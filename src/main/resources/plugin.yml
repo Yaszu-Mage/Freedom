@@ -1,0 +1,16 @@
+name: Freedom
+version: '1.0-SNAPSHOT'
+main: xyz.yaszu.freedom.Freedom
+api-version: '1.21'
+commands:
+  openGui:
+    description: "you can't see me"
+    usage: "/openGui"
+  trust:
+    description: "With what?"
+  fling:
+    description: "Fling"
+  ComorAction:
+    description: "Baller"
+  AbilityOne:
+    description: "Executes Ability One"
