@@ -8,6 +8,7 @@ commands:
     usage: "/openGui"
   trust:
     description: "With what?"
+    usage: "/trust"
   fling:
     description: "Fling"
   ComorAction:

@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util;
 
 import java.awt.*;
@@ -28,6 +29,8 @@ import static xyz.yaszu.freedom.Soul.SoulTypes.Blue;
 public class soulListener extends Util implements Listener {
     Red red = new Red();
 
+
+    Green green = new Green();
 
 
 
@@ -45,6 +48,8 @@ public class soulListener extends Util implements Listener {
         if (player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE) > 10) {
             player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, 10.0);
         }
+
+
     }
 
     @EventHandler
@@ -56,6 +61,9 @@ public class soulListener extends Util implements Listener {
         }
         }
     }
+
+
+
 
     @EventHandler
     public void onPlayerDamagedEntity(EntityDamageByEntityEvent event) {
@@ -74,6 +82,10 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         showSoulPoints(event.getPlayer());
+        Player player = event.getPlayer();
+        if (player.getPersistentDataContainer().get(keygen("soul"),PersistentDataType.STRING) == "Green") {
+
+        }
     }
 
     public void showSoulPoints(Player player) {

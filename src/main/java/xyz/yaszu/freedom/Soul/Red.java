@@ -166,6 +166,7 @@ public class Red extends Util implements Base_Soul {
                     ItemDisplay itemDisplay = (ItemDisplay) fireball;
                     itemDisplay.setItemStack(Fireball());
                     itemDisplay.teleport(player.getLocation().add(player.getLocation().getDirection()));
+                    itemDisplay.setRotation(90,90);
                 } else {
                     ItemDisplay itemDisplay = (ItemDisplay) fireball;
                     itemDisplay.teleport(itemDisplay.getLocation().add(direction.multiply(1)));

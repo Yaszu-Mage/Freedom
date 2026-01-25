@@ -22,10 +22,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.GUI.BaseItems;
-import xyz.yaszu.freedom.Soul.Base_Soul;
-import xyz.yaszu.freedom.Soul.Blue;
-import xyz.yaszu.freedom.Soul.Purple;
-import xyz.yaszu.freedom.Soul.Red;
+import xyz.yaszu.freedom.Soul.*;
 import xyz.yaszu.freedom.Util;
 
 import java.util.ArrayList;
@@ -48,6 +45,9 @@ public class selectionUi extends Util implements Listener {
         }
         if (active_souls_in_config.contains("Blue")) {
             active_souls.add(new Blue());
+        }
+        if (active_souls_in_config.contains("Green")) {
+            active_souls.add(new Green());
         }
         return active_souls;
     }
