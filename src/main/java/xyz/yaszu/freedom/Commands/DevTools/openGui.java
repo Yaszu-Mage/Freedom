@@ -8,6 +8,8 @@ import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Purple;
 import xyz.yaszu.freedom.Soul.Red;
 
+import static xyz.yaszu.freedom.Commands.Trust.soulListener;
+
 public class openGui implements BasicCommand {
     @Override
     public void execute(CommandSourceStack commandSourceStack, String[] args) {
@@ -18,6 +20,7 @@ public class openGui implements BasicCommand {
             selectionUi.open_UI(player,red);
             player.give(red.Related_Item());
             player.give(purple.Related_Item());
+
         }
     }
 }

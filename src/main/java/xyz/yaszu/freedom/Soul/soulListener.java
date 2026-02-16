@@ -135,6 +135,17 @@ public class soulListener extends Util implements Listener {
                     purple.AbilityOne(player);
         }
     }
+    @EventHandler
+    public void joinAndHeal(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        Freedom.get_plugin().getLogger().info(soulType.toString());
+        switch (soulType) {
+            case Green -> green.Passive(player,event);
+
+        }
+    }
+
     public void AbilityTwo(Player player) {
         ItemStack drop = player.getInventory().getItemInMainHand();
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));

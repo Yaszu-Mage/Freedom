@@ -86,15 +86,12 @@ public class Green extends Util implements Base_Soul{
             @Override
             public void run() {
                 World world = player.getWorld();
-
-
-                Freedom.get_plugin().getLogger().info("Running!");
               for (Player iterator : world.getPlayers()) {
-                  Freedom.get_plugin().getLogger().info("Iterating through" + iterator.getName());
                   if (iterator != player) {
                       String trusted;
+                      Freedom.get_plugin().getLogger().info("Iterating through" + iterator.getName());
                       if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
-                          trusted = player.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
+                          trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
                           if (trusted.contains(player.getName())) {
                               iterator.addPotionEffect(PotionEffectType.REGENERATION.createEffect(60, 0));
                               Freedom.get_plugin().getLogger().info("healed " + iterator.getName());
