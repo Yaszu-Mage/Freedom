@@ -93,7 +93,7 @@ public class Green extends Util implements Base_Soul{
                       if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
                           trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
                           if (trusted.contains(player.getName())) {
-                              iterator.addPotionEffect(PotionEffectType.REGENERATION.createEffect(60, 0));
+                              iterator.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
                               Freedom.get_plugin().getLogger().info("healed " + iterator.getName());
                           }
                       }
