@@ -3,6 +3,8 @@ package xyz.yaszu.freedom;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,6 +14,8 @@ import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Util.Util;
 
 public final class Freedom extends JavaPlugin {
 
@@ -31,6 +35,7 @@ public final class Freedom extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new selectionGui(), this);
         Bukkit.getPluginManager().registerEvents(new selectionUi(),this);
         Bukkit.getPluginManager().registerEvents(new black_flash(),this);
+        Bukkit.getPluginManager().registerEvents(new Life_and_Death(), this);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
@@ -42,10 +47,19 @@ public final class Freedom extends JavaPlugin {
             commands.registrar().register(Trust.Ability_One());
             commands.registrar().register(Trust.Ability_Two());
             commands.registrar().register(Trust.Active_Passive());
+            commands.registrar().register(Trust.summonFriendly());
         });
 
     }
 
+    public static Util util = new Util();
+
+    public static void clearPlayerPersistentData(Player player) {
+        PersistentDataContainer container = player.getPersistentDataContainer();
+        for (NamespacedKey key : container.getKeys()) {
+            container.remove(key);
+        }
+    }
     @Override
     public void onDisable() {
         // Plugin shutdown logic

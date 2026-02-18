@@ -2,7 +2,7 @@ package xyz.yaszu.freedom.GUI;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import xyz.yaszu.freedom.Util;
+import xyz.yaszu.freedom.Util.Util;
 
 public class BaseItems extends Util {
 

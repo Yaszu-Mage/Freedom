@@ -1,14 +1,9 @@
 package xyz.yaszu.freedom.Soul;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
-import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.resource.ResourcePackInfo;
-import net.kyori.adventure.resource.ResourcePackRequest;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,13 +13,10 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Util;
+import xyz.yaszu.freedom.Util.Util;
 
-import java.awt.*;
-
-import static xyz.yaszu.freedom.Soul.SoulTypes.Blue;
+import static xyz.yaszu.freedom.Commands.Trust.util;
 
 public class soulListener extends Util implements Listener {
     Red red = new Red();
@@ -72,6 +64,16 @@ public class soulListener extends Util implements Listener {
                 player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE) + 1);
                 showSoulPoints(player);
             }
+        }
+    }
+
+
+    @EventHandler
+    public void OnPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (!player.getPersistentDataContainer().has(keygen("soul"))) {
+            player.performCommand("openGui");
+            player.getPersistentDataContainer().set(util.keygen("trustedby"),PersistentDataType.STRING, "");
         }
     }
 

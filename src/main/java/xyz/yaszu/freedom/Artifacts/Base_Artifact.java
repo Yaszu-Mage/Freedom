@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import xyz.yaszu.freedom.Util;
+import xyz.yaszu.freedom.Util.Util;
 
 public interface Base_Artifact extends Listener {
 

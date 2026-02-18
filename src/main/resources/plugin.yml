@@ -15,3 +15,5 @@ commands:
     description: "Baller"
   AbilityOne:
     description: "Executes Ability One"
+  ally:
+    description: "blah"

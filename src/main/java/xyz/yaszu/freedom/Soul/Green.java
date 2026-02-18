@@ -7,11 +7,10 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Util;
+import xyz.yaszu.freedom.Util.Util;
 
 public class Green extends Util implements Base_Soul{
 

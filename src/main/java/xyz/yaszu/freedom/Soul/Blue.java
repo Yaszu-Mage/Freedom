@@ -4,9 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import xyz.yaszu.freedom.Util;
-
-import static xyz.yaszu.freedom.Util.dess;
+import xyz.yaszu.freedom.Util.Util;
 
 public class Blue extends Util implements Base_Soul {
     @Override

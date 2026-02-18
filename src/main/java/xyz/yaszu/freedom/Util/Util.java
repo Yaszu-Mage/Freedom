@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom;
+package xyz.yaszu.freedom.Util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;

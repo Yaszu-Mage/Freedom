@@ -2,11 +2,7 @@ package xyz.yaszu.freedom.Soul;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
-import xyz.yaszu.freedom.Util;
 
 import java.util.HashMap;
 import java.util.UUID;

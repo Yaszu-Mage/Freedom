@@ -6,14 +6,19 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import io.papermc.paper.entity.LookAnchor;
+import kr.toxicity.model.api.BetterModel;
+import kr.toxicity.model.api.BetterModelPlatform;
+import kr.toxicity.model.api.entity.BaseEntity;
+import kr.toxicity.model.api.platform.PlatformEntity;
+import kr.toxicity.model.api.tracker.EntityTracker;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Soul.soulListener;
-import xyz.yaszu.freedom.Toggleable;
-import xyz.yaszu.freedom.Util;
+import xyz.yaszu.freedom.Util.Util;
 
 public class Trust {
     public static Util util = new Util();
@@ -87,6 +92,19 @@ public class Trust {
                 }
         ).build();
     }
+
+    public static LiteralCommandNode<CommandSourceStack> summonFriendly(){
+        return Commands.literal("ally").executes(ctx -> {
+            final Player sender = (Player) ctx.getSource().getSender();
+            BetterModelPlatform platform = BetterModel.platform();
+            Entity spawned = sender.getWorld().createEntity(sender.getLocation(), Wolf.class);
+            PlatformEntity entity = platform.adapter().
+            EntityTracker tracker = BetterModel.model("sillything").map(r -> r.getOrCreate((BaseEntity) spawned)).orElse(null);
+
+            return Command.SINGLE_SUCCESS;
+        }).build();
+    }
+
 
     public static LiteralCommandNode<CommandSourceStack> trustArgument() {
         return Commands.literal("trust")

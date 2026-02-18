@@ -12,10 +12,19 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven{
+            name = "Bettermodel1"
+            url = "https://maven.blamejared.com/"
+    } // For transitive dependency in bettermodel-fabric
+    maven{
+        name = "Bettermodel2"
+        url = "https://maven.nucleoid.xyz/"
+    } // For transitive dependency in bettermodel-fabric
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    implementation("io.github.toxicity188:bettermodel-api:2.0.1")
 }
 
 tasks {
