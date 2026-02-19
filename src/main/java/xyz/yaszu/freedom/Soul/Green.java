@@ -47,12 +47,12 @@ public class Green extends Util implements Base_Soul{
 
     @Override
     public Component AbilityOneName() {
-        return dess("<green>Ability One</green> - ⬛⬛⬛⬛⬛⬛⬛");
+        return dess("<green>Ability One</green> - Sprite");
     }
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("You can summon a sprite that helps you or your allies.");
     }
 
     @Override
@@ -61,28 +61,42 @@ public class Green extends Util implements Base_Soul{
         if (ray != null) {
         if (ray.getHitEntity() != null) {
             Entity looking_at = ray.getHitEntity();
-            if (looking_at instanceof Player) {
-                Player target = (Player) looking_at;
-                target.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
-                target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 2));
-                Location location = target.getLocation();
-                Entity entity = target.getWorld().spawnEntity(location, EntityType.WOLF);
-                entity.setCustomName(player.getName() + "'s Sprite");
-                entity.setCustomNameVisible(true);
-                Wolf wolf = (Wolf) entity;
-                wolf.setTamed(true);
-                wolf.setOwner(target);
-                wolf.setSilent(true);
-                BetterModelPlatform platform = BetterModel.platform();
-                PlatformEntity platwolf = BukkitAdapter.adapt(wolf);
-                EntityTracker tracker = BetterModel.model("sillything")
-                        .map(r -> r.getOrCreate(platwolf))
-                        .orElse(null);
-                follower(tracker,wolf,target).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
+            if (looking_at instanceof Player target) {
+                if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
+                    if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
+                        register_follower(target,player);
+                    }
+                }
+            } else {
+                register_follower(player,player);
             }
+    } else {
+            register_follower(player,player);
+        }
+    } else {
+            register_follower(player,player);
+        }
     }
+
+    public void register_follower(Player target, Player player) {
+        target.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
+        target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 2));
+        Location location = target.getLocation();
+        Entity entity = target.getWorld().spawnEntity(location, EntityType.WOLF);
+        entity.setCustomName(player.getName() + "'s Sprite");
+        entity.setCustomNameVisible(true);
+        Wolf wolf = (Wolf) entity;
+        wolf.setTamed(true);
+        wolf.setOwner(target);
+        wolf.setSilent(true);
+        BetterModelPlatform platform = BetterModel.platform();
+        PlatformEntity platwolf = BukkitAdapter.adapt(wolf);
+        EntityTracker tracker = BetterModel.model("sillything")
+                .map(r -> r.getOrCreate(platwolf))
+                .orElse(null);
+        follower(tracker,wolf,target).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
     }
-    }
+
     Random random = new Random();
     public BukkitRunnable follower(EntityTracker tracker, Entity entity,Player player) {
         return new BukkitRunnable() {

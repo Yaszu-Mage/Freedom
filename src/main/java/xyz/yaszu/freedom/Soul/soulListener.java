@@ -135,6 +135,8 @@ public class soulListener extends Util implements Listener {
                 break;
             case Purple:
                     purple.AbilityOne(player);
+            case Green:
+                    green.AbilityOne(player);
         }
     }
     @EventHandler
@@ -210,6 +212,12 @@ public class soulListener extends Util implements Listener {
                     if (player.isSneaking()) {
                         purple.AbilityOne(player);
                     }
+                    break;
+                case Green:
+                    if (player.isSneaking()) {
+                        green.AbilityOne(player);
+                    }
+                    break;
             }
         }
     }
