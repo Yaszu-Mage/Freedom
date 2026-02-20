@@ -3,9 +3,7 @@ package xyz.yaszu.freedom.Soul;
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
 import kr.toxicity.model.api.bukkit.platform.BukkitAdapter;
-import kr.toxicity.model.api.platform.PlatformAdapter;
 import kr.toxicity.model.api.platform.PlatformEntity;
-import kr.toxicity.model.api.platform.PlatformLocation;
 import kr.toxicity.model.api.tracker.EntityTracker;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -64,21 +62,21 @@ public class Green extends Util implements Base_Soul{
             if (looking_at instanceof Player target) {
                 if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
                     if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
-                        register_follower(target,player);
+                        registerSprite(target,player);
                     }
                 }
             } else {
-                register_follower(player,player);
+                registerSprite(player,player);
             }
     } else {
-            register_follower(player,player);
+            registerSprite(player,player);
         }
     } else {
-            register_follower(player,player);
+            registerSprite(player,player);
         }
     }
 
-    public void register_follower(Player target, Player player) {
+    public void registerSprite(Player target, Player player) {
         target.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
         target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 2));
         Location location = target.getLocation();
