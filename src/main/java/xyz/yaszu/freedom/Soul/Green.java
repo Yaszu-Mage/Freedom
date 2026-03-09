@@ -11,6 +11,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
@@ -19,9 +22,10 @@ import org.bukkit.util.RayTraceResult;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.Objects;
 import java.util.Random;
 
-public class Green extends Util implements Base_Soul{
+public class Green extends Util implements Base_Soul {
 
     @Override
     public String Name_For_Container() {
@@ -54,27 +58,46 @@ public class Green extends Util implements Base_Soul{
     }
 
     @Override
-    public void AbilityOne(Player player) throws AssertionError{
-        RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(),player.getEyeLocation().toVector(),5d);
-        if (ray != null) {
-        if (ray.getHitEntity() != null) {
-            Entity looking_at = ray.getHitEntity();
-            if (looking_at instanceof Player target) {
-                if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
-                    if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
-                        registerSprite(target,player);
+    public void AbilityOne(Player player) {
+        if (player.getPersistentDataContainer().has(keygen("sprite_active"))) {
+            if (Boolean.FALSE.equals(player.getPersistentDataContainer().get(keygen("sprite_active"), PersistentDataType.BOOLEAN))) {
+            RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), player.getEyeLocation().toVector(), 5d);
+            if (ray != null) {
+                if (ray.getHitEntity() != null) {
+                    Freedom.get_plugin().getLogger().info("BLAH");
+                    Entity looking_at = ray.getHitEntity();
+                    if (looking_at instanceof Player target && target != player) {
+                        if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
+                            if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
+                                registerSprite(target, player);
+                            }
+                        }
+                    } else {
+                        registerSprite(player, player);
                     }
+                } else {
+                    registerSprite(player, player);
                 }
             } else {
-                registerSprite(player,player);
+                registerSprite(player, player);
             }
-    } else {
-            registerSprite(player,player);
-        }
-    } else {
-            registerSprite(player,player);
         }
     }
+}
+    public static void removeOldFollowers() {
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                Freedom.get_plugin().getLogger().info("FOUND ENTITY");
+                Freedom.get_plugin().getLogger().info(entity.getName());
+                if (entity.getPersistentDataContainer().has(keygen("sprite"))) {
+                    if (entity.getPersistentDataContainer().get(keygen("sprite"),PersistentDataType.INTEGER) != Freedom.version) {
+                        entity.remove();
+                    }
+                }
+            }
+        }
+    }
+
 
     public void registerSprite(Player target, Player player) {
         target.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
@@ -87,20 +110,22 @@ public class Green extends Util implements Base_Soul{
         wolf.setTamed(true);
         wolf.setOwner(target);
         wolf.setSilent(true);
+        wolf.getPersistentDataContainer().set(keygen("sprite"),PersistentDataType.INTEGER,Freedom.version);
         BetterModelPlatform platform = BetterModel.platform();
         PlatformEntity platwolf = BukkitAdapter.adapt(wolf);
         EntityTracker tracker = BetterModel.model("sillything")
                 .map(r -> r.getOrCreate(platwolf))
                 .orElse(null);
-        follower(tracker,wolf,target).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
+        follower(tracker,wolf,target,player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
     }
 
     Random random = new Random();
-    public BukkitRunnable follower(EntityTracker tracker, Entity entity,Player player) {
+    public BukkitRunnable follower(EntityTracker tracker, Entity entity,Player player, Player summoner) {
         return new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline() || entity.isDead()) {
+                if ((!player.isOnline() || entity.isDead() || Bukkit.getServer().isStopping()) || (!summoner.isOnline())) {
+                    Freedom.get_plugin().getLogger().info("THIS WAS CANCELLED");
                     this.cancel();
                 }
                 if (random.nextInt(101) == 0) {
@@ -110,13 +135,20 @@ public class Green extends Util implements Base_Soul{
                 }
                 Wolf wolf = (Wolf) entity;
                 wolf.setSitting(false);
+                wolf.setCustomNameVisible(true);
+                wolf.setOwner(player);
+
+                player.getPersistentDataContainer().set(keygen("sprite_active"),PersistentDataType.BOOLEAN,true);
                 player.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 1));
                 player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 1));
             }
             @Override
             public synchronized void cancel() throws IllegalStateException {
+                player.getPersistentDataContainer().set(keygen("sprite_active"),PersistentDataType.BOOLEAN,false);
                 tracker.despawn();
                 tracker.close();
+                entity.remove();
+
                 Bukkit.getScheduler().cancelTask(getTaskId());
             }
         };
@@ -126,7 +158,14 @@ public class Green extends Util implements Base_Soul{
     public ItemStack Related_Item() {
         return ItemStack.of(Material.STICK);
     }
-
+    @EventHandler
+    public void EntityDeath(EntityDeathEvent event) {
+        Entity entity = event.getEntity();
+        if (entity.getPersistentDataContainer().has(keygen("sprite"))) {
+            Player player = Bukkit.getPlayer(entity.getName().replace("'s Sprite",""));
+            player.getPersistentDataContainer().set(keygen("sprite_active"),PersistentDataType.BOOLEAN,false);
+        }
+    }
     @Override
     public Component AbilityTwoName() {
         return dess("Ability Two - ⬛⬛⬛⬛⬛⬛⬛");

@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 
 public class Util {
-    public NamespacedKey keygen(String key) {
+    public static NamespacedKey keygen(String key) {
         return new NamespacedKey(Bukkit.getPluginManager().getPlugin("Freedom"),key);
     }
 

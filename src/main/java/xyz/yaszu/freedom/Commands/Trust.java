@@ -98,8 +98,6 @@ public class Trust {
             final Player sender = (Player) ctx.getSource().getSender();
             BetterModelPlatform platform = BetterModel.platform();
             Entity spawned = sender.getWorld().createEntity(sender.getLocation(), Wolf.class);
-            PlatformEntity entity = platform.adapter().
-            EntityTracker tracker = BetterModel.model("sillything").map(r -> r.getOrCreate((BaseEntity) spawned)).orElse(null);
 
             return Command.SINGLE_SUCCESS;
         }).build();
