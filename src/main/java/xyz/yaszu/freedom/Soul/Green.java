@@ -178,12 +178,12 @@ public class Green extends Util implements Base_Soul {
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
-
+        //
     }
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("You heal all people you trust in a 10 block radius");
     }
 
     @Override
@@ -203,7 +203,7 @@ public class Green extends Util implements Base_Soul {
                       Freedom.get_plugin().getLogger().info("Iterating through" + iterator.getName());
                       if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
                           trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
-                          if (trusted.contains(player.getName())) {
+                          if (trusted.contains(player.getName()) && iterator.getLocation().distance(player.getLocation()) <= 10) {
                               iterator.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
                               Freedom.get_plugin().getLogger().info("healed " + iterator.getName());
                           }

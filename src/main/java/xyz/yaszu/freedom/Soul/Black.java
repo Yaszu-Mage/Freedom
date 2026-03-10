@@ -1,50 +1,48 @@
 package xyz.yaszu.freedom.Soul;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.Audiences;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
-import static xyz.yaszu.freedom.Util.Util.dess;
+public class Black extends Util implements Base_Soul{
 
-public class Blue extends Util implements Base_Soul {
     @Override
     public String Name_For_Container() {
-        return "Blue";
+        return "Black";
     }
 
     @Override
     public Component Name() {
-        return dess("<blue>Blue</blue>");
+        return dess("<shadow:#000000FF><b><yellow><gradient:#0f000f:#555555:#aa00aa>Black</gradient>");
     }
 
     @Override
     public Component Description() {
-        return dess("You are shelled within a castle of your own making");
+        return null;
     }
 
     @Override
     public ItemStack Icon() {
-        return ItemStack.of(Material.SHIELD);
+        return null;
     }
 
     @Override
     public Component AbilityOneName() {
-        return dess("<blue> Ability One </blue> - ⬛⬛⬛⬛⬛⬛⬛");
+        return dess("Trickster");
     }
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("Teleport to a saved location, it will take you 5 seconds.");
     }
 
     @Override
@@ -54,23 +52,50 @@ public class Blue extends Util implements Base_Soul {
             return;
         }
         if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-            Location loadingLocation = new Location(Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"), PersistentDataType.STRING)), player.getPersistentDataContainer().get(keygen("blacksaveX"), PersistentDataType.DOUBLE), player.getPersistentDataContainer().get(keygen("blacksaveY"), PersistentDataType.DOUBLE), player.getPersistentDataContainer().get(keygen("blacksaveZ"), PersistentDataType.DOUBLE));
-            if (loadingLocation.distanceSquared(player.getLocation()) < 100) {
-                load(player);
-            } else {
-                player.sendMessage(dess("You are too far away from the saved location"));
-                save(player);
-            }
-
-            }
+            load(player);
+        }
     }
 
     public void load(Player player) {
         //VFX
         Location loadingLocation = new Location(Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),player.getPersistentDataContainer().get(keygen("blacksaveY"),PersistentDataType.DOUBLE),player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE));
-        player.getWorld().strikeLightningEffect(player.getLocation());
-        player.teleport(loadingLocation);
-        player.getWorld().strikeLightningEffect(loadingLocation);
+        new BukkitRunnable() {
+            public int tick = 0;
+            public double last_health = player.getHealth();
+            @Override
+            public void run() {
+                if (player.getHealth() > last_health || !player.isSneaking() || player.isDead()) {
+                    this.cancel();
+                    player.sendActionBar(dess("Teleport Cancelled."));
+                }
+                if (tick >= 80) {
+                    player.teleport(loadingLocation);
+                    this.cancel();
+                } else {
+                    if (threes(tick) == 3) {
+                        player.sendActionBar(dess("Teleporting in" + tick/20 + " seconds..."));
+                    } else if (threes(tick) == 2) {
+                        player.sendActionBar(dess("Teleporting in" + tick/20 + " seconds.."));
+                    } else {
+                        player.sendActionBar(dess("Teleporting in" + tick/20 + " seconds."));
+                    }
+                    drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.SMOKE);
+                    drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
+                    if (isMultipleofTwenty(tick)) {
+                        for (double iteration = 0; iteration < player.getLocation().distance(player.getEyeLocation()); iteration = iteration + 0.1) {
+                            drawCircle(player.getLocation().add(player.getLocation().add(0,iteration,0)),1,player.getWorld(),16,Particle.SMOKE);
+                            drawCircle(loadingLocation.add(loadingLocation.add(0,iteration,0)),1,player.getWorld(),16,Particle.SMOKE);
+                        }
+                    }
+                }
+                tick++;
+            }
+            @Override
+            public synchronized void cancel() throws IllegalStateException {
+                player.getPersistentDataContainer().remove(keygen("black_save"));
+                Bukkit.getScheduler().cancelTask(getTaskId());
+            }
+        }.runTaskTimer(Freedom.get_plugin(),0,1);
 
 
     }
@@ -96,20 +121,19 @@ public class Blue extends Util implements Base_Soul {
         player.getPersistentDataContainer().set(keygen("blackworld"), PersistentDataType.STRING, player.getWorld().getName());
         player.sendActionBar(dess("Saved Location at (" + player.getLocation().getBlockX() + "," + player.getLocation().getBlockY() + "," + player.getLocation().getBlockZ()) + ")");
     }
-
     @Override
     public ItemStack Related_Item() {
-        return ItemStack.of(Material.SHIELD);
+        return null;
     }
 
     @Override
     public Component AbilityTwoName() {
-        return dess("<blue> Ability Two </blue> - ⬛⬛⬛⬛⬛⬛⬛");
+        return null;
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return null;
     }
 
     @Override
@@ -119,21 +143,21 @@ public class Blue extends Util implements Base_Soul {
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return null;
     }
 
     @Override
     public void Passive(Player player, Object event) {
-        //Take all damage
+
     }
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("You can grant yourself resistance for 9 Soul Points");
+        return null;
     }
 
     @Override
     public void ActivePassive(Player player) {
-        player.addPotionEffect(PotionEffectType.RESISTANCE.createEffect(2000,5));
+
     }
 }
