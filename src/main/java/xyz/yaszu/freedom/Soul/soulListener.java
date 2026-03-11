@@ -125,6 +125,7 @@ public class soulListener extends Util implements Listener {
         }
     }
     }
+    Black black = new Black();
     Purple purple = new Purple();
     public void AbilityOne(Player player) {
         player.sendActionBar(dess("<green>Ability One</green>"));
@@ -137,6 +138,8 @@ public class soulListener extends Util implements Listener {
                     purple.AbilityOne(player);
             case Green:
                     green.AbilityOne(player);
+            case Black:
+                    black.AbilityOne(player);
         }
     }
     @EventHandler

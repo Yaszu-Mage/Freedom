@@ -47,6 +47,9 @@ public class selectionUi extends Util implements Listener {
         if (active_souls_in_config.contains("Green")) {
             active_souls.add(new Green());
         }
+        if (active_souls_in_config.contains("Black")) {
+            active_souls.add(new Black());
+        }
         return active_souls;
     }
 
