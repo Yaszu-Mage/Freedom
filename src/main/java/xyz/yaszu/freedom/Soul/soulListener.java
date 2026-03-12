@@ -136,10 +136,13 @@ public class soulListener extends Util implements Listener {
                 break;
             case Purple:
                     purple.AbilityOne(player);
+                break;
             case Green:
                     green.AbilityOne(player);
+                break;
             case Black:
                     black.AbilityOne(player);
+                    break;
         }
     }
     @EventHandler

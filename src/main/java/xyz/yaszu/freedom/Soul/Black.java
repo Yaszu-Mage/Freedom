@@ -104,9 +104,9 @@ public class Black extends Util implements Base_Soul{
                     } else {
                         player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds."));
                     }
-                    drawCircle(player.getLocation(),1.5,player.getWorld(),16,Particle.SOUL_FIRE_FLAME);
-                    drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.VAULT_CONNECTION);
-                    drawCircle(loadingLocation,1,player.getWorld(),16,Particle.VAULT_CONNECTION);
+                    drawCircle(player.getLocation(),1.5,player.getWorld(),32,Particle.SOUL_FIRE_FLAME);
+                    drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.VAULT_CONNECTION);
+                    drawCircle(loadingLocation,1,player.getWorld(),32,Particle.VAULT_CONNECTION);
                     player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BANJO,SoundCategory.PLAYERS,1,tick);
                     player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,SoundCategory.PLAYERS,1,tick-1);
                 }
@@ -146,6 +146,23 @@ public class Black extends Util implements Base_Soul{
         player.getPersistentDataContainer().set(keygen("blacksaveZ"), PersistentDataType.DOUBLE, player.getLocation().getZ());
         player.getPersistentDataContainer().set(keygen("blackworld"), PersistentDataType.STRING, player.getWorld().getName());
         player.sendActionBar(dess("Saved Location at (" + player.getLocation().getX() + "," + player.getLocation().getY() + "," + player.getLocation().getZ() + ")"));
+        new BukkitRunnable() {
+            int tick = 0;
+            @Override
+            public void run() {
+                if (tick > 8) {
+                    this.cancel();
+                }
+                if (tick == 0) {
+                    player.getWorld().playSound(player.getLocation(),Sound.BLOCK_NOTE_BLOCK_GUITAR,1,1 + Math.min((tick/10),0));
+                }
+                if (tick % 5 == 0) {
+                    player.getWorld().playSound(player.getLocation(),Sound.BLOCK_NOTE_BLOCK_GUITAR,1,1 + Math.min((tick/10),0));
+                }
+
+                tick = tick + 1;
+            }
+        }.runTaskTimer(Freedom.get_plugin(),0,1);
     }
     @Override
     public ItemStack Related_Item() {

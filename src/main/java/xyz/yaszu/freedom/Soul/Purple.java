@@ -165,19 +165,19 @@ public class Purple extends Util implements Base_Soul{
 
                 snipeLocation.add(direction);
                 for (Entity inst : snipeLocation.getNearbyEntities(4,4,4)) {
-                    Freedom.get_plugin().getLogger().info(String.valueOf(inst.getLocation().distanceSquared(snipeLocation)));
+                    Freedom.get_plugin().getLogger().info(String.valueOf(inst.getLocation().distance(snipeLocation)));
                     if (inst instanceof Player) {
                         if (inst != player) {
                             if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                                 LivingEntity entity = (LivingEntity) inst;
-                                entity.damage(14 + Math.sqrt(player.getLocation().distanceSquared(snipeLocation) / 12) * 2.75, player);
+                                entity.damage(14 + Math.sqrt(player.getLocation().distance(snipeLocation) / 6) * 2.75, player);
                                 this.cancel();
                             }
                         }
                     } else {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                             LivingEntity entity = (LivingEntity) inst;
-                            entity.damage(14 + Math.sqrt(player.getLocation().distanceSquared(snipeLocation)) * 2.75, player);
+                            entity.damage(14 + Math.sqrt(player.getLocation().distance(snipeLocation) / 6) * 2.75, player);
                             this.cancel();
                         }
                     }

@@ -36,10 +36,6 @@ public final class Freedom extends JavaPlugin implements Listener {
     }
     public static int version = 0;
     @EventHandler
-    public void ChunkLoadEvent(ChunkLoadEvent event) {
-        removeOldFollowers();
-    }
-    @EventHandler
     public void WorldLoadEvent(WorldLoadEvent event) {
         if (System.currentTimeMillis() <= start_time + 10000) {
             this.getLogger().info("Baller");
