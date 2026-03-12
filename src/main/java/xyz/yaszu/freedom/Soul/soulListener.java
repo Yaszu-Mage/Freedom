@@ -19,10 +19,10 @@ import xyz.yaszu.freedom.Util.Util;
 import static xyz.yaszu.freedom.Commands.Trust.util;
 
 public class soulListener extends Util implements Listener {
-    Red red = new Red();
+    public static Red red = new Red();
 
 
-    Green green = new Green();
+    public static Green green = new Green();
 
 
 
@@ -69,11 +69,18 @@ public class soulListener extends Util implements Listener {
 
 
     @EventHandler
-    public void OnPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerAcceptRP(PlayerResourcePackStatusEvent event) {
         Player player = event.getPlayer();
-        if (!player.getPersistentDataContainer().has(keygen("soul"))) {
-            player.performCommand("openGui");
-            player.getPersistentDataContainer().set(util.keygen("trustedby"),PersistentDataType.STRING, "");
+        if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
+            if (!player.getPersistentDataContainer().has(keygen("soul"))) {
+                player.setWalkSpeed(1);
+                player.setFlySpeed(1);
+                player.performCommand("openGui");
+                player.getPersistentDataContainer().set(util.keygen("trustedby"),PersistentDataType.STRING, "");
+            }
+        } else {
+            player.setWalkSpeed(0);
+            player.setFlySpeed(0);
         }
     }
 
@@ -125,8 +132,9 @@ public class soulListener extends Util implements Listener {
         }
     }
     }
-    Black black = new Black();
-    Purple purple = new Purple();
+    public static Black black = new Black();
+    public static Purple purple = new Purple();
+    public static Blue blue = new Blue();
     public void AbilityOne(Player player) {
         player.sendActionBar(dess("<green>Ability One</green>"));
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));

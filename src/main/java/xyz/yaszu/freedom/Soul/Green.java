@@ -64,7 +64,6 @@ public class Green extends Util implements Base_Soul {
             RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), player.getEyeLocation().toVector(), 5d);
             if (ray != null) {
                 if (ray.getHitEntity() != null) {
-                    Freedom.get_plugin().getLogger().info("BLAH");
                     Entity looking_at = ray.getHitEntity();
                     if (looking_at instanceof Player target && target != player) {
                         if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
@@ -200,12 +199,10 @@ public class Green extends Util implements Base_Soul {
               for (Player iterator : world.getPlayers()) {
                   if (iterator != player) {
                       String trusted;
-                      Freedom.get_plugin().getLogger().info("Iterating through" + iterator.getName());
                       if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
                           trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
-                          if (trusted.contains(player.getName()) && iterator.getLocation().distance(player.getLocation()) <= 10) {
+                          if (trusted.contains(player.getName()) && iterator.getLocation().distanceSquared(player.getLocation()) <= 100) {
                               iterator.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
-                              Freedom.get_plugin().getLogger().info("healed " + iterator.getName());
                           }
                       }
 

@@ -18,6 +18,7 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
 public class Trust {
@@ -138,7 +139,18 @@ public class Trust {
                         }))
                 .build();
     }
-
+    public static LiteralCommandNode<CommandSourceStack> reviveArgument() {
+        return Commands.literal("revive")
+                .then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                            final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                            final Player sender = (Player) ctx.getSource().getSender();
+                            Life_and_Death.revive_player(target,sender.getLocation());
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .build();
+    }
 
 
 }

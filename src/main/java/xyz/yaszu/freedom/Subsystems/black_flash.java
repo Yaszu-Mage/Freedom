@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Subsystems;
 
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;

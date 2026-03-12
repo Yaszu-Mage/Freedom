@@ -36,7 +36,7 @@ public class Life_and_Death implements org.bukkit.event.Listener{
 
 
 
-    Util util = new Util();
+    public static Util util = new Util();
 
 
     @EventHandler
@@ -97,8 +97,11 @@ public class Life_and_Death implements org.bukkit.event.Listener{
         }
     }
 
+    public static boolean is_alive(Player player) {
+        return !player.getPersistentDataContainer().has(util.keygen("ghost"));
+    }
 
-    public void revive_player(Player player,Location location){
+    public static void revive_player(Player player,Location location){
         player.setHealth(20);
         player.setFoodLevel(20);
         player.setSaturation(20);

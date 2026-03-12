@@ -1,17 +1,30 @@
 package xyz.yaszu.freedom.Soul;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.Audiences;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Black extends Util implements Base_Soul{
+import java.util.HashMap;
+import java.util.UUID;
+
+public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {
@@ -179,9 +192,123 @@ public class Black extends Util implements Base_Soul{
         return dess("⬛⬛⬛⬛⬛⬛");
     }
 
+
+    public long AbilityTwo_Cooldown = 1000;
+
+    public HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
+
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
+        if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
+            player.playSound(player.getLocation(),Sound.BLOCK_DISPENSER_DISPENSE,1,1);
+            InventoryGui inventoryGui = new InventoryGui();
+            inventoryGui.setInventory(player);
+            player.openInventory(inventoryGui.getInventory());
+            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+        } else {
+            // no no ability
+        }
+        if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
+            player.setPlayerProfile(originalProfiles.get(player.getUniqueId()));
+            player.getPersistentDataContainer().remove(keygen("disguised"));
+            player.sendActionBar(dess("Disguise Removed."));
+        }
+    }
 
+    public HashMap<UUID,PlayerProfile> originalProfiles = new HashMap<>();
+    @EventHandler
+    public void InventoryClickEvent (InventoryClickEvent event) {
+        Inventory inventory = event.getInventory();
+        if (inventory.getHolder() instanceof InventoryGui inventoryGui && event.getWhoClicked() instanceof Player player) {
+            // yayas correct holder
+            ItemStack item = event.getCurrentItem();
+            PlayerProfile originalProfile = player.getPlayerProfile();
+            PlayerProfile clickedProfile = Bukkit.getPlayer(item.getPersistentDataContainer().get(keygen("player_uuid"),PersistentDataType.STRING)).getPlayerProfile();
+            player.setPlayerProfile(clickedProfile);
+            originalProfiles.put(player.getUniqueId(),originalProfile);
+            player.getPersistentDataContainer().set(keygen("disguised"),PersistentDataType.BOOLEAN,true);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.setPlayerProfile(originalProfile);
+                }
+            }.runTaskLater(Freedom.get_plugin(),6000);
+        }
+    }
+
+
+
+    public HashMap<Player,InventoryGui> inventoryGui = new HashMap<>();
+
+    public class InventoryGui implements InventoryHolder {
+        public Inventory inventory;
+        @Override
+        public @NotNull Inventory getInventory() {
+            return inventory;
+        }
+
+        public void setInventory(Player player) {
+            int max_players = Bukkit.getMaxPlayers();
+            int remainder = max_players % 9;
+            if (remainder == 0) {
+                inventory = Bukkit.createInventory(this,max_players);
+            } else {
+                inventory = Bukkit.createInventory(this,max_players + (remainder));
+            }
+            int iteration = 0;
+            for (Player instancedPlayer :Bukkit.getOnlinePlayers()) {
+                if (instancedPlayer.getUniqueId() != player.getUniqueId()){
+                    ItemStack skull = getSkull(instancedPlayer);
+                    SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                    meta.getPersistentDataContainer().set(keygen("player_uuid"), PersistentDataType.STRING, instancedPlayer.getUniqueId().toString());
+                    SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+                    String name = player.getName();
+                    switch (soulType) {
+                        case Green -> {
+                            meta.displayName(soulListener.green.Name().append(dess(" " + name)));
+                        }
+                        case Red -> {
+                            meta.displayName(soulListener.red.Name().append(dess(" " + name)));
+                        }
+                        case Blue -> {
+                            meta.displayName(soulListener.blue.Name().append(dess(" " + name)));
+                        }
+                        case Purple -> {
+                            meta.displayName(soulListener.purple.Name().append(dess(" " + name)));
+                        }
+                        case Black -> {
+                            meta.displayName(soulListener.black.Name().append(dess(" " + name)));
+                        }
+                    }
+                    skull.displayName();
+                    skull.setItemMeta(meta);
+                    inventory.setItem(iteration,skull);
+                }
+            }
+        }
+
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!inventoryGui.isEmpty()) {
+            for (Player player : inventoryGui.keySet()) {
+                inventoryGui.get(player).setInventory(player);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent event) {
+        if (!inventoryGui.isEmpty()) {
+            for (Player player : inventoryGui.keySet()) {
+                if (event.getPlayer() == player) {
+                    inventoryGui.remove(player);
+                    break;
+                }
+                inventoryGui.get(player).setInventory(player);
+            }
+        }
     }
 
     @Override

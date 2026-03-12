@@ -6,6 +6,9 @@ commands:
   openGui:
     description: "you can't see me"
     usage: "/openGui"
+  opengui:
+    description: "you can't see me"
+    usage: "/openGui"
   trust:
     description: "With what?"
     usage: "/trust"
@@ -17,3 +20,7 @@ commands:
     description: "Executes Ability One"
   ally:
     description: "blah"
+  revive:
+    description: "Revive"
+  Revive:
+    description: "Revive"

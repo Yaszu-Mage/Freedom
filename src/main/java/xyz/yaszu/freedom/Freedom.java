@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -17,7 +16,7 @@ import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
-import xyz.yaszu.freedom.Soul.black_flash;
+import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
@@ -71,6 +70,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         openGui openGui = new openGui();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register("openGui", openGui);
+            commands.registrar().register("opengui", openGui);
+            commands.registrar().register(Trust.reviveArgument());
             commands.registrar().register(Trust.trustArgument());
             commands.registrar().register(Trust.playerArgument());
             commands.registrar().register(Trust.toggleArgument());

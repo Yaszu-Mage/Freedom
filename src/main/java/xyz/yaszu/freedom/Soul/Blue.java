@@ -1,20 +1,20 @@
 package xyz.yaszu.freedom.Soul;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
-import static xyz.yaszu.freedom.Util.Util.dess;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class Blue extends Util implements Base_Soul {
     @Override
@@ -29,7 +29,7 @@ public class Blue extends Util implements Base_Soul {
 
     @Override
     public Component Description() {
-        return dess("You are shelled within a castle of your own making");
+        return dess("The reverse, to go backwards, that is your meaning");
     }
 
     @Override
@@ -39,72 +39,58 @@ public class Blue extends Util implements Base_Soul {
 
     @Override
     public Component AbilityOneName() {
-        return dess("<blue> Ability One </blue> - ⬛⬛⬛⬛⬛⬛⬛");
+        return dess("<blue> Ability One </blue> - Wait up!");
     }
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("Slow down people in a 10 block radius");
     }
 
+
+    public long abilityOneCooldownTime = 8100;
+    public HashMap<UUID, Long> abilityOneCooldown = new HashMap<>();
     @Override
     public void AbilityOne(Player player) {
-        if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-            save(player);
-            return;
+        //The clocks... what?
+        //Slows down people in a 10 block radius
+        if (can_ability(abilityOneCooldownTime, abilityOneCooldown, player.getUniqueId())) {
+            Location location = player.getLocation();
+            location.getNearbyEntitiesByType(Player.class, 10).forEach(entity -> {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        Location location = entity.getLocation();
+                        if (location.getNearbyEntitiesByType(Player.class, 10).contains(player) && player.isOnline()) {
+                            //default movement speed attribute 0.1
+                            //default gravity 0.08
+                            entity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.025);
+                            entity.getAttribute(Attribute.GRAVITY).setBaseValue(0.01);
+                        } else {
+                            entity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1);
+                            entity.getAttribute(Attribute.GRAVITY).setBaseValue(0.08);
+                            this.cancel();
+                        }
+                    }
+                }.runTaskTimer(Freedom.get_plugin(), 0, 0);
+            });
+            abilityOneCooldown.put(player.getUniqueId(), System.currentTimeMillis());
+        } else {
+            player.sendActionBar(dess("You can't use this ability yet wait, " + (abilityOneCooldownTime - (System.currentTimeMillis() - abilityOneCooldown.get(player.getUniqueId()))) / 1000 + " seconds."));
         }
-        if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-            Location loadingLocation = new Location(Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"), PersistentDataType.STRING)), player.getPersistentDataContainer().get(keygen("blacksaveX"), PersistentDataType.DOUBLE), player.getPersistentDataContainer().get(keygen("blacksaveY"), PersistentDataType.DOUBLE), player.getPersistentDataContainer().get(keygen("blacksaveZ"), PersistentDataType.DOUBLE));
-            if (loadingLocation.distanceSquared(player.getLocation()) < 100) {
-                load(player);
-            } else {
-                player.sendMessage(dess("You are too far away from the saved location"));
-                save(player);
-            }
-
-            }
     }
 
-    public void load(Player player) {
-        //VFX
-        Location loadingLocation = new Location(Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),player.getPersistentDataContainer().get(keygen("blacksaveY"),PersistentDataType.DOUBLE),player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE));
-        player.getWorld().strikeLightningEffect(player.getLocation());
-        player.teleport(loadingLocation);
-        player.getWorld().strikeLightningEffect(loadingLocation);
 
-
-    }
-    public static double threes(int num) {
-        if (num % 3 == 0) {
-            return 3;
-        }
-        if (num % 2 == 0) {
-            return 2;
-        }
-        return 1;
-    }
-
-    public static boolean isMultipleofTwenty(int num) {
-        // The condition (num % 10 == 0) is true if the remainder is 0.
-        return (num % 20 == 0);
-    }
-    public void save(Player player) {
-        player.getPersistentDataContainer().set(keygen("black_save"), PersistentDataType.BOOLEAN, true);
-        player.getPersistentDataContainer().set(keygen("blacksaveX"), PersistentDataType.DOUBLE, player.getLocation().getX());
-        player.getPersistentDataContainer().set(keygen("blacksaveY"), PersistentDataType.DOUBLE, player.getLocation().getY());
-        player.getPersistentDataContainer().set(keygen("blacksaveZ"), PersistentDataType.DOUBLE, player.getLocation().getZ());
-        player.getPersistentDataContainer().set(keygen("blackworld"), PersistentDataType.STRING, player.getWorld().getName());
-        player.sendActionBar(dess("Saved Location at (" + player.getLocation().getBlockX() + "," + player.getLocation().getBlockY() + "," + player.getLocation().getBlockZ()) + ")");
-    }
 
     @Override
     public ItemStack Related_Item() {
-        return ItemStack.of(Material.SHIELD);
+        //TODO make clock blue
+        return ItemStack.of(Material.CLOCK);
     }
 
     @Override
     public Component AbilityTwoName() {
-        return dess("<blue> Ability Two </blue> - ⬛⬛⬛⬛⬛⬛⬛");
+        return dess("<blue> Ability Two </blue> - Rewind");
     }
 
     @Override
@@ -114,7 +100,36 @@ public class Blue extends Util implements Base_Soul {
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
+        new BukkitRunnable() {
+            int tick = 0;
+            ArrayList<velocityTime> velocityTimes = new ArrayList<>();
+            @Override
+            public void run() {
+                if (tick >= 100) {
+                    velocityTimes.add(new velocityTime(player.getVelocity().multiply(-1), 100));
+                } else {
+                    if (tick == 101) {
+                        Collections.reverse(velocityTimes);
+                    }
+                    if (tick >= 200) {
+                        this.cancel();
+                        return;
+                    }
+                    player.setVelocity(velocityTimes.get(100-tick).vector);
+                }
+                tick = tick + 1;
+            }
+        }.runTaskTimer(Freedom.get_plugin(), 0,0);
+    }
 
+    public class velocityTime {
+
+        public Vector vector;
+        public double time;
+        velocityTime(Vector Vector, long Time) {
+           this.time = Time;
+           this.vector = Vector;
+        }
     }
 
     @Override
@@ -124,7 +139,7 @@ public class Blue extends Util implements Base_Soul {
 
     @Override
     public void Passive(Player player, Object event) {
-        //Take all damage
+        //idk bro
     }
 
     @Override
