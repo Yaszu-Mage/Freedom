@@ -1,6 +1,9 @@
 package xyz.yaszu.freedom.Soul;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.Audiences;
 import net.kyori.adventure.text.Component;
@@ -193,7 +196,7 @@ public class Black extends Util implements Base_Soul, Listener {
     }
 
 
-    public long AbilityTwo_Cooldown = 1000;
+    public long AbilityTwo_Cooldown = 300000;
 
     public HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
 
@@ -207,32 +210,66 @@ public class Black extends Util implements Base_Soul, Listener {
             abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
             // no no ability
+            if (abilityTwoCooldownTime.get(player.getUniqueId()) != null) {
+                double seconds = (double) (AbilityTwo_Cooldown - (System.currentTimeMillis() - abilityTwoCooldownTime.get(player.getUniqueId()))) / 1000;
+                player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            }
         }
         if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
-            player.setPlayerProfile(originalProfiles.get(player.getUniqueId()));
+            Freedom.get_plugin().getLogger().info(String.valueOf(originalProfiles.get(player.getUniqueId())));
+            if (originalProfiles.get(player.getUniqueId()) != null) {
+                Freedom.get_plugin().getLogger().info("Removing Disguises!");
+                DisguiseAPI.undisguiseToAll(player);
+                PlayerDisguise disguise =originalProfiles.get(player.getUniqueId());
+                player.getWorld();
+                World world = player.getWorld();
+                Location location = player.getLocation();
+                world.spawnParticle(Particle.SMOKE, location,128);
+                world.playSound(location,Sound.ENTITY_WARDEN_HEARTBEAT,1,1);
+                disguise.removePlayer(player);
+                disguise.stopDisguise();
+                disguise.removeDisguise();
+            }
             player.getPersistentDataContainer().remove(keygen("disguised"));
             player.sendActionBar(dess("Disguise Removed."));
         }
     }
 
-    public HashMap<UUID,PlayerProfile> originalProfiles = new HashMap<>();
+    public static HashMap<UUID,PlayerDisguise> originalProfiles = new HashMap<>();
     @EventHandler
     public void InventoryClickEvent (InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
-        if (inventory.getHolder() instanceof InventoryGui inventoryGui && event.getWhoClicked() instanceof Player player) {
+        if (inventory.getHolder() instanceof InventoryGui inventoryGui) {
             // yayas correct holder
+            Player player = (Player) event.getWhoClicked();
             ItemStack item = event.getCurrentItem();
-            PlayerProfile originalProfile = player.getPlayerProfile();
-            PlayerProfile clickedProfile = Bukkit.getPlayer(item.getPersistentDataContainer().get(keygen("player_uuid"),PersistentDataType.STRING)).getPlayerProfile();
-            player.setPlayerProfile(clickedProfile);
-            originalProfiles.put(player.getUniqueId(),originalProfile);
+            Player baller = Bukkit.getPlayer(UUID.fromString(item.getPersistentDataContainer().get(keygen("player_uuid"),PersistentDataType.STRING)));
+            PlayerDisguise disguise = new PlayerDisguise(baller);
+            disguise.setEntity(player);
             player.getPersistentDataContainer().set(keygen("disguised"),PersistentDataType.BOOLEAN,true);
+            disguise.startDisguise();
+            originalProfiles.put(player.getUniqueId(),disguise);
+            Freedom.get_plugin().getLogger().info(String.valueOf(originalProfiles.get(player.getUniqueId())));
+            World world = player.getWorld();
+            Location location = player.getLocation();
+            //VFX
+
+            world.playSound(location,Sound.ENTITY_WARDEN_EMERGE,1,1);
+            world.spawnParticle(Particle.SMOKE, location,128);
+            player.closeInventory();
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    player.setPlayerProfile(originalProfile);
+                    disguise.stopDisguise();
+                    disguise.removeDisguise();
+                    if (disguise.isDisguiseInUse()) {
+                        world.spawnParticle(Particle.SMOKE, location,128);
+                    }
+
+                    this.cancel();
                 }
             }.runTaskLater(Freedom.get_plugin(),6000);
+            event.setCancelled(true);
         }
     }
 
@@ -250,10 +287,11 @@ public class Black extends Util implements Base_Soul, Listener {
         public void setInventory(Player player) {
             int max_players = Bukkit.getMaxPlayers();
             int remainder = max_players % 9;
+            Freedom.get_plugin().getLogger().info(String.valueOf(remainder));
             if (remainder == 0) {
                 inventory = Bukkit.createInventory(this,max_players);
             } else {
-                inventory = Bukkit.createInventory(this,max_players + (remainder));
+                inventory = Bukkit.createInventory(this,max_players - (remainder));
             }
             int iteration = 0;
             for (Player instancedPlayer :Bukkit.getOnlinePlayers()) {
@@ -262,7 +300,7 @@ public class Black extends Util implements Base_Soul, Listener {
                     SkullMeta meta = (SkullMeta) skull.getItemMeta();
                     meta.getPersistentDataContainer().set(keygen("player_uuid"), PersistentDataType.STRING, instancedPlayer.getUniqueId().toString());
                     SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                    String name = player.getName();
+                    String name = instancedPlayer.getName();
                     switch (soulType) {
                         case Green -> {
                             meta.displayName(soulListener.green.Name().append(dess(" " + name)));

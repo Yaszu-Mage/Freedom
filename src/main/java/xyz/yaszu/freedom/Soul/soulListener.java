@@ -68,19 +68,19 @@ public class soulListener extends Util implements Listener {
     }
 
 
+
     @EventHandler
-    public void onPlayerAcceptRP(PlayerResourcePackStatusEvent event) {
+    public void onPlayerMoveEvent(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
-            if (!player.getPersistentDataContainer().has(keygen("soul"))) {
-                player.setWalkSpeed(1);
-                player.setFlySpeed(1);
-                player.performCommand("openGui");
+            if (player.getPersistentDataContainer().has(keygen("soul"))) {
+                player.setWalkSpeed(0.2f);
+                player.setFlySpeed(0.1f);
+
                 player.getPersistentDataContainer().set(util.keygen("trustedby"),PersistentDataType.STRING, "");
-            }
-        } else {
-            player.setWalkSpeed(0);
-            player.setFlySpeed(0);
+            } else {
+                player.performCommand("openGui");
+                player.setWalkSpeed(0);
+                player.setFlySpeed(0);
         }
     }
 
@@ -140,17 +140,20 @@ public class soulListener extends Util implements Listener {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         switch (soulType) {
             case Red:
-                    red.AbilityOne(player);
+                red.AbilityOne(player);
                 break;
             case Purple:
-                    purple.AbilityOne(player);
+                purple.AbilityOne(player);
                 break;
             case Green:
-                    green.AbilityOne(player);
+                green.AbilityOne(player);
                 break;
             case Black:
-                    black.AbilityOne(player);
-                    break;
+                black.AbilityOne(player);
+                break;
+            case Blue:
+                blue.AbilityOne(player);
+                break;
         }
     }
     @EventHandler
@@ -180,6 +183,12 @@ public class soulListener extends Util implements Listener {
                 if (drop.getPersistentDataContainer().has(keygen("rifle"))) {
                     purple.AbilityTwo(player,drop);
                 }
+                break;
+            case Black:
+                black.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case Blue:
+                blue.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
         }
     }

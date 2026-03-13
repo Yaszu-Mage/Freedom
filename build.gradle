@@ -20,11 +20,24 @@ repositories {
         name = "Bettermodel2"
         url = "https://maven.nucleoid.xyz/"
     } // For transitive dependency in bettermodel-fabric
+
+    maven {
+        url = "https://mvn.lib.co.nz/public"
+        content {
+            includeGroup("me.libraryaddict.disguises")
+        }
+    }
+    maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
+    maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
 }
 
 dependencies {
+    compileOnly("com.github.retrooper:packetevents-spigot:2.11.2")
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.0.1")
+    compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.15")
+
+
 }
 
 tasks {
