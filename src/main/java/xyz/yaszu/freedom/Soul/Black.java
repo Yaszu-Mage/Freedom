@@ -20,11 +20,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
@@ -88,6 +91,9 @@ public class Black extends Util implements Base_Soul, Listener {
                 if (!player.getPersistentDataContainer().has(keygen("blacksave"))) {
                     this.cancel();
                 }
+                if (player.getPersistentDataContainer().has(keygen("blackworld"),PersistentDataType.STRING) & player.getPersistentDataContainer().has(keygen("blacksaveX"),PersistentDataType.DOUBLE) & player.getPersistentDataContainer().has(keygen("blacksaveY"),PersistentDataType.DOUBLE) & player.getPersistentDataContainer().has(keygen("blacksaveZ"),PersistentDataType.DOUBLE)) {
+
+
                 Location loadingLocation = new Location(
                         Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),
                         player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),
@@ -97,6 +103,7 @@ public class Black extends Util implements Base_Soul, Listener {
                 );
                 drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.SMOKE);
                 drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
+            }
             }
         }.runTaskTimer(Freedom.get_plugin(),20,20);
         new BukkitRunnable() {
@@ -196,12 +203,12 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Who am I?");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Become anyone who is on the server for 5 min");
     }
 
 
@@ -447,6 +454,26 @@ public class Black extends Util implements Base_Soul, Listener {
         }
     }
 
+
+    @EventHandler
+    public void playerSneakEvent(PlayerToggleSneakEvent sneakEvent) {
+        Player player = sneakEvent.getPlayer();
+        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        if (soulType == SoulTypes.Black) {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if(player.isSneaking()) {
+                            player.addPotionEffect(PotionEffectType.INVISIBILITY.createEffect(70,1));
+                        } else {
+                            this.cancel();
+                        }
+                    }
+                }.runTaskTimer(Freedom.get_plugin(),1,60);
+
+        }
+    }
+
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         if (!inventoryGui.isEmpty()) {
@@ -462,7 +489,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("When you crouch, you are invisible.");
     }
 
     @Override
