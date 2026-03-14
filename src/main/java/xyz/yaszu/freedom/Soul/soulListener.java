@@ -4,6 +4,8 @@ import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.bossbar.BossBar;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -167,7 +169,7 @@ public class soulListener extends Util implements Listener {
         }
     }
 
-    public void AbilityTwo(Player player) {
+    public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
         ItemStack drop = player.getInventory().getItemInMainHand();
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         player.sendActionBar(dess("<green>Ability Two</green>"));

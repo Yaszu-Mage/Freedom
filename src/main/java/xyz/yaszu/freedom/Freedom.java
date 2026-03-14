@@ -1,6 +1,8 @@
 package xyz.yaszu.freedom;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.skinsrestorer.api.SkinsRestorer;
+import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -17,6 +19,7 @@ import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Black;
+import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
@@ -57,7 +60,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         // Plugin startup logic
         this.saveDefaultConfig();
         //Enable Listeners
-
+        Util.skinsRestorerAPI = SkinsRestorerProvider.get();
         soulListener soulListener = new soulListener();
         Bukkit.getPluginManager().registerEvents(soulListener,this);
         Bukkit.getPluginManager().registerEvents(new selectionGui(), this);
@@ -66,6 +69,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new Life_and_Death(), this);
         Bukkit.getPluginManager().registerEvents(this,this);
         Bukkit.getPluginManager().registerEvents(new Black(),this);
+        Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
         version = random.nextInt(0,9999);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands

@@ -1,17 +1,23 @@
 package xyz.yaszu.freedom.Soul;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.Audiences;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
+import net.skinsrestorer.api.SkinsRestorer;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -22,9 +28,12 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 public class Black extends Util implements Base_Soul, Listener {
@@ -196,18 +205,18 @@ public class Black extends Util implements Base_Soul, Listener {
     }
 
 
-    public long AbilityTwo_Cooldown = 300000;
+    public long AbilityTwo_Cooldown = 30000;
 
-    public HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
+    public static HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) {
+    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
             player.playSound(player.getLocation(),Sound.BLOCK_DISPENSER_DISPENSE,1,1);
             InventoryGui inventoryGui = new InventoryGui();
             inventoryGui.setInventory(player);
             player.openInventory(inventoryGui.getInventory());
-            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+
         } else {
             // no no ability
             if (abilityTwoCooldownTime.get(player.getUniqueId()) != null) {
@@ -229,41 +238,62 @@ public class Black extends Util implements Base_Soul, Listener {
                 disguise.removePlayer(player);
                 disguise.stopDisguise();
                 disguise.removeDisguise();
+                player.playerListName(player.name());
+                setSkinByName(player,player.getName());
+                originalProfiles.remove(player.getUniqueId());
             }
             player.getPersistentDataContainer().remove(keygen("disguised"));
             player.sendActionBar(dess("Disguise Removed."));
         }
     }
-
+    public static Random random = new Random();
     public static HashMap<UUID,PlayerDisguise> originalProfiles = new HashMap<>();
     @EventHandler
-    public void InventoryClickEvent (InventoryClickEvent event) {
+    public void InventoryClickEvent (InventoryClickEvent event) throws MineSkinException, DataRequestException {
         Inventory inventory = event.getInventory();
-        if (inventory.getHolder() instanceof InventoryGui inventoryGui) {
+        if (inventory.getHolder() instanceof InventoryGui inventoryGui && event.getCurrentItem() != null) {
             // yayas correct holder
             Player player = (Player) event.getWhoClicked();
             ItemStack item = event.getCurrentItem();
             Player baller = Bukkit.getPlayer(UUID.fromString(item.getPersistentDataContainer().get(keygen("player_uuid"),PersistentDataType.STRING)));
             PlayerDisguise disguise = new PlayerDisguise(baller);
+            disguise.setHearSelfDisguise(false);
             disguise.setEntity(player);
             player.getPersistentDataContainer().set(keygen("disguised"),PersistentDataType.BOOLEAN,true);
             disguise.startDisguise();
+            player.playerListName(baller.name());
+            setSkinByName(player,baller.getName());
             originalProfiles.put(player.getUniqueId(),disguise);
             Freedom.get_plugin().getLogger().info(String.valueOf(originalProfiles.get(player.getUniqueId())));
             World world = player.getWorld();
             Location location = player.getLocation();
             //VFX
-
+            int disguiseid = random.nextInt();
+            player.getPersistentDataContainer().set(keygen("diguiseid"),PersistentDataType.INTEGER,disguiseid);
             world.playSound(location,Sound.ENTITY_WARDEN_EMERGE,1,1);
             world.spawnParticle(Particle.SMOKE, location,128);
+
             player.closeInventory();
+            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     disguise.stopDisguise();
                     disguise.removeDisguise();
-                    if (disguise.isDisguiseInUse()) {
-                        world.spawnParticle(Particle.SMOKE, location,128);
+                    player.playerListName(player.name());
+                    if (player.getPersistentDataContainer().has(keygen("disguiseid"),PersistentDataType.INTEGER)) {
+                        int gotid = player.getPersistentDataContainer().get(keygen("disguiseid"), PersistentDataType.INTEGER);
+                        player.playerListName(player.name());
+                        if (disguise.isDisguiseInUse() && disguiseid == gotid) {
+                            world.spawnParticle(Particle.SMOKE, location, 128);
+                            try {
+                                setSkinByName(player,player.getName());
+                            } catch (MineSkinException e) {
+                                throw new RuntimeException(e);
+                            } catch (DataRequestException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     }
 
                     this.cancel();
@@ -272,8 +302,86 @@ public class Black extends Util implements Base_Soul, Listener {
             event.setCancelled(true);
         }
     }
+    public BukkitRunnable send(Player player,String Msg) {
+        return new BukkitRunnable() {
+            @Override
+            public void run() {
+                say(player,Msg);
+            }
+        };
+    }
+    public static String sendchatthrough = String.valueOf(Freedom.version-1);
+    public static String resend = String.valueOf(Freedom.version);
 
+    public static ArrayList<Player> successful_message = new ArrayList<>();
+    @EventHandler
+    public void PlayerChatEvent(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        String message = event.getMessage();
+        event.getRecipients().clear();
+        boolean is_alive = Life_and_Death.is_alive(player);
+        if (player.getPersistentDataContainer().has(keygen("disguised"),PersistentDataType.BOOLEAN)) {
+            //disguised logic
+            if (message.contains(sendchatthrough)) {
+                //continue
+                tabDistance(event, message, is_alive);
+            } else {
+                //resend
+                Player dis = Bukkit.getPlayer(originalProfiles.get(player.getUniqueId()).getName());
+                send(dis,message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                event.setCancelled(true);
+            }
+        } else {
+            if (message.contains(sendchatthrough)) {
+                //continue
+                tabDistance(event, message, is_alive);
+            } else {
+                //resend
+                send(player,message + resend+ "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                event.setCancelled(true);
+            }
+        }
+    }
 
+    public static void tabDistance(AsyncPlayerChatEvent event, String message, boolean is_alive) {
+        message = message.replace(sendchatthrough,"");
+
+        String[] msg = message.split("\uD83E\uDDFF");
+        event.setMessage(msg[0]);
+        Freedom.get_plugin().getLogger().info("Correct "+ msg[0] + " " + msg[1]);
+        Player realPlayer = Bukkit.getPlayer(msg[1]);
+        if (is_alive) {
+            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
+                if (realPlayer != null) {
+                    if (realPlayer.isOnline()) {
+                        if (realPlayer.canSee(instancedPlayer)) {
+                            event.getRecipients().add(instancedPlayer);
+                            instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
+                        }
+                    }
+
+                }
+            }
+        } else {
+            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
+                if (!Life_and_Death.is_alive(instancedPlayer)) {
+                    if (realPlayer != null) {
+                        if (realPlayer.isOnline()) {
+                            if (realPlayer.canSee(instancedPlayer)) {
+                                event.getRecipients().add(instancedPlayer);
+                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+    public void say(Player dis, String message){
+            dis.chat(message.replace(resend,sendchatthrough));
+    }
 
     public HashMap<Player,InventoryGui> inventoryGui = new HashMap<>();
 
@@ -294,7 +402,7 @@ public class Black extends Util implements Base_Soul, Listener {
                 inventory = Bukkit.createInventory(this,max_players - (remainder));
             }
             int iteration = 0;
-            for (Player instancedPlayer :Bukkit.getOnlinePlayers()) {
+            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
                 if (instancedPlayer.getUniqueId() != player.getUniqueId()){
                     ItemStack skull = getSkull(instancedPlayer);
                     SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -302,25 +410,27 @@ public class Black extends Util implements Base_Soul, Listener {
                     SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
                     String name = instancedPlayer.getName();
                     switch (soulType) {
-                        case Green -> {
-                            meta.displayName(soulListener.green.Name().append(dess(" " + name)));
-                        }
-                        case Red -> {
-                            meta.displayName(soulListener.red.Name().append(dess(" " + name)));
-                        }
-                        case Blue -> {
-                            meta.displayName(soulListener.blue.Name().append(dess(" " + name)));
-                        }
-                        case Purple -> {
-                            meta.displayName(soulListener.purple.Name().append(dess(" " + name)));
-                        }
-                        case Black -> {
+                        case Black:
                             meta.displayName(soulListener.black.Name().append(dess(" " + name)));
-                        }
+                            break;
+                        case Green:
+                            meta.displayName(soulListener.green.Name().append(dess(" " + name)));
+                            break;
+                        case Red:
+                            meta.displayName(soulListener.red.Name().append(dess(" " + name)));
+                            break;
+                        case Blue:
+                            meta.displayName(soulListener.blue.Name().append(dess(" " + name)));
+                            break;
+                        case Purple:
+                            meta.displayName(soulListener.purple.Name().append(dess(" " + name)));
+                            break;
+
                     }
                     skull.displayName();
                     skull.setItemMeta(meta);
                     inventory.setItem(iteration,skull);
+                    iteration++;
                 }
             }
         }
@@ -328,7 +438,8 @@ public class Black extends Util implements Base_Soul, Listener {
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) throws MineSkinException, DataRequestException {
+        setSkinByName(event.getPlayer(),event.getPlayer().getName());
         if (!inventoryGui.isEmpty()) {
             for (Player player : inventoryGui.keySet()) {
                 inventoryGui.get(player).setInventory(player);

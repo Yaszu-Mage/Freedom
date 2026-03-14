@@ -1,6 +1,8 @@
 package xyz.yaszu.freedom.Soul;
 
 import net.kyori.adventure.text.Component;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,7 +31,7 @@ public interface Base_Soul {
     // Description for Ability Two
     public Component AbilityTwoDescription();
     //Ability Two - An ability that can be triggered using an ITEM and/or with Inputs
-    public void AbilityTwo(Player player,ItemStack ability_item);
+    public void AbilityTwo(Player player,ItemStack ability_item) throws MineSkinException, DataRequestException;
     public Component Passive_Description();
     //Passive - A passive that is active no matter what
     public void Passive(Player player, Object event);

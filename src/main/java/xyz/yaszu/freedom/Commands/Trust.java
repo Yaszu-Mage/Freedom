@@ -12,6 +12,8 @@ import kr.toxicity.model.api.entity.BaseEntity;
 import kr.toxicity.model.api.platform.PlatformEntity;
 import kr.toxicity.model.api.tracker.EntityTracker;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
@@ -58,7 +60,13 @@ public class Trust {
         return Commands.literal("AbilityTwo").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
-                        soulListener.AbilityTwo(player);
+                        try {
+                            soulListener.AbilityTwo(player);
+                        } catch (MineSkinException e) {
+                            throw new RuntimeException(e);
+                        } catch (DataRequestException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                     return Command.SINGLE_SUCCESS;
                 }

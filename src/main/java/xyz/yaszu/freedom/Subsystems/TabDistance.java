@@ -2,6 +2,7 @@ package xyz.yaszu.freedom.Subsystems;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,6 +10,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Black;
 
 import java.util.ArrayList;
 
@@ -33,30 +35,4 @@ public class TabDistance implements Listener {
         }
     }
 
-    @EventHandler
-    public void PlayerChatEvent(AsyncPlayerChatEvent event) {
-        event.getRecipients().clear();
-        Player player = event.getPlayer();
-        boolean is_alive = Life_and_Death.is_alive(player);
-        if (is_alive) {
-            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
-                if (Life_and_Death.is_alive(instancedPlayer)) {
-                    return;
-                } else {
-                    if (player.getLocation().getNearbyEntitiesByType(Player.class, tabradius).contains(instancedPlayer)) {
-                        event.getRecipients().add(instancedPlayer);
-                    }
-                }
-            }
-        } else {
-            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
-                if (Life_and_Death.is_alive(instancedPlayer)) {
-                    if (player.getLocation().getNearbyEntitiesByType(Player.class, tabradius).contains(instancedPlayer)) {
-                        event.getRecipients().add(instancedPlayer);
-                    }
-                }
-            }
-        }
-
-    }
 }

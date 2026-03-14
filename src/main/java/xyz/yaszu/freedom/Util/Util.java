@@ -4,14 +4,22 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.skinsrestorer.api.SkinsRestorer;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
+import net.skinsrestorer.api.property.InputDataResult;
+import net.skinsrestorer.api.storage.PlayerStorage;
+import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class Util {
+    public static SkinsRestorer skinsRestorerAPI;
     public static NamespacedKey keygen(String key) {
         return new NamespacedKey(Bukkit.getPluginManager().getPlugin("Freedom"),key);
     }
@@ -54,5 +62,19 @@ public class Util {
         return head;
     }
 
-
+    public void setSkinByName(Player player, String skinName) throws MineSkinException, DataRequestException {
+        SkinStorage skinStorage = skinsRestorerAPI.getSkinStorage();
+        PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
+        // Find or fetch the skin data
+        Optional<InputDataResult> result = skinStorage.findOrCreateSkinData(skinName);
+        if (result.isPresent()) {
+            // Set the skin identifier for the player
+            playerStorage.setSkinIdOfPlayer(
+                    player.getUniqueId(),
+                    result.get().getIdentifier()
+            );
+            // Apply the skin visually
+            skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player);
+        }
+    }
 }
