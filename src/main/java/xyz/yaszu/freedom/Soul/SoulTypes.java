@@ -5,5 +5,6 @@ public enum SoulTypes {
     Green,
     Blue,
     Purple,
-    Black
+    Black,
+    None
 }

@@ -8,6 +8,7 @@ import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
+import net.skinsrestorer.api.property.SkinProperty;
 import net.skinsrestorer.api.storage.PlayerStorage;
 import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.*;
@@ -61,6 +62,16 @@ public class Util {
         head.setItemMeta(skullMeta);
         return head;
     }
+    public SkinProperty getPlayerSkin(Player player) throws DataRequestException {
+        PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
+        Optional<SkinProperty> property = playerStorage.getSkinForPlayer(
+                player.getUniqueId(),
+                player.getName()
+        );
+        return property.orElse(null);
+    }
+
+
 
     public void setSkinByName(Player player, String skinName) throws MineSkinException, DataRequestException {
         SkinStorage skinStorage = skinsRestorerAPI.getSkinStorage();

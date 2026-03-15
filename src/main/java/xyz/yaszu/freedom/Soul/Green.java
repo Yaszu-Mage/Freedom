@@ -86,7 +86,6 @@ public class Green extends Util implements Base_Soul {
     public static void removeOldFollowers() {
         for (World world : Bukkit.getWorlds()) {
             for (Entity entity : world.getEntities()) {
-                Freedom.get_plugin().getLogger().info("FOUND ENTITY");
                 Freedom.get_plugin().getLogger().info(entity.getName());
                 if (entity.getPersistentDataContainer().has(keygen("sprite"))) {
                     if (entity.getPersistentDataContainer().get(keygen("sprite"),PersistentDataType.INTEGER) != Freedom.version) {

@@ -13,6 +13,8 @@ import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,11 +22,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
@@ -239,6 +243,9 @@ public class Black extends Util implements Base_Soul, Listener {
                 disguise.stopDisguise();
                 disguise.removeDisguise();
                 player.playerListName(player.name());
+                if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
+                    player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
+                }
                 setSkinByName(player,player.getName());
                 originalProfiles.remove(player.getUniqueId());
             }
@@ -261,6 +268,9 @@ public class Black extends Util implements Base_Soul, Listener {
             disguise.setEntity(player);
             player.getPersistentDataContainer().set(keygen("disguised"),PersistentDataType.BOOLEAN,true);
             disguise.startDisguise();
+            if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) != null) {
+                player.getAttribute(Attribute.SCALE).removeModifier(keygen("black"));
+            }
             player.playerListName(baller.name());
             setSkinByName(player,baller.getName());
             originalProfiles.put(player.getUniqueId(),disguise);
@@ -281,6 +291,9 @@ public class Black extends Util implements Base_Soul, Listener {
                     disguise.removeDisguise();
                     player.playerListName(player.name());
                     if (player.getPersistentDataContainer().has(keygen("disguiseid"),PersistentDataType.INTEGER)) {
+                        if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
+                            player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),0.80, AttributeModifier.Operation.ADD_NUMBER));
+                        }
                         int gotid = player.getPersistentDataContainer().get(keygen("disguiseid"), PersistentDataType.INTEGER);
                         player.playerListName(player.name());
                         if (disguise.isDisguiseInUse() && disguiseid == gotid) {
@@ -439,9 +452,16 @@ public class Black extends Util implements Base_Soul, Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) throws MineSkinException, DataRequestException {
         setSkinByName(event.getPlayer(),event.getPlayer().getName());
+        Player player = event.getPlayer();
+        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        if (soulType == SoulTypes.Black) {
+            if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
+                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),0.80, AttributeModifier.Operation.ADD_NUMBER));
+            }
+        }
         if (!inventoryGui.isEmpty()) {
-            for (Player player : inventoryGui.keySet()) {
-                inventoryGui.get(player).setInventory(player);
+            for (Player iteratedplayer : inventoryGui.keySet()) {
+                inventoryGui.get(iteratedplayer).setInventory(player);
             }
         }
     }
@@ -458,6 +478,24 @@ public class Black extends Util implements Base_Soul, Listener {
             }
         }
     }
+    public void playerSneakEvent(Player player) {
+        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+        player.getPersistentDataContainer().set(keygen("SoulPoint"),PersistentDataType.DOUBLE,SoulPoints - 5);
+        if (soulType == SoulTypes.Black) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if(player.isSneaking()) {
+                        player.addPotionEffect(PotionEffectType.INVISIBILITY.createEffect(70,1));
+                    } else {
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(Freedom.get_plugin(),1,60);
+
+        }
+    }
 
     @Override
     public Component Passive_Description() {
@@ -471,7 +509,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("When you sneak you are invisible");
     }
 
     @Override

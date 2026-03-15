@@ -131,6 +131,10 @@ public class soulListener extends Util implements Listener {
                     red.ActivePassive(player);
                 }
                 break;
+            case Black:
+                if (SoulPoints >= 5 && player.isSneaking()) {
+                    black.playerSneakEvent(player);
+                }
         }
     }
     }
@@ -203,6 +207,13 @@ public class soulListener extends Util implements Listener {
                 red.ActivePassive(player);
             case Purple:
                 purple.ActivePassive(player);
+            case Black:
+                double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+                if (SoulPoints >= 5 && player.isSneaking()) {
+                    black.playerSneakEvent(player);
+
+                }
+
         }
     }
 
