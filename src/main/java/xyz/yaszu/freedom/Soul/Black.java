@@ -279,7 +279,6 @@ public class Black extends Util implements Base_Soul, Listener {
             player.getPersistentDataContainer().set(keygen("diguiseid"),PersistentDataType.INTEGER,disguiseid);
             world.playSound(location,Sound.ENTITY_WARDEN_EMERGE,1,1);
             world.spawnParticle(Particle.SMOKE, location,128);
-
             player.closeInventory();
             abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
             new BukkitRunnable() {

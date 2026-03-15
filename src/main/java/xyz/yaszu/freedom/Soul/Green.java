@@ -178,6 +178,36 @@ public class Green extends Util implements Base_Soul {
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
         //
+        new BukkitRunnable() {
+            int tick = 0;
+            @Override
+            public void run() {
+                player.getLocation().getNearbyEntitiesByType(Player.class, 10).forEach(iterator -> {
+                        String trusted;
+                        if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
+                            trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
+                            if (trusted.contains(player.getName()) && iterator.getLocation().distanceSquared(player.getLocation()) <= 10) {
+                                iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 0));
+                                iterator.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, iterator.getLocation(),8);
+                                if (!player.hasPotionEffect(PotionEffectType.SLOWNESS)) {
+                                    player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, 0));
+                                } else {
+                                    int amplifier = player.getPotionEffect(PotionEffectType.SLOWNESS).getAmplifier();
+                                    player.removePotionEffect(PotionEffectType.SLOWNESS);
+                                    player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, amplifier + 1));
+                                }
+
+                            }
+                        }
+
+                });
+                tick++;
+                if (tick == 2) {
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer(Freedom.get_plugin(),0,80);
+
     }
 
     @Override
