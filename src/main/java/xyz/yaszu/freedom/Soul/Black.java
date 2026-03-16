@@ -340,7 +340,12 @@ public class Black extends Util implements Base_Soul, Listener {
             } else {
                 //resend
                 Player dis = Bukkit.getPlayer(originalProfiles.get(player.getUniqueId()).getName());
-                send(dis,message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                if (dis == null) {
+                    send(player, message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                } else {
+                    send(dis,message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                }
+
                 event.setCancelled(true);
             }
         } else {
@@ -449,10 +454,25 @@ public class Black extends Util implements Base_Soul, Listener {
 
     }
 
+    public static void join (Player player) throws MineSkinException, DataRequestException {
+        setSkinByName(player,player.getName());
+        if (player.getPersistentDataContainer().has(keygen("soul"))) {
+
+
+        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        if (soulType == SoulTypes.Black) {
+            if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
+                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),0.80, AttributeModifier.Operation.ADD_NUMBER));
+            }
+        }
+    }
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) throws MineSkinException, DataRequestException {
         setSkinByName(event.getPlayer(),event.getPlayer().getName());
         Player player = event.getPlayer();
+        if (player.getPersistentDataContainer().has(keygen("soul"))) {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         if (soulType == SoulTypes.Black) {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
@@ -464,6 +484,7 @@ public class Black extends Util implements Base_Soul, Listener {
                 inventoryGui.get(iteratedplayer).setInventory(player);
             }
         }
+    }
     }
 
     @EventHandler

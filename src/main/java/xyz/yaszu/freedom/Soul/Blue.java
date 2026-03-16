@@ -1,22 +1,30 @@
 package xyz.yaszu.freedom.Soul;
 
+import com.github.retrooper.packetevents.protocol.potion.Potion;
 import net.kyori.adventure.text.Component;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
-public class Blue extends Util implements Base_Soul {
+public class Blue extends Util implements Base_Soul, Listener {
+
     @Override
     public String Name_For_Container() {
         return "Blue";
@@ -24,131 +32,203 @@ public class Blue extends Util implements Base_Soul {
 
     @Override
     public Component Name() {
-        return dess("<blue>Blue</blue>");
+        return dess("<Blue>Blue</Blue>");
     }
 
     @Override
     public Component Description() {
-        return dess("The reverse, to go backwards, that is your meaning");
+        return dess("AntiClock Yaoi where?");
     }
 
     @Override
     public ItemStack Icon() {
-        return ItemStack.of(Material.SHIELD);
+        //TODO replace with blue clock
+        return ItemStack.of(Material.CLOCK);
     }
 
     @Override
     public Component AbilityOneName() {
-        return dess("<blue> Ability One </blue> - Wait up!");
+        return dess("<Blue> Selective TP </Blue>");
     }
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("Slow down people in a 10 block radius");
+        return dess("You can selectively with the Yellow one you are bonded with");
     }
-
-
-    public long abilityOneCooldownTime = 8100;
-    public HashMap<UUID, Long> abilityOneCooldown = new HashMap<>();
+    public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
+    public static long abilityOneCooldown = 3000L;
     @Override
     public void AbilityOne(Player player) {
-        //The clocks... what?
-        //Slows down people in a 10 block radius
-        if (can_ability(abilityOneCooldownTime, abilityOneCooldown, player.getUniqueId())) {
-            Location location = player.getLocation();
-            location.getNearbyEntitiesByType(Player.class, 10).forEach(entity -> {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Location location = entity.getLocation();
-                        if (location.getNearbyEntitiesByType(Player.class, 10).contains(player) && player.isOnline()) {
-                            //default movement speed attribute 0.1
-                            //default gravity 0.08
-                            entity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.025);
-                            entity.getAttribute(Attribute.GRAVITY).setBaseValue(0.01);
-                        } else {
-                            entity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1);
-                            entity.getAttribute(Attribute.GRAVITY).setBaseValue(0.08);
-                            this.cancel();
-                        }
+        player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
+        if (can_ability(abilityOneCooldown,abilityOneCooldowns,player.getUniqueId())) {
+            //Do ability
+            //TODO implement VFX
+            if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
+
+                Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                Freedom.get_plugin().getLogger().info(String.valueOf(doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)));
+                if (Bukkit.getPlayer(doubleclock.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING)) == player) {
+                    if ( player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == true && doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == false) {
+                        doubleclock.sendMessage(player.getName() + " has requested to swap!");
+                    } else {
+                        doubleclock.sendMessage(player.getName() + " has rescinded their request to swap.");
                     }
-                }.runTaskTimer(Freedom.get_plugin(), 0, 0);
-            });
-            abilityOneCooldown.put(player.getUniqueId(), System.currentTimeMillis());
+
+                if (doubleclock.getLocation().distanceSquared(player.getLocation()) <= 10000) {
+                if (doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)) {
+                    player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
+                    doubleclock.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
+                    Location doubleloc = doubleclock.getLocation().setRotation(0,0);
+                    Location location = player.getLocation().setRotation(0,0);
+
+                    player.teleport(doubleloc);
+                    doubleclock.teleport(location);
+                    abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+                    abilityOneCooldowns.put(doubleclock.getUniqueId(),System.currentTimeMillis());
+                    location = location.add(0,0.5,0);
+                    doubleloc = doubleloc.add(0,0.5,0);
+                    ItemDisplay onedisplay = location.getWorld().spawn(location, ItemDisplay.class);
+                    ItemDisplay twodisplay = doubleloc.getWorld().spawn(doubleloc, ItemDisplay.class);
+                    onedisplay.setItemStack(ItemStack.of(Material.CLOCK));
+                    twodisplay.setItemStack(ItemStack.of(Material.CLOCK));
+                    doubleclock.getWorld().playSound(location,Sound.UI_BUTTON_CLICK,1,1);
+                    player.getWorld().playSound(location,Sound.UI_BUTTON_CLICK,1,1);
+                    drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.REVERSE_PORTAL);
+                    drawCircle(doubleclock.getLocation(),1,doubleclock.getWorld(),16,Particle.REVERSE_PORTAL);
+                    new BukkitRunnable() {
+
+                        @Override
+                        public void run() {
+                            onedisplay.remove();
+                            twodisplay.remove();
+                        }
+                    }.runTaskLater(Freedom.get_plugin(),20);
+
+                }
+            } else {
+                    player.sendMessage(dess("YOU ARE TOO FAR TO SWAP!"));
+                    doubleclock.sendMessage(dess("YOU ARE TOO FAR TO SWAP!"));
+                }
         } else {
-            player.sendActionBar(dess("You can't use this ability yet wait, " + (abilityOneCooldownTime - (System.currentTimeMillis() - abilityOneCooldown.get(player.getUniqueId()))) / 1000 + " seconds."));
+            //TODO send message
         }
+    }}}
+    public static void init(Player player) {
+        player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
     }
-
-
-
     @Override
     public ItemStack Related_Item() {
-        //TODO make clock blue
         return ItemStack.of(Material.CLOCK);
     }
 
     @Override
     public Component AbilityTwoName() {
-        return dess("<blue> Ability Two </blue> - Rewind");
+        return dess("⬛⬛⬛⬛⬛⬛");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("⬛⬛⬛⬛⬛⬛");
     }
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) {
-        new BukkitRunnable() {
-            int tick = 0;
-            ArrayList<velocityTime> velocityTimes = new ArrayList<>();
-            @Override
-            public void run() {
-                if (tick >= 100) {
-                    velocityTimes.add(new velocityTime(player.getVelocity().multiply(-1), 100));
-                } else {
-                    if (tick == 101) {
-                        Collections.reverse(velocityTimes);
-                    }
-                    if (tick >= 200) {
-                        this.cancel();
-                        return;
-                    }
-                    player.setVelocity(velocityTimes.get(100-tick).vector);
-                }
-                tick = tick + 1;
-            }
-        }.runTaskTimer(Freedom.get_plugin(), 0,0);
-    }
+    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
 
-    public class velocityTime {
-
-        public Vector vector;
-        public double time;
-        velocityTime(Vector Vector, long Time) {
-           this.time = Time;
-           this.vector = Vector;
-        }
     }
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("⬛⬛⬛⬛⬛⬛");
     }
 
     @Override
     public void Passive(Player player, Object event) {
-        //idk bro
+
+    }
+    public static HashMap<UUID,Boolean> haspassive = new HashMap<>();
+    @EventHandler
+    public void Passive_Potion(PlayerMoveEvent event) {
+
+        Player player = event.getPlayer();
+            if (getSoulType(player) == SoulTypes.Blue || getSoulType(player) == SoulTypes.Yellow) {
+                if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
+                    Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                    if (doubleclock != null) {
+                        if (Bukkit.getPlayer(doubleclock.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING)) == player) {
+                        Collection<PotionEffect> potions = player.getActivePotionEffects();
+                        Collection<PotionEffect> doublepotions = player.getActivePotionEffects();
+                        potioncheck(player,doubleclock,potions,doublepotions);
+                        }
+                }
+            }
+        }
+    }
+
+    public static HashMap<UUID,List> potionchecker = new HashMap<>();
+    public void potionCheck(Player clock, Player anticlock) {
+        for (PotionEffect potionEffect : clock.getActivePotionEffects()) {
+            if (!anticlock.hasPotionEffect(potionEffect.getType())) {
+                anticlock.addPotionEffect(potionEffect);
+            }
+        }
+    }
+    public void potioncheck(Player player, Player doubleclock, Collection<PotionEffect> clockpotion,Collection<PotionEffect> anticlockpotion) {
+        List<PotionEffect> effects = new ArrayList<>();
+        potionchecker.put(player.getUniqueId(),effects);
+        potionrealcheck(clockpotion, anticlockpotion, effects,player.getUniqueId());
+        potionrealcheck(anticlockpotion, clockpotion, effects,player.getUniqueId());
+        doubleclock.clearActivePotionEffects();
+        player.clearActivePotionEffects();
+        for (Object objpotion : potionchecker.get(player.getUniqueId())) {
+            if (objpotion instanceof PotionEffect potion) {
+                doubleclock.addPotionEffect(potion);
+                player.addPotionEffect(potion);
+            }
+
+        }
+
+    }
+
+    public void potionrealcheck(Collection<PotionEffect> clockpotion, Collection<PotionEffect> anticlockpotion, Collection<PotionEffect> effects,UUID uuid) {
+        for (PotionEffect potion : clockpotion) {
+            int potionduration = potion.getDuration();
+            int potionamplifier = potion.getAmplifier();
+            int finaleffectduration = potionduration;
+            int finaleffectamplifier = potionamplifier;
+            for (PotionEffect antipotion : anticlockpotion) {
+                int antipotionduration = antipotion.getDuration();
+                int antipotionamplifier = antipotion.getAmplifier();
+                finaleffectduration = Math.max(potionduration, antipotionduration);
+                finaleffectamplifier = Math.max(potionamplifier, antipotionamplifier);
+            }
+            potionchecker.get(uuid).add(new PotionEffect(potion.getType(),finaleffectduration,finaleffectamplifier));
+        }
     }
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("You can grant yourself resistance for 9 Soul Points");
+        return dess("⬛⬛⬛⬛⬛⬛");
     }
 
     @Override
     public void ActivePassive(Player player) {
-        player.addPotionEffect(PotionEffectType.RESISTANCE.createEffect(2000,5));
+        for (Entity entity : player.getNearbyEntities(2,2,2)) {
+            if (entity instanceof  Player lookedat)
+            if (lookedat != player) {
+            if (lookedat.getPersistentDataContainer().has(keygen("soul"))) {
+
+                SoulTypes soulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+                Freedom.get_plugin().getLogger().info(String.valueOf(soulType));
+                Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Blue || soulType == SoulTypes.Yellow));
+                SoulTypes selfsoulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+                if ((soulType == SoulTypes.Blue && selfsoulType == SoulTypes.Yellow) || (soulType == SoulTypes.Yellow && selfsoulType == SoulTypes.Blue)){
+                    player.getPersistentDataContainer().set(keygen("doubleclock"),PersistentDataType.STRING,lookedat.getName());
+
+                }
+            }
+        }
     }
 }
+}
+
+

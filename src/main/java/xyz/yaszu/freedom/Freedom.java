@@ -19,6 +19,7 @@ import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Black;
+import xyz.yaszu.freedom.Soul.Blue;
 import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
@@ -70,6 +71,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this,this);
         Bukkit.getPluginManager().registerEvents(new Black(),this);
         Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
+        Bukkit.getPluginManager().registerEvents(new Blue(), this);
         version = random.nextInt(0,9999);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands

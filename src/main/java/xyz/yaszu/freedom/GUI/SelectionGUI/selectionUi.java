@@ -10,6 +10,8 @@ import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -50,6 +52,12 @@ public class selectionUi extends Util implements Listener {
         if (active_souls_in_config.contains("Black")) {
             active_souls.add(new Black());
         }
+        if (active_souls_in_config.contains("Yellow")) {
+            active_souls.add(new Yellow());
+        }
+        if (active_souls_in_config.contains("None")) {
+            active_souls.add(new None());
+        }
         return active_souls;
     }
 
@@ -70,21 +78,17 @@ public class selectionUi extends Util implements Listener {
         if (is_forward) {
             if (location + 1 >= max_size) {
                 Base_Soul base = (Base_Soul) active_souls().get(0);
-                freedom.getLogger().info("max size reached, returning " + location + "which is " + base.Name_For_Container());
                 return base;
             } else {
                 Base_Soul base = (Base_Soul) active_souls().get(location + 1);
-                freedom.getLogger().info("max size reached, returning " + location + "which is " + base.Name_For_Container());
                 return base;
             }
         } else {
             if (location - 1 <= 0) {
                 Base_Soul base = (Base_Soul) active_souls().get(max_size - 1);
-                freedom.getLogger().info("max size reached, returning " + location + "which is " + base.Name_For_Container());
                 return base;
             } else {
                 Base_Soul base = (Base_Soul) active_souls().get(location - 1);
-                freedom.getLogger().info("max size reached, returning " + location + "which is " + base.Name_For_Container());
                 return base;
             }
         }
@@ -94,7 +98,7 @@ public class selectionUi extends Util implements Listener {
     public static HashMap<UUID, Base_Soul> soul_selection_map = new HashMap<UUID, Base_Soul>();
 
     @EventHandler
-    void handleDialog(PlayerCustomClickEvent event){
+    void handleDialog(PlayerCustomClickEvent event) throws MineSkinException, DataRequestException {
         Player player;
         if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
             player = conn.getPlayer();
@@ -107,6 +111,10 @@ public class selectionUi extends Util implements Listener {
         }
         if (event.getIdentifier().equals(Key.key("papermc:user_input/select"))) {
             player.getPersistentDataContainer().set(keygen("soul"), PersistentDataType.STRING,soul_selection_map.get(player.getUniqueId()).Name_For_Container());
+            Black.join(player);
+            if (soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Blue" || soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Yellow") {
+                Blue.init(player);
+            }
         }
         if (event.getIdentifier().equals(Key.key("papermc:user_input/forward"))) {
             open_UI(player,get_next_soul(player,soul_selection_map.get(player.getUniqueId()),true));

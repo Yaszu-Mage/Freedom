@@ -15,6 +15,8 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataType;
+import xyz.yaszu.freedom.Soul.SoulTypes;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -71,9 +73,11 @@ public class Util {
         return property.orElse(null);
     }
 
+    public SoulTypes getSoulType(Player player) {
+        return SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+    }
 
-
-    public void setSkinByName(Player player, String skinName) throws MineSkinException, DataRequestException {
+    public static void setSkinByName(Player player, String skinName) throws MineSkinException, DataRequestException {
         SkinStorage skinStorage = skinsRestorerAPI.getSkinStorage();
         PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
         // Find or fetch the skin data

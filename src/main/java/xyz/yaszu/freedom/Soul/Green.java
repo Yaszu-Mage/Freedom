@@ -16,14 +16,17 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 
 public class Green extends Util implements Base_Soul {
 
@@ -86,7 +89,6 @@ public class Green extends Util implements Base_Soul {
     public static void removeOldFollowers() {
         for (World world : Bukkit.getWorlds()) {
             for (Entity entity : world.getEntities()) {
-                Freedom.get_plugin().getLogger().info(entity.getName());
                 if (entity.getPersistentDataContainer().has(keygen("sprite"))) {
                     if (entity.getPersistentDataContainer().get(keygen("sprite"),PersistentDataType.INTEGER) != Freedom.version) {
                         entity.remove();
@@ -174,9 +176,14 @@ public class Green extends Util implements Base_Soul {
         return dess("⬛⬛⬛⬛⬛⬛⬛");
     }
 
+
+    public static HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
+    public long AbilityTwo_Cooldown = 30000;
+
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
         //
+        if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId())) {
         new BukkitRunnable() {
             int tick = 0;
             @Override
@@ -184,9 +191,10 @@ public class Green extends Util implements Base_Soul {
                 player.getLocation().getNearbyEntitiesByType(Player.class, 10).forEach(iterator -> {
                         String trusted;
                         if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
+
                             trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
                             if (trusted.contains(player.getName()) && iterator.getLocation().distanceSquared(player.getLocation()) <= 10) {
-                                iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 0));
+                                iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 2));
                                 iterator.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, iterator.getLocation(),8);
                                 if (!player.hasPotionEffect(PotionEffectType.SLOWNESS)) {
                                     player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, 0));
@@ -207,6 +215,7 @@ public class Green extends Util implements Base_Soul {
             }
         }.runTaskTimer(Freedom.get_plugin(),0,80);
 
+    }
     }
 
     @Override
@@ -248,6 +257,10 @@ public class Green extends Util implements Base_Soul {
 
     @Override
     public void ActivePassive(Player player) {
-
+        if (!player.hasPotionEffect(PotionEffectType.REGENERATION)) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 6000, 0));
+            double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+            player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, SoulPoints - 5);
+        }
     }
 }

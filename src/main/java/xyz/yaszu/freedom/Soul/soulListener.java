@@ -77,8 +77,6 @@ public class soulListener extends Util implements Listener {
             if (player.getPersistentDataContainer().has(keygen("soul"))) {
                 player.setWalkSpeed(0.2f);
                 player.setFlySpeed(0.1f);
-
-                player.getPersistentDataContainer().set(util.keygen("trustedby"),PersistentDataType.STRING, "");
             } else {
                 player.performCommand("openGui");
                 player.setWalkSpeed(0);
@@ -135,6 +133,18 @@ public class soulListener extends Util implements Listener {
                 if (SoulPoints >= 5 && player.isSneaking()) {
                     black.playerSneakEvent(player);
                 }
+            case Green:
+                if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
+
+                    green.ActivePassive(player);
+                }
+                break;
+            case Blue:
+                blue.ActivePassive(player);
+                break;
+            case Yellow:
+                yellow.ActivePassive(player);
+                break;
         }
     }
     }
@@ -157,7 +167,7 @@ public class soulListener extends Util implements Listener {
             case Black:
                 black.AbilityOne(player);
                 break;
-            case Blue:
+            case Blue, Yellow:
                 blue.AbilityOne(player);
                 break;
         }
@@ -196,6 +206,9 @@ public class soulListener extends Util implements Listener {
             case Blue:
                 blue.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
+            case Green:
+                green.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
         }
     }
 
@@ -213,10 +226,16 @@ public class soulListener extends Util implements Listener {
                     black.playerSneakEvent(player);
 
                 }
-
+                break;
+            case Blue:
+                blue.ActivePassive(player);
+                break;
+            case Yellow:
+                yellow.ActivePassive(player);
+                break;
         }
     }
-
+public static Yellow yellow =  new Yellow();
 
 
     @EventHandler
@@ -254,6 +273,16 @@ public class soulListener extends Util implements Listener {
                         green.AbilityOne(player);
                     }
                     break;
+                case Black:
+                    if (player.isSneaking()) {
+                        black.AbilityOne(player);
+                    }
+                    break;
+                case Blue, Yellow:
+                    if (player.isSneaking()) {
+                        blue.AbilityOne(player);
+                    }
+                    break;
             }
         }
     }
@@ -283,6 +312,9 @@ public class soulListener extends Util implements Listener {
                     purple.AbilityTwo(player,drop);
                     event.setCancelled(true);
                 }
+                break;
+            case Green:
+                green.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
         }
     }

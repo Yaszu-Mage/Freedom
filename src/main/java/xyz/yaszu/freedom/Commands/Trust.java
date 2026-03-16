@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
@@ -135,7 +136,9 @@ public class Trust {
                                 }
 
                                 target.getPersistentDataContainer().set(util.keygen("trustedby"), PersistentDataType.STRING, trustedby);
+                                Freedom.get_plugin().getLogger().info(trustedby);
                             } else {
+                                Freedom.get_plugin().getLogger().info(sender.getName());
                                 target.getPersistentDataContainer().set(util.keygen("trustedby"), PersistentDataType.STRING, sender.getName());
                                 ctx.getSource().getSender().sendRichMessage("You have trusted <target>.",
                                         Placeholder.component("target", target.name())
