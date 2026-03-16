@@ -24,4 +24,6 @@ commands:
     description: "Revive"
   Revive:
     description: "Revive"
+  Passive:
+    description: "Passive"
 softdepend: [ "SkinsRestorer" ]

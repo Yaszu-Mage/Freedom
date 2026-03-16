@@ -47,7 +47,7 @@ public class Trust {
 
 
     public static LiteralCommandNode<CommandSourceStack> Ability_One() {
-        return Commands.literal("AbilityOne").executes(
+        return Commands.literal("abilityone").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
                         soulListener.AbilityOne(player);
@@ -56,9 +56,20 @@ public class Trust {
                 }
         ).build();
     }
+    public static LiteralCommandNode<CommandSourceStack> Passive() {
+        return Commands.literal("passive").executes(
+                ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+
+                        soulListener.Passive(player);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }
+        ).build();
+    }
 
     public static LiteralCommandNode<CommandSourceStack> Ability_Two() {
-        return Commands.literal("AbilityTwo").executes(
+        return Commands.literal("abilitytwo").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
                         try {
@@ -76,7 +87,7 @@ public class Trust {
 
 
     public static LiteralCommandNode<CommandSourceStack> Active_Passive() {
-        return Commands.literal("ActivePassive").executes(
+        return Commands.literal("activepassive").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
                         soulListener.ActivePassive(player);
@@ -87,7 +98,7 @@ public class Trust {
     }
 
     public static LiteralCommandNode<CommandSourceStack> toggleArgument() {
-        return Commands.literal("ComorAction").executes(
+        return Commands.literal("comoraction").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
                         if (player.getPersistentDataContainer().get(util.keygen("ComorAction"),PersistentDataType.BOOLEAN)) {

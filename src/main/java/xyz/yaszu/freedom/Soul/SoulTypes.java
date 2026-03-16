@@ -7,5 +7,6 @@ public enum SoulTypes {
     Purple,
     Black,
     None,
-    Yellow
+    Yellow,
+    Orange
 }

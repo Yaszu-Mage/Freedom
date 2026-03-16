@@ -26,6 +26,15 @@ public class soulListener extends Util implements Listener {
 
     public static Green green = new Green();
 
+    public static Orange orange = new Orange();
+    public void Passive(Player player) {
+        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        switch (soulType) {
+            case Orange:
+                orange.Passive(player,null);
+                break;
+        }
+    }
 
 
     @EventHandler
@@ -187,6 +196,7 @@ public class soulListener extends Util implements Listener {
         ItemStack drop = player.getInventory().getItemInMainHand();
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         player.sendActionBar(dess("<green>Ability Two</green>"));
+        Freedom.get_plugin().getLogger().info(soulType.toString());
         switch (soulType) {
             case Red:
                 if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
@@ -204,10 +214,17 @@ public class soulListener extends Util implements Listener {
                 black.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
             case Blue:
+                Freedom.get_plugin().getLogger().info("Baller");
                 blue.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
             case Green:
                 green.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case Yellow:
+                yellow.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case Orange:
+                orange.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
         }
     }
@@ -289,7 +306,7 @@ public static Yellow yellow =  new Yellow();
 
 
     @EventHandler
-    public void AbilityTwoListener(PlayerDropItemEvent event) {
+    public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
         Player player = event.getPlayer();
         ItemStack drop = event.getItemDrop().getItemStack();
         if (player.getPersistentDataContainer().get(keygen("ComorAction"),PersistentDataType.BOOLEAN)) {
@@ -315,6 +332,9 @@ public static Yellow yellow =  new Yellow();
                 break;
             case Green:
                 green.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case Yellow:
+                yellow.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
         }
     }

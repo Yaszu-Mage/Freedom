@@ -6,6 +6,7 @@ import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -56,7 +57,7 @@ public class Blue extends Util implements Base_Soul, Listener {
         return dess("You can selectively with the Yellow one you are bonded with");
     }
     public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
-    public static long abilityOneCooldown = 3000L;
+    public static long abilityOneCooldown = 30000L;
     @Override
     public void AbilityOne(Player player) {
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
@@ -66,6 +67,7 @@ public class Blue extends Util implements Base_Soul, Listener {
             if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
 
                 Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                if (doubleclock != null) {
                 Freedom.get_plugin().getLogger().info(String.valueOf(doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)));
                 if (Bukkit.getPlayer(doubleclock.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING)) == player) {
                     if ( player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == true && doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == false) {
@@ -112,7 +114,7 @@ public class Blue extends Util implements Base_Soul, Listener {
         } else {
             //TODO send message
         }
-    }}}
+    }}}}
     public static void init(Player player) {
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
     }
@@ -130,10 +132,76 @@ public class Blue extends Util implements Base_Soul, Listener {
     public Component AbilityTwoDescription() {
         return dess("⬛⬛⬛⬛⬛⬛");
     }
-
+    public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
+    public static long abilityTwoCooldown = 3000L;
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        Freedom.get_plugin().getLogger().info("Baller");
+        if (can_ability(abilityTwoCooldown, abilityTwoCooldowns,player.getUniqueId())) {
+            Freedom.get_plugin().getLogger().info("Baller");
+            new BukkitRunnable() {
+                public static List<Entity> affectedEntities = new ArrayList<>();
+                int tick = 0;
+                @Override
+                public void run() {
+                    List<Entity> nearguys = player.getNearbyEntities(5,5,5);
+                    Player ignoreplayer = player;
+                    for (Entity affected : affectedEntities) {
+                        if (!nearguys.contains(affected)) {
+                            if (affected instanceof Player instplayer) {
+                                if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) != null && instplayer != ignoreplayer) {
+                                    instplayer.getAttribute(Attribute.GRAVITY).removeModifier(keygen("anticlock"));
+                                    instplayer.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(keygen("anticlock"));
+                                }
+                            }
+                        }
+                    }
+                    if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
+                        Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                        if (doubleclock != null) {
+                            ignoreplayer = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                        }
+                    }
+                    for (Entity entity : nearguys) {
+                        if (entity instanceof Player instplayer) {
+                            affectedEntities.add(instplayer);
+                            if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) == null && instplayer != ignoreplayer) {
+                                Freedom.get_plugin().getLogger().info("inst");
+                                instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),-0.01d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.075d, AttributeModifier.Operation.ADD_NUMBER));
+                            }
+                        }
+                    }
 
+                    if (tick > 10) {
+                        this.cancel();
+                    }
+                    player.getLocation().getWorld().playSound(player.getLocation(),Sound.UI_BUTTON_CLICK,1,1);
+                    drawCircle(player.getLocation(),1,player.getLocation().getWorld(),16,Particle.SOUL_FIRE_FLAME);
+                    drawCircle(player.getLocation(),5,player.getLocation().getWorld(),16,Particle.SOUL_FIRE_FLAME);
+                    tick++;
+                }
+                @Override
+                public synchronized void cancel() throws IllegalStateException {
+                    for (Entity affected : affectedEntities) {
+
+                            if (affected instanceof Player instplayer) {
+                                if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) != null) {
+                                    instplayer.getAttribute(Attribute.GRAVITY).removeModifier(keygen("anticlock"));
+                                    instplayer.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(keygen("anticlock"));
+                                }
+                            }
+
+                    }
+                    Bukkit.getScheduler().cancelTask(getTaskId());
+                }
+
+            }.runTaskTimer(Freedom.get_plugin(),0,20);
+
+            abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+        } else {
+            // TODO no no ability + time
+        }
     }
 
     @Override

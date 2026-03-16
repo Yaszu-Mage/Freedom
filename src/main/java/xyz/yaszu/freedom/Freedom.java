@@ -20,6 +20,7 @@ import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Black;
 import xyz.yaszu.freedom.Soul.Blue;
+import xyz.yaszu.freedom.Soul.Orange;
 import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
@@ -72,6 +73,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new Black(),this);
         Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
         Bukkit.getPluginManager().registerEvents(new Blue(), this);
+        Bukkit.getPluginManager().registerEvents(new Orange(),this);
         version = random.nextInt(0,9999);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
@@ -87,6 +89,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.Ability_Two());
             commands.registrar().register(Trust.Active_Passive());
             commands.registrar().register(Trust.summonFriendly());
+            commands.registrar().register(Trust.Passive());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();

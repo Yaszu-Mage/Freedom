@@ -106,14 +106,18 @@ public class Black extends Util implements Base_Soul, Listener {
         new BukkitRunnable() {
             public int tick = 0;
             public double last_health = player.getHealth();
+            Location loadingLocation = player.getLocation();
             @Override
             public void run() {
-                Location loadingLocation = new Location(
-                    Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),
-                    player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),
-                    player.getPersistentDataContainer().get(keygen("blacksaveY"),PersistentDataType.DOUBLE),
-                    player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE)
-                );
+                if (player.getPersistentDataContainer().has(keygen("blackworld"),PersistentDataType.STRING)) {
+                    Location loadingLocation = new Location(
+                            Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),
+                            player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),
+                            player.getPersistentDataContainer().get(keygen("blacksaveY"),PersistentDataType.DOUBLE),
+                            player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE)
+                    );
+                }
+
                 if (player.getHealth() > last_health || !player.isSneaking() || player.isDead()) {
                     this.cancel();
                     player.sendActionBar(dess("Teleport Cancelled."));
@@ -332,6 +336,8 @@ public class Black extends Util implements Base_Soul, Listener {
         String message = event.getMessage();
         event.getRecipients().clear();
         boolean is_alive = Life_and_Death.is_alive(player);
+        Freedom.get_plugin().getLogger().info("YES SEND");
+        Freedom.get_plugin().getLogger().info(String.valueOf(player.getPersistentDataContainer().has(keygen("cursed"))));
         if (player.getPersistentDataContainer().has(keygen("disguised"),PersistentDataType.BOOLEAN)) {
             //disguised logic
             if (message.contains(sendchatthrough)) {
@@ -341,23 +347,68 @@ public class Black extends Util implements Base_Soul, Listener {
                 //resend
                 Player dis = Bukkit.getPlayer(originalProfiles.get(player.getUniqueId()).getName());
                 if (dis == null) {
+                    if (player.getPersistentDataContainer().has(keygen("cursed"))) {
+                        String newmsg = curse(player,message);
+                        event.setMessage(newmsg);
+
+                    }
+                    message = event.getMessage();
+                    Freedom.get_plugin().getLogger().info(message);
                     send(player, message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
                 } else {
+                    if (player.getPersistentDataContainer().has(keygen("cursed"))) {
+                        String newmsg = curse(player,message);
+                        event.setMessage(newmsg);
+
+                    }
                     send(dis,message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
                 }
 
                 event.setCancelled(true);
             }
         } else {
+
+
             if (message.contains(sendchatthrough)) {
                 //continue
                 tabDistance(event, message, is_alive);
             } else {
                 //resend
+                if (player.getPersistentDataContainer().has(keygen("cursed")) == true) {
+                    String newmsg = curse(player, message);
+                    Freedom.get_plugin().getLogger().info(newmsg);
+                    event.setMessage(newmsg);
+
+                }
+                message = event.getMessage();
                 send(player,message + resend+ "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
                 event.setCancelled(true);
             }
         }
+    }
+
+    public String curse(Player player, String message) {
+        Freedom.get_plugin().getLogger().info("Curse 1");
+        String[] msg = message.split(" ");
+        Orange.Cursetype cursetype = Orange.Cursetype.valueOf(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING));
+        String newmsg = "";
+
+        switch (cursetype) {
+            case Cat:
+                for (String string : msg) {
+                    Freedom.get_plugin().getLogger().info("Cat Iteration");
+                    newmsg = newmsg + "Meow ";
+                }
+                break;
+            case Frog:
+                for (String string : msg) {
+                    newmsg = newmsg + " Ribbit";
+                }
+
+                break;
+        }
+        Freedom.get_plugin().getLogger().info(newmsg);
+        return newmsg;
     }
 
     public static void tabDistance(AsyncPlayerChatEvent event, String message, boolean is_alive) {
@@ -373,7 +424,14 @@ public class Black extends Util implements Base_Soul, Listener {
                     if (realPlayer.isOnline()) {
                         if (realPlayer.canSee(instancedPlayer)) {
                             event.getRecipients().add(instancedPlayer);
-                            instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
+                            if (msg[0].contains("Meow")) {
+                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
+                            } else if (msg[0].contains("Ribbit")) {
+                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
+                            } else {
+                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
+                            }
+
                         }
                     }
 
@@ -386,7 +444,13 @@ public class Black extends Util implements Base_Soul, Listener {
                         if (realPlayer.isOnline()) {
                             if (realPlayer.canSee(instancedPlayer)) {
                                 event.getRecipients().add(instancedPlayer);
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
+                                if (msg[0].contains("Meow")) {
+                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
+                                } else if (msg[0].contains("Ribbit")) {
+                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
+                                } else {
+                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
+                                }
                             }
                         }
 
@@ -462,9 +526,14 @@ public class Black extends Util implements Base_Soul, Listener {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         if (soulType == SoulTypes.Black) {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
-                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),0.80, AttributeModifier.Operation.ADD_NUMBER));
+                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
             }
         }
+            if (soulType == SoulTypes.Orange) {
+                if (!player.getPersistentDataContainer().has(keygen("cancurse"))) {
+                    player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
+                }
+            }
     }
     }
 
@@ -476,7 +545,12 @@ public class Black extends Util implements Base_Soul, Listener {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         if (soulType == SoulTypes.Black) {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
-                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),0.80, AttributeModifier.Operation.ADD_NUMBER));
+                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
+            }
+        }
+        if (soulType == SoulTypes.Orange) {
+            if (!player.getPersistentDataContainer().has(keygen("cancurse"))) {
+                player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
             }
         }
         if (!inventoryGui.isEmpty()) {
