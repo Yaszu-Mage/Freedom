@@ -14,9 +14,12 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
+
+import java.util.Objects;
 
 import static xyz.yaszu.freedom.Commands.Trust.util;
 
@@ -91,6 +94,12 @@ public class soulListener extends Util implements Listener {
                 player.setWalkSpeed(0);
                 player.setFlySpeed(0);
         }
+        if (player.getPersistentDataContainer().has(keygen("cursed"))) {
+            if (Objects.equals(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING), "Frog")) {
+                Orange.recurse(player);
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
+            }
+        }
     }
 
 
@@ -106,7 +115,7 @@ public class soulListener extends Util implements Listener {
         }
     }
 
-    public void showSoulPoints(Player player) {
+    public static void showSoulPoints(Player player) {
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
         for (BossBar bossBar : player.activeBossBars() ) {
             bossBar.name().toString().contains("SoulPoints");
@@ -154,6 +163,9 @@ public class soulListener extends Util implements Listener {
             case Yellow:
                 yellow.ActivePassive(player);
                 break;
+            case Orange:
+                orange.ActivePassive(player);
+                break;
         }
     }
     }
@@ -179,6 +191,8 @@ public class soulListener extends Util implements Listener {
             case Blue, Yellow:
                 blue.AbilityOne(player);
                 break;
+            case Orange:
+                orange.AbilityOne(player);
         }
     }
     @EventHandler
@@ -250,6 +264,9 @@ public class soulListener extends Util implements Listener {
             case Yellow:
                 yellow.ActivePassive(player);
                 break;
+            case Orange:
+                orange.ActivePassive(player);
+                break;
         }
     }
 public static Yellow yellow =  new Yellow();
@@ -300,6 +317,8 @@ public static Yellow yellow =  new Yellow();
                         blue.AbilityOne(player);
                     }
                     break;
+                case Orange:
+                    orange.AbilityOne(player);
             }
         }
     }

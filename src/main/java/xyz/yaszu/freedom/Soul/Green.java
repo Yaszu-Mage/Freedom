@@ -169,12 +169,12 @@ public class Green extends Util implements Base_Soul {
     }
     @Override
     public Component AbilityTwoName() {
-        return dess("Ability Two - ⬛⬛⬛⬛⬛⬛⬛");
+        return dess("Ability Two - Short Range Healing");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("Heal those you trust quickly");
     }
 
 
@@ -254,7 +254,7 @@ public class Green extends Util implements Base_Soul {
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛⬛");
+        return dess("Regeneration for yourself for 30s");
     }
 
     @Override

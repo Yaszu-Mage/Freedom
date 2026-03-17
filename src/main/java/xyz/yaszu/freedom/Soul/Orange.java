@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Soul;
 
+import com.github.retrooper.packetevents.protocol.potion.Potion;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
@@ -17,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -24,18 +26,18 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Orange extends Util implements Base_Soul, Listener {
     @Override
@@ -50,7 +52,7 @@ public class Orange extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Description() {
-        return dess("What is it but magic?");
+        return dess("<color:#ff7300>What is it but magic?</color>");
     }
 
     @Override
@@ -60,18 +62,47 @@ public class Orange extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneName() {
-        return dess("⬛⬛⬛⬛");
+        return dess("<color:#ff7300> Ability One </color> Pot for All");
     }
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("⬛⬛⬛⬛");
+        return dess("Increase the amplifier of all potions of yourself and trusted team mates in a 5 block radius");
     }
+    public long AbilityOne_Cooldown = 30000;
+
+    public static HashMap<UUID,Long> abilityOneCooldownTime = new HashMap<>();
+
 
     @Override
     public void AbilityOne(Player player) {
-
+        if (can_ability(AbilityOne_Cooldown,abilityOneCooldownTime,player.getUniqueId())) {
+            Collection<PotionEffect> pots = player.getActivePotionEffects();
+            player.clearActivePotionEffects();
+            for (PotionEffect pot : pots) {
+                player.addPotionEffect(new PotionEffect(pot.getType(),pot.getDuration(),pot.getAmplifier() + 1,pot.isAmbient(),pot.hasParticles()));
+            }
+            List<Entity> entities = player.getNearbyEntities(5,5,5);
+            for (Entity entity : entities) {
+                if (entity instanceof Player playeriterated) {
+                    if (player.getPersistentDataContainer().has(keygen("trustedby"))) {
+                        if (player.getPersistentDataContainer().get(keygen("trustedby"),PersistentDataType.STRING).contains(playeriterated.getName())) {
+                            Collection<PotionEffect> iterpots = playeriterated.getActivePotionEffects();
+                            playeriterated.clearActivePotionEffects();
+                            for (PotionEffect pot : iterpots) {
+                                playeriterated.addPotionEffect(new PotionEffect(pot.getType(),pot.getDuration(),pot.getAmplifier() + 1,pot.isAmbient(),pot.hasParticles()));
+                            }
+                        }
+                    }
+                }
+            }
+            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+        }
     }
+
+
+
+    @EventHandler
 
     @Override
     public ItemStack Related_Item() {
@@ -80,12 +111,12 @@ public class Orange extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("⬛⬛⬛⬛");
+        return dess("<color:#ff7300> Ability Two </color> Curse");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛");
+        return dess("Curse one person to become a frog. they cannot speak and they have weakness 2");
     }
 
     public long AbilityTwo_Cooldown = 30000;
@@ -109,7 +140,7 @@ public class Orange extends Util implements Base_Soul, Listener {
         }
     }
 
-    public HashMap<UUID,MobDisguise> curses = new HashMap<>();
+    public static HashMap<UUID,MobDisguise> curses = new HashMap<>();
 
 
     @EventHandler
@@ -207,32 +238,37 @@ public class Orange extends Util implements Base_Soul, Listener {
 
     public void curse(Player baller,String curser) {
         baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
-        MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
-        mobDisguise.addPlayer(baller);
-        mobDisguise.setEntity(baller);
-
         baller.getPersistentDataContainer().set(keygen("cursedby"),PersistentDataType.STRING,curser);
         baller.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
-        mobDisguise.startDisguise();
-        FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
-        watcher.setVariant(Frog.Variant.COLD);
-        curses.put(baller.getUniqueId(),mobDisguise);
+        if (curses.get(baller.getUniqueId()) == null) {
+            MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
+            mobDisguise.addPlayer(baller);
+            mobDisguise.setEntity(baller);
+            mobDisguise.startDisguise();
+            FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
+            watcher.setVariant(Frog.Variant.COLD);
+            curses.put(baller.getUniqueId(),mobDisguise);
+        }
     }
-    public void recurse(Player baller) {
+    public static void recurse(Player baller) {
         baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
-        MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
-        mobDisguise.addPlayer(baller);
-        mobDisguise.setEntity(baller);
+
         baller.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
-        mobDisguise.startDisguise();
-        FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
-        watcher.setVariant(Frog.Variant.COLD);
-        curses.put(baller.getUniqueId(),mobDisguise);
+        if (curses.get(baller.getUniqueId()) == null) {
+            MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
+            mobDisguise.addPlayer(baller);
+            mobDisguise.setEntity(baller);
+            mobDisguise.startDisguise();
+            FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
+            watcher.setVariant(Frog.Variant.COLD);
+            curses.put(baller.getUniqueId(),mobDisguise);
+        }
+
     }
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛");
+        return dess("Kitty kitty Kitty! (You can become a cat)");
     }
 
 
@@ -328,33 +364,98 @@ public class Orange extends Util implements Base_Soul, Listener {
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("⬛⬛⬛⬛");
+        return dess("You can ride a broom in exchange for soulpoints");
     }
 
     @Override
     public void ActivePassive(Player player) {
         // witch broom flight
+        double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+        Freedom.get_plugin().getLogger().info("Active active!");
+        if (SoulPoints > 1) {
+
+
         if (!player.isInsideVehicle()) {
+            player.getPersistentDataContainer().set(keygen("ridemode"),PersistentDataType.INTEGER,1);
             Entity broom = player.getWorld().spawnEntity(player.getLocation(),EntityType.BAT);
             //disable broom entity ai
-            LivingEntity mob = (LivingEntity) broom;
-            mob.setAI(false);
+            broom.addPassenger(player);
+            player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE,SoulPoints - 1);
+            soulListener.showSoulPoints(player);
+            ItemDisplay display = player.getWorld().spawn(player.getLocation(), ItemDisplay.class);
+            ItemStack boom = ItemStack.of(Material.BRUSH);
+            ItemMeta meta = boom.getItemMeta();
+            meta.setItemModel(NamespacedKey.minecraft("broom"));
+            boom.setItemMeta(meta);
+            display.getPersistentDataContainer().set(keygen("sprite"),PersistentDataType.INTEGER,Freedom.version);
+            broom.getPersistentDataContainer().set(keygen("sprite"),PersistentDataType.INTEGER,Freedom.version);
+            display.setItemStack(boom);
+            broom.addPassenger(display);
+            LivingEntity live = (LivingEntity) broom;
+            live.setSilent(true);
+            live.setInvulnerable(true);
+            live.setInvisible(true);
+
             new BukkitRunnable() {
+                int tick = 0;
                 @Override
                 public void run() {
-                    if (broom.isDead() || !player.isOnline() || !player.isInsideVehicle()) {
+                    double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+                    if (broom.isDead() || !player.isOnline() || !player.isInsideVehicle() || SoulPoints < 1) {
+
                         cancel();
                     } else {
-                        broom.setVelocity(player.getLocation().getDirection().normalize());
+                        if (player.getPersistentDataContainer().has(keygen("ridemode"),PersistentDataType.INTEGER)) {
+                            int ridemode = player.getPersistentDataContainer().get(keygen("ridemode"),PersistentDataType.INTEGER);
+                            switch (ridemode) {
+                                case 1:
+                                    //stationary
+                                    broom.teleport(broom.getLocation());
+                                    display.teleport(player.getLocation().setDirection(player.getLocation().getDirection().multiply(-1)).add(new Vector(0,0.5,0)));
+                                    live.setAI(false);
+                                    break;
+                                case 2:
+                                    //moving
+                                    broom.setVelocity(player.getLocation().getDirection().multiply(0.75));
+                                    display.teleportAsync(player.getLocation().setDirection(player.getLocation().getDirection().multiply(-1)).add(new Vector(0,0.5,0)).add(player.getLocation().getDirection().multiply(-1)));
+                                    live.setAI(true);
+                                    break;
+                            }
+                        }
 
+                        if (tick >= 600) {
+                            tick = 0;
+                            player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE,SoulPoints - 1);
+                            soulListener.showSoulPoints(player);
+                        }
+                        tick++;
                     }
                 }
                 @Override
                 public void cancel() {
                     broom.remove();
+                    display.remove();
+                    player.getPersistentDataContainer().set(keygen("ridemode"),PersistentDataType.INTEGER,0);
                     super.cancel();
                 }
-            }.runTaskTimer(Freedom.get_plugin(),0,20);
+            }.runTaskTimer(Freedom.get_plugin(),0,0);
+        } else {
+            if (player.getPersistentDataContainer().has(keygen("ridemode"),PersistentDataType.INTEGER)) {
+                int ridemode = player.getPersistentDataContainer().get(keygen("ridemode"),PersistentDataType.INTEGER);
+                switch (ridemode) {
+                    case 1:
+                        //stationary
+                        ridemode = 2;
+                        player.getPersistentDataContainer().set(keygen("ridemode"),PersistentDataType.INTEGER,ridemode);
+                        break;
+                    case 2:
+                        //moving
+                        ridemode = 1;
+                        player.getPersistentDataContainer().set(keygen("ridemode"),PersistentDataType.INTEGER,ridemode);
+                        break;
+                }
+            }
         }
     }
+}
 }
