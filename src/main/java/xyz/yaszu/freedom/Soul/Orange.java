@@ -115,10 +115,19 @@ public class Orange extends Util implements Base_Soul, Listener {
     @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
+        if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("recursor"))) {
+            Player recursor = Bukkit.getPlayer(Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"),PersistentDataType.STRING));
+            if (recursor != null) {
+                String recursorName = recursor.getName();
+                String worlddata = Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"),PersistentDataType.STRING);
+                String fixedworlddata = worlddata.replace(recursorName, "");
+                recursor.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
+                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,fixedworlddata);
+            }
+        }
         if (player.getPersistentDataContainer().has(keygen("cursed"))) {
             if (Objects.equals(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING), "Frog")) {
-                curse(player);
+                recurse(player);
             } else {
                 player.getPersistentDataContainer().remove(keygen("cursed"));
             }
@@ -141,7 +150,7 @@ public class Orange extends Util implements Base_Soul, Listener {
                 }
             }
         } else {
-            curse(event.getPlayer());
+            recurse(event.getPlayer());
         }
 
     }
@@ -154,11 +163,13 @@ public class Orange extends Util implements Base_Soul, Listener {
             Player player = (Player) event.getWhoClicked();
             ItemStack item = event.getCurrentItem();
             Player baller = Bukkit.getPlayer(UUID.fromString(item.getPersistentDataContainer().get(keygen("player_uuid"),PersistentDataType.STRING)));
+            String curser = player.getName();
             if (baller != null) {
             if (!baller.getPersistentDataContainer().has(keygen("cursed"))) {
                 if (player.getPersistentDataContainer().get(keygen("cancurse"),PersistentDataType.BOOLEAN) == true) {
                     player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,false);
-                    curse(baller);
+
+                    curse(baller,curser);
                 }
             } else {
                 if (baller.getPersistentDataContainer().get(keygen("cursed"),PersistentDataType.STRING) == "Frog") {
@@ -167,7 +178,7 @@ public class Orange extends Util implements Base_Soul, Listener {
                 } else {
                     if (player.getPersistentDataContainer().get(keygen("cancurse"),PersistentDataType.BOOLEAN) == true) {
                         player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,false);
-                        curse(baller);
+                        curse(baller,curser);
                     }
 
                 }
@@ -179,14 +190,35 @@ public class Orange extends Util implements Base_Soul, Listener {
     }
     }
 
+
     public void uncurse(Player baller) {
         baller.getPersistentDataContainer().remove(keygen("cursed"));
         baller.removePotionEffect(PotionEffectType.WEAKNESS);
+        String curser = baller.getPersistentDataContainer().get(keygen("cursedby"),PersistentDataType.STRING);
+        if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("recursor"))) {
+            Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,curser + Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"),PersistentDataType.STRING));
+        } else {
+            Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,curser);
+        }
         curses.get(baller.getUniqueId()).removeDisguise();
         curses.remove(baller.getUniqueId());
+        baller.getPersistentDataContainer().remove(keygen("cursedby"));
     }
 
-    public void curse(Player baller) {
+    public void curse(Player baller,String curser) {
+        baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
+        MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
+        mobDisguise.addPlayer(baller);
+        mobDisguise.setEntity(baller);
+
+        baller.getPersistentDataContainer().set(keygen("cursedby"),PersistentDataType.STRING,curser);
+        baller.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
+        mobDisguise.startDisguise();
+        FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
+        watcher.setVariant(Frog.Variant.COLD);
+        curses.put(baller.getUniqueId(),mobDisguise);
+    }
+    public void recurse(Player baller) {
         baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
         MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
         mobDisguise.addPlayer(baller);
@@ -301,6 +333,28 @@ public class Orange extends Util implements Base_Soul, Listener {
 
     @Override
     public void ActivePassive(Player player) {
+        // witch broom flight
+        if (!player.isInsideVehicle()) {
+            Entity broom = player.getWorld().spawnEntity(player.getLocation(),EntityType.BAT);
+            //disable broom entity ai
+            LivingEntity mob = (LivingEntity) broom;
+            mob.setAI(false);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (broom.isDead() || !player.isOnline() || !player.isInsideVehicle()) {
+                        cancel();
+                    } else {
+                        broom.setVelocity(player.getLocation().getDirection().normalize());
 
+                    }
+                }
+                @Override
+                public void cancel() {
+                    broom.remove();
+                    super.cancel();
+                }
+            }.runTaskTimer(Freedom.get_plugin(),0,20);
+        }
     }
 }

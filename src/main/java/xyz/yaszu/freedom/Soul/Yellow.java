@@ -31,12 +31,12 @@ public class Yellow  extends Util implements Base_Soul {
 
     @Override
     public Component Name() {
-        return dess("<yellow>Yellow</yellow>");
+        return dess("<Yellow>Yellow</Yellow>");
     }
 
     @Override
     public Component Description() {
-        return dess("Clock Yaoi where?");
+        return dess("Creates a bond when your other half is found");
     }
 
     @Override
@@ -46,12 +46,12 @@ public class Yellow  extends Util implements Base_Soul {
 
     @Override
     public Component AbilityOneName() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("<Yellow>Selective TP</Yellow>");
     }
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("You can selectively swap with the Blue one you are bonded with");
     }
     Blue blue = new Blue();
     @Override
@@ -126,7 +126,7 @@ public class Yellow  extends Util implements Base_Soul {
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Shares you potion effects with your bonded half");
     }
 
     @Override
@@ -136,7 +136,7 @@ public class Yellow  extends Util implements Base_Soul {
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Chose those to bond with");
     }
 
     @Override

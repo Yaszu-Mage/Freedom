@@ -1,6 +1,7 @@
 package xyz.yaszu.freedom.Soul;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.github.retrooper.packetevents.protocol.potion.Potion;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
@@ -19,15 +20,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +53,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Your appearance is as malleable as clay");
     }
 
     @Override
@@ -204,12 +203,12 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Mimicry");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Take mimic the Apearance and name of a player.");
     }
 
 
@@ -534,9 +533,25 @@ public class Black extends Util implements Base_Soul, Listener {
                     player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
                 }
             }
+            if (soulType == SoulTypes.None) {
+                player.addPotionEffect(PotionEffectType.STRENGTH.createEffect(PotionEffect.INFINITE_DURATION,1));
+                player.addPotionEffect(PotionEffectType.SPEED.createEffect(PotionEffect.INFINITE_DURATION,1));
+                player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(PotionEffect.INFINITE_DURATION,1));
+            }
     }
     }
 
+
+    @EventHandler
+    public void Respawnevent(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        if (soulType == SoulTypes.None) {
+            player.addPotionEffect(PotionEffectType.STRENGTH.createEffect(PotionEffect.INFINITE_DURATION,1));
+            player.addPotionEffect(PotionEffectType.SPEED.createEffect(PotionEffect.INFINITE_DURATION,1));
+            player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(PotionEffect.INFINITE_DURATION,1));
+        }
+    }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) throws MineSkinException, DataRequestException {
         setSkinByName(event.getPlayer(),event.getPlayer().getName());
@@ -594,7 +609,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("You are slightly shorter");
     }
 
     @Override

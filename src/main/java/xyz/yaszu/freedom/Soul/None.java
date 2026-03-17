@@ -85,4 +85,6 @@ public class None extends Util implements Base_Soul, Listener {
     public void ActivePassive(Player player) {
 
     }
+
+
 }

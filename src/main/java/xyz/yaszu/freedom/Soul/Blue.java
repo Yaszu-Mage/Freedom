@@ -38,7 +38,7 @@ public class Blue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Description() {
-        return dess("AntiClock Yaoi where?");
+        return dess("Creates a bond when your other half is found");
     }
 
     @Override
@@ -125,20 +125,18 @@ public class Blue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Time slow");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Slows time for all but the one you are bonded with");
     }
     public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
     public static long abilityTwoCooldown = 3000L;
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-        Freedom.get_plugin().getLogger().info("Baller");
         if (can_ability(abilityTwoCooldown, abilityTwoCooldowns,player.getUniqueId())) {
-            Freedom.get_plugin().getLogger().info("Baller");
             new BukkitRunnable() {
                 public static List<Entity> affectedEntities = new ArrayList<>();
                 int tick = 0;
@@ -206,7 +204,7 @@ public class Blue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Passive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Shares you potion effects with your bonded half");
     }
 
     @Override
@@ -275,7 +273,7 @@ public class Blue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Chose those to bond with");
     }
 
     @Override
