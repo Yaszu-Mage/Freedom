@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Items;
+package xyz.yaszu.freedom.Items.Upgrades;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import xyz.yaszu.freedom.GUI.BaseItems;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
+import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.*;
@@ -22,6 +22,7 @@ public class Evolve extends Util implements BaseItem {
         meta.setItemModel(NamespacedKey.minecraft("evolve"));
         meta.displayName(dess("<shadow:#000000FF><b><rainbow>Evolution Stone</rainbow>"));
         meta.getPersistentDataContainer().set(keygen("item_id"), PersistentDataType.STRING,"evolutionstone");
+        meta.setRarity(ItemRarity.EPIC);
         evolve.setItemMeta(meta);
         return evolve;
     }

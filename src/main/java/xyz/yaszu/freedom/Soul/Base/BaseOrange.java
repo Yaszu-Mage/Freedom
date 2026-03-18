@@ -66,7 +66,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("Increase the amplifier of all potions of yourself and trusted team mates in a 5 block radius");
+        return dess("Increase the amplifier of all potions of yourself and trusted team mates in a 2 block radius");
     }
     public long AbilityOne_Cooldown = 60000;
 

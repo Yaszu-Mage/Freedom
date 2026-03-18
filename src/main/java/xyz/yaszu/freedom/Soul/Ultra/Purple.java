@@ -142,7 +142,7 @@ public class Purple extends Util implements Base_Soul {
             player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 10f, 0f);
 
-            handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
+            handleSnipe(player).runTaskTimerAsynchronously(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
             ability_two_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
             double seconds = (double) (ability_two_cooldown - (System.currentTimeMillis() - ability_two_cooldowns.get(player.getUniqueId()))) / 1000;

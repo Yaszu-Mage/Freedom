@@ -565,11 +565,6 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                     player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
                 }
             }
-            if (soulType == SoulTypes.None) {
-                player.addPotionEffect(PotionEffectType.STRENGTH.createEffect(PotionEffect.INFINITE_DURATION,1));
-                player.addPotionEffect(PotionEffectType.SPEED.createEffect(PotionEffect.INFINITE_DURATION,1));
-                player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(PotionEffect.INFINITE_DURATION,1));
-            }
     }
     }
 

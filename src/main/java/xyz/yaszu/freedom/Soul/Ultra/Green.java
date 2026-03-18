@@ -115,7 +115,7 @@ public class Green extends Util implements Base_Soul {
         EntityTracker tracker = BetterModel.model("sillything")
                 .map(r -> r.getOrCreate(platwolf))
                 .orElse(null);
-        follower(tracker,wolf,target,player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
+        follower(tracker,wolf,target,player).runTaskTimerAsynchronously(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
     }
 
     Random random = new Random();
@@ -167,12 +167,12 @@ public class Green extends Util implements Base_Soul {
     }
     @Override
     public Component AbilityTwoName() {
-        return dess("Ability Two - Short Range Healing");
+        return dess("<green>Ability Two</green> - Short Range Healing");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("Heal those you trust quickly");
+        return dess("Heal for a greater amount");
     }
 
 
@@ -213,7 +213,7 @@ public class Green extends Util implements Base_Soul {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(Freedom.get_plugin(),0,80);
+        }.runTaskTimerAsynchronously(Freedom.get_plugin(),0,80);
 
     }
     }
@@ -252,7 +252,7 @@ public class Green extends Util implements Base_Soul {
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("Regeneration for yourself for 30s");
+        return dess("Increase the duration of your regeneration");
     }
 
     @Override

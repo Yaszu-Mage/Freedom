@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Artifacts;
+package xyz.yaszu.freedom.Items.Artifacts;
 
 import com.destroystokyo.paper.event.player.PlayerSetSpawnEvent;
 import net.kyori.adventure.text.Component;

@@ -35,7 +35,7 @@ public class Blue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Description() {
-        return dess("Creates a bond when your other half is found");
+        return dess("Increases your bond with your other half");
     }
 
     @Override
@@ -51,7 +51,7 @@ public class Blue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("You can selectively with the Yellow one you are bonded with");
+        return dess("You can teleport across larger distances and more frequently");
     }
     public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
     public static long abilityOneCooldown = 30000L;
@@ -127,7 +127,7 @@ public class Blue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("Slows time for all but the one you are bonded with");
+        return dess("Further increases your control of time");
     }
     public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
     public static long abilityTwoCooldown = 3000L;

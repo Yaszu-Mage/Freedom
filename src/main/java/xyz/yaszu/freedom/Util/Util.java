@@ -44,6 +44,20 @@ public class Util {
             world.spawnParticle(particle, pointLocation, 1);
         }
     }
+    public void drawverticleCircle(Location center, double radius, World world, int points,Particle particle) {
+        for (int i = 0; i < points; i++) {
+            double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
+            double x = center.getX() + (radius * Math.cos(angle)); // Calculate X coordinate
+            double z = center.getZ(); // Calculate Z coordinate
+            double y = center.getY() + (radius * Math.sin(angle));; // Y remains constant for a flat circle
+
+            // Create a new location for the point
+            Location pointLocation = new Location(world, x, y, z);
+
+            // 2. Spawn particles
+            world.spawnParticle(particle, pointLocation, 1);
+        }
+    }
     public static ItemStack getSkull(Player player) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();

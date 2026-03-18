@@ -165,7 +165,7 @@ public class BaseGreen extends Util implements Base_Soul {
     }
     @Override
     public Component AbilityTwoName() {
-        return dess("Ability Two - Short Range Healing");
+        return dess("<green>Ability Two</green> - Short Range Healing");
     }
 
     @Override
@@ -250,13 +250,13 @@ public class BaseGreen extends Util implements Base_Soul {
 
     @Override
     public Component ActivePassive_Description() {
-        return dess("Regeneration for yourself for 30s");
+        return dess("Regeneration for yourself for a brief period");
     }
 
     @Override
     public void ActivePassive(Player player) {
         if (!player.hasPotionEffect(PotionEffectType.REGENERATION)) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 6000, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 3000, 0));
             double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
             player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, SoulPoints - 5);
         }

@@ -63,7 +63,7 @@ public class Orange extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("Increase the amplifier of all potions of yourself and trusted team mates in a 5 block radius");
+        return dess("Increased your control over distance.");
     }
     public long AbilityOne_Cooldown = 30000;
 
@@ -454,7 +454,7 @@ public class Orange extends Util implements Base_Soul, Listener {
                     player.getPersistentDataContainer().set(keygen("ridemode"),PersistentDataType.INTEGER,0);
                     super.cancel();
                 }
-            }.runTaskTimer(Freedom.get_plugin(),0,0);
+            }.runTaskTimerAsynchronously(Freedom.get_plugin(),0,0);
         } else {
             if (player.getPersistentDataContainer().has(keygen("ridemode"),PersistentDataType.INTEGER)) {
                 int ridemode = player.getPersistentDataContainer().get(keygen("ridemode"),PersistentDataType.INTEGER);

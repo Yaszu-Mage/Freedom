@@ -210,7 +210,6 @@ public class soulListener extends Util implements Listener {
     }
 
     public void AbilityOne(Player player) {
-        player.sendActionBar(dess("<green>Ability One</green>"));
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         switch (soulType) {
             case Red:
@@ -328,7 +327,6 @@ public class soulListener extends Util implements Listener {
     }
 
     public void ActivePassive(Player player) {
-        player.sendActionBar(dess("<green>Active Passive</green>"));
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         switch (soulType) {
             case Red:

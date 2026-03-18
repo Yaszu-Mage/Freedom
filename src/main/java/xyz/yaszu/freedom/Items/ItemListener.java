@@ -1,15 +1,25 @@
 package xyz.yaszu.freedom.Items;
 
 import org.bukkit.Bukkit;
+import org.bukkit.block.BlockType;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import xyz.yaszu.freedom.Items.Upgrades.Evolve;
+import xyz.yaszu.freedom.Items.Upgrades.Revival;
 import xyz.yaszu.freedom.Util.Util;
+
+import java.util.List;
+import java.util.Random;
 
 public class ItemListener extends Util implements Listener {
     static Evolve evolve = new Evolve();
+    static Revival revive = new Revival();
     @EventHandler
     public void playerinteractevent(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
@@ -27,6 +37,23 @@ public class ItemListener extends Util implements Listener {
         }
     }
 
+    public int sus_amount = 1;
+    @EventHandler
+    public void BlockBreakEvent(BlockDropItemEvent event) {
+        if (event.getBlock().getType().equals(BlockType.SUSPICIOUS_GRAVEL) || event.getBlock().getType().equals(BlockType.SUSPICIOUS_SAND)) {
+            Random random = new Random();
+            int chance = random.nextInt(101);
+            if (chance > 80) {
+                List<Item>  stack = event.getItems();
+                int chancer = random.nextInt(sus_amount+1);
+                switch (chancer) {
+                    case 1:
+                        //drop revive item
+                        event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), revive.item());
+                }
+            }
+        }
+    }
 
     public static void registeritems(){
         Bukkit.addRecipe(evolve.recipe());
