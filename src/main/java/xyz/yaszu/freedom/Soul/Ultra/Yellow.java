@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Ultra;
 
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
@@ -7,18 +7,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -84,7 +81,7 @@ public class Yellow  extends Util implements Base_Soul {
                 int tick = 0;
                 @Override
                 public void run() {
-                    List<Entity> nearguys = player.getNearbyEntities(5,5,5);
+                    List<Entity> nearguys = player.getNearbyEntities(4,4,4);
                     Player ignoreplayer = player;
                     if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
                         Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));

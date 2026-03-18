@@ -14,6 +14,7 @@ import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,8 +23,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Soul.*;
 import xyz.yaszu.freedom.Soul.Base.*;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -32,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class selectionUi extends Util implements Listener {
+public class UltraselectionUi extends Util implements Listener {
 
     Plugin freedom = Freedom.get_plugin();
     public ArrayList active_souls(){
@@ -40,28 +41,28 @@ public class selectionUi extends Util implements Listener {
         List active_souls_in_config = freedom.getConfig().getStringList("Active_Souls");
         ArrayList active_souls = new ArrayList<Base_Soul>();
         if (active_souls_in_config.contains("Red")) {
-            active_souls.add(new BaseRed());
+            active_souls.add(new Red());
         }
         if (active_souls_in_config.contains("Purple")) {
-            active_souls.add(new BasePurple());
+            active_souls.add(new Purple());
         }
         if (active_souls_in_config.contains("Blue")) {
-            active_souls.add(new BaseBlue());
+            active_souls.add(new Blue());
         }
         if (active_souls_in_config.contains("Green")) {
-            active_souls.add(new BaseGreen());
+            active_souls.add(new Green());
         }
         if (active_souls_in_config.contains("Black")) {
-            active_souls.add(new BaseBlack());
+            active_souls.add(new Black());
         }
         if (active_souls_in_config.contains("Yellow")) {
-            active_souls.add(new BaseYellow());
+            active_souls.add(new Yellow());
         }
         if (active_souls_in_config.contains("None")) {
-            active_souls.add(new BaseNone());
+            active_souls.add(new None());
         }
         if (active_souls_in_config.contains("Orange")) {
-            active_souls.add(new BaseOrange());
+            active_souls.add(new Orange());
         }
         return active_souls;
     }
@@ -111,21 +112,52 @@ public class selectionUi extends Util implements Listener {
         } else {
             return;
         }
-        if (event.getIdentifier().equals(Key.key("papermc:user_input/back"))) {
-            open_UI(player,get_next_soul(player,soul_selection_map.get(player.getUniqueId()),false));
-        }
-        if (event.getIdentifier().equals(Key.key("papermc:user_input/select"))) {
-            player.getPersistentDataContainer().set(keygen("soul"), PersistentDataType.STRING,soul_selection_map.get(player.getUniqueId()).Name_For_Container());
+        if (event.getIdentifier().equals(Key.key("papermc:user_input/select2"))) {
+            ItemStack item = player.getInventory().getItemInMainHand();
+                if (item != null) {
+                    if (item.getPersistentDataContainer().has(keygen("item_id"))) {
+                        String itemid = item.getPersistentDataContainer().get(keygen("item_id"), PersistentDataType.STRING);
+                        switch (itemid) {
+                            case "evolutionstone":
+                                if (player.getInventory().getItemInMainHand().getAmount() > 1) {
+                                    player.getInventory().getItemInMainHand().subtract(1);
+                                } else {
+                                    player.getInventory().setItemInMainHand(ItemStack.of(Material.AIR));
+                                }
+                                break;
+
+
+                        }
+                    }
+                }
+            ItemStack offitem = player.getInventory().getItemInOffHand();
+            if (offitem != null) {
+                if (offitem.getPersistentDataContainer().has(keygen("item_id"))) {
+                    String itemid = offitem.getPersistentDataContainer().get(keygen("item_id"), PersistentDataType.STRING);
+                    switch (itemid) {
+                        case "evolutionstone":
+                            if (player.getInventory().getItemInOffHand().getAmount() > 1) {
+                                player.getInventory().getItemInOffHand().subtract(1);
+                            } else {
+                                player.getInventory().setItemInOffHand(ItemStack.of(Material.AIR));
+                            }
+
+                            break;
+
+
+                    }
+                }
+            }
+            currentsouls.get(player.getUniqueId());
+            player.getPersistentDataContainer().set(keygen("soul"), PersistentDataType.STRING,currentsouls.get(player.getUniqueId()).Name_For_Container());
             Black.join(player);
-            BaseBlack.join(player);
-            if (soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Blue" || soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Yellow") {
+            Black.join(player);
+            if (currentsouls.get(player.getUniqueId()).Name_For_Container() == "Blue" || currentsouls.get(player.getUniqueId()).Name_For_Container() == "Yellow") {
                 Blue.init(player);
-                BaseBlue.init(player);
+                Blue.init(player);
             }
         }
-        if (event.getIdentifier().equals(Key.key("papermc:user_input/forward"))) {
-            open_UI(player,get_next_soul(player,soul_selection_map.get(player.getUniqueId()),true));
-        }
+
     }
 
     public static ItemStack emptyItem(ItemStack item) {
@@ -143,8 +175,10 @@ public class selectionUi extends Util implements Listener {
         return item;
     }
     public static Component line = dess("----------");
+    public static Base_Soul currentsoul = new Red();
+    public static HashMap<UUID,Base_Soul> currentsouls = new HashMap<>();
     public static void open_UI(Player player, Base_Soul red) {
-        soul_selection_map.put(player.getUniqueId(),red);
+        currentsouls.put(player.getUniqueId(),red);
         Dialog dialog = Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(red.Name()).canCloseWithEscape(false).externalTitle(dess("I AM TITLE"))
                         .body(List.of(
@@ -181,9 +215,8 @@ public class selectionUi extends Util implements Listener {
                         )
                         .build())
                 .type(DialogType.multiAction(List.of(
-                        ActionButton.builder(dess("Back")).action(DialogAction.customClick(Key.key("papermc:user_input/back"),null)).build(),
-                        ActionButton.builder(dess("Select")).action(DialogAction.customClick(Key.key("papermc:user_input/select"),null)).build(),
-                        ActionButton.builder(dess("Forward")).action(DialogAction.customClick(Key.key("papermc:user_input/forward"),null)).build())).columns(3)
+
+                        ActionButton.builder(dess("Select")).action(DialogAction.customClick(Key.key("papermc:user_input/select2"),null)).build()))
                         .build())
 
         );

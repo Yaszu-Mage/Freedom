@@ -1,28 +1,21 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Ultra;
 
-import com.github.retrooper.packetevents.protocol.potion.Potion;
-import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.FrogWatcher;
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +28,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base_Soul;
+import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
@@ -156,11 +152,14 @@ public class Orange extends Util implements Base_Soul, Listener {
                 Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,fixedworlddata);
             }
         }
-        if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-            if (Objects.equals(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING), "Frog")) {
-                recurse(player);
-            } else {
-                player.getPersistentDataContainer().remove(keygen("cursed"));
+        if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("uncursor"))) {
+            Player recursor = Bukkit.getPlayer(Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("uncursor"),PersistentDataType.STRING));
+            if (recursor != null) {
+                String recursorName = recursor.getName();
+                String worlddata = Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("uncursor"),PersistentDataType.STRING);
+                String fixedworlddata = worlddata.replace(recursorName, "");
+                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("uncursor"),PersistentDataType.STRING,fixedworlddata);
+                uncurse(recursor);
             }
         }
     }
@@ -223,17 +222,28 @@ public class Orange extends Util implements Base_Soul, Listener {
 
 
     public void uncurse(Player baller) {
-        baller.getPersistentDataContainer().remove(keygen("cursed"));
-        baller.removePotionEffect(PotionEffectType.WEAKNESS);
-        String curser = baller.getPersistentDataContainer().get(keygen("cursedby"),PersistentDataType.STRING);
-        if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("recursor"))) {
-            Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,curser + Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"),PersistentDataType.STRING));
+        if (baller.isOnline()) {
+
+
+            baller.getPersistentDataContainer().remove(keygen("cursed"));
+            baller.removePotionEffect(PotionEffectType.WEAKNESS);
+            String curser = baller.getPersistentDataContainer().get(keygen("cursedby"), PersistentDataType.STRING);
+            if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("recursor"))) {
+                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"), PersistentDataType.STRING, curser + Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"), PersistentDataType.STRING));
+            } else {
+                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"), PersistentDataType.STRING, curser);
+            }
+            curses.get(baller.getUniqueId()).removeDisguise();
+            curses.remove(baller.getUniqueId());
+            baller.getPersistentDataContainer().remove(keygen("cursedby"));
         } else {
-            Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,curser);
+            if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("uncursor"))) {
+                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("uncursor"),PersistentDataType.STRING,Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("uncursor"),PersistentDataType.STRING)+baller.getName());
+            } else {
+                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("uncursor"),PersistentDataType.STRING,baller.getName());
+            }
+
         }
-        curses.get(baller.getUniqueId()).removeDisguise();
-        curses.remove(baller.getUniqueId());
-        baller.getPersistentDataContainer().remove(keygen("cursedby"));
     }
 
     public void curse(Player baller,String curser) {
@@ -249,6 +259,12 @@ public class Orange extends Util implements Base_Soul, Listener {
             watcher.setVariant(Frog.Variant.COLD);
             curses.put(baller.getUniqueId(),mobDisguise);
         }
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                uncurse(baller);
+            }
+        }.runTaskLater(Freedom.get_plugin(),5020);
     }
     public static void recurse(Player baller) {
         baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");

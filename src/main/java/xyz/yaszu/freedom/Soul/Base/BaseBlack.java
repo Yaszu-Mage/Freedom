@@ -1,16 +1,8 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Base;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.github.retrooper.packetevents.protocol.potion.Potion;
-import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.Audiences;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
-import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
@@ -20,7 +12,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +26,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base_Soul;
+import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -39,11 +37,11 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
-public class Black extends Util implements Base_Soul, Listener {
+public class BaseBlack extends Util implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {
-        return "Black";
+        return "BaseBlack";
     }
 
     @Override
@@ -78,6 +76,7 @@ public class Black extends Util implements Base_Soul, Listener {
             return;
         }
         if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
+
             load(player);
         }
     }
@@ -98,6 +97,18 @@ public class Black extends Util implements Base_Soul, Listener {
                         player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE)
 
                 );
+                if (loadingLocation != null) {
+                    if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
+                        player.sendMessage(dess("Too Far! (100 blocks)"));
+                        player.getPersistentDataContainer().remove(keygen("black_save"));
+                        player.getPersistentDataContainer().remove(keygen("blacksaveX"));
+                        player.getPersistentDataContainer().remove(keygen("blacksaveY"));
+                        player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
+                        player.getPersistentDataContainer().remove(keygen("blackworld"));
+                        this.cancel();
+                        return;
+                    }
+                }
                 drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.SMOKE);
                 drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
             }
@@ -108,6 +119,18 @@ public class Black extends Util implements Base_Soul, Listener {
             Location loadingLocation = player.getLocation();
             @Override
             public void run() {
+                if (loadingLocation != null) {
+                    if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
+                        player.sendMessage(dess("Too Far! (100 blocks)"));
+                        player.getPersistentDataContainer().remove(keygen("black_save"));
+                        player.getPersistentDataContainer().remove(keygen("blacksaveX"));
+                        player.getPersistentDataContainer().remove(keygen("blacksaveY"));
+                        player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
+                        player.getPersistentDataContainer().remove(keygen("blackworld"));
+                        this.cancel();
+                        return;
+                    }
+                }
                 if (player.getPersistentDataContainer().has(keygen("blackworld"),PersistentDataType.STRING)) {
                     Location loadingLocation = new Location(
                             Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),
@@ -247,7 +270,7 @@ public class Black extends Util implements Base_Soul, Listener {
                 disguise.removeDisguise();
                 player.playerListName(player.name());
                 if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
-                    player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
+                    player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.10, AttributeModifier.Operation.ADD_NUMBER));
                 }
                 setSkinByName(player,player.getName());
                 originalProfiles.remove(player.getUniqueId());
@@ -313,7 +336,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
                     this.cancel();
                 }
-            }.runTaskLater(Freedom.get_plugin(),6000);
+            }.runTaskLater(Freedom.get_plugin(),3000);
             event.setCancelled(true);
         }
     }
@@ -389,7 +412,7 @@ public class Black extends Util implements Base_Soul, Listener {
     public String curse(Player player, String message) {
         Freedom.get_plugin().getLogger().info("Curse 1");
         String[] msg = message.split(" ");
-        Orange.Cursetype cursetype = Orange.Cursetype.valueOf(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING));
+        BaseOrange.Cursetype cursetype = BaseOrange.Cursetype.valueOf(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING));
         String newmsg = "";
 
         switch (cursetype) {
@@ -520,13 +543,22 @@ public class Black extends Util implements Base_Soul, Listener {
     public static void join (Player player) throws MineSkinException, DataRequestException {
         setSkinByName(player,player.getName());
         if (player.getPersistentDataContainer().has(keygen("soul"))) {
-
+        for (PotionEffect potion : player.getActivePotionEffects()) {
+            if (potion.getDuration() == PotionEffect.INFINITE_DURATION) {
+                player.removePotionEffect(potion.getType());
+            }
+        }
 
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        if (soulType == SoulTypes.Black) {
+        if (soulType == SoulTypes.BaseBlack) {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
-                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
+                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.10, AttributeModifier.Operation.ADD_NUMBER));
             }
+        } else {
+            if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) != null) {
+                player.getAttribute(Attribute.SCALE).removeModifier(keygen("black"));
+            }
+
         }
             if (soulType == SoulTypes.Orange) {
                 if (!player.getPersistentDataContainer().has(keygen("cancurse"))) {
@@ -560,7 +592,7 @@ public class Black extends Util implements Base_Soul, Listener {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         if (soulType == SoulTypes.Black) {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
-                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
+                player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.10, AttributeModifier.Operation.ADD_NUMBER));
             }
         }
         if (soulType == SoulTypes.Orange) {

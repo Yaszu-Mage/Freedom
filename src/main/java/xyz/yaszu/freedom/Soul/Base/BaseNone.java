@@ -1,19 +1,19 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Base;
 
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
-public class None extends Util implements Base_Soul, Listener {
+public class BaseNone extends Util implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
-        return "None";
+        return "BaseNone";
     }
 
     @Override

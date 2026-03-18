@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Base;
 
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
@@ -12,9 +12,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -22,18 +20,18 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
-public class Green extends Util implements Base_Soul {
+public class BaseGreen extends Util implements Base_Soul {
 
     @Override
     public String Name_For_Container() {
-        return "Green";
+        return "BaseGreen";
     }
 
     @Override
@@ -101,7 +99,6 @@ public class Green extends Util implements Base_Soul {
 
 
     public void registerSprite(Player target, Player player) {
-        target.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
         target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 2));
         Location location = target.getLocation();
         Entity entity = target.getWorld().spawnEntity(location, EntityType.WOLF);
@@ -140,7 +137,6 @@ public class Green extends Util implements Base_Soul {
                 wolf.setOwner(player);
 
                 player.getPersistentDataContainer().set(keygen("sprite_active"),PersistentDataType.BOOLEAN,true);
-                player.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 1));
                 player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 1));
             }
             @Override
@@ -196,7 +192,7 @@ public class Green extends Util implements Base_Soul {
 
                             trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
                             if (trusted.contains(player.getName()) && iterator.getLocation().distanceSquared(player.getLocation()) <= 10) {
-                                iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 2));
+                                iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 0));
                                 iterator.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, iterator.getLocation(),8);
                                 if (!player.hasPotionEffect(PotionEffectType.SLOWNESS)) {
                                     player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, 0));

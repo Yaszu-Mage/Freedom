@@ -1,34 +1,33 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Base;
 
-import com.github.retrooper.packetevents.protocol.potion.Potion;
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityPotionEffectEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base_Soul;
+import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
-public class Blue extends Util implements Base_Soul, Listener {
+public class BaseBlue extends Util implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {
-        return "Blue";
+        return "BaseBlue";
     }
 
     @Override
@@ -57,7 +56,7 @@ public class Blue extends Util implements Base_Soul, Listener {
         return dess("You can selectively with the Yellow one you are bonded with");
     }
     public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
-    public static long abilityOneCooldown = 30000L;
+    public static long abilityOneCooldown = 45000L;
     @Override
     public void AbilityOne(Player player) {
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
@@ -76,7 +75,7 @@ public class Blue extends Util implements Base_Soul, Listener {
                         doubleclock.sendMessage(player.getName() + " has rescinded their request to swap.");
                     }
 
-                if (doubleclock.getLocation().distanceSquared(player.getLocation()) <= 10000) {
+                if (doubleclock.getLocation().distanceSquared(player.getLocation()) <= 2500) {
                 if (doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)) {
                     player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
                     doubleclock.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
@@ -133,7 +132,7 @@ public class Blue extends Util implements Base_Soul, Listener {
         return dess("Slows time for all but the one you are bonded with");
     }
     public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
-    public static long abilityTwoCooldown = 3000L;
+    public static long abilityTwoCooldown = 9000L;
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         if (can_ability(abilityTwoCooldown, abilityTwoCooldowns,player.getUniqueId())) {
@@ -165,8 +164,8 @@ public class Blue extends Util implements Base_Soul, Listener {
                             affectedEntities.add(instplayer);
                             if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) == null && instplayer != ignoreplayer) {
                                 Freedom.get_plugin().getLogger().info("inst");
-                                instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),-0.01d, AttributeModifier.Operation.ADD_NUMBER));
-                                instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.075d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),-0.005d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.0375d, AttributeModifier.Operation.ADD_NUMBER));
                             }
                         }
                     }

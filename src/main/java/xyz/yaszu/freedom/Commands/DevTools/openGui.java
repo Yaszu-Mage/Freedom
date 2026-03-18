@@ -3,12 +3,9 @@ package xyz.yaszu.freedom.Commands.DevTools;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.bukkit.entity.Player;
-import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
-import xyz.yaszu.freedom.Soul.Purple;
-import xyz.yaszu.freedom.Soul.Red;
-
-import static xyz.yaszu.freedom.Commands.Trust.soulListener;
+import xyz.yaszu.freedom.Soul.Ultra.Purple;
+import xyz.yaszu.freedom.Soul.Ultra.Red;
 
 public class openGui implements BasicCommand {
     @Override

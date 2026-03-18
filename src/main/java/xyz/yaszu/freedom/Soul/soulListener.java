@@ -17,24 +17,35 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base.*;
+import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.Objects;
 
-import static xyz.yaszu.freedom.Commands.Trust.util;
-
 public class soulListener extends Util implements Listener {
     public static Red red = new Red();
-
-
+    public static Yellow yellow =  new Yellow();
     public static Green green = new Green();
-
+    public static Black black = new Black();
+    public static Purple purple = new Purple();
+    public static Blue blue = new Blue();
     public static Orange orange = new Orange();
+    public static BaseRed basered = new BaseRed();
+    public static BaseYellow baseyellow =  new BaseYellow();
+    public static BaseGreen basegreen = new BaseGreen();
+    public static BaseBlack baseblack = new BaseBlack();
+    public static BasePurple basepurple = new BasePurple();
+    public static BaseBlue baseblue = new BaseBlue();
+    public static BaseOrange baseorange = new BaseOrange();
     public void Passive(Player player) {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         switch (soulType) {
             case Orange:
                 orange.Passive(player,null);
+                break;
+            case BaseOrange:
+                baseorange.Passive(player,null);
                 break;
         }
     }
@@ -116,6 +127,9 @@ public class soulListener extends Util implements Listener {
     }
 
     public static void showSoulPoints(Player player) {
+        if (!player.getPersistentDataContainer().has(keygen("SoulPoint"))) {
+            player.getPersistentDataContainer().set(keygen("SoulPoints"),PersistentDataType.DOUBLE,0d);
+        }
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
         for (BossBar bossBar : player.activeBossBars() ) {
             bossBar.name().toString().contains("SoulPoints");
@@ -166,12 +180,35 @@ public class soulListener extends Util implements Listener {
             case Orange:
                 orange.ActivePassive(player);
                 break;
+            case BaseRed:
+                if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
+
+                    basered.ActivePassive(player);
+                }
+                break;
+            case BaseBlack:
+                if (SoulPoints >= 5 && player.isSneaking()) {
+                    baseblack.playerSneakEvent(player);
+                }
+            case BaseGreen:
+                if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
+
+                    basegreen.ActivePassive(player);
+                }
+                break;
+            case BaseBlue:
+                baseblue.ActivePassive(player);
+                break;
+            case BaseYellow:
+                baseyellow.ActivePassive(player);
+                break;
+            case BaseOrange:
+                baseorange.ActivePassive(player);
+                break;
         }
     }
     }
-    public static Black black = new Black();
-    public static Purple purple = new Purple();
-    public static Blue blue = new Blue();
+
     public void AbilityOne(Player player) {
         player.sendActionBar(dess("<green>Ability One</green>"));
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
@@ -193,6 +230,25 @@ public class soulListener extends Util implements Listener {
                 break;
             case Orange:
                 orange.AbilityOne(player);
+                break;
+            case BaseRed:
+                basered.AbilityOne(player);
+                break;
+            case BasePurple:
+                basepurple.AbilityOne(player);
+                break;
+            case BaseGreen:
+                basegreen.AbilityOne(player);
+                break;
+            case BaseBlack:
+                baseblack.AbilityOne(player);
+                break;
+            case BaseBlue, BaseYellow:
+                baseblue.AbilityOne(player);
+                break;
+            case BaseOrange:
+                baseorange.AbilityOne(player);
+                break;
         }
     }
     @EventHandler
@@ -202,7 +258,7 @@ public class soulListener extends Util implements Listener {
         Freedom.get_plugin().getLogger().info(soulType.toString());
         switch (soulType) {
             case Green -> green.Passive(player,event);
-
+            case BaseGreen -> basegreen.Passive(player,event);
         }
     }
 
@@ -240,6 +296,34 @@ public class soulListener extends Util implements Listener {
             case Orange:
                 orange.AbilityTwo(player,player.getInventory().getItem(0));
                 break;
+            case BaseRed:
+                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                    //Do stuff
+                    basered.AbilityTwo(player,drop);
+
+                }
+                break;
+            case BasePurple:
+                if (drop.getPersistentDataContainer().has(keygen("rifle"))) {
+                    basepurple.AbilityTwo(player,drop);
+                }
+                break;
+            case BaseBlack:
+                baseblack.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case BaseBlue:
+                Freedom.get_plugin().getLogger().info("Baller");
+                baseblue.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case BaseGreen:
+                basegreen.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case BaseYellow:
+                baseyellow.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case BaseOrange:
+                baseorange.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
         }
     }
 
@@ -267,15 +351,41 @@ public class soulListener extends Util implements Listener {
             case Orange:
                 orange.ActivePassive(player);
                 break;
+            case BaseRed:
+                basered.ActivePassive(player);
+                break;
+            case BasePurple:
+                basepurple.ActivePassive(player);
+                break;
+            case BaseBlack:
+                double SoulPoints2 = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+                if (SoulPoints2 >= 5 && player.isSneaking()) {
+                    black.playerSneakEvent(player);
+
+                }
+                break;
+            case BaseBlue:
+                baseblue.ActivePassive(player);
+                break;
+            case BaseYellow:
+                baseyellow.ActivePassive(player);
+                break;
+            case BaseOrange:
+                baseorange.ActivePassive(player);
+                break;
         }
     }
-public static Yellow yellow =  new Yellow();
+
 
 
     @EventHandler
     public void onPlayerXPgain(PlayerExpChangeEvent event) {
         Player player = event.getPlayer();
         if (player.getPersistentDataContainer().get(keygen("soul"),PersistentDataType.STRING) == "Purple") {
+            event.setAmount(event.getAmount() * 4);
+
+        }
+        if (player.getPersistentDataContainer().get(keygen("soul"),PersistentDataType.STRING) == "BasePurple") {
             event.setAmount(event.getAmount() * 2);
 
         }
@@ -319,6 +429,35 @@ public static Yellow yellow =  new Yellow();
                     break;
                 case Orange:
                     orange.AbilityOne(player);
+                    break;
+                case BaseRed:
+                    if (player.isSneaking()) {
+                        basered.AbilityOne(player);
+                    }
+                    break;
+                case BasePurple:
+                    if (player.isSneaking()) {
+                        basepurple.AbilityOne(player);
+                    }
+                    break;
+                case BaseGreen:
+                    if (player.isSneaking()) {
+                        basegreen.AbilityOne(player);
+                    }
+                    break;
+                case BaseBlack:
+                    if (player.isSneaking()) {
+                        baseblack.AbilityOne(player);
+                    }
+                    break;
+                case BaseBlue, BaseYellow:
+                    if (player.isSneaking()) {
+                        baseblue.AbilityOne(player);
+                    }
+                    break;
+                case BaseOrange:
+                    baseorange.AbilityOne(player);
+                    break;
             }
         }
     }
@@ -369,6 +508,10 @@ public static Yellow yellow =  new Yellow();
         switch (soulType) {
             case Red:
                 red.Passive(player,event);
+                break;
+            case BaseRed:
+                basered.Passive(player,event);
+                break;
         }
 
 }

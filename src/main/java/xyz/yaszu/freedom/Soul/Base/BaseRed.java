@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Base;
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.bossbar.BossBar;
@@ -7,7 +7,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -16,13 +19,14 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class Red extends Util implements Base_Soul {
+public class BaseRed extends Util implements Base_Soul {
 
     public long ability_one_cooldown = 1000;
     public long ability_two_cooldown = 30000;
@@ -33,7 +37,7 @@ public class Red extends Util implements Base_Soul {
 
     @Override
     public String Name_For_Container() {
-        return "Red";
+        return "BaseRed";
     }
 
     @Override
@@ -72,7 +76,7 @@ public class Red extends Util implements Base_Soul {
     public void AbilityOne(Player player) {
         PersistentDataContainer playerContainer = player.getPersistentDataContainer();
         if (can_ability(ability_one_cooldown,ability_one_cooldowns,player.getUniqueId())) {
-                player.setVelocity(player.getLocation().getDirection().multiply(2));
+                player.setVelocity(player.getLocation().getDirection().multiply(1.5));
                 spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
                 ability_one_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
@@ -94,7 +98,6 @@ public class Red extends Util implements Base_Soul {
                 }
                 tick = tick + 1;
                 player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 0, 0), 5);
-                player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME,player.getLocation().add(0, 0, 0), 5);
             }
         };
     }
@@ -166,7 +169,7 @@ public class Red extends Util implements Base_Soul {
                     ItemDisplay itemDisplay = (ItemDisplay) fireball;
                     itemDisplay.teleport(itemDisplay.getLocation().add(direction.multiply(1)));
                     int entitycount = 0;
-                    for (Entity entity : itemDisplay.getNearbyEntities(1,1,1)) {
+                    for (Entity entity : itemDisplay.getNearbyEntities(1,3,1)) {
                         if (entity instanceof Player instanceplayer) {
                             if (instanceplayer != player) {
                                 entitycount = entitycount + 1;
@@ -197,7 +200,7 @@ public class Red extends Util implements Base_Soul {
                     }
                     if (entitycount >= 1) {
                         //spawn explosion
-                        player.getWorld().createExplosion(itemDisplay.getLocation(), 5.0F + entitycount, true, true);
+                        player.getWorld().createExplosion(itemDisplay.getLocation(), 1.0F + entitycount, true, true);
                         itemDisplay.remove();
                         this.cancel();
                     }

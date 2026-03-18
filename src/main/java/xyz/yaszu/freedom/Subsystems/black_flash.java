@@ -52,8 +52,6 @@ public class black_flash implements Listener {
 
                 // Reset counter
                 attacker.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 0);
-            } else {
-                attacker.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, additive + 1);
             }
         }
     }

@@ -1,7 +1,6 @@
 package xyz.yaszu.freedom;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -16,11 +15,15 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
+import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
-import xyz.yaszu.freedom.Soul.Black;
-import xyz.yaszu.freedom.Soul.Blue;
-import xyz.yaszu.freedom.Soul.Orange;
+import xyz.yaszu.freedom.Items.ItemListener;
+import xyz.yaszu.freedom.Soul.Base.BaseBlack;
+import xyz.yaszu.freedom.Soul.Base.BaseOrange;
+import xyz.yaszu.freedom.Soul.Ultra.Black;
+import xyz.yaszu.freedom.Soul.Ultra.Blue;
+import xyz.yaszu.freedom.Soul.Ultra.Orange;
 import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
@@ -29,7 +32,7 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.Random;
 
-import static xyz.yaszu.freedom.Soul.Green.removeOldFollowers;
+import static xyz.yaszu.freedom.Soul.Ultra.Green.removeOldFollowers;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
 public final class Freedom extends JavaPlugin implements Listener {
@@ -74,6 +77,10 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
         Bukkit.getPluginManager().registerEvents(new Blue(), this);
         Bukkit.getPluginManager().registerEvents(new Orange(),this);
+        Bukkit.getPluginManager().registerEvents(new BaseOrange(),this);
+        Bukkit.getPluginManager().registerEvents(new BaseBlack(),this);
+        Bukkit.getPluginManager().registerEvents(new ItemListener(), this);
+        Bukkit.getPluginManager().registerEvents(new UltraselectionUi(), this);
         version = random.nextInt(0,9999);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
@@ -92,6 +99,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.Passive());
         });
         removeOldFollowers();
+        ItemListener.registeritems();
         start_time = System.currentTimeMillis();
     }
 

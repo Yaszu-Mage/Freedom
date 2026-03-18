@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul;
+package xyz.yaszu.freedom.Soul.Ultra;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -13,6 +13,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
@@ -20,10 +21,10 @@ import java.util.List;
 import java.util.UUID;
 
 
-public class Purple extends Util implements Base_Soul{
+public class Purple extends Util implements Base_Soul {
 
     public long ability_one_cooldown = 1000;
-    public long ability_two_cooldown = 60000;
+    public long ability_two_cooldown = 15000;
 
     public static HashMap<UUID, Long> ability_two_cooldowns = new HashMap<>();
 
@@ -136,20 +137,18 @@ public class Purple extends Util implements Base_Soul{
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
-        if (can_ability(ability_two_cooldown,ability_two_cooldowns,player.getUniqueId())) {
+        if (can_ability(ability_two_cooldown, ability_two_cooldowns, player.getUniqueId())) {
 
-        player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
-        player.getWorld().playSound(player.getLocation(),Sound.ENTITY_WARDEN_SONIC_BOOM,10f,0f);
+            player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 10f, 0f);
 
-        handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
-        ability_two_cooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+            handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
+            ability_two_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+        } else {
+            double seconds = (double) (ability_two_cooldown - (System.currentTimeMillis() - ability_two_cooldowns.get(player.getUniqueId()))) / 1000;
+            player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+        }
     }
-    else {
-        double seconds = (double) (ability_two_cooldown - (System.currentTimeMillis() - ability_two_cooldowns.get(player.getUniqueId()))) / 1000;
-        player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
-    }
-    }
-
     public BukkitRunnable handleSnipe(Player player) {
         return new BukkitRunnable() {
             Vector direction = player.getLocation().getDirection();
@@ -170,14 +169,14 @@ public class Purple extends Util implements Base_Soul{
                         if (inst != player) {
                             if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                                 LivingEntity entity = (LivingEntity) inst;
-                                entity.damage(14 + Math.sqrt(player.getLocation().distance(snipeLocation) / 6) * 2.75, player);
+                                entity.damage(16 + player.getLocation().distance(snipeLocation) * 2.75, player);
                                 this.cancel();
                             }
                         }
                     } else {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                             LivingEntity entity = (LivingEntity) inst;
-                            entity.damage(14 + Math.sqrt(player.getLocation().distance(snipeLocation) / 6) * 2.75, player);
+                            entity.damage(16 + player.getLocation().distance(snipeLocation) * 2.75, player);
                             this.cancel();
                         }
                     }
