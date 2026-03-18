@@ -10,6 +10,7 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
 import xyz.yaszu.freedom.Items.Upgrades.Revival;
 import xyz.yaszu.freedom.Util.Util;
@@ -20,6 +21,7 @@ import java.util.Random;
 public class ItemListener extends Util implements Listener {
     static Evolve evolve = new Evolve();
     static Revival revive = new Revival();
+    static Rifle rifle = new Rifle();
     @EventHandler
     public void playerinteractevent(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
@@ -28,7 +30,10 @@ public class ItemListener extends Util implements Listener {
                 String itemid = item.getPersistentDataContainer().get(keygen("item_id"), PersistentDataType.STRING);
                 switch (itemid) {
                     case "evolutionstone":
-                        evolve.effect(event.getPlayer());
+                        evolve.effect(event.getPlayer(),event);
+                        break;
+                    case "rifle":
+                        rifle.effect(event.getPlayer(),event);
                         break;
 
 
@@ -57,6 +62,8 @@ public class ItemListener extends Util implements Listener {
 
     public static void registeritems(){
         Bukkit.addRecipe(evolve.recipe());
+        Bukkit.addRecipe(rifle.recipe());
+        Bukkit.addRecipe(revive.recipe());
     }
 
 }

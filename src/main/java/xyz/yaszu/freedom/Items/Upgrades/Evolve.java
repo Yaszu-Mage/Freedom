@@ -3,6 +3,8 @@ package xyz.yaszu.freedom.Items.Upgrades;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -28,7 +30,7 @@ public class Evolve extends Util implements BaseItem {
     }
 
     @Override
-    public void effect(Player player) {
+    public void effect(Player player, PlayerInteractEvent event) {
         Base_Soul red = new Red();
         boolean cancel = false;
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));

@@ -3,7 +3,9 @@ package xyz.yaszu.freedom.Items.Upgrades;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -28,7 +30,7 @@ public class Revival extends Util implements BaseItem {
     }
 
     @Override
-    public void effect(Player player) {
+    public void effect(Player player, PlayerInteractEvent event) {
 
     }
 
