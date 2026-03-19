@@ -115,7 +115,7 @@ public class Green extends Util implements Base_Soul {
         EntityTracker tracker = BetterModel.model("sillything")
                 .map(r -> r.getOrCreate(platwolf))
                 .orElse(null);
-        follower(tracker,wolf,target,player).runTaskTimerAsynchronously(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
+        follower(tracker,wolf,target,player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
     }
 
     Random random = new Random();
@@ -213,7 +213,7 @@ public class Green extends Util implements Base_Soul {
                     this.cancel();
                 }
             }
-        }.runTaskTimerAsynchronously(Freedom.get_plugin(),0,80);
+        }.runTaskTimer(Freedom.get_plugin(),0,80);
 
     }
     }

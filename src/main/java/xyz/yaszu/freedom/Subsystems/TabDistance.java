@@ -10,7 +10,7 @@ import xyz.yaszu.freedom.Freedom;
 import java.util.ArrayList;
 
 public class TabDistance implements Listener {
-    int tabradius = 100;
+    public static int tabradius = 100;
     @EventHandler
     public void PlayerMoveEvent(PlayerMoveEvent event) {
         Player player = event.getPlayer();

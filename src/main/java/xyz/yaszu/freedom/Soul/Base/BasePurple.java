@@ -81,9 +81,10 @@ public class BasePurple extends Util implements Base_Soul {
     @Override
     public void AbilityOne(Player player) {
         //
-        World world = player.getWorld();
-        world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
+
         if (can_ability(ability_one_cooldown,ability_one_cooldowns,player.getUniqueId())) {
+            World world = player.getWorld();
+            world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
             Vector velocity = player.getVelocity();
         drawCircle(player.getLocation().add(0,1,0), 1, player.getWorld(), 100);
         Location location = player.getLocation().add(player.getLocation().getDirection().multiply(5));

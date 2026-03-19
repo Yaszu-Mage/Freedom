@@ -31,6 +31,8 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
@@ -388,7 +390,7 @@ public class Orange extends Util implements Base_Soul, Listener {
         // witch broom flight
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
         Freedom.get_plugin().getLogger().info("Active active!");
-        if (SoulPoints > 1) {
+        if (SoulPoints > 1  && !player.getPersistentDataContainer().has(keygen("combattimer"))) {
 
 
         if (!player.isInsideVehicle()) {
@@ -421,6 +423,20 @@ public class Orange extends Util implements Base_Soul, Listener {
 
                         cancel();
                     } else {
+                        if (!Life_and_Death.is_alive(player)) return;
+                        ArrayList<Player> players = new ArrayList<>();
+                        for (Player instancedplayer : player.getLocation().getNearbyEntitiesByType(Player.class, TabDistance.tabradius) ) {
+                            if (Life_and_Death.is_alive(instancedplayer)) {
+                                players.add(instancedplayer);
+                            }
+                        }
+                        for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
+                            if (players.contains(instancedPlayer)) {
+                                player.showPlayer(Freedom.get_plugin(),instancedPlayer);
+                            } else {
+                                player.hidePlayer(Freedom.get_plugin(),instancedPlayer);
+                            }
+                        }
                         if (player.getPersistentDataContainer().has(keygen("ridemode"),PersistentDataType.INTEGER)) {
                             int ridemode = player.getPersistentDataContainer().get(keygen("ridemode"),PersistentDataType.INTEGER);
                             switch (ridemode) {
@@ -454,7 +470,7 @@ public class Orange extends Util implements Base_Soul, Listener {
                     player.getPersistentDataContainer().set(keygen("ridemode"),PersistentDataType.INTEGER,0);
                     super.cancel();
                 }
-            }.runTaskTimerAsynchronously(Freedom.get_plugin(),0,0);
+            }.runTaskTimer(Freedom.get_plugin(),0,0);
         } else {
             if (player.getPersistentDataContainer().has(keygen("ridemode"),PersistentDataType.INTEGER)) {
                 int ridemode = player.getPersistentDataContainer().get(keygen("ridemode"),PersistentDataType.INTEGER);

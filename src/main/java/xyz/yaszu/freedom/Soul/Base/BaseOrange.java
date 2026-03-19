@@ -31,12 +31,12 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.CombatTimer;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class BaseOrange extends Util implements Base_Soul, Listener {
     @Override
@@ -95,7 +95,10 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                     }
                 }
             }
-            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+            abilityOneCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+        } else {
+            double seconds = (double) (AbilityOne_Cooldown - (System.currentTimeMillis() - abilityOneCooldownTime.get(player.getUniqueId()))) / 1000;
+            player.sendActionBar(dess("<Red>Cooldown!</Red> Please wait " + seconds + " seconds!"));
         }
     }
 
@@ -151,7 +154,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                 String recursorName = recursor.getName();
                 String worlddata = Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"),PersistentDataType.STRING);
                 String fixedworlddata = worlddata.replace(recursorName, "");
-                recursor.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
+                recursor.getPersistentDataContainer().remove(keygen("cancurse"));
                 Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,fixedworlddata);
             }
         }
@@ -202,23 +205,31 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             String curser = player.getName();
             if (baller != null) {
             if (!baller.getPersistentDataContainer().has(keygen("cursed"))) {
+                if (!player.getPersistentDataContainer().has(keygen("cancurse"))) {
+                    player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
+                }
                 if (player.getPersistentDataContainer().get(keygen("cancurse"),PersistentDataType.BOOLEAN) == true) {
+                    Freedom.get_plugin().getLogger().info("Standard Curse");
                     player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,false);
 
                     curse(baller,curser);
                 }
             } else {
                 if (baller.getPersistentDataContainer().get(keygen("cursed"),PersistentDataType.STRING) == "Frog") {
+                    Freedom.get_plugin().getLogger().info("UNCURSE FROG");
                     player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
                     uncurse(baller);
                 } else {
                     if (player.getPersistentDataContainer().get(keygen("cancurse"),PersistentDataType.BOOLEAN) == true) {
+                        Freedom.get_plugin().getLogger().info("Can curse Cat");
                         player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,false);
                         curse(baller,curser);
                     }
 
                 }
             }
+                Freedom.get_plugin().getLogger().info("huh");
+            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
             player.closeInventory();
             event.setCancelled(true);
 
@@ -234,6 +245,9 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             baller.getPersistentDataContainer().remove(keygen("cursed"));
             baller.removePotionEffect(PotionEffectType.WEAKNESS);
             String curser = baller.getPersistentDataContainer().get(keygen("cursedby"), PersistentDataType.STRING);
+            if (Bukkit.getPlayer(curser) != null) {
+                Bukkit.getPlayer(curser).getPersistentDataContainer().remove(keygen("cancurse"));
+            }
             if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("recursor"))) {
                 Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"), PersistentDataType.STRING, curser + Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"), PersistentDataType.STRING));
             } else {
@@ -393,8 +407,11 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
     public void ActivePassive(Player player) {
         // witch broom flight
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
-        Freedom.get_plugin().getLogger().info("Active active!");
-        if (SoulPoints > 1) {
+        if (player.getPersistentDataContainer().has(keygen("combattimer"))) {
+            int seconds = (int) (CombatTimer.combatTime - (System.currentTimeMillis() - CombatTimer.combatTimer.get(player.getUniqueId()))) / 1000;
+            player.sendMessage(dess("<Red>ERROR</Red> cannot deploy broom while in combat! Wait " + seconds + " seconds!"));
+        }
+        if (SoulPoints > 1 && !player.getPersistentDataContainer().has(keygen("combattimer"))) {
 
 
         if (!player.isInsideVehicle()) {
@@ -422,7 +439,25 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                 int tick = 0;
                 @Override
                 public void run() {
+                    if (player.getPersistentDataContainer().has(keygen("combattimer"))) {
+                        player.sendMessage(dess("<Red>ERROR</Red> cannot deploy broom while in combat!"));
+                        cancel();
+                    }
                     double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+                    if (!Life_and_Death.is_alive(player)) return;
+                    ArrayList<Player> players = new ArrayList<>();
+                    for (Player instancedplayer : player.getLocation().getNearbyEntitiesByType(Player.class, TabDistance.tabradius) ) {
+                        if (Life_and_Death.is_alive(instancedplayer)) {
+                            players.add(instancedplayer);
+                        }
+                    }
+                    for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
+                        if (players.contains(instancedPlayer)) {
+                            player.showPlayer(Freedom.get_plugin(),instancedPlayer);
+                        } else {
+                            player.hidePlayer(Freedom.get_plugin(),instancedPlayer);
+                        }
+                    }
                     if (broom.isDead() || !player.isOnline() || !player.isInsideVehicle() || SoulPoints < 1) {
 
                         cancel();

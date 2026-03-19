@@ -352,63 +352,6 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
     public static String resend = String.valueOf(Freedom.version);
 
     public static ArrayList<Player> successful_message = new ArrayList<>();
-    @EventHandler
-    public void PlayerChatEvent(AsyncPlayerChatEvent event) {
-        Player player = event.getPlayer();
-        String message = event.getMessage();
-        event.getRecipients().clear();
-        boolean is_alive = Life_and_Death.is_alive(player);
-        Freedom.get_plugin().getLogger().info("YES SEND");
-        Freedom.get_plugin().getLogger().info(String.valueOf(player.getPersistentDataContainer().has(keygen("cursed"))));
-        if (player.getPersistentDataContainer().has(keygen("disguised"),PersistentDataType.BOOLEAN)) {
-            //disguised logic
-            if (message.contains(sendchatthrough)) {
-                //continue
-                tabDistance(event, message, is_alive);
-            } else {
-                //resend
-                Player dis = Bukkit.getPlayer(originalProfiles.get(player.getUniqueId()).getName());
-                if (dis == null) {
-                    if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                        String newmsg = curse(player,message);
-                        event.setMessage(newmsg);
-
-                    }
-                    message = event.getMessage();
-                    Freedom.get_plugin().getLogger().info(message);
-                    send(player, message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
-                } else {
-                    if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                        String newmsg = curse(player,message);
-                        event.setMessage(newmsg);
-
-                    }
-                    send(dis,message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
-                }
-
-                event.setCancelled(true);
-            }
-        } else {
-
-
-            if (message.contains(sendchatthrough)) {
-                //continue
-                tabDistance(event, message, is_alive);
-            } else {
-                //resend
-                if (player.getPersistentDataContainer().has(keygen("cursed")) == true) {
-                    String newmsg = curse(player, message);
-                    Freedom.get_plugin().getLogger().info(newmsg);
-                    event.setMessage(newmsg);
-
-                }
-                message = event.getMessage();
-                send(player,message + resend+ "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
-                event.setCancelled(true);
-            }
-        }
-    }
-
     public String curse(Player player, String message) {
         Freedom.get_plugin().getLogger().info("Curse 1");
         String[] msg = message.split(" ");

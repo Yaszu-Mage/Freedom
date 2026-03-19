@@ -283,7 +283,6 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
             if (lookedat.getPersistentDataContainer().has(keygen("soul"))) {
 
                 SoulTypes soulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                Freedom.get_plugin().getLogger().info(String.valueOf(soulType));
                 Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Blue || soulType == SoulTypes.Yellow));
                 SoulTypes selfsoulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
                 if ((soulType == SoulTypes.Blue && selfsoulType == SoulTypes.Yellow) || (soulType == SoulTypes.Yellow && selfsoulType == SoulTypes.Blue)){

@@ -24,6 +24,7 @@ import xyz.yaszu.freedom.Soul.Base.BaseOrange;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.Ultra.Blue;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
+import xyz.yaszu.freedom.Subsystems.CombatTimer;
 import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
@@ -81,6 +82,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new BaseBlack(),this);
         Bukkit.getPluginManager().registerEvents(new ItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new UltraselectionUi(), this);
+        Bukkit.getPluginManager().registerEvents(new CombatTimer(),this);
         version = random.nextInt(0,9999);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands

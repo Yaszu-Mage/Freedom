@@ -72,7 +72,7 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void onPlayerDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (player.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE) < 10) {
+            if (player.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE) < 10 && !player.isInsideVehicle()) {
             player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE) + 1);
             showSoulPoints(player);
         }
@@ -85,7 +85,7 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void onPlayerDamagedEntity(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player player) {
-            if (player.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE) < 10) {
+            if (player.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE) < 10 && !player.isInsideVehicle()) {
                 player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE) + 1);
                 showSoulPoints(player);
             }
@@ -128,7 +128,7 @@ public class soulListener extends Util implements Listener {
 
     public static void showSoulPoints(Player player) {
         if (!player.getPersistentDataContainer().has(keygen("SoulPoint"))) {
-            player.getPersistentDataContainer().set(keygen("SoulPoints"),PersistentDataType.DOUBLE,0d);
+            player.getPersistentDataContainer().set(keygen("SoulPoint"),PersistentDataType.DOUBLE,0d);
         }
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
         for (BossBar bossBar : player.activeBossBars() ) {

@@ -24,8 +24,8 @@ public class Revival extends Util implements BaseItem {
     public ItemStack item() {
         ItemStack item = new ItemStack(Material.RECOVERY_COMPASS);
         ItemMeta meta = item.getItemMeta();
-        meta.getPersistentDataContainer().set(keygen("item_id"), PersistentDataType.STRING,"revivalstone");
-        meta.setItemModel(NamespacedKey.minecraft("revivalstone"));
+        meta.getPersistentDataContainer().set(keygen("item_id"), PersistentDataType.STRING,"revival");
+        meta.setItemModel(NamespacedKey.minecraft("revival"));
         meta.displayName(dess("<shadow:#000000FF><b><Blue>Revival Stone</Blue>"));
         meta.setRarity(ItemRarity.EPIC);
         item.setItemMeta(meta);
@@ -38,7 +38,7 @@ public class Revival extends Util implements BaseItem {
             if (entity instanceof Player player_nearby) {
                 if (player_nearby.getPersistentDataContainer().has(keygen("trustedby"))) {
                     String trustedby = player_nearby.getPersistentDataContainer().get(keygen("trustedby"),PersistentDataType.STRING);
-                    if (trustedby.contains(player.getName())) {
+                    if (trustedby.contains(player.getName()) && !Life_and_Death.is_alive(player)) {
                         Life_and_Death.revive_player(player_nearby,player.getLocation());
                         return;
                     }
@@ -51,7 +51,7 @@ public class Revival extends Util implements BaseItem {
 
     @Override
     public Recipe recipe() {
-        ShapedRecipe rec = new ShapedRecipe(keygen("revivalstone"), item());
+        ShapedRecipe rec = new ShapedRecipe(keygen("revival"), item());
         rec.shape(
                 "NGN",
                 "TST",

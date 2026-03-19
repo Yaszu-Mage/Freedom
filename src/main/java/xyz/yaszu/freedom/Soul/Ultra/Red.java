@@ -74,7 +74,7 @@ public class Red extends Util implements Base_Soul {
         PersistentDataContainer playerContainer = player.getPersistentDataContainer();
         if (can_ability(ability_one_cooldown,ability_one_cooldowns,player.getUniqueId())) {
                 player.setVelocity(player.getLocation().getDirection().multiply(2));
-                spawnFlames(player).runTaskTimerAsynchronously(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
+                spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
                 ability_one_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
             double seconds = (double) (ability_one_cooldown - (System.currentTimeMillis() - ability_one_cooldowns.get(player.getUniqueId()))) / 1000;
@@ -127,7 +127,7 @@ public class Red extends Util implements Base_Soul {
     public void AbilityTwo(Player player,ItemStack abilityItem) {
         if (can_ability(ability_two_cooldown,ability_two_cooldowns,player.getUniqueId())) {
             ability_two_cooldowns.put(player.getUniqueId(),System.currentTimeMillis());
-            handleFireball(player).runTaskTimerAsynchronously(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
+            handleFireball(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
         } else {
             double seconds = (double) (ability_two_cooldown - (System.currentTimeMillis() - ability_two_cooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));

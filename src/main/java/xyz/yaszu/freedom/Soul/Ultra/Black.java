@@ -227,9 +227,7 @@ public class Black extends Util implements Base_Soul, Listener {
             }
         }
         if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
-            Freedom.get_plugin().getLogger().info(String.valueOf(originalProfiles.get(player.getUniqueId())));
             if (originalProfiles.get(player.getUniqueId()) != null) {
-                Freedom.get_plugin().getLogger().info("Removing Disguises!");
                 DisguiseAPI.undisguiseToAll(player);
                 PlayerDisguise disguise =originalProfiles.get(player.getUniqueId());
                 player.getWorld();
@@ -272,7 +270,6 @@ public class Black extends Util implements Base_Soul, Listener {
             player.playerListName(baller.name());
             setSkinByName(player,baller.getName());
             originalProfiles.put(player.getUniqueId(),disguise);
-            Freedom.get_plugin().getLogger().info(String.valueOf(originalProfiles.get(player.getUniqueId())));
             World world = player.getWorld();
             Location location = player.getLocation();
             //VFX
@@ -330,8 +327,6 @@ public class Black extends Util implements Base_Soul, Listener {
         String message = event.getMessage();
         event.getRecipients().clear();
         boolean is_alive = Life_and_Death.is_alive(player);
-        Freedom.get_plugin().getLogger().info("YES SEND");
-        Freedom.get_plugin().getLogger().info(String.valueOf(player.getPersistentDataContainer().has(keygen("cursed"))));
         if (player.getPersistentDataContainer().has(keygen("disguised"),PersistentDataType.BOOLEAN)) {
             //disguised logic
             if (message.contains(sendchatthrough)) {
@@ -347,15 +342,14 @@ public class Black extends Util implements Base_Soul, Listener {
 
                     }
                     message = event.getMessage();
-                    Freedom.get_plugin().getLogger().info(message);
-                    send(player, message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                    send(player, message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
                 } else {
                     if (player.getPersistentDataContainer().has(keygen("cursed"))) {
                         String newmsg = curse(player,message);
                         event.setMessage(newmsg);
 
                     }
-                    send(dis,message + resend + "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                    send(dis,message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
                 }
 
                 event.setCancelled(true);
@@ -370,7 +364,6 @@ public class Black extends Util implements Base_Soul, Listener {
                 //resend
                 if (player.getPersistentDataContainer().has(keygen("cursed")) == true) {
                     String newmsg = curse(player, message);
-                    Freedom.get_plugin().getLogger().info(newmsg);
                     event.setMessage(newmsg);
 
                 }
@@ -382,7 +375,6 @@ public class Black extends Util implements Base_Soul, Listener {
     }
 
     public String curse(Player player, String message) {
-        Freedom.get_plugin().getLogger().info("Curse 1");
         String[] msg = message.split(" ");
         Orange.Cursetype cursetype = Orange.Cursetype.valueOf(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING));
         String newmsg = "";
@@ -390,7 +382,6 @@ public class Black extends Util implements Base_Soul, Listener {
         switch (cursetype) {
             case Cat:
                 for (String string : msg) {
-                    Freedom.get_plugin().getLogger().info("Cat Iteration");
                     newmsg = newmsg + "Meow ";
                 }
                 break;
@@ -401,7 +392,6 @@ public class Black extends Util implements Base_Soul, Listener {
 
                 break;
         }
-        Freedom.get_plugin().getLogger().info(newmsg);
         return newmsg;
     }
 
@@ -410,7 +400,6 @@ public class Black extends Util implements Base_Soul, Listener {
 
         String[] msg = message.split("\uD83E\uDDFF");
         event.setMessage(msg[0]);
-        Freedom.get_plugin().getLogger().info("Correct "+ msg[0] + " " + msg[1]);
         Player realPlayer = Bukkit.getPlayer(msg[1]);
         if (is_alive) {
             for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
@@ -470,7 +459,6 @@ public class Black extends Util implements Base_Soul, Listener {
         public void setInventory(Player player) {
             int max_players = Bukkit.getMaxPlayers();
             int remainder = max_players % 9;
-            Freedom.get_plugin().getLogger().info(String.valueOf(remainder));
             if (remainder == 0) {
                 inventory = Bukkit.createInventory(this,max_players);
             } else {

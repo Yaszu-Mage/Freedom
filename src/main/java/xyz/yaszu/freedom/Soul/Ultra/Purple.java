@@ -119,7 +119,7 @@ public class Purple extends Util implements Base_Soul {
         workingMeta.setItemModel(NamespacedKey.minecraft("rifle"));
         workingMeta.getPersistentDataContainer().set(keygen("rifle"), PersistentDataType.BOOLEAN, true);
         workingMeta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
-        workingMeta.displayName(dess("<color:#3700ff>My</color> rifle"));
+        workingMeta.displayName(dess("<color:#3700ff>Rifle</color>"));
         workingItem.setItemMeta(workingMeta);
         return workingItem;
     }
@@ -142,7 +142,7 @@ public class Purple extends Util implements Base_Soul {
             player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 10f, 0f);
 
-            handleSnipe(player).runTaskTimerAsynchronously(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
+            handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
             ability_two_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
             double seconds = (double) (ability_two_cooldown - (System.currentTimeMillis() - ability_two_cooldowns.get(player.getUniqueId()))) / 1000;

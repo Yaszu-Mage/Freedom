@@ -10,6 +10,7 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
 import xyz.yaszu.freedom.Items.Upgrades.Revival;
@@ -28,12 +29,16 @@ public class ItemListener extends Util implements Listener {
         if (item != null) {
             if (item.getPersistentDataContainer().has(keygen("item_id"))) {
                 String itemid = item.getPersistentDataContainer().get(keygen("item_id"), PersistentDataType.STRING);
+                Freedom.get_plugin().getLogger().info(itemid);
                 switch (itemid) {
                     case "evolutionstone":
                         evolve.effect(event.getPlayer(),event);
                         break;
                     case "rifle":
                         rifle.effect(event.getPlayer(),event);
+                        break;
+                    case "revival":
+                        revive.effect(event.getPlayer(), event);
                         break;
 
 

@@ -121,6 +121,7 @@ public class Life_and_Death implements org.bukkit.event.Listener{
             case 2:
                 player.sendActionBar(MiniMessage.miniMessage().deserialize("<dark_red><b>Yet, time marches on, though from the start.</b></dark_red>"));
             case 3:
+
                 player.sendActionBar(MiniMessage.miniMessage().deserialize("Your hear a voice whisper into your ear softly, <dark_red>\"Proceed.\"</dark_red>"));
             case 4:
                 int rarer = random.nextInt(1,1000);
