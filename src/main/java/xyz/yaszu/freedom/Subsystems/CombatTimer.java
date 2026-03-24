@@ -6,6 +6,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
@@ -17,6 +19,23 @@ import java.util.UUID;
 public class CombatTimer extends Util implements Listener {
     public static HashMap<UUID,Long> combatTimer = new HashMap<>();
     public static long combatTime = 30000;
+
+    @EventHandler
+    public void PlayerLeaveEvent(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (player.getPersistentDataContainer().has(keygen("combattimer"))) {
+            player.getPersistentDataContainer().remove(keygen("combattimer"));
+            ItemStack[] stack = player.getInventory().getContents();
+            player.getInventory().clear();
+            for (ItemStack item : stack) {
+                player.getWorld().dropItem(player.getLocation(),item);
+            }
+            player.damage(player.getHealth() * 10);
+            player.getWorld().sendMessage(dess(player.getName() +" combat logged."));
+
+        }
+    }
+
     @EventHandler
     public void PlayerDamagePlayer (EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player player) {
