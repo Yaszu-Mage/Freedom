@@ -20,6 +20,7 @@ import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 public class Util {
@@ -68,8 +69,9 @@ public class Util {
     }
 
     public Location rotpoint(Location center, double rot, Location rotatable) {
-        rotatable.setX((center.getX() * Math.sin(rot)) - (center.getZ() * Math.cos(rot)));
-        rotatable.setZ((center.getZ() * Math.sin(rot)) + (center.getX() * Math.cos(rot)));
+        Random random = new Random();
+
+        rotatable.add((center.getX() * Math.sin(rot)) - (center.getZ() * Math.cos(rot)),random.nextFloat(0,1),(center.getZ() * Math.sin(rot)) + (center.getX() * Math.cos(rot)));
         return rotatable;
     }
     public void drawParticleLine(Location start, Location end, World world) {
