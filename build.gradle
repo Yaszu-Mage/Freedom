@@ -29,6 +29,7 @@ repositories {
     }
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
     maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
+    maven { url = "https://maven.enginehub.org/repo/"}
 }
 
 dependencies {
@@ -37,6 +38,7 @@ dependencies {
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.0.1")
     compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.15")
     compileOnly ('net.skinsrestorer:skinsrestorer-api:15.11.0')
+    compileOnly ('com.sk89q.worldedit:worldedit-bukkit:7.4.0')
 
 
 }

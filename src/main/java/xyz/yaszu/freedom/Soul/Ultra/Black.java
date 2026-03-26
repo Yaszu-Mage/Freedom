@@ -8,6 +8,7 @@ import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,10 +30,7 @@ import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class Black extends Util implements Base_Soul, Listener {
 
@@ -119,6 +117,21 @@ public class Black extends Util implements Base_Soul, Listener {
                 if (tick >= 4) {
                     drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.GUST);
                     player.playSound(player.getLocation(),Sound.ENTITY_WIND_CHARGE_WIND_BURST,1,1);
+                    List<Entity> entities = player.getNearbyEntities(2,2,2);
+                    for (Entity entity : entities) {
+                        if (entity instanceof Player trustcheck) {
+                            if (player.getPersistentDataContainer().has(keygen("trustedby"))) {
+                                String trustedby = trustcheck.getPersistentDataContainer().get(keygen("trustedby"),PersistentDataType.STRING);
+                                if (trustedby.contains(player.getName())) {
+                                    drawCircle(trustcheck.getLocation(),1,player.getWorld(),32,Particle.REVERSE_PORTAL);
+                                    trustcheck.teleport(loadingLocation);
+                                    drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
+                                    player.getWorld().playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);
+                                }
+
+                            }
+                        }
+                    }
                     player.teleport(loadingLocation);
                     drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
                     player.playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);

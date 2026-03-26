@@ -247,7 +247,7 @@ public class Orange extends Util implements Base_Soul, Listener {
 
         }
     }
-
+//TODO redo logic for removing curses
     public void curse(Player baller,String curser) {
         baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
         baller.getPersistentDataContainer().set(keygen("cursedby"),PersistentDataType.STRING,curser);
