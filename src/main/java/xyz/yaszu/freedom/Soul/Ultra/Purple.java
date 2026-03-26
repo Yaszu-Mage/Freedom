@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Soul.Ultra;
 
+import io.papermc.paper.entity.LookAnchor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
@@ -99,6 +100,13 @@ public class Purple extends Util implements Base_Soul {
         }
 
         player.teleport(location);
+            try {
+                if (player.getNearbyEntities(3,5,3).size() == 1) {
+                    player.lookAt(player.getNearbyEntities(1, 1, 1).get(0).getLocation(), LookAnchor.EYES);
+                }
+            } catch (IndexOutOfBoundsException ignored) {
+
+            }
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
         drawCircle(player.getLocation().add(0,1,0), 1, player.getWorld(), 100);
         ability_one_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
