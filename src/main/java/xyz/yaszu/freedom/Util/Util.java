@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 
 import java.util.Optional;
@@ -44,6 +45,46 @@ public class Util {
             world.spawnParticle(particle, pointLocation, 1);
         }
     }
+
+    // Example: Draw a 5x5 square on the ground around the player
+    public void drawSquare(Location center, double size, double rot) {
+        size = size / 2; // Half-size for a 5x5
+
+        // Four corners
+        Location c1 = center.clone().add(-size, 0, -size);
+        Location c2 = center.clone().add(size, 0, -size);
+        Location c3 = center.clone().add(size, 0, size);
+        Location c4 = center.clone().add(-size, 0, size);
+        //add rot
+        c1 = rotpoint(center,rot,c1);
+        c2 = rotpoint(center,rot,c2);
+        c3 = rotpoint(center,rot,c3);
+        c4 = rotpoint(center,rot,c4);
+        // Draw lines between corners (simplified)
+        drawParticleLine(c1, c2, center.getWorld());
+        drawParticleLine(c2, c3, center.getWorld());
+        drawParticleLine(c3, c4, center.getWorld());
+        drawParticleLine(c4, c1, center.getWorld());
+    }
+
+    public Location rotpoint(Location center, double rot, Location rotatable) {
+        rotatable.setX((center.getX() * Math.sin(rot)) - (center.getZ() * Math.cos(rot)));
+        rotatable.setZ((center.getZ() * Math.sin(rot)) + (center.getX() * Math.cos(rot)));
+        return rotatable;
+    }
+    public void drawParticleLine(Location start, Location end, World world) {
+        double space = 0.2; // Density of particles
+        double distance = start.distance(end);
+        Vector p1 = start.toVector();
+        Vector p2 = end.toVector();
+        Vector vector = p2.clone().subtract(p1).normalize().multiply(space);
+
+        for (double length = 0; length < distance; length += space) {
+            p1.add(vector);
+            world.spawnParticle(Particle.FLAME, p1.toLocation(world), 1, 0, 0, 0, 0);
+        }
+    }
+
     public void drawverticleCircle(Location center, double radius, World world, int points,Particle particle) {
         for (int i = 0; i < points; i++) {
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians

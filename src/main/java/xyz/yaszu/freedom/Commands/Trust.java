@@ -26,6 +26,21 @@ import xyz.yaszu.freedom.Util.Util;
 
 public class Trust {
     public static Util util = new Util();
+
+    public static LiteralCommandNode<CommandSourceStack> test() {
+        return Commands.literal("test").executes(
+                ctx -> {
+
+                    if ( ctx.getSource().getSender() instanceof Player target) {
+                        util.drawSquare(target.getLocation(),5,90);
+                        util.drawSquare(target.getLocation(),10,30);
+                    }
+
+                    return Command.SINGLE_SUCCESS;
+                }
+        ).build();
+    }
+
     public static LiteralCommandNode<CommandSourceStack> playerArgument() {
         return Commands.literal("fling")
                 .then(Commands.argument("target", ArgumentTypes.player())

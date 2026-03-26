@@ -26,4 +26,6 @@ commands:
     description: "Revive"
   Passive:
     description: "Passive"
+  test:
+    description: "Test"
 softdepend: [ "SkinsRestorer" ]

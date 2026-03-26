@@ -99,6 +99,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.Active_Passive());
             commands.registrar().register(Trust.summonFriendly());
             commands.registrar().register(Trust.Passive());
+            commands.registrar().register(Trust.test());
         });
         removeOldFollowers();
         ItemListener.registeritems();
