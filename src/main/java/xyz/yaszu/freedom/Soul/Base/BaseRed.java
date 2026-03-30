@@ -67,8 +67,8 @@ public class BaseRed extends Util implements Base_Soul {
 
     @Override
     public Component AbilityOneDescription() {
-        //TODO improve description
-        return dess("   <color:#ff6a00>Dash</color> forward towards your <dark_red>enemies</dark_red>\n");
+
+        return dess("   <color:#ff6a00>Dash</color> launches yourself forward with a boost of flame towards your <dark_red>enemies</dark_red>\n");
     }
 
     @Override

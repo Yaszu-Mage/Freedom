@@ -381,7 +381,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
                 }
                 message = event.getMessage();
-                send(player,message + resend+ "\uD83E\uDDFF" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                send(player,message + resend+ "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
                 event.setCancelled(true);
             }
         }
@@ -411,7 +411,9 @@ public class Black extends Util implements Base_Soul, Listener {
     public static void tabDistance(AsyncPlayerChatEvent event, String message, boolean is_alive) {
         message = message.replace(sendchatthrough,"");
 
-        String[] msg = message.split("\uD83E\uDDFF");
+        String[] msg = message.split("ニ");
+
+        event.setMessage(msg[0]);
         event.setMessage(msg[0]);
         Player realPlayer = Bukkit.getPlayer(msg[1]);
         if (is_alive) {
@@ -424,6 +426,8 @@ public class Black extends Util implements Base_Soul, Listener {
                                 instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
                             } else if (msg[0].contains("Ribbit")) {
                                 instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
+                            } else if (msg[0].contains("Tnt")) {
+                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
                             } else {
                                 instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
                             }
@@ -543,6 +547,32 @@ public class Black extends Util implements Base_Soul, Listener {
                 player.addPotionEffect(PotionEffectType.SPEED.createEffect(PotionEffect.INFINITE_DURATION,1));
                 player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(PotionEffect.INFINITE_DURATION,1));
             }
+            switch (soulType) {
+                case BaseRed,Red -> {
+                    player.displayName(dess("<Red>").append(player.displayName()));
+                }
+                case BaseGreen,Green -> {
+                    player.displayName(dess("<Green>").append(player.displayName()));
+                }
+                case BaseBlue,Blue -> {
+                    player.displayName(dess("<Blue>").append(player.displayName()));
+                }
+                case BasePurple,Purple -> {
+                    player.displayName(dess("<dark_purple>").append(player.displayName()));
+                }
+                case Black,BaseBlack -> {
+                    player.displayName(dess("<color:#ffffff>").append(player.displayName()));
+                }
+                case Orange,BaseOrange -> {
+                    player.displayName(dess("<color:#ff6f00> ").append(player.displayName()));
+                }
+                case Yellow,BaseYellow -> {
+                    player.displayName(dess("<gold>").append(player.displayName()));
+                }
+                case None,BaseNone -> {
+                    player.displayName(dess("<color:#555555>").append(player.displayName()));
+                }
+            }
     }
     }
 
@@ -561,6 +591,7 @@ public class Black extends Util implements Base_Soul, Listener {
     public void onPlayerJoin(PlayerJoinEvent event) throws MineSkinException, DataRequestException {
         setSkinByName(event.getPlayer(),event.getPlayer().getName());
         Player player = event.getPlayer();
+        join(player);
         if (player.getPersistentDataContainer().has(keygen("soul"))) {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         if (soulType == SoulTypes.Black) {

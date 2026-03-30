@@ -245,6 +245,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             baller.getPersistentDataContainer().remove(keygen("cursed"));
             baller.removePotionEffect(PotionEffectType.WEAKNESS);
             String curser = baller.getPersistentDataContainer().get(keygen("cursedby"), PersistentDataType.STRING);
+            if (curser != null) {
             if (Bukkit.getPlayer(curser) != null) {
                 Bukkit.getPlayer(curser).getPersistentDataContainer().remove(keygen("cancurse"));
             }
@@ -264,6 +265,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             }
 
         }
+    }
     }
 
     public void curse(Player baller,String curser) {

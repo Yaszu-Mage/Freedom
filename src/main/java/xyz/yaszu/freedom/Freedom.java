@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.yaszu.freedom.Alchemy.Alchemy;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
@@ -43,7 +44,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     public static Plugin get_plugin() {
         return Bukkit.getPluginManager().getPlugin("Freedom");
     }
-    public static int version = 0;
+    public static int version = 6942067;
     @EventHandler
     public void WorldLoadEvent(WorldLoadEvent event) {
         if (System.currentTimeMillis() <= start_time + 10000) {
@@ -83,7 +84,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new ItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new UltraselectionUi(), this);
         Bukkit.getPluginManager().registerEvents(new CombatTimer(),this);
-        version = random.nextInt(0,9999);
+        Bukkit.getPluginManager().registerEvents(new Alchemy(), this);
+
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
@@ -104,6 +106,20 @@ public final class Freedom extends JavaPlugin implements Listener {
         removeOldFollowers();
         ItemListener.registeritems();
         start_time = System.currentTimeMillis();
+        version = setVer();
+        getVer();
+    }
+
+
+    public static int setVer()
+    {
+        Random random = new Random();
+        int rand = random.nextInt(100000,9999999);
+        return rand;
+    }
+    public static void getVer()
+    {
+        version = setVer();
     }
 
     public static Util util = new Util();

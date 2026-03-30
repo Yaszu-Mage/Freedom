@@ -165,6 +165,7 @@ public class soulListener extends Util implements Listener {
                 if (SoulPoints >= 5 && player.isSneaking()) {
                     black.playerSneakEvent(player);
                 }
+                break;
             case Green:
                 if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
 
@@ -190,6 +191,7 @@ public class soulListener extends Util implements Listener {
                 if (SoulPoints >= 5 && player.isSneaking()) {
                     baseblack.playerSneakEvent(player);
                 }
+                break;
             case BaseGreen:
                 if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
 
@@ -491,6 +493,14 @@ public class soulListener extends Util implements Listener {
                 break;
             case Yellow:
                 yellow.AbilityTwo(player,player.getInventory().getItem(0));
+                break;
+            case BaseRed:
+                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                    //Do stuff
+                    basered.AbilityTwo(player,drop);
+                    event.setCancelled(true);
+
+                }
                 break;
         }
     }

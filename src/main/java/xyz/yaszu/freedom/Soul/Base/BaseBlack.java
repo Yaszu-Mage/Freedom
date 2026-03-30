@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
@@ -389,54 +390,6 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
         return newmsg;
     }
 
-    public static void tabDistance(AsyncPlayerChatEvent event, String message, boolean is_alive) {
-        message = message.replace(sendchatthrough,"");
-
-        String[] msg = message.split("\uD83E\uDDFF");
-        event.setMessage(msg[0]);
-        Freedom.get_plugin().getLogger().info("Correct "+ msg[0] + " " + msg[1]);
-        Player realPlayer = Bukkit.getPlayer(msg[1]);
-        if (is_alive) {
-            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
-                if (realPlayer != null) {
-                    if (realPlayer.isOnline()) {
-                        if (realPlayer.canSee(instancedPlayer)) {
-                            event.getRecipients().add(instancedPlayer);
-                            if (msg[0].contains("Meow")) {
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
-                            } else if (msg[0].contains("Ribbit")) {
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
-                            } else {
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
-                            }
-
-                        }
-                    }
-
-                }
-            }
-        } else {
-            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
-                if (!Life_and_Death.is_alive(instancedPlayer)) {
-                    if (realPlayer != null) {
-                        if (realPlayer.isOnline()) {
-                            if (realPlayer.canSee(instancedPlayer)) {
-                                event.getRecipients().add(instancedPlayer);
-                                if (msg[0].contains("Meow")) {
-                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
-                                } else if (msg[0].contains("Ribbit")) {
-                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
-                                } else {
-                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-    }
 
     public void say(Player dis, String message){
             dis.chat(message.replace(resend,sendchatthrough));
@@ -540,6 +493,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
         setSkinByName(event.getPlayer(),event.getPlayer().getName());
         Player player = event.getPlayer();
         if (player.getPersistentDataContainer().has(keygen("soul"))) {
+            Black.join(player);
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         if (soulType == SoulTypes.Black) {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {

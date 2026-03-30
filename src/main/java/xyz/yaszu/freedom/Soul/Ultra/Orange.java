@@ -235,9 +235,11 @@ public class Orange extends Util implements Base_Soul, Listener {
             } else {
                 Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"), PersistentDataType.STRING, curser);
             }
-            curses.get(baller.getUniqueId()).removeDisguise();
-            curses.remove(baller.getUniqueId());
-            baller.getPersistentDataContainer().remove(keygen("cursedby"));
+            if (curses.containsKey(baller.getUniqueId())) {
+                curses.get(baller.getUniqueId()).removeDisguise();
+                curses.remove(baller.getUniqueId());
+                baller.getPersistentDataContainer().remove(keygen("cursedby"));
+            }
         } else {
             if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("uncursor"))) {
                 Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("uncursor"),PersistentDataType.STRING,Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("uncursor"),PersistentDataType.STRING)+baller.getName());
