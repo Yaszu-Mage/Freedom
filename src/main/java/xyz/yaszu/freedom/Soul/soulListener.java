@@ -105,10 +105,12 @@ public class soulListener extends Util implements Listener {
                 player.setWalkSpeed(0);
                 player.setFlySpeed(0);
         }
+            if (!player.getPersistentDataContainer().has(keygen("ComorAction"))) {
+                player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, true);
+            }
         if (player.getPersistentDataContainer().has(keygen("cursed"))) {
             if (Objects.equals(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING), "Frog")) {
-                Orange.recurse(player);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
+                Orange.uncurse(player);
             }
         }
     }

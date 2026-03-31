@@ -182,7 +182,7 @@ public class Orange extends Util implements Base_Soul, Listener {
                 }
             }
         } else {
-            recurse(event.getPlayer());
+            uncurse(event.getPlayer());
         }
 
     }
@@ -223,7 +223,7 @@ public class Orange extends Util implements Base_Soul, Listener {
     }
 
 
-    public void uncurse(Player baller) {
+    public static void uncurse(Player baller) {
         if (baller.isOnline()) {
 
 
@@ -270,21 +270,21 @@ public class Orange extends Util implements Base_Soul, Listener {
             }
         }.runTaskLater(Freedom.get_plugin(),5020);
     }
-    public static void recurse(Player baller) {
-        baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
-
-        baller.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
-        if (curses.get(baller.getUniqueId()) == null) {
-            MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
-            mobDisguise.addPlayer(baller);
-            mobDisguise.setEntity(baller);
-            mobDisguise.startDisguise();
-            FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
-            watcher.setVariant(Frog.Variant.COLD);
-            curses.put(baller.getUniqueId(),mobDisguise);
-        }
-
-    }
+//    public static void recurse(Player baller) {
+//        baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
+//
+//        baller.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
+//        if (curses.get(baller.getUniqueId()) == null) {
+//            MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
+//            mobDisguise.addPlayer(baller);
+//            mobDisguise.setEntity(baller);
+//            mobDisguise.startDisguise();
+//            FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
+//            watcher.setVariant(Frog.Variant.COLD);
+//            curses.put(baller.getUniqueId(),mobDisguise);
+//        }
+//
+//    }
 
     @Override
     public Component Passive_Description() {

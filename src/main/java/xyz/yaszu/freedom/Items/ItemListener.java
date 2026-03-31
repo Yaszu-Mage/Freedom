@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
+import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
 import xyz.yaszu.freedom.Items.Upgrades.Revival;
 import xyz.yaszu.freedom.Util.Util;
@@ -23,6 +24,7 @@ public class ItemListener extends Util implements Listener {
     static Evolve evolve = new Evolve();
     static Revival revive = new Revival();
     static Rifle rifle = new Rifle();
+    static TimePiece timepiece = new TimePiece();
     @EventHandler
     public void playerinteractevent(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
@@ -69,6 +71,7 @@ public class ItemListener extends Util implements Listener {
         Bukkit.addRecipe(evolve.recipe());
         Bukkit.addRecipe(rifle.recipe());
         Bukkit.addRecipe(revive.recipe());
+        Bukkit.addRecipe(timepiece.recipe());
     }
 
 }

@@ -23,6 +23,7 @@ import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
+import static xyz.yaszu.freedom.Util.Util.dess;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
 public class Trust {
@@ -33,12 +34,12 @@ public class Trust {
                 ctx -> {
 
                     if ( ctx.getSource().getSender() instanceof Player target) {
+                        if (!target.isOp()) return Command.SINGLE_SUCCESS;
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
                         Location loc = target.getLocation();
                         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                       util.PortalParticleLifespan(loc.clone().add(0,2,0),loc.clone().add(0,50,4));
-                        util.PortalParticleLifespan(loc.clone().add(0,50,0),loc.clone().add(0,2,4));
+                       util.createRemoteExplosionParticles(loc,15,16);
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -54,7 +55,7 @@ public class Trust {
                         .executes(ctx -> {
                             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
                             final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-
+                            if (!target.isOp()) return Command.SINGLE_SUCCESS;
                             target.setVelocity(new Vector(0, 100, 0));
                             target.sendRichMessage("You will fly.");
 
@@ -106,7 +107,28 @@ public class Trust {
                 }
         ).build();
     }
-
+    public static LiteralCommandNode<CommandSourceStack> rules() {
+        return Commands.literal("rules").executes(
+                ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        player.sendMessage(dess("<shadow:#000000FF><b><green>Welcome to <Blue>Meowtin</Blue> </green>- <aqua>Catboy Central!"));
+                        player.sendMessage(dess("<black><obf>RULESRULESRULESRULESRULESRULESRULESRULESR</obf></black><shadow:#000000FF><b>"));
+                        player.sendMessage(dess("<shadow:#000000FF><b><u><Red>RULES</u>"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>1. No Discrimination based on race/sexuality"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>2. Do not put other people down"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>3. No Hacking/Cheating/Exploiting (etc.)"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>4. Be respectful to all players "));
+                        player.sendMessage(dess("<shadow:#000000FF><b>5. No major griefing (ex. destroying entire towns) (yes that means if you nuke one person that's fine)"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>6. No Innapropiate Content (ex. Genitalia buildings, skins, paintings, usernames)"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>7. No account abuse (selling, trading, sharing accounts)"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>8. No abusive language, misleading information, or any kind of spam</shadow>"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>9. No combat logging</shadow>"));
+                        player.sendMessage(dess("<black><obf>RULESRULESRULESRULESRULESRULESRULESRULESRULESR</black>"));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }
+        ).build();
+    }
 
     public static LiteralCommandNode<CommandSourceStack> Active_Passive() {
         return Commands.literal("activepassive").executes(
@@ -138,7 +160,9 @@ public class Trust {
 
     public static LiteralCommandNode<CommandSourceStack> summonFriendly(){
         return Commands.literal("ally").executes(ctx -> {
+
             final Player sender = (Player) ctx.getSource().getSender();
+            if (!sender.isOp()) return Command.SINGLE_SUCCESS;
             BetterModelPlatform platform = BetterModel.platform();
             Entity spawned = sender.getWorld().createEntity(sender.getLocation(), Wolf.class);
 
@@ -189,6 +213,7 @@ public class Trust {
                         .executes(ctx -> {
                             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
                             final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                            if (!target.isOp()) return Command.SINGLE_SUCCESS;
                             final Player sender = (Player) ctx.getSource().getSender();
                             Life_and_Death.revive_player(target,sender.getLocation());
                             return Command.SINGLE_SUCCESS;

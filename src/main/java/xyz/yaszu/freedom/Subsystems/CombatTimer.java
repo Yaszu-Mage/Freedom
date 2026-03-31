@@ -28,7 +28,10 @@ public class CombatTimer extends Util implements Listener {
             ItemStack[] stack = player.getInventory().getContents();
             player.getInventory().clear();
             for (ItemStack item : stack) {
-                player.getWorld().dropItem(player.getLocation(),item);
+                if (item != null) {
+                    player.getWorld().dropItem(player.getLocation(),item);
+                }
+
             }
             player.damage(player.getHealth() * 10);
             player.getWorld().sendMessage(dess(player.getName() +" combat logged."));
@@ -38,12 +41,11 @@ public class CombatTimer extends Util implements Listener {
 
     @EventHandler
     public void PlayerDamagePlayer (EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Player player) {
+        if (event.getEntity() instanceof Player player && event.getDamager() instanceof Player damager) {
             combatcheck(player);
+            combatcheck(damager);
         }
-        if (event.getEntity() instanceof Player player) {
-            combatcheck(player);
-        }
+
     }
 
     public void combatcheck(Player player) {

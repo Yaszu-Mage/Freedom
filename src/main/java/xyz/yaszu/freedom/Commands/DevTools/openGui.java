@@ -13,12 +13,10 @@ public class openGui implements BasicCommand {
     public void execute(CommandSourceStack commandSourceStack, String[] args) {
         if (commandSourceStack.getSender() instanceof Player) {
             Player player = (Player) commandSourceStack.getSender();
+            if (!player.isOp()) return;
             Purple purple = new Purple();
             BaseRed red = new BaseRed();
             selectionUi.open_UI(player,red);
-            player.give(red.Related_Item());
-            player.give(purple.Related_Item());
-
         }
     }
 }

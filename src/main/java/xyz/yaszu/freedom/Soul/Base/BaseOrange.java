@@ -188,7 +188,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
         } else {
             Player player = event.getPlayer();
             if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                recurse(event.getPlayer());
+                uncurse(event.getPlayer());
             }
         }
 
@@ -288,21 +288,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             }
         }.runTaskLater(Freedom.get_plugin(),2620);
     }
-    public static void recurse(Player baller) {
-        baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
 
-        baller.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
-        if (curses.get(baller.getUniqueId()) == null) {
-            MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
-            mobDisguise.addPlayer(baller);
-            mobDisguise.setEntity(baller);
-            mobDisguise.startDisguise();
-            FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
-            watcher.setVariant(Frog.Variant.COLD);
-            curses.put(baller.getUniqueId(),mobDisguise);
-        }
-
-    }
 
     @Override
     public Component Passive_Description() {

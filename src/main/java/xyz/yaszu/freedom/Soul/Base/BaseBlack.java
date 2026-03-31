@@ -269,11 +269,11 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             }
         }
         if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
-            Freedom.get_plugin().getLogger().info(String.valueOf(originalProfiles.get(player.getUniqueId())));
-            if (originalProfiles.get(player.getUniqueId()) != null) {
+            Freedom.get_plugin().getLogger().info(String.valueOf(Black.originalProfiles.get(player.getUniqueId())));
+            if (Black.originalProfiles.get(player.getUniqueId()) != null) {
                 Freedom.get_plugin().getLogger().info("Removing Disguises!");
                 DisguiseAPI.undisguiseToAll(player);
-                PlayerDisguise disguise =originalProfiles.get(player.getUniqueId());
+                PlayerDisguise disguise =Black.originalProfiles.get(player.getUniqueId());
                 player.getWorld();
                 World world = player.getWorld();
                 Location location = player.getLocation();
@@ -287,14 +287,14 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                     player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.10, AttributeModifier.Operation.ADD_NUMBER));
                 }
                 setSkinByName(player,player.getName());
-                originalProfiles.remove(player.getUniqueId());
+                Black.originalProfiles.remove(player.getUniqueId());
             }
             player.getPersistentDataContainer().remove(keygen("disguised"));
             player.sendActionBar(dess("Disguise Removed."));
         }
     }
     public static Random random = new Random();
-    public static HashMap<UUID,PlayerDisguise> originalProfiles = new HashMap<>();
+    public static HashMap<UUID,PlayerDisguise> originalProfiles = Black.originalProfiles;
     @EventHandler
     public void InventoryClickEvent (InventoryClickEvent event) throws MineSkinException, DataRequestException {
         Inventory inventory = event.getInventory();
@@ -354,46 +354,10 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             event.setCancelled(true);
         }
     }
-    public BukkitRunnable send(Player player,String Msg) {
-        return new BukkitRunnable() {
-            @Override
-            public void run() {
-                say(player,Msg);
-            }
-        };
-    }
-    public static String sendchatthrough = String.valueOf(Freedom.version-1);
-    public static String resend = String.valueOf(Freedom.version);
-
-    public static ArrayList<Player> successful_message = new ArrayList<>();
-    public String curse(Player player, String message) {
-        Freedom.get_plugin().getLogger().info("Curse 1");
-        String[] msg = message.split(" ");
-        BaseOrange.Cursetype cursetype = BaseOrange.Cursetype.valueOf(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING));
-        String newmsg = "";
-
-        switch (cursetype) {
-            case Cat:
-                for (String string : msg) {
-                    Freedom.get_plugin().getLogger().info("Cat Iteration");
-                    newmsg = newmsg + "Meow ";
-                }
-                break;
-            case Frog:
-                for (String string : msg) {
-                    newmsg = newmsg + " Ribbit";
-                }
-
-                break;
-        }
-        Freedom.get_plugin().getLogger().info(newmsg);
-        return newmsg;
-    }
 
 
-    public void say(Player dis, String message){
-            dis.chat(message.replace(resend,sendchatthrough));
-    }
+
+
 
     public HashMap<Player,InventoryGui> inventoryGui = new HashMap<>();
 

@@ -1,19 +1,31 @@
 package xyz.yaszu.freedom;
 
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.world.World;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.skinsrestorer.api.SkinsRestorerProvider;
-import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Alchemy.Alchemy;
+import xyz.yaszu.freedom.Alchemy.voidGenerator;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
@@ -32,8 +44,12 @@ import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
 import java.util.Random;
 
+import static xyz.yaszu.freedom.Alchemy.Alchemy.loadSchematic;
 import static xyz.yaszu.freedom.Soul.Ultra.Green.removeOldFollowers;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
@@ -56,6 +72,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event){
         removeOldFollowers();
+        event.getPlayer().performCommand("rules");
         event.getPlayer().getPersistentDataContainer().set(keygen("sprite_active"),PersistentDataType.BOOLEAN,false);
     }
 
@@ -69,6 +86,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         //Enable Listeners
         Util.skinsRestorerAPI = SkinsRestorerProvider.get();
         soulListener soulListener = new soulListener();
+        Bukkit.getPluginManager().registerEvents(this,this);
         Bukkit.getPluginManager().registerEvents(soulListener,this);
         Bukkit.getPluginManager().registerEvents(new selectionGui(), this);
         Bukkit.getPluginManager().registerEvents(new selectionUi(),this);
@@ -102,12 +120,14 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.summonFriendly());
             commands.registrar().register(Trust.Passive());
             commands.registrar().register(Trust.test());
+            commands.registrar().register(Trust.rules());
         });
         removeOldFollowers();
         ItemListener.registeritems();
         start_time = System.currentTimeMillis();
         version = setVer();
         getVer();
+        createVoid();
     }
 
 
@@ -134,5 +154,55 @@ public final class Freedom extends JavaPlugin implements Listener {
     public void onDisable() {
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent event) throws IOException, WorldEditException {
+        if (event.getWorld() == Bukkit.getWorld("void") && !event.getChunk().getPersistentDataContainer().has(keygen("void"))) {
+            event.getChunk().getPersistentDataContainer().set(keygen("void"),PersistentDataType.BOOLEAN,true);
+            int currentrand = random.nextInt(1000);
+            Freedom.get_plugin().getLogger().info(String.valueOf(currentrand));
+            if (currentrand <= 50) {
+                File ritualschem;
+                int rand = random.nextInt(0,4);
+                switch (rand) {
+                    case 1 -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland2.schem").toFile();
+                    case 2 -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland3.schem").toFile();
+                    case 3 -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland4.schem").toFile();
+                    default -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland.schem").toFile();
+                }
+                Freedom.get_plugin().getLogger().info(String.valueOf(Freedom.get_plugin().getDataFolder().toPath()));
+                int x = (event.getChunk().getX() + random.nextInt(0,16)) * 16;
+                int z = (event.getChunk().getZ() + random.nextInt(0,16)) * 16;
+                int y = random.nextInt(0,128) * 16;
+                Clipboard load = loadSchematic(ritualschem);
+                World adapter = BukkitAdapter.adapt(Bukkit.getWorld("void"));
+                try (EditSession editSession = WorldEdit.getInstance().newEditSession(adapter)) {
+                    Operation operation = new ClipboardHolder(load)
+                            .createPaste(editSession)
+                            .to(BlockVector3.at(x, y, z))
+                            // configure here
+                            .build();
+                    Operations.complete(operation);
+                }
+
+            }
+        }
+    }
+
+
+    public void createVoid() {
+        WorldCreator worldCreator = new WorldCreator("void");
+        worldCreator.generator(new voidGenerator());
+        worldCreator.createWorld();
+        Objects.requireNonNull(Bukkit.getWorld("void")).setTime(17000);
+        Objects.requireNonNull(Bukkit.getWorld("void")).setStorm(false);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Objects.requireNonNull(Bukkit.getWorld("void")).setTime(17000);
+                Util.drawEye(new Location(Bukkit.getWorld("void"),0,-63,0),1);
+            }
+        }.runTaskTimer(this,0,20);
     }
 }

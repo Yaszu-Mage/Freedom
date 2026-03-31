@@ -28,4 +28,6 @@ commands:
     description: "Passive"
   test:
     description: "Test"
+  rules:
+    description: "Rules"
 softdepend: [ "SkinsRestorer" ]

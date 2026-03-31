@@ -283,6 +283,7 @@ public class Black extends Util implements Base_Soul, Listener {
             player.playerListName(baller.name());
             setSkinByName(player,baller.getName());
             originalProfiles.put(player.getUniqueId(),disguise);
+
             World world = player.getWorld();
             Location location = player.getLocation();
             //VFX
@@ -330,8 +331,8 @@ public class Black extends Util implements Base_Soul, Listener {
             }
         };
     }
-    public static String sendchatthrough = String.valueOf(Freedom.version-1);
-    public static String resend = String.valueOf(Freedom.version);
+    public static String sendchatthrough = String.valueOf(Freedom.version);
+    public static String resend = String.valueOf(Freedom.version-1);
 
     public static ArrayList<Player> successful_message = new ArrayList<>();
     @EventHandler
@@ -344,29 +345,41 @@ public class Black extends Util implements Base_Soul, Listener {
             //disguised logic
             if (message.contains(sendchatthrough)) {
                 //continue
+                Freedom.get_plugin().getLogger().info("CORRECT SENT GO ON FORWARD");
                 tabDistance(event, message, is_alive);
             } else {
                 //resend
-                Player dis = Bukkit.getPlayer(originalProfiles.get(player.getUniqueId()).getName());
-                if (dis == null) {
-                    if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                        String newmsg = curse(player,message);
-                        event.setMessage(newmsg);
+                Player dis = null;
+                Freedom.get_plugin().getLogger().info(originalProfiles.toString());
+                Freedom.get_plugin().getLogger().info(originalProfiles.get(player.getUniqueId()).getName());
+                if (originalProfiles.get(player.getUniqueId()) != null) {
 
-                    }
-                    message = event.getMessage();
-                    send(player, message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
-                } else {
-                    if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                        String newmsg = curse(player,message);
-                        event.setMessage(newmsg);
-
-                    }
-                    send(dis,message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
+                    dis = Bukkit.getPlayer(originalProfiles.get(player.getUniqueId()).getName());
+                    Freedom.get_plugin().getLogger().info(dis.getName());
                 }
 
+                    if (dis == null) {
+                        Freedom.get_plugin().getLogger().info("DIS IS NULL");
+                        if (player.getPersistentDataContainer().has(keygen("cursed"))) {
+                            Freedom.get_plugin().getLogger().info("NOT Cursed");
+                            String newmsg = curse(player, message);
+                            event.setMessage(newmsg);
+
+                        }
+                        message = event.getMessage();
+                        send(player, message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(), 1);
+                    } else {
+                        Freedom.get_plugin().getLogger().info("Disguised Player: " + dis.getName());
+                        if (player.getPersistentDataContainer().has(keygen("cursed"))) {
+                            Freedom.get_plugin().getLogger().info("Cursed");
+                            String newmsg = curse(player, message);
+                            event.setMessage(newmsg);
+
+                        }
+                        send(dis, message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(), 1);
+                    }
+                }
                 event.setCancelled(true);
-            }
         } else {
 
 
@@ -409,13 +422,15 @@ public class Black extends Util implements Base_Soul, Listener {
     }
 
     public static void tabDistance(AsyncPlayerChatEvent event, String message, boolean is_alive) {
-        message = message.replace(sendchatthrough,"");
+        Freedom.get_plugin().getLogger().info("TAB DISTANCE " + message);
+        message = message.replace(sendchatthrough," ");
 
         String[] msg = message.split("ニ");
 
         event.setMessage(msg[0]);
         event.setMessage(msg[0]);
         Player realPlayer = Bukkit.getPlayer(msg[1]);
+        event.getRecipients().add(realPlayer);
         if (is_alive) {
             for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
                 if (realPlayer != null) {
@@ -462,6 +477,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
     public void say(Player dis, String message){
             dis.chat(message.replace(resend,sendchatthrough));
+            Freedom.get_plugin().getLogger().info("Sent " + dis.getName() + "MSG: " + message.replace(resend,sendchatthrough));
     }
 
     public HashMap<Player,InventoryGui> inventoryGui = new HashMap<>();

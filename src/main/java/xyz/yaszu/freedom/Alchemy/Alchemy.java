@@ -19,6 +19,8 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -50,98 +52,28 @@ public class Alchemy extends Util implements Listener {
 
     }
 
-    public enum ritualkeywords  {
-        soul,
-        amplification,
-        destruction,
-        location,
-        teleport,
-        area,
-        effect,
-        regeneration,
-        haste,
-        speed,
-        jump,
-        fire,
-        water,
-        lightning,
-        poison,
-        wither,
-        strength,
-        weakness,
-        range,
-    }
-
-    public class ritualkeywordConstructor {
-        String[] keywords = {};
-        public PotionEffect[] effects;
-        public ritualkeywordConstructor(String[] keywords) {
-            this.keywords = keywords;
-            applyKeywords();
-        }
-        public void applyKeywords() {
-            for (String keyword : keywords) {
-                keyword = keyword.toLowerCase();
-                ritualkeywords active_keyword = ritualkeywords.valueOf(keyword);
-                switch (active_keyword) {
-                    case soul:
-                        //do soul stuff IDK
-                        break;
-                    case amplification:
-                        //amplify previous keyword
-                        break;
-                    case destruction:
-                        //destroy location after keyword
-                        break;
-                    case teleport:
-                        //create portal to location after keyword
-                        break;
-                    case area:
-                        //create area that has the effect after keyword
-                        break;
-                    case effect:
-                        //create effect for previous keyword
-                        break;
-                    case regeneration,fire,water,lightning,poison,wither,strength,weakness,haste,speed,jump:
-                        //effect for the previous keyword
-                        break;
-                    case range:
-                        //range of previous keyword
-                        break;
-                }
+    @EventHandler
+    public void onPlayerInteractWrittenBook(PlayerDropItemEvent event) {
+        ItemStack item = event.getItemDrop().getItemStack();
+        if (item != null && !event.getPlayer().isSneaking()){
+            if (item.getItemMeta() instanceof BookMeta bookMeta){
+                String text = String.join(" ", bookMeta.getPages());
+                SpellCompiler.cost(text,event.getPlayer());
+                event.setCancelled(true);
             }
-        }
-        public ritualkeywordConstructor(String keywords) {
-            this.keywords = keywords.split(" ");
-            applyKeywords();
-        }
-    }
-    public enum ritualtype {
-        soul,
-        amplification,
-        destruction,
-        teleport,
-        area,
-        effect,
-        range
-    }
-    public class ritualeffecttype {
-        public ritualtype type = ritualtype.area;
-        public int value = 0;
-        public PotionEffect effect;
-        public Location teleportlocation;
-        public ritualeffecttype(ritualtype type, PotionEffect pot, int range) {
-            this.effect = pot;
-            this.value = range;
-        }
-        public ritualeffecttype(ritualtype type, Location location) {
-            this.type = type;
-            this.teleportlocation = location;
         }
     }
 
     @EventHandler
     public void LecturnInterActEvent(PlayerInsertLecternBookEvent event) throws IOException, WorldEditException {
+        ItemStack book = event.getBook();
+        if ((book.getItemMeta() instanceof BookMeta bookMeta)) {
+            if (bookMeta.getAuthor() == null) {
+                return;
+            }
+        } else {
+            return;
+        }
         Player target = event.getPlayer();
         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         event.getBook();
@@ -158,8 +90,11 @@ public class Alchemy extends Util implements Listener {
                 Freedom.get_plugin().getLogger().info("Ritual structure matches!");
                 BookMeta meta = (BookMeta) book.getItemMeta();
                 String text = String.join(" ", meta.getPages());
-                if (!SpellCompiler.castSpell(text, centerLocation, player)) {
+                int Casted = SpellCompiler.castSpell(text, centerLocation, player);
+                if (Casted < 10000) {
                     createMinMagicCircle(centerLocation.add(0.5,0,0.5),15,soulType);
+                } else {
+                    createMaxMagicCircle(centerLocation.add(0.5,0,0.5),15,Casted/10000,soulType);
                 }
 
 
