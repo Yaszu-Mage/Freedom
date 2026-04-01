@@ -23,7 +23,7 @@ public class TimePiece extends Util implements BaseItem {
     }
 
     @Override
-    public void effect(Player player, PlayerInteractEvent event) {
+    public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
         if (getSoulType(player) != SoulTypes.Red || getSoulType(player) != SoulTypes.BaseRed) {
             //do stuff
             event.setCancelled(true);

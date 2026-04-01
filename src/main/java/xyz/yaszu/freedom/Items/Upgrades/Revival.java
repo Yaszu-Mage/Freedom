@@ -33,13 +33,14 @@ public class Revival extends Util implements BaseItem {
     }
 
     @Override
-    public void effect(Player player, PlayerInteractEvent event) {
+    public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
         for (Entity entity : player.getNearbyEntities(2,2,2)) {
             if (entity instanceof Player player_nearby) {
                 if (player_nearby.getPersistentDataContainer().has(keygen("trustedby"))) {
                     String trustedby = player_nearby.getPersistentDataContainer().get(keygen("trustedby"),PersistentDataType.STRING);
                     if (trustedby.contains(player.getName()) && !Life_and_Death.is_alive(player)) {
                         Life_and_Death.revive_player(player_nearby,player.getLocation());
+                        item.subtract();
                         return;
                     }
                 }

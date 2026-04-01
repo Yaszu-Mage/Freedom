@@ -11,11 +11,14 @@ import kr.toxicity.model.api.BetterModelPlatform;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.SoulTypes;
@@ -23,8 +26,7 @@ import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
-import static xyz.yaszu.freedom.Util.Util.dess;
-import static xyz.yaszu.freedom.Util.Util.keygen;
+import static xyz.yaszu.freedom.Util.Util.*;
 
 public class Trust {
     public static Util util = new Util();
@@ -37,15 +39,15 @@ public class Trust {
                         if (!target.isOp()) return Command.SINGLE_SUCCESS;
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
-                        Location loc = target.getLocation();
-                        SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                       util.createRemoteExplosionParticles(loc,15,16);
+                        drawDangerSymbol(target.getLocation(),5,16,Particle.DUST,new Particle.DustOptions(Color.YELLOW, 8.0f),new Particle.DustOptions(Color.BLACK,8.0f));
+//                       drawSpiral(loc,8, 4, loc.getWorld(),128, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8.0f));
                     }
 
                     return Command.SINGLE_SUCCESS;
                 }
         ).build();
     }
+
 
 
 

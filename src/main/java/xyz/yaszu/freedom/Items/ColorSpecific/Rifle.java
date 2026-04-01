@@ -23,7 +23,7 @@ public class Rifle extends Util implements BaseItem {
     }
 
     @Override
-    public void effect(Player player, PlayerInteractEvent event) {
+    public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
         if (getSoulType(player) != SoulTypes.Purple || getSoulType(player) != SoulTypes.BasePurple) {
             //do stuff
             event.setCancelled(true);

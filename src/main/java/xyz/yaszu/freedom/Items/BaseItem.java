@@ -8,6 +8,6 @@ import org.bukkit.inventory.Recipe;
 
 public interface BaseItem {
     public ItemStack item();
-    public void effect(Player player, PlayerInteractEvent event);
+    public void effect(Player player, PlayerInteractEvent event,ItemStack item);
     public Recipe recipe();
 }

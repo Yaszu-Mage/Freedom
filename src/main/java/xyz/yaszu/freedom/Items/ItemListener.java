@@ -14,6 +14,7 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
+import xyz.yaszu.freedom.Items.Upgrades.Reset;
 import xyz.yaszu.freedom.Items.Upgrades.Revival;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -25,6 +26,7 @@ public class ItemListener extends Util implements Listener {
     static Revival revive = new Revival();
     static Rifle rifle = new Rifle();
     static TimePiece timepiece = new TimePiece();
+    static Reset reset = new Reset();
     @EventHandler
     public void playerinteractevent(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
@@ -34,13 +36,16 @@ public class ItemListener extends Util implements Listener {
                 Freedom.get_plugin().getLogger().info(itemid);
                 switch (itemid) {
                     case "evolutionstone":
-                        evolve.effect(event.getPlayer(),event);
+                        evolve.effect(event.getPlayer(),event,item);
                         break;
                     case "rifle":
-                        rifle.effect(event.getPlayer(),event);
+                        rifle.effect(event.getPlayer(),event,item);
                         break;
                     case "revival":
-                        revive.effect(event.getPlayer(), event);
+                        revive.effect(event.getPlayer(), event,item);
+                        break;
+                    case "resetstone":
+                        reset.effect(event.getPlayer(),event,item);
                         break;
 
 
@@ -49,7 +54,7 @@ public class ItemListener extends Util implements Listener {
         }
     }
 
-    public int sus_amount = 1;
+    public int sus_amount = 2;
     @EventHandler
     public void BlockBreakEvent(BlockDropItemEvent event) {
         if (event.getBlock().getType().equals(BlockType.SUSPICIOUS_GRAVEL) || event.getBlock().getType().equals(BlockType.SUSPICIOUS_SAND)) {
@@ -62,6 +67,8 @@ public class ItemListener extends Util implements Listener {
                     case 1:
                         //drop revive item
                         event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), revive.item());
+                    case 2:
+                        event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), reset.item());
                 }
             }
         }
@@ -72,6 +79,7 @@ public class ItemListener extends Util implements Listener {
         Bukkit.addRecipe(rifle.recipe());
         Bukkit.addRecipe(revive.recipe());
         Bukkit.addRecipe(timepiece.recipe());
+        Bukkit.addRecipe(reset.recipe());
     }
 
 }

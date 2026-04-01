@@ -255,9 +255,11 @@ public class Util {
                 drawParticleLine(c3, c3u, c3.getWorld(), Particle.SOUL_FIRE_FLAME, new Particle.DustOptions(Color.AQUA, 2.0f), 0, 8, 0);
                 drawParticleLine(c4, c4u, c4.getWorld(), Particle.SOUL_FIRE_FLAME, new Particle.DustOptions(Color.AQUA, 2.0f), 0, 8, 0);
                 center.getWorld().playSound(center, Sound.ITEM_FLINTANDSTEEL_USE, 4, soundtick);
+                drawDangerSymbol(center,5,16,Particle.DUST,new Particle.DustOptions(Color.YELLOW, 8.0f),new Particle.DustOptions(Color.BLACK,8.0f));
                 tick = tick + tickrate;
                 if (tick % 80 == 0) {
                     soundtick++;
+
                 }
                 size_modifier = size_modifier * 0.9;
                 if (tick >= 550) {
@@ -266,6 +268,7 @@ public class Util {
                         center.getWorld().playSound(center, Sound.ENTITY_WARDEN_SONIC_BOOM, 4, 1);
 
                     }
+
                     center.getWorld().spawnParticle(Particle.EXPLOSION, center, 30);
                     center.getWorld().createExplosion(center, size, true, true);
                     this.cancel();
@@ -632,5 +635,162 @@ public class Util {
             // Apply the skin visually
             skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player);
         }
+    }
+
+
+
+    public static void drawLine(Location start, Location end, World world, int points, Particle particle, Particle.DustOptions options) {
+        double dx = (end.getX() - start.getX()) / points;
+        double dy = (end.getY() - start.getY()) / points;
+        double dz = (end.getZ() - start.getZ()) / points;
+
+        for (int i = 0; i <= points; i++) {
+            Location point = start.clone().add(dx * i, dy * i, dz * i);
+            spawn(world, point, particle, options);
+        }
+    }
+
+    private static void spawn(World world, Location loc, Particle particle, Particle.DustOptions options) {
+        if (particle == Particle.DUST && options != null) {
+            world.spawnParticle(particle, loc, 1, 0, 0, 0, 1, options);
+        } else {
+            world.spawnParticle(particle, loc, 1, 0, 0, 0, 0);
+        }
+    }
+
+
+    public static void drawIsoscelesTriangle(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options) {
+        Location top = center.clone().add(0, 0, -size);
+        Location left = center.clone().add(-size, 0, size);
+        Location right = center.clone().add(size, 0, size);
+        left = rotpointX(center, center.getYaw() + 180, left);
+        top = rotpointX(center, center.getYaw() + 180, top);
+        right = rotpointX(center, center.getYaw() + 180, right);
+        Freedom.get_plugin().getLogger().info(String.valueOf(center.getYaw()) + " " + String.valueOf(Math.toDegrees(center.getYaw())));
+        drawLine(top, left, world, points, particle, options);
+        drawLine(left, right, world, points, particle, options);
+        drawLine(right, top, world, points, particle, options);
+    }
+    public static void drawIsoscelesTriangle(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options,Location offset) {
+
+        Location top = center.clone().add(0, 0, -size);
+        Location left = center.clone().add(-size, 0, size).add(offset.getX(),offset.getY(),offset.getZ());
+        Location right = center.clone().add(size, 0, size).add(offset.getX(),offset.getY(),offset.getZ());
+        left = rotpointX(center, center.getYaw() + 180, left);
+        top = rotpointX(center, center.getYaw() + 180, top);
+        right = rotpointX(center, center.getYaw() + 180, right);
+        Freedom.get_plugin().getLogger().info(String.valueOf(center.getYaw()) + " " + String.valueOf(Math.toDegrees(center.getYaw())));
+        drawLine(top, left, world, points, particle, options);
+        drawLine(left, right, world, points, particle, options);
+        drawLine(right, top, world, points, particle, options);
+    }
+
+    public static void drawSpiral(Location center, double radius, int turns, World world, int points, Particle particle, Particle.DustOptions options) {
+        for (int i = 0; i < points; i++) {
+            double progress = (double) i / points;
+            double angle = progress * turns * 2 * Math.PI;
+
+            double currentRadius = radius * progress;
+
+            double x = center.getX() + currentRadius * Math.cos(angle);
+            double z = center.getZ() + currentRadius * Math.sin(angle);
+            double y = center.getY(); // height increase
+
+            spawn(world, new Location(world, x, y, z), particle, options);
+        }
+    }
+
+
+
+    public static void drawStar(Location center, double radius, World world, int points, Particle particle, Particle.DustOptions options) {
+        int vertices = 5;
+        Location[] pts = new Location[vertices * 2];
+
+        for (int i = 0; i < vertices * 2; i++) {
+            double angle = Math.PI * i / vertices;
+            double r = (i % 2 == 0) ? radius : radius / 2;
+
+            double x = center.getX() + r * Math.cos(angle);
+            double z = center.getZ() + r * Math.sin(angle);
+
+            pts[i] = new Location(world, x, center.getY(), z);
+        }
+
+        for (int i = 0; i < pts.length; i++) {
+            drawLine(rotpointX(center,center.getYaw() + 15, pts[i]), rotpointX(center,center.getYaw()  + 15, pts[(i + 1) % pts.length]), world, points, particle, options);
+        }
+    }
+
+    public static void Lift(Player target) {
+        Location loc = target.getLocation();
+        SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        target.setVelocity(new Vector(0, 40, 0));
+        new BukkitRunnable() {
+            int tick = 0;
+            @Override
+            public void run() {
+                Location loc = target.getLocation();
+
+                switch (tick) {
+                    case 1,3,5,7,9 -> drawStar(loc,8,loc.getWorld(),128, Particle.DUST, new Particle.DustOptions(Color.AQUA, 8.0f));
+                    case 0,2,4,6,8,10 -> drawStar(loc,8,loc.getWorld(),128, Particle.DUST, new Particle.DustOptions(Color.WHITE, 8.0f));
+                }
+                tick++;
+                if (tick == 10) {
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer(Freedom.get_plugin(), 0, 5);
+    }
+
+    public static void drawExclamationPoint(Location center, double size, int points, Particle particle, Particle.DustOptions options, Location offset) {
+        Location tip = center.clone().add(0, 0, size / 8 - 3.5);
+        Location back = center.clone().add(0, 0, size);
+        double rot = center.getRotation().yaw();
+        World world = center.getWorld();
+
+        tip = rotpointX(center, rot, tip);
+        back = rotpointX(center, rot, back);
+        // Shaft
+        drawLine(center, back, world, points, particle, options);
+        //circle
+        drawCircle(tip, size / 6, world, points, particle, options);
+    }
+
+
+    public static void drawDangerSymbol(Location center, double size, int points, Particle particle, Particle.DustOptions outside, Particle.DustOptions inside) {
+        drawExclamationPoint(center, size, points, particle, inside,new Location(center.getWorld(),0,0,1));
+        drawIsoscelesTriangle(center, size * 1.5,center.getWorld(), points,particle,outside,new Location(center.getWorld(),0,0,-2.5));
+    }
+
+    public static void drawHeart(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options) {
+        for (int i = 0; i < points; i++) {
+            double t = Math.PI * 2 * i / points;
+
+            double x = size * 16 * Math.pow(Math.sin(t), 3);
+            double z = size * (13 * Math.cos(t) - 5 * Math.cos(2 * t)
+                    - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+            Location point = center.clone().add(x * 0.05, 0, z * 0.05);
+            point = rotpointX(center, center.getYaw(), point);
+            spawn(world, point, particle, options);
+        }
+    }
+
+
+
+
+
+
+    public static void drawArrow(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options,float rot) {
+        Location tip = center.clone().add(0, 0, -size / 2);
+        Location back = center.clone().add(0, 0, size);
+        tip = rotpointX(center, rot + 180, tip);
+        back = rotpointX(center, rot + 180, back);
+        // Arrow head
+        drawIsoscelesTriangle(tip, size / 2, world, points, particle, options);
+
+        // Shaft
+        drawLine(center, back, world, points, particle, options);
     }
 }
