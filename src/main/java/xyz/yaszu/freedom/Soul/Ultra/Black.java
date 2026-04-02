@@ -2,7 +2,10 @@ package xyz.yaszu.freedom.Soul.Ultra;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
@@ -12,6 +15,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
@@ -27,10 +31,12 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.CurseManager;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Black extends Util implements Base_Soul, Listener {
 
@@ -242,6 +248,7 @@ public class Black extends Util implements Base_Soul, Listener {
         if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
             if (originalProfiles.get(player.getUniqueId()) != null) {
                 DisguiseAPI.undisguiseToAll(player);
+
                 PlayerDisguise disguise =originalProfiles.get(player.getUniqueId());
                 player.getWorld();
                 World world = player.getWorld();
@@ -251,13 +258,25 @@ public class Black extends Util implements Base_Soul, Listener {
                 disguise.removePlayer(player);
                 disguise.stopDisguise();
                 disguise.removeDisguise();
-                player.playerListName(player.name());
+
+
+                try {
+                    join(player);
+                } catch (MineSkinException | DataRequestException e) {
+                    throw new RuntimeException(e);
+                }
                 if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
                     player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
                 }
                 setSkinByName(player,player.getName());
                 originalProfiles.remove(player.getUniqueId());
             }
+            player.playerListName(player.name());
+            player.displayName(player.name());
+            player.customName(null);
+            player.setCustomNameVisible(false);
+            player.customName(player.name());
+            player.getPersistentDataContainer().remove(keygen("disguiseid"));
             player.getPersistentDataContainer().remove(keygen("disguised"));
             player.sendActionBar(dess("Disguise Removed."));
         }
@@ -275,12 +294,22 @@ public class Black extends Util implements Base_Soul, Listener {
             PlayerDisguise disguise = new PlayerDisguise(baller);
             disguise.setHearSelfDisguise(false);
             disguise.setEntity(player);
+            
+            // Comprehensive Impersonation: Mimic Equipment
+            PlayerWatcher watcher = disguise.getWatcher();
+            watcher.setArmor(baller.getInventory().getArmorContents());
+            watcher.setItemInMainHand(baller.getInventory().getItemInMainHand());
+            watcher.setItemInOffHand(baller.getInventory().getItemInOffHand());
+            
             player.getPersistentDataContainer().set(keygen("disguised"),PersistentDataType.BOOLEAN,true);
             disguise.startDisguise();
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) != null) {
                 player.getAttribute(Attribute.SCALE).removeModifier(keygen("black"));
             }
             player.playerListName(baller.name());
+            player.displayName(baller.displayName());
+            player.customName(Component.text(baller.getName()));
+            player.setCustomNameVisible(true);
             setSkinByName(player,baller.getName());
             originalProfiles.put(player.getUniqueId(),disguise);
 
@@ -288,7 +317,7 @@ public class Black extends Util implements Base_Soul, Listener {
             Location location = player.getLocation();
             //VFX
             int disguiseid = random.nextInt();
-            player.getPersistentDataContainer().set(keygen("diguiseid"),PersistentDataType.INTEGER,disguiseid);
+            player.getPersistentDataContainer().set(keygen("disguiseid"),PersistentDataType.INTEGER,disguiseid);
             world.playSound(location,Sound.ENTITY_WARDEN_EMERGE,1,1);
             world.spawnParticle(Particle.SMOKE, location,128);
             player.closeInventory();
@@ -299,12 +328,23 @@ public class Black extends Util implements Base_Soul, Listener {
                     disguise.stopDisguise();
                     disguise.removeDisguise();
                     player.playerListName(player.name());
+                    player.displayName(player.name());
+                    player.customName(null);
+                    player.setCustomNameVisible(false);
+                    try {
+                        join(player);
+                    } catch (MineSkinException | DataRequestException e) {
+                        throw new RuntimeException(e);
+                    }
                     if (player.getPersistentDataContainer().has(keygen("disguiseid"),PersistentDataType.INTEGER)) {
                         if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
                             player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),0.80, AttributeModifier.Operation.ADD_NUMBER));
                         }
                         int gotid = player.getPersistentDataContainer().get(keygen("disguiseid"), PersistentDataType.INTEGER);
                         player.playerListName(player.name());
+                        player.displayName(player.name());
+                        player.customName(null);
+                        player.setCustomNameVisible(false);
                         if (disguise.isDisguiseInUse() && disguiseid == gotid) {
                             world.spawnParticle(Particle.SMOKE, location, 128);
                             try {
@@ -323,161 +363,151 @@ public class Black extends Util implements Base_Soul, Listener {
             event.setCancelled(true);
         }
     }
-    public BukkitRunnable send(Player player,String Msg) {
-        return new BukkitRunnable() {
-            @Override
-            public void run() {
-                say(player,Msg);
-            }
-        };
-    }
-    public static String sendchatthrough = String.valueOf(Freedom.version);
-    public static String resend = String.valueOf(Freedom.version-1);
+    @EventHandler
+    public void PlayerDeathEvent(PlayerDeathEvent event) {
+        Player player = event.getEntity();
 
-    public static ArrayList<Player> successful_message = new ArrayList<>();
+        // 1. Handle victim name in death message
+        if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
+            PlayerDisguise disguise = originalProfiles.get(player.getUniqueId());
+            if (disguise != null) {
+                String targetName = disguise.getName();
+                Component deathMessage = event.deathMessage();
+                if (deathMessage != null) {
+                    // Impersonate victim name in death message
+                    String originalName = player.getName();
+                    event.deathMessage(deathMessage.replaceText(builder -> builder.matchLiteral(originalName).replacement(targetName)));
+                }
+            }
+        }
+        
+        // 2. Handle killer name in death message
+        Player killer = player.getKiller();
+        if (killer != null && killer.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
+            PlayerDisguise killerDisguise = originalProfiles.get(killer.getUniqueId());
+            if (killerDisguise != null) {
+                String killerTargetName = killerDisguise.getName();
+                Component deathMessage = event.deathMessage();
+                if (deathMessage != null) {
+                    // Impersonate killer name in death message
+                    String originalKillerName = killer.getName();
+                    event.deathMessage(deathMessage.replaceText(builder -> builder.matchLiteral(originalKillerName).replacement(killerTargetName)));
+                }
+            }
+        }
+    }
+
+    private static final Map<UUID, UUID> echoMap = new ConcurrentHashMap<>();
+
     @EventHandler
     public void PlayerChatEvent(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
+        
+        // Check for echo
+        UUID sourceUUID = echoMap.remove(player.getUniqueId());
+        Player sourcePlayer = (sourceUUID != null) ? Bukkit.getPlayer(sourceUUID) : null;
+        boolean isEcho = sourcePlayer != null;
+        
+        Player realTypist = isEcho ? sourcePlayer : player;
         String message = event.getMessage();
-        event.getRecipients().clear();
-        boolean is_alive = Life_and_Death.is_alive(player);
-        if (player.getPersistentDataContainer().has(keygen("disguised"),PersistentDataType.BOOLEAN)) {
-            //disguised logic
-            if (message.contains(sendchatthrough)) {
-                //continue
-                Freedom.get_plugin().getLogger().info("CORRECT SENT GO ON FORWARD");
-                tabDistance(event, message, is_alive);
-            } else {
-                //resend
-                Player dis = null;
-                Freedom.get_plugin().getLogger().info(originalProfiles.toString());
-                Freedom.get_plugin().getLogger().info(originalProfiles.get(player.getUniqueId()).getName());
-                if (originalProfiles.get(player.getUniqueId()) != null) {
 
-                    dis = Bukkit.getPlayer(originalProfiles.get(player.getUniqueId()).getName());
-                    Freedom.get_plugin().getLogger().info(dis.getName());
-                }
+        // If not an echo, process message and check for disguise
+        if (!isEcho) {
+            // Apply CurseManager modifications
+            String processedMessage = CurseManager.handleChat(player, message);
+            event.setMessage(processedMessage);
 
-                    if (dis == null) {
-                        Freedom.get_plugin().getLogger().info("DIS IS NULL");
-                        if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                            Freedom.get_plugin().getLogger().info("NOT Cursed");
-                            String newmsg = curse(player, message);
-                            event.setMessage(newmsg);
-
-                        }
-                        message = event.getMessage();
-                        send(player, message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(), 1);
+            boolean isDisguised = player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN);
+            Freedom.get_plugin().getLogger().info("Disguised: " + isDisguised);
+            if (isDisguised) {
+                PlayerDisguise disguise = originalProfiles.get(player.getUniqueId());
+                if (disguise != null) {
+                    Player target = Bukkit.getPlayer(disguise.getName());
+                    if (target != null && target.isOnline()) {
+                        // Echo through online target
+                        event.setCancelled(true);
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                echoMap.put(target.getUniqueId(), player.getUniqueId());
+                                target.chat(event.getMessage());
+                            }
+                        }.runTask(Freedom.get_plugin());
+                        return;
                     } else {
-                        Freedom.get_plugin().getLogger().info("Disguised Player: " + dis.getName());
-                        if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                            Freedom.get_plugin().getLogger().info("Cursed");
-                            String newmsg = curse(player, message);
-                            event.setMessage(newmsg);
-
-                        }
-                        send(dis, message + resend + "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(), 1);
+                        // Target is offline, substitute name in current event format
+                        String targetName = disguise.getName();
+                        
+                        // Temporarily set names if plugins use them
+                        player.displayName(dess(targetName));
+                        player.customName(dess(targetName));
                     }
                 }
-                event.setCancelled(true);
-        } else {
+            }
+        }
 
-
-            if (message.contains(sendchatthrough)) {
-                //continue
-                tabDistance(event, message, is_alive);
+        // Filtering logic (runs for non-disguised OR for the echoed event OR for offline disguise)
+        String processedMessage = event.getMessage();
+        
+        // Use the disguise target's status if disguised and offline
+        boolean is_alive;
+        boolean isDisguised = player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN);
+        if (!isEcho && isDisguised) {
+            PlayerDisguise disguise = originalProfiles.get(player.getUniqueId());
+            Player target = (disguise != null) ? Bukkit.getPlayer(disguise.getName()) : null;
+            if (target != null && target.isOnline()) {
+                is_alive = Life_and_Death.is_alive(target);
             } else {
-                //resend
-                if (player.getPersistentDataContainer().has(keygen("cursed")) == true) {
-                    String newmsg = curse(player, message);
-                    event.setMessage(newmsg);
-
-                }
-                message = event.getMessage();
-                send(player,message + resend+ "ニ" + player.getName()).runTaskLater(Freedom.get_plugin(),1);
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    public String curse(Player player, String message) {
-        String[] msg = message.split(" ");
-        Orange.Cursetype cursetype = Orange.Cursetype.valueOf(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING));
-        String newmsg = "";
-
-        switch (cursetype) {
-            case Cat:
-                for (String string : msg) {
-                    newmsg = newmsg + "Meow ";
-                }
-                break;
-            case Frog:
-                for (String string : msg) {
-                    newmsg = newmsg + " Ribbit";
-                }
-
-                break;
-        }
-        return newmsg;
-    }
-
-    public static void tabDistance(AsyncPlayerChatEvent event, String message, boolean is_alive) {
-        Freedom.get_plugin().getLogger().info("TAB DISTANCE " + message);
-        message = message.replace(sendchatthrough," ");
-
-        String[] msg = message.split("ニ");
-
-        event.setMessage(msg[0]);
-        event.setMessage(msg[0]);
-        Player realPlayer = Bukkit.getPlayer(msg[1]);
-        event.getRecipients().add(realPlayer);
-        if (is_alive) {
-            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
-                if (realPlayer != null) {
-                    if (realPlayer.isOnline()) {
-                        if (realPlayer.canSee(instancedPlayer)) {
-                            event.getRecipients().add(instancedPlayer);
-                            if (msg[0].contains("Meow")) {
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
-                            } else if (msg[0].contains("Ribbit")) {
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
-                            } else if (msg[0].contains("Tnt")) {
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
-                            } else {
-                                instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
-                            }
-
-                        }
-                    }
-
-                }
+                // If offline, we assume they are alive or use the typist's status
+                // To be safe and mimic the 'echo' behavior, we use the real typist's status
+                // but usually, if you are disguised as someone, you want to talk in the channel they would.
+                is_alive = Life_and_Death.is_alive(player);
             }
         } else {
-            for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
-                if (!Life_and_Death.is_alive(instancedPlayer)) {
-                    if (realPlayer != null) {
-                        if (realPlayer.isOnline()) {
-                            if (realPlayer.canSee(instancedPlayer)) {
-                                event.getRecipients().add(instancedPlayer);
-                                if (msg[0].contains("Meow")) {
-                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
-                                } else if (msg[0].contains("Ribbit")) {
-                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
-                                } else {
-                                    instancedPlayer.playSound(instancedPlayer.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
-                                }
-                            }
-                        }
+            is_alive = Life_and_Death.is_alive(player); // Status of the identity chatting
+        }
 
+        // Filter recipients and play sounds
+        event.getRecipients().clear();
+        for (Player recipient : Bukkit.getOnlinePlayers()) {
+            // Check if recipient can see the sender (realTypist)
+            if (recipient.canSee(realTypist)) {
+                if (is_alive) {
+                    // Alive chat: only to those who are alive
+                    if (Life_and_Death.is_alive(recipient)) {
+                        event.getRecipients().add(recipient);
+                        playProximitySound(recipient, processedMessage);
+                    }
+                } else {
+                    // Dead chat (ghost): only to other dead players
+                    if (!Life_and_Death.is_alive(recipient)) {
+                        event.getRecipients().add(recipient);
+                        playProximitySound(recipient, processedMessage);
                     }
                 }
             }
         }
+        
+        // Ensure the real typist sees their own message
+        if (!event.getRecipients().contains(realTypist)) {
+            event.getRecipients().add(realTypist);
+        }
+        // Ensure the identity player sees it too (if it's an echo)
+        if (isEcho && !event.getRecipients().contains(player)) {
+            event.getRecipients().add(player);
+        }
     }
 
-    public void say(Player dis, String message){
-            dis.chat(message.replace(resend,sendchatthrough));
-            Freedom.get_plugin().getLogger().info("Sent " + dis.getName() + "MSG: " + message.replace(resend,sendchatthrough));
+    private void playProximitySound(Player recipient, String message) {
+        if (message.contains("Meow")) {
+            recipient.playSound(recipient.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
+        } else if (message.contains("Ribbit")) {
+            recipient.playSound(recipient.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);
+        } else if (message.contains("Tnt")) {
+            recipient.playSound(recipient.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
+        } else {
+            recipient.playSound(recipient.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1, 1);
+        }
     }
 
     public HashMap<Player,InventoryGui> inventoryGui = new HashMap<>();
@@ -495,7 +525,7 @@ public class Black extends Util implements Base_Soul, Listener {
             if (remainder == 0) {
                 inventory = Bukkit.createInventory(this,max_players);
             } else {
-                inventory = Bukkit.createInventory(this,max_players - (remainder));
+                inventory = Bukkit.createInventory(this,max_players + (9 - remainder));
             }
             int iteration = 0;
             for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
@@ -503,27 +533,20 @@ public class Black extends Util implements Base_Soul, Listener {
                     ItemStack skull = getSkull(instancedPlayer);
                     SkullMeta meta = (SkullMeta) skull.getItemMeta();
                     meta.getPersistentDataContainer().set(keygen("player_uuid"), PersistentDataType.STRING, instancedPlayer.getUniqueId().toString());
-                    SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+                    
+                    String soulString = instancedPlayer.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING);
+                    SoulTypes soulType = (soulString != null) ? SoulTypes.valueOf(soulString) : SoulTypes.None;
+                    
                     String name = instancedPlayer.getName();
-                    switch (soulType) {
-                        case Black:
-                            meta.displayName(soulListener.black.Name().append(dess(" " + name)));
-                            break;
-                        case Green:
-                            meta.displayName(soulListener.green.Name().append(dess(" " + name)));
-                            break;
-                        case Red:
-                            meta.displayName(soulListener.red.Name().append(dess(" " + name)));
-                            break;
-                        case Blue:
-                            meta.displayName(soulListener.blue.Name().append(dess(" " + name)));
-                            break;
-                        case Purple:
-                            meta.displayName(soulListener.purple.Name().append(dess(" " + name)));
-                            break;
-
-                    }
-                    skull.displayName();
+                    meta.displayName(soulListener.SOULS.get(soulType).Name().append(dess(" " + name)));
+                    
+                    // Add Lore for better selection
+                    List<Component> lore = new ArrayList<>();
+                    boolean isAlive = Life_and_Death.is_alive(instancedPlayer);
+                    lore.add(dess(isAlive ? "<green>Status: ALIVE" : "<gray>Status: GHOST"));
+                    lore.add(dess("<aqua>Soul: " + soulType.name()));
+                    meta.lore(lore);
+                    
                     skull.setItemMeta(meta);
                     inventory.setItem(iteration,skull);
                     iteration++;
@@ -536,11 +559,15 @@ public class Black extends Util implements Base_Soul, Listener {
     public static void join (Player player) throws MineSkinException, DataRequestException {
         setSkinByName(player,player.getName());
         if (player.getPersistentDataContainer().has(keygen("soul"))) {
-        for (PotionEffect potion : player.getActivePotionEffects()) {
-            if (potion.getDuration() == PotionEffect.INFINITE_DURATION) {
-                player.removePotionEffect(potion.getType());
+            // Reset to original name before applying soul-specific prefix
+            player.displayName(player.name());
+            player.customName(player.name());
+            
+            for (PotionEffect potion : player.getActivePotionEffects()) {
+                if (potion.getDuration() == PotionEffect.INFINITE_DURATION) {
+                    player.removePotionEffect(potion.getType());
+                }
             }
-        }
 
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         if (soulType == SoulTypes.Black) {
@@ -565,28 +592,28 @@ public class Black extends Util implements Base_Soul, Listener {
             }
             switch (soulType) {
                 case BaseRed,Red -> {
-                    player.displayName(dess("<Red>").append(player.displayName()));
+                    player.displayName(Component.text("", NamedTextColor.RED).append(player.name()));
                 }
                 case BaseGreen,Green -> {
-                    player.displayName(dess("<Green>").append(player.displayName()));
+                    player.displayName(Component.text("", NamedTextColor.GREEN).append(player.name()));
                 }
                 case BaseBlue,Blue -> {
-                    player.displayName(dess("<Blue>").append(player.displayName()));
+                    player.displayName(Component.text("", NamedTextColor.BLUE).append(player.name()));
                 }
                 case BasePurple,Purple -> {
-                    player.displayName(dess("<dark_purple>").append(player.displayName()));
+                    player.displayName(Component.text("", NamedTextColor.DARK_PURPLE).append(player.name()));
                 }
                 case Black,BaseBlack -> {
-                    player.displayName(dess("<color:#ffffff>").append(player.displayName()));
+                    player.displayName(Component.text("", NamedTextColor.WHITE).append(player.name()));
                 }
                 case Orange,BaseOrange -> {
-                    player.displayName(dess("<color:#ff6f00> ").append(player.displayName()));
+                    player.displayName(Component.text("", TextColor.color(0xff6f00)).append(player.name()));
                 }
                 case Yellow,BaseYellow -> {
-                    player.displayName(dess("<gold>").append(player.displayName()));
+                    player.displayName(Component.text("", NamedTextColor.GOLD).append(player.name()));
                 }
                 case None,BaseNone -> {
-                    player.displayName(dess("<color:#555555>").append(player.displayName()));
+                    player.displayName(Component.text("", TextColor.color(0x555555)).append(player.name()));
                 }
             }
     }

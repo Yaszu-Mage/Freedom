@@ -28,7 +28,7 @@ public class Util {
     public static SkinsRestorer skinsRestorerAPI;
 
     public static NamespacedKey keygen(String key) {
-        return new NamespacedKey(Bukkit.getPluginManager().getPlugin("Freedom"), key);
+        return FreedomKeys.key(key);
     }
 
     public static Component dess(String minimessage) {
@@ -99,7 +99,7 @@ public class Util {
         }
     }
 
-    public void createMinMagicCircleAroundPlayer(Player target, int tickRate) {
+    public static void createMinMagicCircleAroundPlayer(Player target, int tickRate) {
         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         Color color = Color.PURPLE;
         switch (soulType) {
@@ -127,7 +127,7 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0, 10);
     }
 
-    public void createMinMagicCircle(Location center, int tickRate, SoulTypes soulType) {
+    public static void createMinMagicCircle(Location center, int tickRate, SoulTypes soulType) {
         Color color = Color.PURPLE;
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
@@ -190,7 +190,7 @@ public class Util {
 
     }
 
-    public void createMaxMagicCircle(Location center, int tickRate, int scale, SoulTypes soulType) {
+    public static void createMaxMagicCircle(Location center, int tickRate, int scale, SoulTypes soulType) {
         Color color = Color.PURPLE;
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
@@ -311,7 +311,7 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0, 12);
     }
 
-    public void randompointoncircle(Location center, int points, int radius, Particle particle) {
+    public static void randompointoncircle(Location center, int points, int radius, Particle particle) {
         World world = center.getWorld();
         Random random = new Random();
         int i = random.nextInt(points);
@@ -335,7 +335,7 @@ public class Util {
         }
     }
 
-    public void multisquare(Location location, int tick, int size, Particle particle, int initialrot, Particle.DustOptions options) {
+    public static void multisquare(Location location, int tick, int size, Particle particle, int initialrot, Particle.DustOptions options) {
         Color optionscolor = options.getColor();
         optionscolor = optionscolor.mixColors(Color.RED);
         Particle.DustOptions options1 = new Particle.DustOptions(optionscolor, options.getSize());
@@ -608,7 +608,7 @@ public class Util {
         head.setItemMeta(skullMeta);
         return head;
     }
-    public SkinProperty getPlayerSkin(Player player) throws DataRequestException {
+    public static SkinProperty getPlayerSkin(Player player) throws DataRequestException {
         PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
         Optional<SkinProperty> property = playerStorage.getSkinForPlayer(
                 player.getUniqueId(),
@@ -617,7 +617,7 @@ public class Util {
         return property.orElse(null);
     }
 
-    public SoulTypes getSoulType(Player player) {
+    public static SoulTypes getSoulType(Player player) {
         return SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
     }
 

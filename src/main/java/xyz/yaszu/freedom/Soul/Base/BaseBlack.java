@@ -385,24 +385,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                     meta.getPersistentDataContainer().set(keygen("player_uuid"), PersistentDataType.STRING, instancedPlayer.getUniqueId().toString());
                     SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
                     String name = instancedPlayer.getName();
-                    switch (soulType) {
-                        case Black:
-                            meta.displayName(soulListener.black.Name().append(dess(" " + name)));
-                            break;
-                        case Green:
-                            meta.displayName(soulListener.green.Name().append(dess(" " + name)));
-                            break;
-                        case Red:
-                            meta.displayName(soulListener.red.Name().append(dess(" " + name)));
-                            break;
-                        case Blue:
-                            meta.displayName(soulListener.blue.Name().append(dess(" " + name)));
-                            break;
-                        case Purple:
-                            meta.displayName(soulListener.purple.Name().append(dess(" " + name)));
-                            break;
-
-                    }
+                    meta.displayName(soulListener.SOULS.get(soulType).Name().append(dess(" " + name)));
                     skull.displayName();
                     skull.setItemMeta(meta);
                     inventory.setItem(iteration,skull);

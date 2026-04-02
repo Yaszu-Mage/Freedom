@@ -35,12 +35,16 @@ public interface Base_Soul {
     public Component Passive_Description();
     //Passive - A passive that is active no matter what
     public void Passive(Player player, Object event);
+
+    // Active Passive - A passive that requires a condition to activate (like sneaking or specific stats)
+    public default void playerSneakEvent(Player player) {}
+
     public Component ActivePassive_Description();
 
     //Active Passive - A passive that requires a condition to activate
     public void ActivePassive(Player player);
 
-    public default boolean can_ability(long cooldown, HashMap<UUID, Long> cooldown_list, UUID player) {
+    default boolean can_ability(long cooldown, HashMap<UUID, Long> cooldown_list, UUID player) {
         if (cooldown_list.get(player) == null) {
             return true;
         } else {

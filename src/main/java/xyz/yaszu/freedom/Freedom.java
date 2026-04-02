@@ -16,6 +16,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
@@ -23,6 +24,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Alchemy.Alchemy;
 import xyz.yaszu.freedom.Alchemy.voidGenerator;
@@ -38,10 +41,12 @@ import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.Ultra.Blue;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
 import xyz.yaszu.freedom.Subsystems.CombatTimer;
+import xyz.yaszu.freedom.Subsystems.CurseManager;
 import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.io.File;
@@ -55,12 +60,36 @@ import static xyz.yaszu.freedom.Util.Util.keygen;
 
 public final class Freedom extends JavaPlugin implements Listener {
 
+    public static int version = 6942067;
+
+
+    public void reapplyCurseWeakness(Player player) {
+        if (player == null || !player.isOnline()) return;
+
+        if (!player.getPersistentDataContainer().has(keygen("cursed"), PersistentDataType.STRING)) return;
+        if (!"Frog".equals(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING))) return;
+
+        player.removePotionEffect(PotionEffectType.WEAKNESS);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 0, true, false));
+    }
+
+    @EventHandler
+    public void onTotemPop(EntityResurrectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                reapplyCurseWeakness(player);
+            }
+        }.runTaskLater(Freedom.get_plugin(), 30);
+
+    }
+
 
 
     public static Plugin get_plugin() {
         return Bukkit.getPluginManager().getPlugin("Freedom");
     }
-    public static int version = 6942067;
     @EventHandler
     public void WorldLoadEvent(WorldLoadEvent event) {
         if (System.currentTimeMillis() <= start_time + 10000) {
@@ -73,7 +102,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     public void PlayerJoinEvent(PlayerJoinEvent event){
         removeOldFollowers();
         event.getPlayer().performCommand("rules");
-        event.getPlayer().getPersistentDataContainer().set(keygen("sprite_active"),PersistentDataType.BOOLEAN,false);
+        event.getPlayer().getPersistentDataContainer().set(FreedomKeys.spriteActive(),PersistentDataType.BOOLEAN,false);
     }
 
 
@@ -86,6 +115,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         //Enable Listeners
         Util.skinsRestorerAPI = SkinsRestorerProvider.get();
         soulListener soulListener = new soulListener();
+        soulListener.registerSouls();
         Bukkit.getPluginManager().registerEvents(this,this);
         Bukkit.getPluginManager().registerEvents(soulListener,this);
         Bukkit.getPluginManager().registerEvents(new selectionGui(), this);
@@ -102,6 +132,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new ItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new UltraselectionUi(), this);
         Bukkit.getPluginManager().registerEvents(new CombatTimer(),this);
+        Bukkit.getPluginManager().registerEvents(new CurseManager(), this);
         Bukkit.getPluginManager().registerEvents(new Alchemy(), this);
 
         this.getLogger().info("---Registered Listeners!---");
@@ -111,6 +142,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register("openGui", openGui);
             commands.registrar().register("opengui", openGui);
             commands.registrar().register(Trust.reviveArgument());
+            commands.registrar().register(Trust.uncurseArgument());
             commands.registrar().register(Trust.trustArgument());
             commands.registrar().register(Trust.playerArgument());
             commands.registrar().register(Trust.toggleArgument());
@@ -123,24 +155,11 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.rules());
         });
         removeOldFollowers();
-        ItemListener.registeritems();
+        ItemListener.registerItems();
         start_time = System.currentTimeMillis();
-        version = setVer();
-        getVer();
         createVoid();
     }
 
-
-    public static int setVer()
-    {
-        Random random = new Random();
-        int rand = random.nextInt(100000,9999999);
-        return rand;
-    }
-    public static void getVer()
-    {
-        version = setVer();
-    }
 
     public static Util util = new Util();
 
@@ -158,8 +177,8 @@ public final class Freedom extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) throws IOException, WorldEditException {
-        if (event.getWorld() == Bukkit.getWorld("void") && !event.getChunk().getPersistentDataContainer().has(keygen("void"))) {
-            event.getChunk().getPersistentDataContainer().set(keygen("void"),PersistentDataType.BOOLEAN,true);
+        if (event.getWorld() == Bukkit.getWorld("void") && !event.getChunk().getPersistentDataContainer().has(FreedomKeys.key("void"))) {
+            event.getChunk().getPersistentDataContainer().set(FreedomKeys.key("void"),PersistentDataType.BOOLEAN,true);
             int currentrand = random.nextInt(1000);
             Freedom.get_plugin().getLogger().info(String.valueOf(currentrand));
             if (currentrand <= 50) {

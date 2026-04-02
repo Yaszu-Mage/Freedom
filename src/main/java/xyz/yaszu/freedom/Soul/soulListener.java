@@ -1,5 +1,4 @@
 package xyz.yaszu.freedom.Soul;
-
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
@@ -19,34 +18,48 @@ import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
+import xyz.yaszu.freedom.Subsystems.CurseManager;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class soulListener extends Util implements Listener {
-    public static Red red = new Red();
-    public static Yellow yellow =  new Yellow();
-    public static Green green = new Green();
-    public static Black black = new Black();
-    public static Purple purple = new Purple();
-    public static Blue blue = new Blue();
-    public static Orange orange = new Orange();
-    public static BaseRed basered = new BaseRed();
-    public static BaseYellow baseyellow =  new BaseYellow();
-    public static BaseGreen basegreen = new BaseGreen();
-    public static BaseBlack baseblack = new BaseBlack();
-    public static BasePurple basepurple = new BasePurple();
-    public static BaseBlue baseblue = new BaseBlue();
-    public static BaseOrange baseorange = new BaseOrange();
+    public static final Map<SoulTypes, Base_Soul> SOULS = new EnumMap<>(SoulTypes.class);
+
+    public static void registerSouls() {
+        SOULS.put(SoulTypes.Red, new Red());
+        SOULS.put(SoulTypes.Yellow, new Yellow());
+        SOULS.put(SoulTypes.Green, new Green());
+        SOULS.put(SoulTypes.Black, new Black());
+        SOULS.put(SoulTypes.Purple, new Purple());
+        SOULS.put(SoulTypes.Blue, new Blue());
+        SOULS.put(SoulTypes.Orange, new Orange());
+        SOULS.put(SoulTypes.BaseRed, new BaseRed());
+        SOULS.put(SoulTypes.BaseYellow, new BaseYellow());
+        SOULS.put(SoulTypes.BaseGreen, new BaseGreen());
+        SOULS.put(SoulTypes.BaseBlack, new BaseBlack());
+        SOULS.put(SoulTypes.BasePurple, new BasePurple());
+        SOULS.put(SoulTypes.BaseBlue, new BaseBlue());
+        SOULS.put(SoulTypes.BaseOrange, new BaseOrange());
+    }
+
+    private Base_Soul getSoul(Player player) {
+        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+        if (soulName == null) return null;
+        try {
+            return SOULS.get(SoulTypes.valueOf(soulName));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     public void Passive(Player player) {
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        switch (soulType) {
-            case Orange:
-                orange.Passive(player,null);
-                break;
-            case BaseOrange:
-                baseorange.Passive(player,null);
-                break;
+        Base_Soul soul = getSoul(player);
+        if (soul != null) {
+            soul.Passive(player, null);
         }
     }
 
@@ -97,21 +110,16 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-            if (player.getPersistentDataContainer().has(keygen("soul"))) {
-                player.setWalkSpeed(0.2f);
-                player.setFlySpeed(0.1f);
-            } else {
-                player.performCommand("openGui");
-                player.setWalkSpeed(0);
-                player.setFlySpeed(0);
+        if (player.getPersistentDataContainer().has(keygen("soul"))) {
+            player.setWalkSpeed(0.2f);
+            player.setFlySpeed(0.1f);
+        } else {
+            player.performCommand("openGui");
+            player.setWalkSpeed(0);
+            player.setFlySpeed(0);
         }
-            if (!player.getPersistentDataContainer().has(keygen("ComorAction"))) {
-                player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, true);
-            }
-        if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-            if (Objects.equals(player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING), "Frog")) {
-                Orange.uncurse(player);
-            }
+        if (!player.getPersistentDataContainer().has(keygen("ComorAction"))) {
+            player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, true);
         }
     }
 
@@ -122,10 +130,6 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         showSoulPoints(event.getPlayer());
-        Player player = event.getPlayer();
-        if (player.getPersistentDataContainer().get(keygen("soul"),PersistentDataType.STRING) == "Green") {
-
-        }
     }
 
     public static void showSoulPoints(Player player) {
@@ -143,389 +147,165 @@ public class soulListener extends Util implements Listener {
 
 
     @EventHandler
-    public void enableActivePassives(PlayerArmSwingEvent event){
-
+    public void enableActivePassives(PlayerArmSwingEvent event) {
         Player player = event.getPlayer();
-        if (player.getPersistentDataContainer().get(keygen("ComorAction"), PersistentDataType.BOOLEAN)) {
-
-
-        if (!player.getPersistentDataContainer().has(keygen("soul")) || player.isSneaking() == false && event.getAnimationType() != PlayerAnimationType.ARM_SWING || !player.getPersistentDataContainer().has(keygen("SoulPoint"))) {
+        if (!player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             return;
         }
 
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
-
-        switch (soulType) {
-            case Red:
-                if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
-
-                    red.ActivePassive(player);
-                }
-                break;
-            case Black:
-                if (SoulPoints >= 5 && player.isSneaking()) {
-                    black.playerSneakEvent(player);
-                }
-                break;
-            case Green:
-                if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
-
-                    green.ActivePassive(player);
-                }
-                break;
-            case Blue:
-                blue.ActivePassive(player);
-                break;
-            case Yellow:
-                yellow.ActivePassive(player);
-                break;
-            case Orange:
-                orange.ActivePassive(player);
-                break;
-            case BaseRed:
-                if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
-
-                    basered.ActivePassive(player);
-                }
-                break;
-            case BaseBlack:
-                if (SoulPoints >= 5 && player.isSneaking()) {
-                    baseblack.playerSneakEvent(player);
-                }
-                break;
-            case BaseGreen:
-                if (SoulPoints >= 5 && player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE) == false) {
-
-                    basegreen.ActivePassive(player);
-                }
-                break;
-            case BaseBlue:
-                baseblue.ActivePassive(player);
-                break;
-            case BaseYellow:
-                baseyellow.ActivePassive(player);
-                break;
-            case BaseOrange:
-                baseorange.ActivePassive(player);
-                break;
+        if (!player.getPersistentDataContainer().has(FreedomKeys.soul()) ||
+                (!player.isSneaking() && event.getAnimationType() != PlayerAnimationType.ARM_SWING) ||
+                !player.getPersistentDataContainer().has(FreedomKeys.soulPoint())) {
+            return;
         }
-    }
+
+        Base_Soul soul = getSoul(player);
+        if (soul == null) return;
+
+        double soulPoints = player.getPersistentDataContainer().getOrDefault(FreedomKeys.soulPoint(), PersistentDataType.DOUBLE, 0.0);
+
+        // Special handling for some souls in enableActivePassives
+        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+        if (soulName != null) {
+            if (soulName.contains("Red") || soulName.contains("Green")) {
+                if (soulPoints >= 5 && !player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE)) {
+                    soul.ActivePassive(player);
+                }
+                return;
+            } else if (soulName.contains("Black")) {
+                if (soulPoints >= 5 && player.isSneaking()) {
+                    soul.playerSneakEvent(player);
+                }
+                return;
+            }
+        }
+
+        // Default behavior for other souls
+        soul.ActivePassive(player);
     }
 
     public void AbilityOne(Player player) {
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        switch (soulType) {
-            case Red:
-                red.AbilityOne(player);
-                break;
-            case Purple:
-                purple.AbilityOne(player);
-                break;
-            case Green:
-                green.AbilityOne(player);
-                break;
-            case Black:
-                black.AbilityOne(player);
-                break;
-            case Blue, Yellow:
-                blue.AbilityOne(player);
-                break;
-            case Orange:
-                orange.AbilityOne(player);
-                break;
-            case BaseRed:
-                basered.AbilityOne(player);
-                break;
-            case BasePurple:
-                basepurple.AbilityOne(player);
-                break;
-            case BaseGreen:
-                basegreen.AbilityOne(player);
-                break;
-            case BaseBlack:
-                baseblack.AbilityOne(player);
-                break;
-            case BaseBlue, BaseYellow:
-                baseblue.AbilityOne(player);
-                break;
-            case BaseOrange:
-                baseorange.AbilityOne(player);
-                break;
+        Base_Soul soul = getSoul(player);
+        if (soul != null) {
+            soul.AbilityOne(player);
         }
     }
+
     @EventHandler
     public void joinAndHeal(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        Freedom.get_plugin().getLogger().info(soulType.toString());
-        switch (soulType) {
-            case Green -> green.Passive(player,event);
-            case BaseGreen -> basegreen.Passive(player,event);
+        Base_Soul soul = getSoul(player);
+        if (soul != null) {
+            String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+            if (soulName != null && soulName.contains("Green")) {
+                soul.Passive(player, event);
+            }
         }
     }
 
     public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
         ItemStack drop = player.getInventory().getItemInMainHand();
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        Base_Soul soul = getSoul(player);
+        if (soul == null) return;
+
         player.sendActionBar(dess("<green>Ability Two</green>"));
-        Freedom.get_plugin().getLogger().info(soulType.toString());
-        switch (soulType) {
-            case Red:
-                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    //Do stuff
-                    red.AbilityTwo(player,drop);
 
-                }
-                break;
-            case Purple:
-                if (drop.getPersistentDataContainer().has(keygen("rifle"))) {
-                    purple.AbilityTwo(player,drop);
-                }
-                break;
-            case Black:
-                black.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case Blue:
-                Freedom.get_plugin().getLogger().info("Baller");
-                blue.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case Green:
-                green.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case Yellow:
-                yellow.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case Orange:
-                orange.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case BaseRed:
+        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+        Freedom.get_plugin().getLogger().info(soulName);
+        if (soulName != null) {
+            if (soulName.contains("Red")) {
                 if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    //Do stuff
-                    basered.AbilityTwo(player,drop);
-
+                    soul.AbilityTwo(player, drop);
                 }
-                break;
-            case BasePurple:
+                return;
+            } else if (soulName.contains("Purple")) {
                 if (drop.getPersistentDataContainer().has(keygen("rifle"))) {
-                    basepurple.AbilityTwo(player,drop);
+                    soul.AbilityTwo(player, drop);
                 }
-                break;
-            case BaseBlack:
-                baseblack.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case BaseBlue:
-                Freedom.get_plugin().getLogger().info("Baller");
-                baseblue.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case BaseGreen:
-                basegreen.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case BaseYellow:
-                baseyellow.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case BaseOrange:
-                baseorange.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
+                return;
+            }
         }
-    }
 
+        // For others, use first item slot as per original logic
+        soul.AbilityTwo(player, player.getInventory().getItem(0));
+    }
     public void ActivePassive(Player player) {
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        switch (soulType) {
-            case Red:
-                red.ActivePassive(player);
-            case Purple:
-                purple.ActivePassive(player);
-            case Black:
-                double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
-                if (SoulPoints >= 5 && player.isSneaking()) {
-                    black.playerSneakEvent(player);
+        Base_Soul soul = getSoul(player);
+        if (soul == null) return;
 
-                }
-                break;
-            case Blue:
-                blue.ActivePassive(player);
-                break;
-            case Yellow:
-                yellow.ActivePassive(player);
-                break;
-            case Orange:
-                orange.ActivePassive(player);
-                break;
-            case BaseRed:
-                basered.ActivePassive(player);
-                break;
-            case BasePurple:
-                basepurple.ActivePassive(player);
-                break;
-            case BaseBlack:
-                double SoulPoints2 = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
-                if (SoulPoints2 >= 5 && player.isSneaking()) {
-                    black.playerSneakEvent(player);
+        double soulPoints = player.getPersistentDataContainer().getOrDefault(FreedomKeys.soulPoint(), PersistentDataType.DOUBLE, 0.0);
+        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
 
-                }
-                break;
-            case BaseBlue:
-                baseblue.ActivePassive(player);
-                break;
-            case BaseYellow:
-                baseyellow.ActivePassive(player);
-                break;
-            case BaseOrange:
-                baseorange.ActivePassive(player);
-                break;
+        if (soulName != null && soulName.contains("Black")) {
+            if (soulPoints >= 5 && player.isSneaking()) {
+                soul.playerSneakEvent(player);
+            }
+        } else {
+            soul.ActivePassive(player);
         }
     }
-
-
 
     @EventHandler
     public void onPlayerXPgain(PlayerExpChangeEvent event) {
         Player player = event.getPlayer();
-        if (player.getPersistentDataContainer().get(keygen("soul"),PersistentDataType.STRING) == "Purple") {
+        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+        if ("Purple".equals(soulName)) {
             event.setAmount(event.getAmount() * 4);
-
-        }
-        if (player.getPersistentDataContainer().get(keygen("soul"),PersistentDataType.STRING) == "BasePurple") {
+        } else if ("BasePurple".equals(soulName)) {
             event.setAmount(event.getAmount() * 2);
-
         }
     }
 
     @EventHandler
     public void AbilityOneListener(PlayerJumpEvent event) {
         Player player = event.getPlayer();
-        if (player.getPersistentDataContainer().get(keygen("ComorAction"),PersistentDataType.BOOLEAN)) {
+        if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
+            Base_Soul soul = getSoul(player);
+            if (soul == null) return;
 
-
-            if (!player.getPersistentDataContainer().has(keygen("soul"))) {
-                return;
-            }
-            SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-            switch (soulType) {
-                case Red:
-                    if (player.isSneaking()) {
-                        red.AbilityOne(player);
-                    }
-                    break;
-                case Purple:
-                    if (player.isSneaking()) {
-                        purple.AbilityOne(player);
-                    }
-                    break;
-                case Green:
-                    if (player.isSneaking()) {
-                        green.AbilityOne(player);
-                    }
-                    break;
-                case Black:
-                    if (player.isSneaking()) {
-                        black.AbilityOne(player);
-                    }
-                    break;
-                case Blue, Yellow:
-                    if (player.isSneaking()) {
-                        blue.AbilityOne(player);
-                    }
-                    break;
-                case Orange:
-                    orange.AbilityOne(player);
-                    break;
-                case BaseRed:
-                    if (player.isSneaking()) {
-                        basered.AbilityOne(player);
-                    }
-                    break;
-                case BasePurple:
-                    if (player.isSneaking()) {
-                        basepurple.AbilityOne(player);
-                    }
-                    break;
-                case BaseGreen:
-                    if (player.isSneaking()) {
-                        basegreen.AbilityOne(player);
-                    }
-                    break;
-                case BaseBlack:
-                    if (player.isSneaking()) {
-                        baseblack.AbilityOne(player);
-                    }
-                    break;
-                case BaseBlue, BaseYellow:
-                    if (player.isSneaking()) {
-                        baseblue.AbilityOne(player);
-                    }
-                    break;
-                case BaseOrange:
-                    baseorange.AbilityOne(player);
-                    break;
+            String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+            if (soulName != null && soulName.contains("Orange")) {
+                soul.AbilityOne(player);
+            } else if (player.isSneaking()) {
+                soul.AbilityOne(player);
             }
         }
     }
-
 
     @EventHandler
     public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
         Player player = event.getPlayer();
         ItemStack drop = event.getItemDrop().getItemStack();
-        if (player.getPersistentDataContainer().get(keygen("ComorAction"),PersistentDataType.BOOLEAN)) {
-        if (!player.getPersistentDataContainer().has(keygen("soul"))) {
-            return;
-        }
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
+            Base_Soul soul = getSoul(player);
+            if (soul == null) return;
 
-        switch (soulType) {
-            case Red:
-                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                        //Do stuff
-                        red.AbilityTwo(player,drop);
-                        event.setCancelled(true);
-
-                }
-                break;
-            case Purple:
-                if (drop.getPersistentDataContainer().has(keygen("rifle"))) {
-                    purple.AbilityTwo(player,drop);
+            String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+            if (soulName != null) {
+                if (soulName.contains("Red") && drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                    soul.AbilityTwo(player, drop);
                     event.setCancelled(true);
-                }
-                break;
-            case Green:
-                green.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case Yellow:
-                yellow.AbilityTwo(player,player.getInventory().getItem(0));
-                break;
-            case BaseRed:
-                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    //Do stuff
-                    basered.AbilityTwo(player,drop);
+                    return;
+                } else if (soulName.contains("Purple") && drop.getPersistentDataContainer().has(keygen("rifle"))) {
+                    soul.AbilityTwo(player, drop);
                     event.setCancelled(true);
-
+                    return;
                 }
-                break;
+            }
+
+            soul.AbilityTwo(player, player.getInventory().getItem(0));
         }
     }
-    }
 
-@EventHandler
+    @EventHandler
     public void activateAttackPassive(PrePlayerAttackEntityEvent event) {
         Player player = event.getPlayer();
-        if (!player.getPersistentDataContainer().has(keygen("soul"))) {
-            return;
+        Base_Soul soul = getSoul(player);
+        if (soul == null) return;
+
+        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+        if (soulName != null && soulName.contains("Red")) {
+            soul.Passive(player, event);
         }
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        switch (soulType) {
-            case Red:
-                red.Passive(player,event);
-                break;
-            case BaseRed:
-                basered.Passive(player,event);
-                break;
-        }
-
-}
-
-
-
+    }
 }

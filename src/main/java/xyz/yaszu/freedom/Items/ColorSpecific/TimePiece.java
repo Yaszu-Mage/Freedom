@@ -9,13 +9,12 @@ import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.SmithingTransformRecipe;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Soul.SoulTypes;
-import xyz.yaszu.freedom.Soul.Ultra.Purple;
 import xyz.yaszu.freedom.Soul.Ultra.Red;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class TimePiece extends Util implements BaseItem {
-    Red red = new Red();
-
+public class TimePiece implements BaseItem {
+    private final Red red = new Red();
 
     @Override
     public ItemStack item() {
@@ -24,7 +23,8 @@ public class TimePiece extends Util implements BaseItem {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-        if (getSoulType(player) != SoulTypes.Red || getSoulType(player) != SoulTypes.BaseRed) {
+        SoulTypes soul = Util.getSoulType(player);
+        if (soul != SoulTypes.Red && soul != SoulTypes.BaseRed) {
             //do stuff
             event.setCancelled(true);
         }
@@ -36,6 +36,6 @@ public class TimePiece extends Util implements BaseItem {
         RecipeChoice base = new RecipeChoice.MaterialChoice(Material.CLOCK);
         RecipeChoice addition = new RecipeChoice.MaterialChoice(Material.GUNPOWDER);
         ItemStack result = item();
-        return new SmithingTransformRecipe(keygen("timepiece"), result, template, base, addition);
+        return new SmithingTransformRecipe(FreedomKeys.key("timepiece"), result, template, base, addition);
     }
 }

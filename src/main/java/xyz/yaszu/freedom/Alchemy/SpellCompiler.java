@@ -21,7 +21,96 @@ public class SpellCompiler extends Util {
     }
 
     public enum ritualtype {
-        destruction, teleport, area, effect,rain,sun,thundering,day,night,shock,goon,sixtyseven,nothing
+        destruction(1500), teleport(50), area(40), effect(25),
+        rain(45), sun(45), thundering(45), day(30), night(30),
+        shock(45), goon(1000), sixtyseven(1000), nothing(750);
+
+        private final int baseCost;
+        ritualtype(int baseCost) { this.baseCost = baseCost; }
+        public int getBaseCost() { return baseCost; }
+
+        public void execute(StatementNode stmt, Player caster) {
+            int power = stmt.range + stmt.amplification * 2;
+            switch (this) {
+                case teleport -> {
+                    PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), stmt.location.clone().add(0,0,4));
+                    PortalParticleLifespan(stmt.location.clone().add(0,2,0),caster.getLocation().clone().add(0,2,4).setRotation(0,0));
+                }
+                case destruction -> {
+                    createRemoteExplosionParticles(stmt.location,15,stmt.range);
+                }
+                case area -> {
+                    for (Entity e : caster.getWorld().getNearbyEntities(stmt.location, power, power, power)) {
+                        if (e instanceof LivingEntity l && stmt.effect != null) l.addPotionEffect(stmt.effect);
+
+                    }
+                }
+                case effect -> {
+                    if (stmt.effect != null) caster.addPotionEffect(stmt.effect);
+                }
+                case rain -> {
+                    caster.getWorld().setStorm(true);
+                    caster.getWorld().setThundering(false);
+                    caster.getWorld().setWeatherDuration(6000 * Math.max(1,stmt.amplification));
+                }
+                case sun -> {
+                    caster.getWorld().setStorm(false);
+                    caster.getWorld().setThundering(false);
+                    caster.getWorld().setWeatherDuration(0);
+                }
+                case thundering -> {
+                    caster.getWorld().setThundering(true);
+                    caster.getWorld().setWeatherDuration(6000 * Math.max(1,stmt.amplification));
+                    caster.getWorld().setStorm(true);
+                }
+                case day -> {
+                    caster.getWorld().setTime(1000);
+                }
+                case night -> {
+                    caster.getWorld().setTime(13000);
+                }
+                case shock -> {
+                    if (stmt.range > 0) {
+                        for (int x = 0; x < stmt.range; x++) {
+                            stmt.location.getWorld().strikeLightning(stmt.location);
+                        }
+                    } else {
+                        stmt.location.getWorld().strikeLightning(stmt.location);
+                    }
+                }
+                case goon -> {
+                    for (ItemStack item : caster.getInventory().getContents()) {
+                        if (item != null) {
+                            if ((item.getType() != Material.WRITABLE_BOOK) && (item.getType() != Material.WRITTEN_BOOK) && (item.getType() != Material.MILK_BUCKET) && (item.getType() != Material.BOOK)) {
+                                caster.getInventory().remove(item);
+                                caster.getWorld().dropItemNaturally(caster.getLocation(),ItemStack.of(Material.MILK_BUCKET));
+                            }
+
+                        }
+                    }
+                    caster.getLocation().getWorld().spawnParticle(Particle.ITEM_SNOWBALL,caster.getLocation(),100,0,0,0,0.1);
+                    caster.damage(10000,caster);
+                }
+                case sixtyseven -> {
+                    caster.getWorld().strikeLightning(caster.getLocation());
+                    caster.damage(10000,caster);
+                }
+                case nothing -> {
+                    //the void
+                    if (stmt.range > 0 && stmt.amplification > 1 && caster.getLocation().getWorld() == Bukkit.getWorld("world")) {
+                        Location voidloc = stmt.location.clone().set(0,-60,0);
+                        voidloc.setWorld(Bukkit.getWorld("void"));
+                        PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), voidloc.clone().add(0,0,4),new Particle.DustOptions(Color.RED,8f));
+                        PortalParticleLifespan(voidloc,caster.getLocation().clone().add(0,2,0).setRotation(0,0),new Particle.DustOptions(Color.RED,8f));
+                    } else {
+                        Location voidloc = Objects.requireNonNull(Bukkit.getWorld("world")).getSpawnLocation().clone().add(0,2,0);
+
+                        PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), voidloc.clone().add(0,0,4),new Particle.DustOptions(Color.RED,8f));
+                        PortalParticleLifespan(voidloc,caster.getLocation().clone().add(0,2,0).setRotation(0,0),new Particle.DustOptions(Color.RED,8f));
+                    }
+                }
+            }
+        }
     }
 
     /* ================= LOGGER ================= */
@@ -91,18 +180,15 @@ public class SpellCompiler extends Util {
                 if (isAction(key)) {
                     current = new StatementNode();
                     current.action = ritualtype.valueOf(key.name());
-                    current.location = base;
+                    current.location = base.clone();
                     spell.statements.add(current);
                     used = true;
-                    continue;
-                }
-
-                if (current != null) {
+                } else if (current != null) {
                     switch (key) {
                         case amplification -> { current.amplification++; used = true; }
                         case range -> {
                             if (i + 1 < tokens.size() && tokens.get(i + 1).type == TokenType.NUMBER) {
-                                current.range = Math.min(25,Integer.parseInt(tokens.get(++i).value));
+                                current.range = Math.min(25, Integer.parseInt(tokens.get(++i).value));
                                 used = true;
                             }
                         }
@@ -121,10 +207,8 @@ public class SpellCompiler extends Util {
                                 double y = Double.parseDouble(tokens.get(++i).value);
                                 double z = Double.parseDouble(tokens.get(++i).value);
                                 current.location = new Location(base.getWorld(), x, y, z);
-                            } else {
-                                current.location = base;
+                                used = true;
                             }
-                            used = true;
                         }
                         case regeneration, speed, strength, poison, wither, jump, haste -> {
                             current.effect = createEffect(key);
@@ -148,11 +232,13 @@ public class SpellCompiler extends Util {
     /* ================= VALIDATION ================= */
 
     static List<String> validate(SpellNode spell) {
-        Set<String> errors = new HashSet<>();
-        if (spell.statements.isEmpty()) errors.add("No valid statements.");
-        for (Token t : spell.unusedTokens) errors.add("Invalid token: " + t.value);
+        Set<String> errors = new LinkedHashSet<>();
+        if (spell.statements.isEmpty()) errors.add("No valid statements found. Did you start with an action keyword?");
+        for (Token t : spell.unusedTokens) errors.add("Unrecognized or misplaced token: " + t.value);
         for (StatementNode stmt : spell.statements) {
-            if (stmt.action == ritualtype.area && stmt.effect == null) errors.add("Area requires effect.");
+            if (stmt.action == ritualtype.area && stmt.effect == null) {
+                errors.add("Action 'area' requires an effect (e.g., speed, strength, poison).");
+            }
         }
         return new ArrayList<>(errors);
     }
@@ -163,7 +249,7 @@ public class SpellCompiler extends Util {
      * Assigns a power value to every material in Minecraft.
      */
     private static int getItemValue(Material mat) {
-        return switch (mat) {
+        int value = switch (mat) {
             case PLAYER_HEAD -> 15000;
             case DRAGON_EGG -> 10000;
             case ENCHANTED_GOLDEN_APPLE -> 7500;
@@ -183,9 +269,12 @@ public class SpellCompiler extends Util {
             default -> {
                 if (mat.isBlock() && mat.isSolid()) yield 1;
                 if (mat.isEdible()) yield 3;
-                yield 2; // Default for miscellaneous items
+                yield 2;
             }
         };
+
+        // Expansion point: External configuration or Soul-specific multipliers
+        return value;
     }
 
     static int calculateTotalPowerCost(SpellNode spell) {
@@ -193,20 +282,11 @@ public class SpellCompiler extends Util {
         for (StatementNode stmt : spell.statements) {
             // Base complexity: Range and Amp increase cost exponentially
             int complexity = 1 + stmt.range + (stmt.amplification * 5);
-            log("Complexity " + String.valueOf(complexity));
-            int actionBase = switch (stmt.action) {
-                case destruction -> 500;
-                case teleport -> 50;
-                case area -> 40;
-                case effect -> 25;
-                case sun, thundering, rain, shock -> 45;
-                case day,night -> 30;
-                case goon, sixtyseven -> 1000;
-                case nothing -> 750;
-            };
-            log("Action Base " + String.valueOf(actionBase));
+            log("Complexity " + complexity);
+            int actionBase = stmt.action.getBaseCost();
+            log("Action Base " + actionBase);
             totalRequiredPower += (complexity * actionBase);
-            log("Total " + String.valueOf(totalRequiredPower));
+            log("Total " + totalRequiredPower);
         }
 
         return totalRequiredPower;
@@ -283,94 +363,12 @@ public class SpellCompiler extends Util {
 
     static void execute(SpellNode spell, Player caster) {
         for (StatementNode stmt : spell.statements) {
-            int power = stmt.range + stmt.amplification * 2;
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                        switch (stmt.action) {
-                            case teleport -> {
-                                PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), stmt.location.clone().add(0,0,4));
-                                PortalParticleLifespan(stmt.location.clone().add(0,2,0),caster.getLocation().clone().add(0,2,4).setRotation(0,0));
-                            }
-                            case destruction -> {
-                                createRemoteExplosionParticles(stmt.location,15,stmt.range);
-                            }
-                            case area -> {
-                                for (Entity e : caster.getWorld().getNearbyEntities(stmt.location, power, power, power)) {
-                                    if (e instanceof LivingEntity l && stmt.effect != null) l.addPotionEffect(stmt.effect);
-
-                                }
-                            }
-                            case effect -> {
-                                if (stmt.effect != null) caster.addPotionEffect(stmt.effect);
-                            }
-                            case rain -> {
-                                caster.getWorld().setStorm(true);
-                                caster.getWorld().setThundering(false);
-                                caster.getWorld().setWeatherDuration(6000 * Math.min(1,stmt.amplification));
-                            }
-                            case sun -> {
-                                caster.getWorld().setStorm(false);
-                                caster.getWorld().setThundering(false);
-                                caster.getWorld().setWeatherDuration(0);
-                            }
-                            case thundering -> {
-                                caster.getWorld().setThundering(true);
-                                caster.getWorld().setWeatherDuration(6000 * Math.min(1,stmt.amplification));
-                                caster.getWorld().setStorm(true);
-                            }
-                            case day -> {
-                                caster.getWorld().setTime(1000);
-                            }
-                            case night -> {
-                                caster.getWorld().setTime(13000);
-                            }
-                            case shock -> {
-                                if (stmt.range > 0) {
-                                    for (int x = 0; x < stmt.range; x++) {
-                                        stmt.location.getWorld().strikeLightning(stmt.location);
-                                    }
-                                } else {
-                                    stmt.location.getWorld().strikeLightning(stmt.location);
-                                }
-                            }
-                            case goon -> {
-                                for (ItemStack item : caster.getInventory().getContents()) {
-                                    if (item != null) {
-                                        if ((item.getType() != Material.WRITABLE_BOOK) && (item.getType() != Material.WRITTEN_BOOK) && (item.getType() != Material.MILK_BUCKET) && (item.getType() != Material.BOOK)) {
-                                            caster.getInventory().remove(item);
-                                            caster.getWorld().dropItemNaturally(caster.getLocation(),ItemStack.of(Material.MILK_BUCKET));
-                                        }
-
-                                    }
-                                }
-                                caster.getLocation().getWorld().spawnParticle(Particle.ITEM_SNOWBALL,caster.getLocation(),100,0,0,0,0.1);
-                                caster.damage(10000,caster);
-                            }
-                            case sixtyseven -> {
-                                caster.getWorld().strikeLightning(caster.getLocation());
-                                caster.damage(10000,caster);
-                            }
-                            case nothing -> {
-                                //the void
-                                if (stmt.range > 0 && stmt.amplification > 1 && caster.getLocation().getWorld() == Bukkit.getWorld("world")) {
-                                    Location voidloc = stmt.location.clone().set(0,-60,0);
-                                    voidloc.setWorld(Bukkit.getWorld("void"));
-                                    PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), voidloc.clone().add(0,0,4),new Particle.DustOptions(Color.RED,8f));
-                                    PortalParticleLifespan(voidloc,caster.getLocation().clone().add(0,2,0).setRotation(0,0),new Particle.DustOptions(Color.RED,8f));
-                                } else {
-                                    Location voidloc = Objects.requireNonNull(Bukkit.getWorld("world")).getSpawnLocation().clone().add(0,2,0);
-
-                                    PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), voidloc.clone().add(0,0,4),new Particle.DustOptions(Color.RED,8f));
-                                    PortalParticleLifespan(voidloc,caster.getLocation().clone().add(0,2,0).setRotation(0,0),new Particle.DustOptions(Color.RED,8f));
-                                }
-                            }
-                        }
-                    }
-
-            }.runTaskLater(Freedom.get_plugin(),stmt.delay);
-
-
+                    stmt.action.execute(stmt, caster);
+                }
+            }.runTaskLater(Freedom.get_plugin(), stmt.delay);
         }
     }
 

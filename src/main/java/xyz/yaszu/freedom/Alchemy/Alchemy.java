@@ -37,7 +37,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-public class Alchemy extends Util implements Listener {
+public class Alchemy implements Listener {
     public static Alchemy instance = new Alchemy();
     public static void init() {
         instance.registerRecipes();
@@ -75,7 +75,7 @@ public class Alchemy extends Util implements Listener {
             return;
         }
         Player target = event.getPlayer();
-        SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        SoulTypes soulType = Util.getSoulType(target);
         event.getBook();
         ritual(event.getLectern().getLocation(),soulType,event.getBook(),target);
     }
@@ -92,9 +92,9 @@ public class Alchemy extends Util implements Listener {
                 String text = String.join(" ", meta.getPages());
                 int Casted = SpellCompiler.castSpell(text, centerLocation, player);
                 if (Casted < 10000) {
-                    createMinMagicCircle(centerLocation.add(0.5,0,0.5),15,soulType);
+                    Util.createMinMagicCircle(centerLocation.add(0.5,0,0.5),15,soulType);
                 } else {
-                    createMaxMagicCircle(centerLocation.add(0.5,0,0.5),15,Casted/10000,soulType);
+                    Util.createMaxMagicCircle(centerLocation.add(0.5,0,0.5),15,Casted/10000,soulType);
                 }
 
 

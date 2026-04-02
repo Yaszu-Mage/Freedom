@@ -209,6 +209,26 @@ public class Trust {
                         }))
                 .build();
     }
+    public static LiteralCommandNode<CommandSourceStack> uncurseArgument() {
+        return Commands.literal("uncurse")
+                .then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                            final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+
+                            if (ctx.getSource().getSender() instanceof Player sender) {
+                                if (!sender.isOp()) return Command.SINGLE_SUCCESS;
+                            }
+
+                            xyz.yaszu.freedom.Subsystems.CurseManager.uncurse(target);
+                            ctx.getSource().getSender().sendRichMessage("<green>Uncursed <target>!</green>",
+                                    Placeholder.component("target", target.name())
+                            );
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .build();
+    }
+
     public static LiteralCommandNode<CommandSourceStack> reviveArgument() {
         return Commands.literal("revive")
                 .then(Commands.argument("target", ArgumentTypes.player())

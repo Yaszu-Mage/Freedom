@@ -32,6 +32,7 @@ import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.CombatTimer;
+import xyz.yaszu.freedom.Subsystems.CurseManager;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Util.Util;
@@ -145,7 +146,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("Curse one person to become a frog. they cannot speak and they have weakness 2");
+        return dess("Curse one person to become a frog for 3 minutes. They cannot speak and they have weakness 2");
     }
 
     public long AbilityTwo_Cooldown = 30000;
@@ -154,8 +155,9 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-        if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
-            if (Bukkit.getOnlinePlayers().size() > 2) {
+
+        if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId()) && !player.getPersistentDataContainer().getOrDefault(keygen("disguised"), PersistentDataType.BOOLEAN, false)) {
+            if (Bukkit.getOnlinePlayers().size() >= 2) {
                 player.playSound(player.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE,1,1);
                 InventoryGui inventoryGui = new InventoryGui();
                 inventoryGui.setInventory(player);
@@ -165,67 +167,18 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                 player.sendMessage(dess("<shadow:#000000FF><b><Red>ERROR</Red>:</shadow> You need at least <shadow:#000000FF><b>2</shadow> players online to use this ability!"));
             }
 
-
         } else {
             // no no ability
+            Freedom.get_plugin().getLogger().info("Ability Two - Orange");
             if (abilityTwoCooldownTime.get(player.getUniqueId()) != null) {
                 double seconds = (double) (AbilityTwo_Cooldown - (System.currentTimeMillis() - abilityTwoCooldownTime.get(player.getUniqueId()))) / 1000;
                 player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            } else {
+
             }
         }
     }
 
-    public static HashMap<UUID,MobDisguise> curses = new HashMap<>();
-
-
-    @EventHandler
-    public void PlayerJoinEvent(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("recursor"))) {
-            Player recursor = Bukkit.getPlayer(Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"),PersistentDataType.STRING));
-            if (recursor != null) {
-                String recursorName = recursor.getName();
-                String worlddata = Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"),PersistentDataType.STRING);
-                String fixedworlddata = worlddata.replace(recursorName, "");
-                recursor.getPersistentDataContainer().remove(keygen("cancurse"));
-                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"),PersistentDataType.STRING,fixedworlddata);
-            }
-        }
-        if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("uncursor"))) {
-            Player recursor = Bukkit.getPlayer(Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("uncursor"),PersistentDataType.STRING));
-            if (recursor != null) {
-                String recursorName = recursor.getName();
-                String worlddata = Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("uncursor"),PersistentDataType.STRING);
-                String fixedworlddata = worlddata.replace(recursorName, "");
-                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("uncursor"),PersistentDataType.STRING,fixedworlddata);
-                uncurse(recursor);
-            }
-        }
-    }
-
-    @EventHandler
-    public void PlayerDeathEvent(PlayerDeathEvent event) {
-        Player victim = event.getEntity();
-        EntityDamageEvent lastDamage = victim.getLastDamageCause();
-        if (lastDamage instanceof EntityDamageByEntityEvent damageByEntity) {
-            Entity damager = damageByEntity.getDamager();
-
-            if (damager instanceof Player killer) {
-                Player player = event.getPlayer();
-                if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                    if (player.getPersistentDataContainer().get(keygen("cursed"),PersistentDataType.STRING) == "Frog") {
-                        uncurse(player);
-                    }
-                }
-            }
-        } else {
-            Player player = event.getPlayer();
-            if (player.getPersistentDataContainer().has(keygen("cursed"))) {
-                uncurse(event.getPlayer());
-            }
-        }
-
-    }
 
     @EventHandler
     public void InventoryClickEvent (InventoryClickEvent event) throws MineSkinException, DataRequestException {
@@ -235,91 +188,21 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             Player player = (Player) event.getWhoClicked();
             ItemStack item = event.getCurrentItem();
             Player baller = Bukkit.getPlayer(UUID.fromString(item.getPersistentDataContainer().get(keygen("player_uuid"),PersistentDataType.STRING)));
-            String curser = player.getName();
             if (baller != null) {
-            if (!baller.getPersistentDataContainer().has(keygen("cursed"))) {
-                if (!player.getPersistentDataContainer().has(keygen("cancurse"))) {
-                    player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
-                }
-                if (player.getPersistentDataContainer().get(keygen("cancurse"),PersistentDataType.BOOLEAN) == true) {
-                    Freedom.get_plugin().getLogger().info("Standard Curse");
-                    player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,false);
-
-                    curse(baller,curser);
-                }
-            } else {
-                if (baller.getPersistentDataContainer().get(keygen("cursed"),PersistentDataType.STRING) == "Frog") {
-                    Freedom.get_plugin().getLogger().info("UNCURSE FROG");
-                    player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,true);
-                    uncurse(baller);
-                } else {
-                    if (player.getPersistentDataContainer().get(keygen("cancurse"),PersistentDataType.BOOLEAN) == true) {
-                        Freedom.get_plugin().getLogger().info("Can curse Cat");
-                        player.getPersistentDataContainer().set(keygen("cancurse"),PersistentDataType.BOOLEAN,false);
-                        curse(baller,curser);
+                if (!CurseManager.isCursed(baller)) {
+                    if (player.getPersistentDataContainer().getOrDefault(keygen("cancurse"), PersistentDataType.BOOLEAN, true)) {
+                        player.getPersistentDataContainer().set(keygen("cancurse"), PersistentDataType.BOOLEAN, false);
+                        CurseManager.curse(baller, player);
+                    } else {
+                        player.sendMessage(dess("<red>You cannot curse anyone right now!</red>"));
                     }
-
+                } else {
+                    player.sendMessage(dess("<red>This person is already cursed!</red>"));
                 }
+                player.closeInventory();
+                event.setCancelled(true);
             }
-                Freedom.get_plugin().getLogger().info("huh");
-            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
-            player.closeInventory();
-            event.setCancelled(true);
-
         }
-    }
-    }
-
-
-    public void uncurse(Player baller) {
-        if (baller.isOnline()) {
-
-
-            baller.getPersistentDataContainer().remove(keygen("cursed"));
-            baller.removePotionEffect(PotionEffectType.WEAKNESS);
-            String curser = baller.getPersistentDataContainer().get(keygen("cursedby"), PersistentDataType.STRING);
-            if (curser != null) {
-            if (Bukkit.getPlayer(curser) != null) {
-                Bukkit.getPlayer(curser).getPersistentDataContainer().remove(keygen("cancurse"));
-            }
-            if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("recursor"))) {
-                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"), PersistentDataType.STRING, curser + Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("recursor"), PersistentDataType.STRING));
-            } else {
-                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("recursor"), PersistentDataType.STRING, curser);
-            }
-            curses.get(baller.getUniqueId()).removeDisguise();
-            curses.remove(baller.getUniqueId());
-            baller.getPersistentDataContainer().remove(keygen("cursedby"));
-        } else {
-            if (Bukkit.getWorld("world").getPersistentDataContainer().has(keygen("uncursor"))) {
-                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("uncursor"),PersistentDataType.STRING,Bukkit.getWorld("world").getPersistentDataContainer().get(keygen("uncursor"),PersistentDataType.STRING)+baller.getName());
-            } else {
-                Bukkit.getWorld("world").getPersistentDataContainer().set(keygen("uncursor"),PersistentDataType.STRING,baller.getName());
-            }
-
-        }
-    }
-    }
-
-    public void curse(Player baller,String curser) {
-        baller.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING,"Frog");
-        baller.getPersistentDataContainer().set(keygen("cursedby"),PersistentDataType.STRING,curser);
-        baller.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,PotionEffect.INFINITE_DURATION,1,true,false));
-        if (curses.get(baller.getUniqueId()) == null) {
-            MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
-            mobDisguise.addPlayer(baller);
-            mobDisguise.setEntity(baller);
-            mobDisguise.startDisguise();
-            FrogWatcher watcher = (FrogWatcher) mobDisguise.getWatcher();
-            watcher.setVariant(Frog.Variant.COLD);
-            curses.put(baller.getUniqueId(),mobDisguise);
-        }
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                uncurse(baller);
-            }
-        }.runTaskLater(Freedom.get_plugin(),2620);
     }
 
 
@@ -358,24 +241,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                     meta.getPersistentDataContainer().set(keygen("player_uuid"), PersistentDataType.STRING, instancedPlayer.getUniqueId().toString());
                     SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
                     String name = instancedPlayer.getName();
-                    switch (soulType) {
-                        case Black:
-                            meta.displayName(soulListener.black.Name().append(dess(" " + name)));
-                            break;
-                        case Green:
-                            meta.displayName(soulListener.green.Name().append(dess(" " + name)));
-                            break;
-                        case Red:
-                            meta.displayName(soulListener.red.Name().append(dess(" " + name)));
-                            break;
-                        case Blue:
-                            meta.displayName(soulListener.blue.Name().append(dess(" " + name)));
-                            break;
-                        case Purple:
-                            meta.displayName(soulListener.purple.Name().append(dess(" " + name)));
-                            break;
-
-                    }
+                    meta.displayName(soulListener.SOULS.get(soulType).Name().append(dess(" " + name)));
                     skull.displayName();
                     skull.setItemMeta(meta);
                     inventory.setItem(iteration,skull);
