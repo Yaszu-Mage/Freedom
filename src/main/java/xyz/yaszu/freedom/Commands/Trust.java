@@ -39,7 +39,19 @@ public class Trust {
                         if (!target.isOp()) return Command.SINGLE_SUCCESS;
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
-                        drawDangerSymbol(target.getLocation(),5,16,Particle.DUST,new Particle.DustOptions(Color.YELLOW, 8.0f),new Particle.DustOptions(Color.BLACK,8.0f));
+                        new BukkitRunnable() {
+                            int tick = 0;
+                            @Override
+                            public void run() {
+                                Location loc = target.getLocation();
+                                createVerticleMinMagicCircle(loc.clone().add(4,0,0), 15, getSoulType(target), tick, target.getLocation(),100,0.5);
+                                if (tick >= 360) {
+                                    this.cancel();
+                                }
+                                tick = tick + 15;
+                            }
+                        }.runTaskTimer(Freedom.get_plugin(),0,20);
+//                        drawDangerSymbol(target.getLocation(),5,16,Particle.DUST,new Particle.DustOptions(Color.YELLOW, 8.0f),new Particle.DustOptions(Color.BLACK,8.0f));
 //                       drawSpiral(loc,8, 4, loc.getWorld(),128, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8.0f));
                     }
 

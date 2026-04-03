@@ -5,6 +5,7 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.*;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -17,13 +18,16 @@ public class SpellCompiler extends Util {
     public enum ritualkeywords {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
-        rain, sun, thundering, day, night,shock,delay,goon,sixtyseven,nothing
+        rain, sun, thundering, day, night,shock,delay,goon,sixtyseven,nothing,
+        fire,water,earth,air,blast,up,down,look
     }
+
+
 
     public enum ritualtype {
         destruction(1500), teleport(50), area(40), effect(25),
         rain(45), sun(45), thundering(45), day(30), night(30),
-        shock(45), goon(1000), sixtyseven(1000), nothing(750);
+        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500);
 
         private final int baseCost;
         ritualtype(int baseCost) { this.baseCost = baseCost; }
@@ -109,6 +113,51 @@ public class SpellCompiler extends Util {
                         PortalParticleLifespan(voidloc,caster.getLocation().clone().add(0,2,0).setRotation(0,0),new Particle.DustOptions(Color.RED,8f));
                     }
                 }
+                case blast -> {
+                    Location loc;
+                    loc = Objects.requireNonNullElseGet(stmt.location, caster::getLocation).clone();
+                    switch (stmt.direction) {
+                        case up -> {
+                            loc.setRotation(0,90);
+                        }
+                        case down -> {
+                            loc.setRotation(0,-90);
+                        }
+                        default -> {
+                            loc.setRotation(caster.getLocation().getYaw(),caster.getLocation().getPitch());
+                        }
+                    }
+                    double pitch = loc.getPitch();
+                    //get direction
+                    if (pitch >= 90) {
+                        createMinMagicCircle(loc,15,getSoulType(caster));
+                    } else if (pitch <= -90) {
+                        createMinMagicCircle(loc.add(0,2,0),15,getSoulType(caster));
+                    } else {
+                        createVerticleMinMagicCircle(loc.clone().add(0,4,0),15,getSoulType(caster),caster.getYaw() - 90,loc,100,0.4);
+                        //vertical...
+                    }
+                    switch (stmt.element) {
+                        case fire -> {
+
+                        }
+                        case air -> {
+                            caster.setVelocity(loc.getDirection().multiply(-(4 + (power / 2))));
+                        }
+                        case water -> {
+
+                        }
+                        case earth -> {
+
+                        }
+                        case poison -> {
+
+                        }
+                        case wither -> {
+
+                        }
+                    }
+                }
             }
         }
     }
@@ -156,6 +205,8 @@ public class SpellCompiler extends Util {
     }
 
     static class StatementNode {
+        ritualkeywords direction = ritualkeywords.down;
+        ritualkeywords element = ritualkeywords.air;
         ritualtype action;
         Location location;
         int range = 0;
@@ -185,6 +236,14 @@ public class SpellCompiler extends Util {
                     used = true;
                 } else if (current != null) {
                     switch (key) {
+                        case up,down,look -> {
+                            current.direction = key;
+                            used = true;
+                        }
+                        case fire,water,earth,air -> {
+                            current.element = key;
+                            used = true;
+                        }
                         case amplification -> { current.amplification++; used = true; }
                         case range -> {
                             if (i + 1 < tokens.size() && tokens.get(i + 1).type == TokenType.NUMBER) {
@@ -224,7 +283,7 @@ public class SpellCompiler extends Util {
 
     static boolean isAction(ritualkeywords key) {
         return switch (key) {
-            case teleport, destruction, area, effect, thundering, rain, sun, day, night, shock,goon,sixtyseven,nothing-> true;
+            case teleport, destruction, area, effect, thundering, rain, sun, day, night, shock,goon,sixtyseven,nothing,blast-> true;
             default -> false;
         };
     }

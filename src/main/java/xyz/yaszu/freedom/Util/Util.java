@@ -190,6 +190,36 @@ public class Util {
 
     }
 
+
+    public static void createVerticleMinMagicCircle(Location center, int tickRate, SoulTypes soulType, double yaw,Location pivot, int time,double scale) {
+        Color color = Color.PURPLE;
+        switch (soulType) {
+            case Green, BaseGreen -> color = Color.GREEN;
+            case Red, BaseRed -> color = Color.RED;
+            case Yellow, BaseYellow -> color = Color.YELLOW;
+            case Orange, BaseOrange -> color = Color.ORANGE;
+            case BaseBlue, Blue -> color = Color.BLUE;
+            case Black, BaseBlack -> color = Color.BLACK;
+        }
+        Color finalColor = color;
+        final Location cent = rotpointZ(pivot, yaw, center);
+            new BukkitRunnable() {
+                int tick = 1;
+
+                @Override
+                public void run() {
+                    Vertmultisquare(cent, tick, 4 * scale, Particle.DUST, 90, new Particle.DustOptions(finalColor.setBlue(0), 2f),yaw);
+                    Vertmultisquare(cent, tick, 10 * scale, Particle.DUST, 30, new Particle.DustOptions(finalColor, 2f),yaw);
+                    tick = tick + tickRate;
+                    if (tick >= time) {
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(Freedom.get_plugin(), 5, 10);
+        }
+
+
+
     public static void createMaxMagicCircle(Location center, int tickRate, int scale, SoulTypes soulType) {
         Color color = Color.PURPLE;
         switch (soulType) {
@@ -343,6 +373,14 @@ public class Util {
         drawSquare(location, size, initialrot - 45 + tick, particle, options1, 0, 8, 0);
     }
 
+    public static void Vertmultisquare(Location location, int tick, double size, Particle particle, int initialrot, Particle.DustOptions options, double yaw) {
+        Color optionscolor = options.getColor();
+        optionscolor = optionscolor.mixColors(Color.RED);
+        Particle.DustOptions options1 = new Particle.DustOptions(optionscolor, options.getSize());
+        drawVerticleSquare(location, size, initialrot + tick, particle, options, 0, 8, 0,true,yaw);
+        drawVerticleSquare(location, size, initialrot - 45 + tick, particle, options1, 0, 8, 0,true,yaw);
+    }
+
     // Example: Draw a 5x5 square on the ground around the player
     public static void drawSquare(Location center, double size, double rot, Particle particle, Particle.DustOptions options, double xlimit, double ylimit, double zlimit) {
         size = size / 2; // Half-size for a 5x5
@@ -383,6 +421,50 @@ public class Util {
         drawParticleLine(c3, c4, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
         drawParticleLine(c4, c1, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
     }
+    public static void drawVerticleSquare(Location center, double size, double rot, Particle particle, Particle.DustOptions options, double xlimit, double ylimit, double zlimit,boolean baller, double yaw) {
+        size = size / 2; // Half-size for a 5x5
+
+        // Four corners
+        Location c1 = center.clone().add(-size, -size, 0);
+        Location c2 = center.clone().add(size, -size, 0);
+        Location c3 = center.clone().add(size, size, 0);
+        Location c4 = center.clone().add(-size, size, 0);
+        //add rot
+        Freedom.get_plugin().getLogger().info("Rotating:" + yaw);
+        c1 = rotpointY(center, rot, c1);
+        c2 = rotpointY(center, rot, c2);
+        c3 = rotpointY(center, rot, c3);
+        c4 = rotpointY(center, rot, c4);
+        c1 = rotpointZ(center, yaw, c1);
+        c2 = rotpointZ(center, yaw, c2);
+        c3 = rotpointZ(center, yaw, c3);
+        c4 = rotpointZ(center, yaw, c4);
+        if (yaw <= 90) {
+            c1 = rotpointX(center, yaw, c1);
+            c2 = rotpointX(center, yaw, c2);
+            c3 = rotpointX(center, yaw, c3);
+            c4 = rotpointX(center, yaw, c4);
+        }
+        if (yaw >= -90 || yaw <= 0) {
+            c1 = rotpointX(center, yaw + 90, c1);
+            c2 = rotpointX(center, yaw+ 90, c2);
+            c3 = rotpointX(center, yaw+ 90, c3);
+            c4 = rotpointX(center, yaw+ 90, c4);
+        }
+
+
+
+
+
+
+        // Draw lines between corners (simplified)
+        drawParticleLine(c1, c2, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
+        drawParticleLine(c2, c3, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
+        drawParticleLine(c3, c4, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
+        drawParticleLine(c4, c1, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
+    }
+
+
 
     public static Location rotpointX(Location pivot, double angleDegrees, Location toRotate) {
         double radians = Math.toRadians(angleDegrees);
