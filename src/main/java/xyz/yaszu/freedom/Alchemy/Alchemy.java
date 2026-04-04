@@ -90,7 +90,7 @@ public class Alchemy implements Listener {
                 Freedom.get_plugin().getLogger().info("Ritual structure matches!");
                 BookMeta meta = (BookMeta) book.getItemMeta();
                 String text = String.join(" ", meta.getPages());
-                int Casted = SpellCompiler.castSpell(text, centerLocation, player);
+                int Casted = SpellCompiler.castSpell(text, centerLocation, player,true);
                 if (Casted < 10000) {
                     Util.createMinMagicCircle(centerLocation.add(0.5,0,0.5),15,soulType);
                 } else {

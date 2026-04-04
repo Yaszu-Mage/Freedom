@@ -5,7 +5,6 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.*;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -446,7 +445,7 @@ public class SpellCompiler extends Util {
 
     /* ================= ENTRY ================= */
 
-    public static int castSpell(String text, Location center, Player caster) {
+    public static int castSpell(String text, Location center, Player caster, boolean b) {
         var tokens = tokenize(text);
         var ast = parse(tokens, center);
 

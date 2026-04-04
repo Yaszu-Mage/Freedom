@@ -58,7 +58,7 @@ public class Trust {
                         }.runTaskTimer(Freedom.get_plugin(),0,20);
 //                        drawDangerSymbol(target.getLocation(),5,16,Particle.DUST,new Particle.DustOptions(Color.YELLOW, 8.0f),new Particle.DustOptions(Color.BLACK,8.0f));
 //                       drawSpiral(loc,8, 4, loc.getWorld(),128, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8.0f));
-                        sidebar.addPlayer(target);
+
                     }
 
                     return Command.SINGLE_SUCCESS;
