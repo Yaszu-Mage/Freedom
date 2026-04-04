@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.*;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
@@ -136,6 +137,10 @@ public class soulListener extends Util implements Listener {
         showSoulPoints(event.getPlayer());
     }
 
+
+
+
+
     public static void showSoulPoints(Player player) {
         if (!player.getPersistentDataContainer().has(keygen("SoulPoint"))) {
             player.getPersistentDataContainer().set(keygen("SoulPoint"),PersistentDataType.DOUBLE,0d);
@@ -145,7 +150,7 @@ public class soulListener extends Util implements Listener {
             bossBar.name().toString().contains("SoulPoints");
             player.hideBossBar(bossBar);
         }
-
+        
         player.showBossBar(BossBar.bossBar(dess("SoulPoints"), (float) SoulPoints/10, BossBar.Color.BLUE, BossBar.Overlay.NOTCHED_10));
     }
 

@@ -2,7 +2,10 @@ package xyz.yaszu.freedom.Util;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import io.papermc.paper.scoreboard.numbers.NumberFormat;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.exception.DataRequestException;
@@ -18,7 +21,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Criteria;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.guieffect.qual.UI;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
@@ -101,6 +109,33 @@ public class Util {
             }
         }
     }
+
+    public static Objective getUI(Player player) {
+        Scoreboard score = player.getScoreboard();
+        if (score.getObjective("UI") == null) {
+            Objective objective = score.registerNewObjective("UI", Criteria.DUMMY,dess(""));
+            objective.getScore("Lives: ").setScore(player.getPersistentDataContainer().get(keygen("life"), PersistentDataType.INTEGER));
+            objective.getScore("Lives: ").customName(dess("<shadow:#000000FF><b><green>Lives</green></b>:"));
+            objective.getScore("SoulPoints:").customName(dess("<shadow:#000000FF><b><aqua>SoulPoints</aqua></b>:"));
+
+            objective.numberFormat(NumberFormat.styled(Style.style(TextDecoration.BOLD)));
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        }
+
+        return score.getObjective("UI");
+    }
+
+    public static void updateValue(String name,Double value, Player player) {
+        Objective objective = getUI(player);
+        objective.getScore(name).setScore(value.intValue());
+    }
+
+
+
+    public static void updateValue(String name,Integer value, Player player) {
+
+    }
+
 
     public static void createMinMagicCircleAroundPlayer(Player target, int tickRate) {
         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));

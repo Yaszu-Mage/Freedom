@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
+import xyz.yaszu.freedom.Items.Parts.Burger;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
 import xyz.yaszu.freedom.Items.Upgrades.Reset;
 import xyz.yaszu.freedom.Items.Upgrades.Revival;
@@ -33,6 +34,7 @@ public class ItemListener implements Listener {
         register(new Rifle(), "rifle");
         register(new TimePiece(), "timepiece");
         register(new Reset(), "resetstone");
+        register(new Burger(),"burger");
     }
 
     private static void register(BaseItem item, String id) {

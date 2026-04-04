@@ -9,6 +9,7 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.megavex.scoreboardlibrary.api.sidebar.Sidebar;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Color;
@@ -42,6 +43,7 @@ public class Trust {
                         };
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
+
                         new BukkitRunnable() {
                             int tick = 0;
                             @Override
@@ -56,6 +58,7 @@ public class Trust {
                         }.runTaskTimer(Freedom.get_plugin(),0,20);
 //                        drawDangerSymbol(target.getLocation(),5,16,Particle.DUST,new Particle.DustOptions(Color.YELLOW, 8.0f),new Particle.DustOptions(Color.BLACK,8.0f));
 //                       drawSpiral(loc,8, 4, loc.getWorld(),128, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8.0f));
+                        sidebar.addPlayer(target);
                     }
 
                     return Command.SINGLE_SUCCESS;

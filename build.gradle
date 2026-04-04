@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    id 'com.gradleup.shadow' version '8.3.5'
 }
 
 group = 'xyz.yaszu'
@@ -30,6 +31,8 @@ repositories {
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
     maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
     maven { url = "https://maven.enginehub.org/repo/"}
+
+    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
@@ -39,7 +42,8 @@ dependencies {
     compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.15")
     compileOnly ('net.skinsrestorer:skinsrestorer-api:15.11.0')
     compileOnly ('com.sk89q.worldedit:worldedit-bukkit:7.4.0')
-
+    implementation("net.megavex:scoreboard-library-api:2.7.1")
+    runtimeOnly("net.megavex:scoreboard-library-implementation:2.7.1")
 
 }
 
@@ -77,4 +81,6 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
-}
+
+
+    }

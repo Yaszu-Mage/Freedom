@@ -11,6 +11,9 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.megavex.scoreboardlibrary.api.ScoreboardLibrary;
+import net.megavex.scoreboardlibrary.api.exception.NoPacketAdapterAvailableException;
+import net.megavex.scoreboardlibrary.api.noop.NoopScoreboardLibrary;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -61,7 +64,7 @@ import static xyz.yaszu.freedom.Util.Util.keygen;
 public final class Freedom extends JavaPlugin implements Listener {
 
     public static int version = 6942067;
-
+    public static ScoreboardLibrary scoreboardLibrary;
 
     public void reapplyCurseWeakness(Player player) {
         if (player == null || !player.isOnline()) return;
@@ -158,6 +161,15 @@ public final class Freedom extends JavaPlugin implements Listener {
         ItemListener.registerItems();
         start_time = System.currentTimeMillis();
         createVoid();
+
+        try {
+            scoreboardLibrary = ScoreboardLibrary.loadScoreboardLibrary(this);
+        } catch (NoPacketAdapterAvailableException e) {
+            // If server version is not yet supported, you can fallback to the no-op implementation:
+            scoreboardLibrary = new NoopScoreboardLibrary();
+            this.getLogger().warning("Server version unsupported, scoreboard functionality will not be visible!");
+        }
+
     }
 
 
@@ -171,6 +183,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     }
     @Override
     public void onDisable() {
+        scoreboardLibrary.close();
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
     }
