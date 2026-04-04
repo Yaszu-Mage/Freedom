@@ -127,6 +127,7 @@ public class BaseRed extends Util implements Base_Soul {
     @Override
     //
     public void AbilityTwo(Player player,ItemStack abilityItem) {
+        player.sendMessage(dess("ABILITY IN CONT"));
         if (can_ability(ability_two_cooldown,ability_two_cooldowns,player.getUniqueId())) {
             ability_two_cooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             handleFireball(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);

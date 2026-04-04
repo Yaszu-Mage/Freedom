@@ -21,6 +21,7 @@ public class black_flash implements Listener {
     @EventHandler
     public void blackflash(PrePlayerAttackEntityEvent event) {
         Player attacker = event.getPlayer();
+        if (!Life_and_Death.is_alive(event.getPlayer())) return;
         NamespacedKey key = new NamespacedKey(Bukkit.getPluginManager().getPlugin("Freedom"), "black_flash");
 
         if (!attacker.getPersistentDataContainer().has(key, PersistentDataType.INTEGER)) {

@@ -20,6 +20,9 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
+import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
+import xyz.yaszu.freedom.Soul.Base.BaseRed;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 
 import java.util.*;
@@ -700,6 +703,10 @@ public class Util {
     }
 
     public static SoulTypes getSoulType(Player player) {
+        if (!player.getPersistentDataContainer().has(FreedomKeys.soul(), PersistentDataType.STRING)) {
+            selectionUi.open_UI(player,new BaseRed());
+            return SoulTypes.Red;
+        }
         return SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
     }
 

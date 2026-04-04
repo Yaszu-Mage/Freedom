@@ -6,6 +6,7 @@ import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
@@ -439,8 +440,10 @@ public class Black extends Util implements Base_Soul, Listener {
                         String targetName = disguise.getName();
                         
                         // Temporarily set names if plugins use them
-                        player.displayName(dess(targetName));
-                        player.customName(dess(targetName));
+                            player.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(targetName));
+                            player.customName(LegacyComponentSerializer.legacyAmpersand().deserialize(targetName));
+
+
                     }
                 }
             }

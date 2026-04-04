@@ -59,6 +59,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
     public static long abilityOneCooldown = 45000L;
     @Override
     public void AbilityOne(Player player) {
+        if (!player.getPersistentDataContainer().has(keygen("tpyes"))) player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, true);
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
         if (can_ability(abilityOneCooldown,abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
@@ -285,7 +286,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                 SoulTypes soulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
                 Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Blue || soulType == SoulTypes.Yellow));
                 SoulTypes selfsoulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                if ((soulType == SoulTypes.Blue && selfsoulType == SoulTypes.Yellow) || (soulType == SoulTypes.Yellow && selfsoulType == SoulTypes.Blue)){
+                if ((soulType == SoulTypes.Blue || selfsoulType == SoulTypes.Yellow) || (soulType == SoulTypes.Yellow || selfsoulType == SoulTypes.Blue)|| (soulType == SoulTypes.BaseYellow || soulType == SoulTypes.BaseBlue)){
                     player.getPersistentDataContainer().set(keygen("doubleclock"),PersistentDataType.STRING,lookedat.getName());
 
                 }

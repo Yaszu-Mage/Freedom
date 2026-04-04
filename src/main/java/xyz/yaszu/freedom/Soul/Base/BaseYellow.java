@@ -33,7 +33,7 @@ public class BaseYellow extends Util implements Base_Soul {
 
     @Override
     public Component Description() {
-        return dess("Creates a bond when your other half is found");
+        return dess("What is it but time?");
     }
 
     @Override
@@ -48,7 +48,7 @@ public class BaseYellow extends Util implements Base_Soul {
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("You can selectively swap with the Blue one you are bonded with");
+        return dess("You can selectively swap with the Blue you are bonded with");
     }
     BaseBlue blue = new BaseBlue();
     @Override
@@ -63,12 +63,12 @@ public class BaseYellow extends Util implements Base_Soul {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("<yellow> AOE </yellow>");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Damage people within a 5 block radius with an AOE attack");
     }
     public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
     public static long abilityTwoCooldown = 3000L;
@@ -123,7 +123,7 @@ public class BaseYellow extends Util implements Base_Soul {
 
     @Override
     public Component Passive_Description() {
-        return dess("Shares you potion effects with your bonded half");
+        return dess("Shares your potion effects with your bonded half");
     }
 
     @Override

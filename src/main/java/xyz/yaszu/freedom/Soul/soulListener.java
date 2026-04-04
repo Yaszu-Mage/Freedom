@@ -19,6 +19,7 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Subsystems.CurseManager;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -57,6 +58,7 @@ public class soulListener extends Util implements Listener {
     }
 
     public void Passive(Player player) {
+        if (!Life_and_Death.is_alive(player)) return;
         Base_Soul soul = getSoul(player);
         if (soul != null) {
             soul.Passive(player, null);
@@ -129,6 +131,8 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        Integer life = event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER);
+        event.getPlayer().sendActionBar(dess("<green>Life</green> " + life+ "/9"));
         showSoulPoints(event.getPlayer());
     }
 
@@ -148,13 +152,13 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void enableActivePassives(PlayerArmSwingEvent event) {
+        if (!Life_and_Death.is_alive(event.getPlayer())) return;
         Player player = event.getPlayer();
         if (!player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             return;
         }
-
         if (!player.getPersistentDataContainer().has(FreedomKeys.soul()) ||
-                (!player.isSneaking() && event.getAnimationType() != PlayerAnimationType.ARM_SWING) ||
+                (!player.isSneaking()) ||
                 !player.getPersistentDataContainer().has(FreedomKeys.soulPoint())) {
             return;
         }
@@ -205,18 +209,20 @@ public class soulListener extends Util implements Listener {
 
     public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
         ItemStack drop = player.getInventory().getItemInMainHand();
+        if (!Life_and_Death.is_alive(player)) return;
         Base_Soul soul = getSoul(player);
         if (soul == null) return;
 
         player.sendActionBar(dess("<green>Ability Two</green>"));
 
-        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
-        Freedom.get_plugin().getLogger().info(soulName);
+        String soulName = soul.Name_For_Container();
         if (soulName != null) {
             if (soulName.contains("Red")) {
                 if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                    player.sendMessage(dess("ABILITY"));
                     soul.AbilityTwo(player, drop);
                 }
+
                 return;
             } else if (soulName.contains("Purple")) {
                 if (drop.getPersistentDataContainer().has(keygen("rifle"))) {
@@ -232,7 +238,7 @@ public class soulListener extends Util implements Listener {
     public void ActivePassive(Player player) {
         Base_Soul soul = getSoul(player);
         if (soul == null) return;
-
+        if (!Life_and_Death.is_alive(player)) return;
         double soulPoints = player.getPersistentDataContainer().getOrDefault(FreedomKeys.soulPoint(), PersistentDataType.DOUBLE, 0.0);
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
 
@@ -258,6 +264,7 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void AbilityOneListener(PlayerJumpEvent event) {
+        if (!Life_and_Death.is_alive(event.getPlayer())) return;
         Player player = event.getPlayer();
         if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             Base_Soul soul = getSoul(player);
@@ -276,6 +283,7 @@ public class soulListener extends Util implements Listener {
     public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
         Player player = event.getPlayer();
         ItemStack drop = event.getItemDrop().getItemStack();
+        if (!Life_and_Death.is_alive(event.getPlayer())) return;
         if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             Base_Soul soul = getSoul(player);
             if (soul == null) return;
@@ -300,6 +308,7 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void activateAttackPassive(PrePlayerAttackEntityEvent event) {
         Player player = event.getPlayer();
+        if (!Life_and_Death.is_alive(event.getPlayer())) return;
         Base_Soul soul = getSoul(player);
         if (soul == null) return;
 

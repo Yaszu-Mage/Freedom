@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -47,6 +48,14 @@ public class CombatTimer extends Util implements Listener {
         }
 
     }
+
+    @EventHandler
+    public void PlayerJoinEvent(PlayerJoinEvent event) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("combattimer"))) {
+            event.getPlayer().getPersistentDataContainer().remove(keygen("combattimer"));
+        }
+    }
+
 
     public void combatcheck(Player player) {
         if (!player.getPersistentDataContainer().has(keygen("combattimer"))) {

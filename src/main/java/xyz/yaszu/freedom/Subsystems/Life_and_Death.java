@@ -87,10 +87,8 @@ public class Life_and_Death implements org.bukkit.event.Listener{
         if (event.getPlayer().getPersistentDataContainer().has(util.keygen("ghost"))) {
             for (Player player : Bukkit.getOnlinePlayers() ) {
                 if (!player_util.does_player_have_tag(player,"ghost") && player != event.getPlayer() ) {
-                    Bukkit.getLogger().info("hide2");
                     player.hidePlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
                 } else {
-                    Bukkit.getLogger().info("show2");
                     player.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
                 }
             }

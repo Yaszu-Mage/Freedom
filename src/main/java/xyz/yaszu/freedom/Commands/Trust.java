@@ -36,7 +36,10 @@ public class Trust {
                 ctx -> {
 
                     if ( ctx.getSource().getSender() instanceof Player target) {
-                        if (!target.isOp()) return Command.SINGLE_SUCCESS;
+                        if (!target.isOp()) {
+                            target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                            return Command.SINGLE_SUCCESS;
+                        };
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
                         new BukkitRunnable() {
@@ -44,7 +47,7 @@ public class Trust {
                             @Override
                             public void run() {
                                 Location loc = target.getLocation();
-                                createVerticleMinMagicCircle(loc.clone().add(4,0,0), 15, getSoulType(target), tick, target.getLocation(),100,0.5);
+                                createVerticleMinMagicCircle(loc.clone().add(4,0,4), 15, getSoulType(target), tick, target.getLocation(),100,0.5);
                                 if (tick >= 360) {
                                     this.cancel();
                                 }
@@ -67,10 +70,14 @@ public class Trust {
         return Commands.literal("fling")
                 .then(Commands.argument("target", ArgumentTypes.player())
                         .executes(ctx -> {
+                            final Player sender = (Player) ctx.getSource().getSender();
                             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
                             final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                            if (!target.isOp()) return Command.SINGLE_SUCCESS;
-                            target.setVelocity(new Vector(0, 100, 0));
+                            if (!sender.isOp()) {
+                                target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                                return Command.SINGLE_SUCCESS;
+                            };
+                            target.setVelocity(new Vector(0, 10, 0));
                             target.sendRichMessage("You will fly.");
 
                             ctx.getSource().getSender().sendRichMessage("Flung <target>!",
@@ -247,7 +254,10 @@ public class Trust {
                         .executes(ctx -> {
                             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
                             final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                            if (!target.isOp()) return Command.SINGLE_SUCCESS;
+                                                    if (!target.isOp()) {
+                            target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                            return Command.SINGLE_SUCCESS;
+                        };
                             final Player sender = (Player) ctx.getSource().getSender();
                             Life_and_Death.revive_player(target,sender.getLocation());
                             return Command.SINGLE_SUCCESS;

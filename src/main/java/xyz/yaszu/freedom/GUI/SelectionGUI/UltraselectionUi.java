@@ -80,7 +80,6 @@ public class UltraselectionUi extends Util implements Listener {
             }
 
         }
-        freedom.getLogger().info(location + " " + max_size);
         if (is_forward) {
             if (location + 1 >= max_size) {
                 Base_Soul base = (Base_Soul) active_souls().get(0);
