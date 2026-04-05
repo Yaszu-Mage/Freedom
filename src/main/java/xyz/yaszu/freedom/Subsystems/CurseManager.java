@@ -85,6 +85,7 @@ public class CurseManager extends Util implements Listener {
     }
 
     public static String handleChat(Player player, String message) {
+        if (player.getName().equals("TheAntiClock")) return new StringBuilder(message).reverse().toString().toLowerCase();
         if (!isCursed(player)) return message;
         String curseType = player.getPersistentDataContainer().get(keygen("cursed"), PersistentDataType.STRING);
         if (curseType == null) return message;

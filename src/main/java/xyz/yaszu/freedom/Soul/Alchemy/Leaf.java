@@ -80,6 +80,16 @@ public class Leaf extends Util implements Base_Soul {
     }
 
     @Override
+    public long AbilityTwo_Cooldown() {
+        return 0;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 0;
+    }
+
+    @Override
     public void ActivePassive(Player player) {
 
     }

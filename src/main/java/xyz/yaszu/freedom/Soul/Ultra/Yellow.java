@@ -70,12 +70,10 @@ public class Yellow  extends Util implements Base_Soul {
     public Component AbilityTwoDescription() {
         return dess("⬛⬛⬛⬛⬛⬛");
     }
-    public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
-    public static long abilityTwoCooldown = 3000L;
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         Freedom.get_plugin().getLogger().info("Baller");
-        if (can_ability(abilityTwoCooldown, abilityTwoCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             Freedom.get_plugin().getLogger().info("Baller");
             new BukkitRunnable() {
                 int tick = 0;
@@ -134,6 +132,16 @@ public class Yellow  extends Util implements Base_Soul {
     @Override
     public Component ActivePassive_Description() {
         return dess("Chose those to bond with");
+    }
+
+    @Override
+    public long AbilityTwo_Cooldown() {
+        return 3000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 0;
     }
 
     @Override

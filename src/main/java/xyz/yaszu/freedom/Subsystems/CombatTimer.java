@@ -74,6 +74,7 @@ public class CombatTimer extends Util implements Listener {
                 if (combatTimer.get(player.getUniqueId()) + combatTime <= System.currentTimeMillis()) {
                     if (player.getPersistentDataContainer().has(keygen("combattimer"))) {
                         player.getPersistentDataContainer().remove(keygen("combattimer"));
+                        combatTimer.remove(player.getUniqueId());
                         this.cancel();
                     } else {
                         this.cancel();

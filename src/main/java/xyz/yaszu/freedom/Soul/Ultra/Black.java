@@ -227,13 +227,10 @@ public class Black extends Util implements Base_Soul, Listener {
     }
 
 
-    public long AbilityTwo_Cooldown = 30000;
-
-    public static HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-        if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
+        if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
             player.playSound(player.getLocation(),Sound.BLOCK_DISPENSER_DISPENSE,1,1);
             InventoryGui inventoryGui = new InventoryGui();
             inventoryGui.setInventory(player);
@@ -241,8 +238,8 @@ public class Black extends Util implements Base_Soul, Listener {
 
         } else {
             // no no ability
-            if (abilityTwoCooldownTime.get(player.getUniqueId()) != null) {
-                double seconds = (double) (AbilityTwo_Cooldown - (System.currentTimeMillis() - abilityTwoCooldownTime.get(player.getUniqueId()))) / 1000;
+            if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
+                double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
                 player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
             }
         }
@@ -322,7 +319,7 @@ public class Black extends Util implements Base_Soul, Listener {
             world.playSound(location,Sound.ENTITY_WARDEN_EMERGE,1,1);
             world.spawnParticle(Particle.SMOKE, location,128);
             player.closeInventory();
-            abilityTwoCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+            abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -600,7 +597,7 @@ public class Black extends Util implements Base_Soul, Listener {
                 case BaseGreen,Green -> {
                     player.displayName(Component.text("", NamedTextColor.GREEN).append(player.name()));
                 }
-                case BaseBlue,Blue -> {
+                case BaseMocha, Mocha -> {
                     player.displayName(Component.text("", NamedTextColor.BLUE).append(player.name()));
                 }
                 case BasePurple,Purple -> {
@@ -612,7 +609,7 @@ public class Black extends Util implements Base_Soul, Listener {
                 case Orange,BaseOrange -> {
                     player.displayName(Component.text("", TextColor.color(0xff6f00)).append(player.name()));
                 }
-                case Yellow,BaseYellow -> {
+                case Cafe, BaseCafe -> {
                     player.displayName(Component.text("", NamedTextColor.GOLD).append(player.name()));
                 }
                 case None,BaseNone -> {
@@ -702,6 +699,16 @@ public class Black extends Util implements Base_Soul, Listener {
     @Override
     public Component ActivePassive_Description() {
         return dess("When you sneak you are invisible");
+    }
+
+    @Override
+    public long AbilityTwo_Cooldown() {
+        return 30000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 0;
     }
 
     @Override

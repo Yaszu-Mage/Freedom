@@ -82,6 +82,16 @@ public class BaseNone extends Util implements Base_Soul, Listener {
     }
 
     @Override
+    public long AbilityTwo_Cooldown() {
+        return 0;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 0;
+    }
+
+    @Override
     public void ActivePassive(Player player) {
 
     }

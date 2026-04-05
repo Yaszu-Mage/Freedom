@@ -9,7 +9,6 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.megavex.scoreboardlibrary.api.sidebar.Sidebar;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Color;
@@ -22,10 +21,12 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
+
+import java.time.LocalTime;
 
 import static xyz.yaszu.freedom.Util.Util.*;
 
@@ -41,21 +42,42 @@ public class Trust {
                             target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                             return Command.SINGLE_SUCCESS;
                         };
-//                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
-//                        loc.setY(target.getLocation().getY());
-
+                        Location loc = target.getLocation();
                         new BukkitRunnable() {
                             int tick = 0;
                             @Override
                             public void run() {
-                                Location loc = target.getLocation();
-                                createVerticleMinMagicCircle(loc.clone().add(4,0,4), 15, getSoulType(target), tick, target.getLocation(),100,0.5);
-                                if (tick >= 360) {
+                                Freedom.get_plugin().getLogger().info("Clock");
+                                drawClock(
+                                        loc,
+                                        2,
+                                        100,
+                                        20,
+                                        LocalTime.now().getHour() +(tick/48),
+                                        LocalTime.now().getMinute() + tick,
+                                        Particle.DUST,
+                                        new Particle.DustOptions(Color.AQUA, 1),
+                                        Particle.DUST,
+                                        Particle.DUST,
+                                        new Particle.DustOptions(Color.BLUE, 1),
+                                        new Particle.DustOptions(Color.AQUA, 1)
+                                );
+                                tick = tick - 12;
+                                if (tick <= -1200) {
                                     this.cancel();
                                 }
-                                tick = tick + 15;
                             }
-                        }.runTaskTimer(Freedom.get_plugin(),0,20);
+                        }.runTaskTimer(Freedom.get_plugin(), 0, 10);
+
+
+//                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
+//                        loc.setY(target.getLocation().getY());
+//                        Double soulpoints = target.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE);
+//                        if (soulpoints == null) {
+//                            soulpoints = 0d;
+//                        }
+//                        Integer life = target.getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER);
+//                        open(target, (int) Math.round(soulpoints),life);
 //                        drawDangerSymbol(target.getLocation(),5,16,Particle.DUST,new Particle.DustOptions(Color.YELLOW, 8.0f),new Particle.DustOptions(Color.BLACK,8.0f));
 //                       drawSpiral(loc,8, 4, loc.getWorld(),128, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8.0f));
 

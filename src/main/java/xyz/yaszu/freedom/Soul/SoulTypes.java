@@ -3,18 +3,18 @@ package xyz.yaszu.freedom.Soul;
 public enum SoulTypes {
     BaseRed,
     BaseGreen,
-    BaseBlue,
+    BaseMocha,
     BasePurple,
     BaseBlack,
     BaseNone,
-    BaseYellow,
+    BaseCafe,
     BaseOrange,
     Red,
     Green,
-    Blue,
+    Mocha,
     Purple,
     Black,
     None,
-    Yellow,
+    Cafe,
     Orange
 }

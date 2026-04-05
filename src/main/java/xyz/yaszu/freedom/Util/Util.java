@@ -21,19 +21,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.*;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.guieffect.qual.UI;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Base.BaseRed;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Subsystems.CombatTimer;
 
 import java.util.*;
+
+import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 
 public class Util {
     public static SkinsRestorer skinsRestorerAPI;
@@ -125,6 +124,131 @@ public class Util {
         return score.getObjective("UI");
     }
 
+    public static HashMap<UUID, Scoreboard> souls = new HashMap<>();
+
+
+    public static void open(Player player, int soulvalue, int lives) {
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        Scoreboard score;
+        if (souls.get(player.getUniqueId()) == null) {
+            score = manager.getNewScoreboard();
+            souls.put(player.getUniqueId(), score);
+        } else {
+            score = souls.get(player.getUniqueId());
+        }
+
+
+        String scoreboardName = player.getUniqueId().toString() + Freedom.version;
+
+        for (Objective objective : score.getObjectives()) {
+            if (!objective.getName().equals(scoreboardName)) {
+                objective.unregister();
+            }
+
+        }
+
+        if (score.getObjective(scoreboardName) != null) {
+            Objective objective = score.getObjective(scoreboardName);
+            objective.getScore("line1").customName(dess("<shadow:#000000FF><b><yellow>----------------</yellow></b>"));
+            objective.getScore("line1").numberFormat(NumberFormat.blank());
+            objective.getScore("ZLives").customName(dess("     <shadow:#000000FF><b><green>Lives</green>:       " + lives));
+            objective.getScore("ZLives").numberFormat(NumberFormat.blank());
+            objective.getScore("SoulPoints").customName(dess("<shadow:#000000FF><b><aqua>SoulPoints</aqua>: ").append(loadingBar(soulvalue,10,0)));
+            objective.getScore("SoulPoints").numberFormat(NumberFormat.blank());
+        } else {
+            Objective objective = score.registerNewObjective(scoreboardName, "dummy",dess("<shadow:#000000FF><b>Details:"));
+            objective.getScore("line1").customName(dess("<shadow:#000000FF><b><yellow>----------------</yellow></b>"));
+            objective.getScore("line1").numberFormat(NumberFormat.blank());
+            objective.getScore("ZLives").customName(dess("     <shadow:#000000FF><b><green>Lives</green>:       " + lives));
+            objective.getScore("ZLives").numberFormat(NumberFormat.blank());
+            objective.getScore("SoulPoints").customName(dess("<shadow:#000000FF><b><aqua>SoulPoints</aqua>: ").append(loadingBar(soulvalue,10,0)));
+            objective.getScore("SoulPoints").numberFormat(NumberFormat.blank());
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        }
+        Objective objective = score.getObjective(scoreboardName);
+
+        Base_Soul soul = getSoul(player);
+        player.setScoreboard(score);
+        if (soul == null) return;
+        double seconds = (double) (soul.AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+        if (soul.can_ability(soul.AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
+            objective.getScore("XAbility1").customName(
+                    dess("   <shadow:#000000FF><b><aqua>Ability 1</aqua>: ").append(
+                            dess("<shadow:#000000FF><b><green>READY!")
+                    )
+            );
+        } else {
+            objective.getScore("XAbility1").customName(
+                    dess("   <shadow:#000000FF><b><aqua>Ability 1</aqua>: ").append(
+                            dess(Math.round(seconds) + "s")
+                    )
+            );
+        }
+
+        objective.getScore("XAbility1").numberFormat(NumberFormat.blank());
+        objective.getScore("XAbility2").numberFormat(NumberFormat.blank());
+        double twoseconds = (double) (soul.AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+        if (soul.can_ability(soul.AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
+            objective.getScore("XAbility2").customName(
+                    dess("   <shadow:#000000FF><b><aqua>Ability 2</aqua>: ").append(
+                            dess("<shadow:#000000FF><b><green>READY!")
+                    )
+            );
+        } else {
+            objective.getScore("XAbility2").customName(
+                    dess("   <shadow:#000000FF><b><aqua>Ability 2</aqua>: ").append(
+                            dess(Math.round(twoseconds) + "s")
+                    )
+            );
+        }
+        objective.getScore("XCombat").numberFormat(NumberFormat.blank());
+        if (CombatTimer.combatTimer.containsKey(player.getUniqueId())) {
+            int combatseconds = (int) (CombatTimer.combatTime + 2000 - (System.currentTimeMillis() - CombatTimer.combatTimer.get(player.getUniqueId()))) / 1000;
+            objective.getScore("XCombat").customName(dess("   <shadow:#000000FF><b><gold>Combat</gold>:  ").append(dess("(<color:#ff4400>" + combatseconds + "s</color>)")));
+        } else {
+            objective.getScore("XCombat").customName(dess("<shadow:#000000FF><b><gold>Combat</gold>: ").append(dess("<shadow:#000000FF><b><red>INACTIVE!")));
+        }
+        objective.getScore("Zline2").customName(dess("<shadow:#000000FF><b><yellow>----------------</yellow></b>"));
+        objective.getScore("Zline2").numberFormat(NumberFormat.blank());
+        player.setScoreboard(score);
+    }
+
+
+
+    public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
+
+    public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
+
+    public static Component loadingBar(double value, double max, double min) {
+        int maxBars = 5;
+
+        //
+        if (max <= min) {
+            return dess("<shadow:#000000FF><b>|<red>#####</red></b>");
+        }
+
+        //
+        double progress = (value - min) / (max - min);
+
+        //
+        progress = Math.max(0, Math.min(1, progress));
+
+        //
+        int filledBars = (int) Math.round(progress * maxBars);
+
+        StringBuilder filled = new StringBuilder();
+        StringBuilder empty = new StringBuilder();
+
+        for (int i = 0; i < filledBars; i++) {
+            filled.append("#");
+        }
+
+        for (int i = filledBars; i < maxBars; i++) {
+            empty.append("#");
+        }
+
+        return dess("<shadow:#000000FF><b>|<aqua>" + filled + "</aqua><gray>" + empty + "</gray>|</b>");
+    }
     public static void updateValue(String name,Double value, Player player) {
         Objective objective = getUI(player);
         objective.getScore(name).setScore(value.intValue());
@@ -143,9 +267,9 @@ public class Util {
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
             case Red, BaseRed -> color = Color.RED;
-            case Yellow, BaseYellow -> color = Color.YELLOW;
+            case Cafe, BaseCafe -> color = Color.YELLOW;
             case Orange, BaseOrange -> color = Color.ORANGE;
-            case BaseBlue, Blue -> color = Color.BLUE;
+            case BaseMocha, Mocha -> color = Color.BLUE;
             case Black, BaseBlack -> color = Color.BLACK;
         }
         Color finalColor = color;
@@ -170,9 +294,9 @@ public class Util {
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
             case Red, BaseRed -> color = Color.RED;
-            case Yellow, BaseYellow -> color = Color.YELLOW;
+            case Cafe, BaseCafe -> color = Color.YELLOW;
             case Orange, BaseOrange -> color = Color.ORANGE;
-            case BaseBlue, Blue -> color = Color.BLUE;
+            case BaseMocha, Mocha -> color = Color.BLUE;
             case Black, BaseBlack -> color = Color.BLACK;
         }
         Color finalColor = color;
@@ -234,9 +358,9 @@ public class Util {
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
             case Red, BaseRed -> color = Color.RED;
-            case Yellow, BaseYellow -> color = Color.YELLOW;
+            case Cafe, BaseCafe -> color = Color.YELLOW;
             case Orange, BaseOrange -> color = Color.ORANGE;
-            case BaseBlue, Blue -> color = Color.BLUE;
+            case BaseMocha, Mocha -> color = Color.BLUE;
             case Black, BaseBlack -> color = Color.BLACK;
         }
         Color finalColor = color;
@@ -263,9 +387,9 @@ public class Util {
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
             case Red, BaseRed -> color = Color.RED;
-            case Yellow, BaseYellow -> color = Color.YELLOW;
+            case Cafe, BaseCafe -> color = Color.YELLOW;
             case Orange, BaseOrange -> color = Color.ORANGE;
-            case BaseBlue, Blue -> color = Color.BLUE;
+            case BaseMocha, Mocha -> color = Color.BLUE;
             case Black, BaseBlack -> color = Color.BLACK;
         }
         Color finalColor = color;
@@ -356,9 +480,9 @@ public class Util {
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
             case Red, BaseRed -> color = Color.RED;
-            case Yellow, BaseYellow -> color = Color.YELLOW;
+            case Cafe, BaseCafe -> color = Color.YELLOW;
             case Orange, BaseOrange -> color = Color.ORANGE;
-            case BaseBlue, Blue -> color = Color.BLUE;
+            case BaseMocha, Mocha -> color = Color.BLUE;
             case Black, BaseBlack -> color = Color.BLACK;
         }
         Color finalColor = color;
@@ -520,6 +644,130 @@ public class Util {
         return pivot.clone().add(new Vector(x, v.getY(), z));
     }
 
+    public static void drawClock(
+            Location center,
+            double radius,
+            int circlePoints,
+            int handPoints,
+            int hours,
+            int minutes,
+            Particle faceParticle,
+            Particle.DustOptions faceOptions,
+            Particle tickParticle,
+            Particle handParticle,
+            Particle.DustOptions minuteOptions,
+            Particle.DustOptions hourOptions
+    ) {
+        World world = center.getWorld();
+        double y = center.getY();
+
+    /* =========================
+       1. DRAW CLOCK FACE
+       ========================= */
+        for (int i = 0; i < circlePoints; i++) {
+            double angle = Math.toRadians(i * 360.0 / circlePoints);
+
+            double x = center.getX() + (radius * Math.cos(angle));
+            double z = center.getZ() + (radius * Math.sin(angle));
+
+            Location point = new Location(world, x, y, z);
+
+            if (faceParticle == Particle.DUST) {
+                world.spawnParticle(faceParticle, point, 1, 0, 0, 0, 1, faceOptions);
+            } else {
+                world.spawnParticle(faceParticle, point, 1, 0, 0, 0, 0);
+            }
+        }
+
+    /* =========================
+       2. DRAW TICKS (12 MARKS)
+       ========================= */
+        for (int i = 0; i < 12; i++) {
+            double angle = Math.toRadians(i * 30 - 90);
+
+            double outerX = center.getX() + radius * Math.cos(angle);
+            double outerZ = center.getZ() + radius * Math.sin(angle);
+
+            double innerX = center.getX() + (radius * 0.85) * Math.cos(angle);
+            double innerZ = center.getZ() + (radius * 0.85) * Math.sin(angle);
+
+            for (double t = 0; t <= 1; t += 0.25) {
+                double x = innerX + (outerX - innerX) * t;
+                double z = innerZ + (outerZ - innerZ) * t;
+
+                world.spawnParticle(
+                        tickParticle,
+                        new Location(world, x, y, z),
+                        1, 0, 0, 0, 0,
+                        minuteOptions
+                );
+            }
+        }
+
+    /* =========================
+       3. CALCULATE HAND ANGLES
+       ========================= */
+        double minuteAngle = Math.toRadians((minutes / 60.0) * 360.0 - 90);
+        double hourAngle = Math.toRadians(((hours % 12 + minutes / 60.0) / 12.0) * 360.0 - 90);
+
+    /* =========================
+       4. DRAW MINUTE HAND
+       ========================= */
+        for (int i = 0; i <= handPoints; i++) {
+            double t = i / (double) handPoints;
+
+            double x = center.getX() + (radius * 0.9 * t * Math.cos(minuteAngle));
+            double z = center.getZ() + (radius * 0.9 * t * Math.sin(minuteAngle));
+
+            Location point = new Location(world, x, y, z);
+
+            if (handParticle == Particle.DUST) {
+                world.spawnParticle(handParticle, point, 1, 0, 0, 0, 1, minuteOptions);
+            } else {
+                world.spawnParticle(handParticle, point, 1, 0, 0, 0, 0);
+            }
+        }
+
+    /* =========================
+       5. DRAW HOUR HAND
+       ========================= */
+        for (int i = 0; i <= handPoints; i++) {
+            double t = i / (double) handPoints;
+
+            double x = center.getX() + (radius * 0.6 * t * Math.cos(hourAngle));
+            double z = center.getZ() + (radius * 0.6 * t * Math.sin(hourAngle));
+
+            Location point = new Location(world, x, y, z);
+
+            if (handParticle == Particle.DUST) {
+                world.spawnParticle(handParticle, point, 1, 0, 0, 0, 1, hourOptions);
+            } else {
+                world.spawnParticle(handParticle, point, 1, 0, 0, 0, 0);
+            }
+        }
+    }
+
+    public static void drawClocklines(Location center, double radius, World world, int points, Particle particle, Particle.DustOptions options, double rot) {
+        for (int i = 0; i < points; i++) {
+            double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
+            double x = center.getX() + (radius * Math.cos(angle)); // Calculate X coordinate
+            double z = center.getZ() + (radius * Math.sin(angle)); // Calculate Z coordinate
+            double y = center.getY(); // Y remains constant for a flat circle
+
+            // Create a new location for the point
+
+            Location pointLocation = new Location(world, x, y, z);
+            Location midpoint = new Location(world, (center.getX()+pointLocation.getX())/2, (center.getY()+pointLocation.getY())/2, (center.getZ()+pointLocation.getZ())/2);
+            drawLine(pointLocation,midpoint,center.getWorld(),points/4,particle,options);
+            // 2. Spawn particles
+            if (particle == Particle.DUST) {
+                world.spawnParticle(particle, pointLocation, 1, 0, 0, 0, 1, options);
+            } else {
+                world.spawnParticle(particle, pointLocation, 1, 0, 0, 0, 0);
+            }
+
+        }
+    }
     public static Location rotpointZ(Location pivot, double angleDegrees, Location toRotate) {
         double radians = Math.toRadians(angleDegrees);
         double cos = Math.cos(radians);

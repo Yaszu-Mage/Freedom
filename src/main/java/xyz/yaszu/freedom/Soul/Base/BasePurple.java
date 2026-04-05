@@ -24,12 +24,9 @@ import java.util.UUID;
 
 public class BasePurple extends Util implements Base_Soul {
 
-    public long ability_one_cooldown = 2000;
-    public long ability_two_cooldown = 15000;
 
-    public static HashMap<UUID, Long> ability_two_cooldowns = new HashMap<>();
 
-    public static HashMap<UUID,Long> ability_one_cooldowns = new HashMap<UUID,Long>();
+
     @Override
     public String Name_For_Container() {
         return "BasePurple";
@@ -83,7 +80,7 @@ public class BasePurple extends Util implements Base_Soul {
     public void AbilityOne(Player player) {
         //
 
-        if (can_ability(ability_one_cooldown,ability_one_cooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             World world = player.getWorld();
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
             Vector velocity = player.getVelocity();
@@ -110,10 +107,10 @@ public class BasePurple extends Util implements Base_Soul {
         }
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
         drawCircle(player.getLocation().add(0,1,0), 1, player.getWorld(), 100);
-        ability_one_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+        abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     } else {
             player.sendActionBar(dess("You can't use this ability yet"));
-            double seconds = (double) (ability_one_cooldown - (System.currentTimeMillis() - ability_one_cooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
         }
     }
@@ -146,15 +143,15 @@ public class BasePurple extends Util implements Base_Soul {
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
-        if (can_ability(ability_two_cooldown,ability_two_cooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
 
         player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
         player.getWorld().playSound(player.getLocation(),Sound.ENTITY_WARDEN_SONIC_BOOM,10f,0f);
 
         handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
-        ability_two_cooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+        abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
-            double seconds = (double) (ability_two_cooldown - (System.currentTimeMillis() - ability_two_cooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
         }
 }
@@ -217,6 +214,16 @@ public class BasePurple extends Util implements Base_Soul {
     @Override
     public Component ActivePassive_Description() {
         return dess("You can remove Fall Damage at will");
+    }
+
+    @Override
+    public long AbilityTwo_Cooldown() {
+        return 30000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 1500;
     }
 
     @Override

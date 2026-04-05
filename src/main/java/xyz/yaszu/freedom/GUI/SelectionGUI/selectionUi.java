@@ -46,7 +46,7 @@ public class selectionUi extends Util implements Listener {
             active_souls.add(new BasePurple());
         }
         if (active_souls_in_config.contains("Blue")) {
-            active_souls.add(new BaseBlue());
+            active_souls.add(new BaseMocha());
         }
         if (active_souls_in_config.contains("Green")) {
             active_souls.add(new BaseGreen());
@@ -55,7 +55,7 @@ public class selectionUi extends Util implements Listener {
             active_souls.add(new BaseBlack());
         }
         if (active_souls_in_config.contains("Yellow")) {
-            active_souls.add(new BaseYellow());
+            active_souls.add(new BaseCafe());
         }
         if (active_souls_in_config.contains("None")) {
             active_souls.add(new BaseNone());
@@ -119,7 +119,7 @@ public class selectionUi extends Util implements Listener {
             BaseBlack.join(player);
             if (soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Blue" || soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Yellow") {
                 Blue.init(player);
-                BaseBlue.init(player);
+                BaseMocha.init(player);
             }
         }
         if (event.getIdentifier().equals(Key.key("papermc:user_input/forward"))) {

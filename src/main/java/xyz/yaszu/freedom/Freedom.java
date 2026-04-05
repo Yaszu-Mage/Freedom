@@ -11,9 +11,7 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import net.megavex.scoreboardlibrary.api.ScoreboardLibrary;
-import net.megavex.scoreboardlibrary.api.exception.NoPacketAdapterAvailableException;
-import net.megavex.scoreboardlibrary.api.noop.NoopScoreboardLibrary;
+
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -21,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -38,6 +37,7 @@ import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Items.ItemListener;
+import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
 import xyz.yaszu.freedom.Soul.Base.BaseOrange;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
@@ -64,7 +64,6 @@ import static xyz.yaszu.freedom.Util.Util.keygen;
 public final class Freedom extends JavaPlugin implements Listener {
 
     public static int version = 6942067;
-    public static ScoreboardLibrary scoreboardLibrary;
 
     public void reapplyCurseWeakness(Player player) {
         if (player == null || !player.isOnline()) return;
@@ -102,10 +101,20 @@ public final class Freedom extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        if (event.getPlayer().getName().equals("TheMoonLady")) {
+            event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+        }
+    }
+
+    @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event){
         removeOldFollowers();
         event.getPlayer().performCommand("rules");
         event.getPlayer().getPersistentDataContainer().set(FreedomKeys.spriteActive(),PersistentDataType.BOOLEAN,false);
+        if (event.getPlayer().getName().equals("TheMoonLady")) {
+            event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+        }
     }
 
 
@@ -137,7 +146,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new CombatTimer(),this);
         Bukkit.getPluginManager().registerEvents(new CurseManager(), this);
         Bukkit.getPluginManager().registerEvents(new Alchemy(), this);
-
+        Bukkit.getPluginManager().registerEvents(new PainScythe(), this);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
@@ -162,13 +171,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         start_time = System.currentTimeMillis();
         createVoid();
 
-        try {
-            scoreboardLibrary = ScoreboardLibrary.loadScoreboardLibrary(this);
-        } catch (NoPacketAdapterAvailableException e) {
-            // If server version is not yet supported, you can fallback to the no-op implementation:
-            scoreboardLibrary = new NoopScoreboardLibrary();
-            this.getLogger().warning("Server version unsupported, scoreboard functionality will not be visible!");
-        }
 
     }
 
@@ -183,7 +185,6 @@ public final class Freedom extends JavaPlugin implements Listener {
     }
     @Override
     public void onDisable() {
-        scoreboardLibrary.close();
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
     }

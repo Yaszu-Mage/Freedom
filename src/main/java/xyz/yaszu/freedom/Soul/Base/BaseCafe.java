@@ -16,11 +16,9 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
-public class BaseYellow extends Util implements Base_Soul {
+public class BaseCafe extends Util implements Base_Soul {
     @Override
     public String Name_For_Container() {
         return "BaseYellow";
@@ -50,7 +48,7 @@ public class BaseYellow extends Util implements Base_Soul {
     public Component AbilityOneDescription() {
         return dess("You can selectively swap with the Blue you are bonded with");
     }
-    BaseBlue blue = new BaseBlue();
+    BaseMocha blue = new BaseMocha();
     @Override
     public void AbilityOne(Player player) {
         blue.AbilityOne(player);
@@ -70,12 +68,10 @@ public class BaseYellow extends Util implements Base_Soul {
     public Component AbilityTwoDescription() {
         return dess("Damage people within a 5 block radius with an AOE attack");
     }
-    public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
-    public static long abilityTwoCooldown = 3000L;
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         Freedom.get_plugin().getLogger().info("Baller");
-        if (can_ability(abilityTwoCooldown, abilityTwoCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             Freedom.get_plugin().getLogger().info("Baller");
             new BukkitRunnable() {
                 int tick = 0;
@@ -134,6 +130,16 @@ public class BaseYellow extends Util implements Base_Soul {
     @Override
     public Component ActivePassive_Description() {
         return dess("Chose those to bond with");
+    }
+
+    @Override
+    public long AbilityTwo_Cooldown() {
+        return 3000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 0;
     }
 
     @Override

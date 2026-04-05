@@ -53,12 +53,10 @@ public class Blue extends Util implements Base_Soul, Listener {
     public Component AbilityOneDescription() {
         return dess("You can teleport across larger distances and more frequently");
     }
-    public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
-    public static long abilityOneCooldown = 30000L;
     @Override
     public void AbilityOne(Player player) {
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
-        if (can_ability(abilityOneCooldown,abilityOneCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
             //TODO implement VFX
             if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
@@ -129,11 +127,10 @@ public class Blue extends Util implements Base_Soul, Listener {
     public Component AbilityTwoDescription() {
         return dess("Further increases your control of time");
     }
-    public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
-    public static long abilityTwoCooldown = 3000L;
+
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-        if (can_ability(abilityTwoCooldown, abilityTwoCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             new BukkitRunnable() {
                 public static List<Entity> affectedEntities = new ArrayList<>();
                 int tick = 0;
@@ -147,6 +144,7 @@ public class Blue extends Util implements Base_Soul, Listener {
                                 if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) != null && instplayer != ignoreplayer) {
                                     instplayer.getAttribute(Attribute.GRAVITY).removeModifier(keygen("anticlock"));
                                     instplayer.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(keygen("anticlock"));
+                                    instplayer.getAttribute(Attribute.JUMP_STRENGTH).removeModifier(keygen("anticlock"));
                                 }
                             }
                         }
@@ -162,8 +160,9 @@ public class Blue extends Util implements Base_Soul, Listener {
                             affectedEntities.add(instplayer);
                             if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) == null && instplayer != ignoreplayer) {
                                 Freedom.get_plugin().getLogger().info("inst");
-                                instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),-0.01d, AttributeModifier.Operation.ADD_NUMBER));
-                                instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.075d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.JUMP_STRENGTH).addModifier(new AttributeModifier(keygen("anticlock"),-100000000000d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),10000000d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.0375d, AttributeModifier.Operation.ADD_NUMBER));
                             }
                         }
                     }
@@ -184,6 +183,7 @@ public class Blue extends Util implements Base_Soul, Listener {
                                 if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) != null) {
                                     instplayer.getAttribute(Attribute.GRAVITY).removeModifier(keygen("anticlock"));
                                     instplayer.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(keygen("anticlock"));
+                                    instplayer.getAttribute(Attribute.JUMP_STRENGTH).removeModifier(keygen("anticlock"));
                                 }
                             }
 
@@ -213,7 +213,7 @@ public class Blue extends Util implements Base_Soul, Listener {
     public void Passive_Potion(PlayerMoveEvent event) {
 
         Player player = event.getPlayer();
-            if (getSoulType(player) == SoulTypes.Blue || getSoulType(player) == SoulTypes.Yellow) {
+            if (getSoulType(player) == SoulTypes.Mocha || getSoulType(player) == SoulTypes.Cafe) {
                 if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
                     Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
                     if (doubleclock != null) {
@@ -274,6 +274,16 @@ public class Blue extends Util implements Base_Soul, Listener {
     }
 
     @Override
+    public long AbilityTwo_Cooldown() {
+        return 30000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 30000;
+    }
+
+    @Override
     public void ActivePassive(Player player) {
         for (Entity entity : player.getNearbyEntities(2,2,2)) {
             if (entity instanceof  Player lookedat)
@@ -282,9 +292,9 @@ public class Blue extends Util implements Base_Soul, Listener {
 
                 SoulTypes soulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
                 Freedom.get_plugin().getLogger().info(String.valueOf(soulType));
-                Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Blue || soulType == SoulTypes.Yellow));
+                Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Mocha || soulType == SoulTypes.Cafe));
                 SoulTypes selfsoulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                if ((soulType == SoulTypes.Blue && selfsoulType == SoulTypes.Yellow) || (soulType == SoulTypes.Yellow && selfsoulType == SoulTypes.Blue)){
+                if ((soulType == SoulTypes.Mocha && selfsoulType == SoulTypes.Cafe) || (soulType == SoulTypes.Cafe && selfsoulType == SoulTypes.Mocha)){
                     player.getPersistentDataContainer().set(keygen("doubleclock"),PersistentDataType.STRING,lookedat.getName());
 
                 }

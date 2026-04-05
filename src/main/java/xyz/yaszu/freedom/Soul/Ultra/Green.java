@@ -176,14 +176,12 @@ public class Green extends Util implements Base_Soul {
     }
 
 
-    public static HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
-    public long AbilityTwo_Cooldown = 30000;
 
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) {
         //
-        if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId())) {
+        if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
         new BukkitRunnable() {
             int tick = 0;
             @Override
@@ -253,6 +251,16 @@ public class Green extends Util implements Base_Soul {
     @Override
     public Component ActivePassive_Description() {
         return dess("Increase the duration of your regeneration");
+    }
+
+    @Override
+    public long AbilityTwo_Cooldown() {
+        return 30000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 0;
     }
 
     @Override

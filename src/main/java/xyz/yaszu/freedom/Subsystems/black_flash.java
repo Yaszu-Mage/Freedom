@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import xyz.yaszu.freedom.Freedom;
 
 import java.util.Random;
 
@@ -24,16 +25,12 @@ public class black_flash implements Listener {
         if (!Life_and_Death.is_alive(event.getPlayer())) return;
         NamespacedKey key = new NamespacedKey(Bukkit.getPluginManager().getPlugin("Freedom"), "black_flash");
 
-        if (!attacker.getPersistentDataContainer().has(key, PersistentDataType.INTEGER)) {
-            attacker.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 0);
-        }
-
-        int additive = attacker.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
         Entity attacked = event.getAttacked();
 
         if (!attacker.equals(attacked)) {
-            int value = random.nextInt(201);
-            if (value >= 195) {
+            int value = random.nextInt(1001);
+            if (value == 1) {
+                Freedom.get_plugin().getLogger().info(String.valueOf(value));
                 Bukkit.getPluginManager().getPlugin("Freedom").getLogger().info(attacker.getDisplayName() + " hit a black flash");
 
                 attacker.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#870700:#eb0c00>You hit a black flash!</gradient>"));
@@ -51,8 +48,7 @@ public class black_flash implements Listener {
                 ((LivingEntity) attacked).addPotionEffect(fx2);
 
 
-                // Reset counter
-                attacker.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 0);
+
             }
         }
     }

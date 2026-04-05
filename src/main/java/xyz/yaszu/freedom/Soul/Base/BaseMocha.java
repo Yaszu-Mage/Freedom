@@ -23,16 +23,16 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
-public class BaseBlue extends Util implements Base_Soul, Listener {
+public class BaseMocha extends Util implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {
-        return "BaseBlue";
+        return "BaseMocha";
     }
 
     @Override
     public Component Name() {
-        return dess("<Blue>Blue</Blue>");
+        return dess("<color:#F9EBDE>Mocha</color:#F9EBDE>");
     }
 
     @Override
@@ -48,20 +48,20 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneName() {
-        return dess("<Blue> Selective TP </Blue>");
+        return dess("<color:#F9EBDE> Selective TP </color>");
     }
 
     @Override
     public Component AbilityOneDescription() {
         return dess("You can selectively with the Yellow one you are bonded with");
     }
-    public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
-    public static long abilityOneCooldown = 45000L;
+    @Override
+    public long AbilityOne_Cooldown() {return 45000L;}
     @Override
     public void AbilityOne(Player player) {
         if (!player.getPersistentDataContainer().has(keygen("tpyes"))) player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, true);
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
-        if (can_ability(abilityOneCooldown,abilityOneCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
             //TODO implement VFX
             if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
@@ -133,10 +133,10 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
         return dess("Slows time for all but the one you are bonded with");
     }
     public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
-    public static long abilityTwoCooldown = 9000L;
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-        if (can_ability(abilityTwoCooldown, abilityTwoCooldowns,player.getUniqueId())) {
+
+        if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             new BukkitRunnable() {
                 public static List<Entity> affectedEntities = new ArrayList<>();
                 int tick = 0;
@@ -150,6 +150,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                                 if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) != null && instplayer != ignoreplayer) {
                                     instplayer.getAttribute(Attribute.GRAVITY).removeModifier(keygen("anticlock"));
                                     instplayer.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(keygen("anticlock"));
+                                    instplayer.getAttribute(Attribute.JUMP_STRENGTH).removeModifier(keygen("anticlock"));
                                 }
                             }
                         }
@@ -165,7 +166,8 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                             affectedEntities.add(instplayer);
                             if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) == null && instplayer != ignoreplayer) {
                                 Freedom.get_plugin().getLogger().info("inst");
-                                instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),-0.005d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.JUMP_STRENGTH).addModifier(new AttributeModifier(keygen("anticlock"),-100000000000d, AttributeModifier.Operation.ADD_NUMBER));
+                                instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),10000000d, AttributeModifier.Operation.ADD_NUMBER));
                                 instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.0375d, AttributeModifier.Operation.ADD_NUMBER));
                             }
                         }
@@ -187,6 +189,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                                 if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) != null) {
                                     instplayer.getAttribute(Attribute.GRAVITY).removeModifier(keygen("anticlock"));
                                     instplayer.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(keygen("anticlock"));
+                                    instplayer.getAttribute(Attribute.JUMP_STRENGTH).removeModifier(keygen("anticlock"));
                                 }
                             }
 
@@ -216,7 +219,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
     public void Passive_Potion(PlayerMoveEvent event) {
 
         Player player = event.getPlayer();
-            if (getSoulType(player) == SoulTypes.Blue || getSoulType(player) == SoulTypes.Yellow) {
+            if (getSoulType(player) == SoulTypes.Mocha || getSoulType(player) == SoulTypes.Cafe) {
                 if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
                     Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
                     if (doubleclock != null) {
@@ -277,6 +280,11 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
     }
 
     @Override
+    public long AbilityTwo_Cooldown() {
+        return 9000L;
+    }
+
+    @Override
     public void ActivePassive(Player player) {
         for (Entity entity : player.getNearbyEntities(2,2,2)) {
             if (entity instanceof  Player lookedat)
@@ -284,9 +292,9 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
             if (lookedat.getPersistentDataContainer().has(keygen("soul"))) {
 
                 SoulTypes soulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Blue || soulType == SoulTypes.Yellow));
+                Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Mocha || soulType == SoulTypes.Cafe));
                 SoulTypes selfsoulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                if ((soulType == SoulTypes.Blue || selfsoulType == SoulTypes.Yellow) || (soulType == SoulTypes.Yellow || selfsoulType == SoulTypes.Blue)|| (soulType == SoulTypes.BaseYellow || soulType == SoulTypes.BaseBlue)){
+                if ((soulType == SoulTypes.Mocha || selfsoulType == SoulTypes.Cafe) || (soulType == SoulTypes.Cafe || selfsoulType == SoulTypes.Mocha)|| (soulType == SoulTypes.BaseCafe || soulType == SoulTypes.BaseMocha)){
                     player.getPersistentDataContainer().set(keygen("doubleclock"),PersistentDataType.STRING,lookedat.getName());
 
                 }

@@ -13,42 +13,37 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scoreboard.*;
-import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
-import xyz.yaszu.freedom.Subsystems.CurseManager;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class soulListener extends Util implements Listener {
     public static final Map<SoulTypes, Base_Soul> SOULS = new EnumMap<>(SoulTypes.class);
 
     public static void registerSouls() {
         SOULS.put(SoulTypes.Red, new Red());
-        SOULS.put(SoulTypes.Yellow, new Yellow());
+        SOULS.put(SoulTypes.Cafe, new Yellow());
         SOULS.put(SoulTypes.Green, new Green());
         SOULS.put(SoulTypes.Black, new Black());
         SOULS.put(SoulTypes.Purple, new Purple());
-        SOULS.put(SoulTypes.Blue, new Blue());
+        SOULS.put(SoulTypes.Mocha, new Blue());
         SOULS.put(SoulTypes.Orange, new Orange());
         SOULS.put(SoulTypes.BaseRed, new BaseRed());
-        SOULS.put(SoulTypes.BaseYellow, new BaseYellow());
+        SOULS.put(SoulTypes.BaseCafe, new BaseCafe());
         SOULS.put(SoulTypes.BaseGreen, new BaseGreen());
         SOULS.put(SoulTypes.BaseBlack, new BaseBlack());
         SOULS.put(SoulTypes.BasePurple, new BasePurple());
-        SOULS.put(SoulTypes.BaseBlue, new BaseBlue());
+        SOULS.put(SoulTypes.BaseMocha, new BaseMocha());
         SOULS.put(SoulTypes.BaseOrange, new BaseOrange());
     }
 
-    private Base_Soul getSoul(Player player) {
+    public static Base_Soul getSoul(Player player) {
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
         if (soulName == null) return null;
         try {
@@ -80,6 +75,14 @@ public class soulListener extends Util implements Listener {
         }
         if (player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE) > 10) {
             player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, 10.0);
+        }
+        Base_Soul soul = getSoul(player);
+        if (soul == null) return;
+        if (!abilityOneCooldowns.containsKey(player.getUniqueId())) {
+            abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+        }
+        if (!abilityTwoCooldowns.containsKey(player.getUniqueId())) {
+            abilityTwoCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         }
 
 
@@ -132,8 +135,13 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        Integer life = event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER);
-        event.getPlayer().sendActionBar(dess("<green>Life</green> " + life+ "/9"));
+        Player player = event.getPlayer();
+        if (!abilityOneCooldowns.containsKey(player.getUniqueId())) {
+            abilityOneCooldowns.put(player.getUniqueId(), 0L);
+        }
+        if (!abilityTwoCooldowns.containsKey(player.getUniqueId())) {
+            abilityTwoCooldowns.put(player.getUniqueId(), 0L);
+        }
         showSoulPoints(event.getPlayer());
     }
 
@@ -147,11 +155,13 @@ public class soulListener extends Util implements Listener {
         }
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
         for (BossBar bossBar : player.activeBossBars() ) {
-            bossBar.name().toString().contains("SoulPoints");
-            player.hideBossBar(bossBar);
+            if (bossBar.name().toString().contains("SoulPoints")) {
+                player.hideBossBar(bossBar);
+            }
+
         }
-        
-        player.showBossBar(BossBar.bossBar(dess("SoulPoints"), (float) SoulPoints/10, BossBar.Color.BLUE, BossBar.Overlay.NOTCHED_10));
+        Integer life = player.getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER);
+        open(player, (int) SoulPoints,life);
     }
 
 

@@ -28,12 +28,7 @@ import java.util.UUID;
 
 public class BaseRed extends Util implements Base_Soul {
 
-    public long ability_one_cooldown = 1000;
-    public long ability_two_cooldown = 30000;
 
-    public static HashMap<UUID, Long> ability_two_cooldowns = new HashMap<>();
-
-    public static HashMap<UUID,Long> ability_one_cooldowns = new HashMap<UUID,Long>();
 
     @Override
     public String Name_For_Container() {
@@ -75,12 +70,12 @@ public class BaseRed extends Util implements Base_Soul {
     // Flame Dash -- Player Dashes after Crouching and Jumping in the direction of their movement
     public void AbilityOne(Player player) {
         PersistentDataContainer playerContainer = player.getPersistentDataContainer();
-        if (can_ability(ability_one_cooldown,ability_one_cooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
                 player.setVelocity(player.getLocation().getDirection().multiply(1.5));
                 spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
-                ability_one_cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+                abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
-            double seconds = (double) (ability_one_cooldown - (System.currentTimeMillis() - ability_one_cooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
         }
 
@@ -128,11 +123,11 @@ public class BaseRed extends Util implements Base_Soul {
     //
     public void AbilityTwo(Player player,ItemStack abilityItem) {
         player.sendMessage(dess("ABILITY IN CONT"));
-        if (can_ability(ability_two_cooldown,ability_two_cooldowns,player.getUniqueId())) {
-            ability_two_cooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+        if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
+            abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             handleFireball(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
         } else {
-            double seconds = (double) (ability_two_cooldown - (System.currentTimeMillis() - ability_two_cooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
         }
     }
@@ -231,6 +226,16 @@ public class BaseRed extends Util implements Base_Soul {
     @Override
     public Component ActivePassive_Description() {
         return dess("If you have this item, you have passive fire aspect");
+    }
+
+    @Override
+    public long AbilityTwo_Cooldown() {
+        return 30000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 1000;
     }
 
     @Override

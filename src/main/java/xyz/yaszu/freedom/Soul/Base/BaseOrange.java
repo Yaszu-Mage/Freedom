@@ -69,20 +69,18 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
     public Component AbilityOneDescription() {
         return dess("Increase the amplifier of all potions of yourself and trusted team mates in a 2 block radius");
     }
-    public long AbilityOne_Cooldown = 10000;
 
-    public static HashMap<UUID,Long> abilityOneCooldownTime = new HashMap<>();
 
 
     @Override
     public void AbilityOne(Player player) {
-        if (can_ability(AbilityOne_Cooldown,abilityOneCooldownTime,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             boolean hasactivated = false;
             Collection<PotionEffect> pots = player.getActivePotionEffects();
             if (!pots.isEmpty()) {
                 hasactivated = true;
                 player.sendMessage(dess("<shadow:#000000FF><b><green>Status Report</green>:</b></shadow>"));
-                abilityOneCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+                abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             }
             player.clearActivePotionEffects();
             for (PotionEffect pot : pots) {
@@ -104,7 +102,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                                     player.sendMessage(dess("<shadow:#000000FF><b><green>Status Report</green>:</b></shadow> Status Report"));
                                 }
                                 hasactivated = true;
-                                abilityOneCooldownTime.put(player.getUniqueId(),System.currentTimeMillis());
+                                abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
                             }
                             for (PotionEffect pot : iterpots) {
                                 player.sendMessage(dess("<shadow:#000000FF><b><green>Amplified: </shadow></b>" + pot.getType().toString() + ", duration " + pot.getDuration() + "."));
@@ -124,7 +122,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             }
 
         } else {
-            double seconds = (double) (AbilityOne_Cooldown - (System.currentTimeMillis() - abilityOneCooldownTime.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING,1,-1);
             player.sendActionBar(dess("<Red>Cooldown!</Red> Please wait " + Math.round(seconds) + " seconds!"));
         }
@@ -149,14 +147,11 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
         return dess("Curse one person to become a frog for 3 minutes. They cannot speak and they have weakness 2");
     }
 
-    public long AbilityTwo_Cooldown = 30000;
-
-    public static HashMap<UUID,Long> abilityTwoCooldownTime = new HashMap<>();
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
 
-        if (can_ability(AbilityTwo_Cooldown,abilityTwoCooldownTime,player.getUniqueId()) && !player.getPersistentDataContainer().getOrDefault(keygen("disguised"), PersistentDataType.BOOLEAN, false)) {
+        if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().getOrDefault(keygen("disguised"), PersistentDataType.BOOLEAN, false)) {
             if (Bukkit.getOnlinePlayers().size() >= 2) {
                 player.playSound(player.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE,1,1);
                 InventoryGui inventoryGui = new InventoryGui();
@@ -170,8 +165,8 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
         } else {
             // no no ability
             Freedom.get_plugin().getLogger().info("Ability Two - Orange");
-            if (abilityTwoCooldownTime.get(player.getUniqueId()) != null) {
-                double seconds = (double) (AbilityTwo_Cooldown - (System.currentTimeMillis() - abilityTwoCooldownTime.get(player.getUniqueId()))) / 1000;
+            if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
+                double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
                 player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
             } else {
 
@@ -288,6 +283,16 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
     @Override
     public Component ActivePassive_Description() {
         return dess("You can ride a broom in exchange for soulpoints");
+    }
+
+    @Override
+    public long AbilityTwo_Cooldown() {
+        return 30000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 10000;
     }
 
     @Override

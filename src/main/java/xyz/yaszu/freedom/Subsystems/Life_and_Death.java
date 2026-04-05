@@ -30,7 +30,7 @@ import static xyz.yaszu.freedom.Util.Util.*;
 public class Life_and_Death implements org.bukkit.event.Listener{
     @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event) {
-        if (!player_util.does_player_have_tag(event.getPlayer(),"life")) {
+        if (!event.getPlayer().getPersistentDataContainer().has(keygen("life"))) {
             player_util.set_type_value(event.getPlayer(),"life",9, PersistentDataType.INTEGER);
         }
     }
@@ -87,6 +87,13 @@ public class Life_and_Death implements org.bukkit.event.Listener{
     ConfigManager config = new ConfigManager(Bukkit.getPluginManager().getPlugin("Freedom").getConfig());
     @EventHandler
     public void Can_See_Ghost(PlayerMoveEvent event) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("life"))) {
+            if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER) >= 0) {
+                event.getPlayer().getPersistentDataContainer().remove(keygen("ghost"));
+            }
+        } else {
+            player_util.set_type_value(event.getPlayer(),"life",9, PersistentDataType.INTEGER);
+        }
         if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
             for (Player player : Bukkit.getOnlinePlayers() ) {
                 if (!player_util.does_player_have_tag(player,"ghost") && player != event.getPlayer() ) {

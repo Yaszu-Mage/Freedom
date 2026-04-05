@@ -40,6 +40,7 @@ public class Burger extends Util implements BaseItem {
             player.sendMessage(dess("You are already full!"));
             return;
         }
+        player.setSaturation(player.getSaturation()+5);
         player.setFoodLevel(player.getFoodLevel()+5);
         player.getWorld().spawnParticle(Particle.EGG_CRACK,player.getLocation(),10);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP,10f,2f);

@@ -42,8 +42,6 @@ dependencies {
     compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.15")
     compileOnly ('net.skinsrestorer:skinsrestorer-api:15.11.0')
     compileOnly ('com.sk89q.worldedit:worldedit-bukkit:7.4.0')
-    implementation("net.megavex:scoreboard-library-api:2.7.1")
-    runtimeOnly("net.megavex:scoreboard-library-implementation:2.7.1")
 
 }
 

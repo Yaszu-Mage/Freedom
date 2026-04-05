@@ -40,7 +40,8 @@ public interface Base_Soul {
     public default void playerSneakEvent(Player player) {}
 
     public Component ActivePassive_Description();
-
+    public long AbilityTwo_Cooldown();
+    public long AbilityOne_Cooldown();
     //Active Passive - A passive that requires a condition to activate
     public void ActivePassive(Player player);
 
