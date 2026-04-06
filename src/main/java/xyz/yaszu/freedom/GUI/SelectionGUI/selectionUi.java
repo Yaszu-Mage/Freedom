@@ -45,7 +45,7 @@ public class selectionUi extends Util implements Listener {
         if (active_souls_in_config.contains("Purple")) {
             active_souls.add(new BasePurple());
         }
-        if (active_souls_in_config.contains("Blue")) {
+        if (active_souls_in_config.contains("Mocha")) {
             active_souls.add(new BaseMocha());
         }
         if (active_souls_in_config.contains("Green")) {
@@ -54,7 +54,7 @@ public class selectionUi extends Util implements Listener {
         if (active_souls_in_config.contains("Black")) {
             active_souls.add(new BaseBlack());
         }
-        if (active_souls_in_config.contains("Yellow")) {
+        if (active_souls_in_config.contains("Cafe")) {
             active_souls.add(new BaseCafe());
         }
         if (active_souls_in_config.contains("None")) {
@@ -62,6 +62,12 @@ public class selectionUi extends Util implements Listener {
         }
         if (active_souls_in_config.contains("Orange")) {
             active_souls.add(new BaseOrange());
+        }
+        if (active_souls_in_config.contains("Yellow")) {
+            active_souls.add(new BaseYellow());
+        }
+        if (active_souls_in_config.contains("Blue")) {
+            active_souls.add(new BaseBlue());
         }
         return active_souls;
     }
@@ -118,7 +124,7 @@ public class selectionUi extends Util implements Listener {
             Black.join(player);
             BaseBlack.join(player);
             if (soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Blue" || soul_selection_map.get(player.getUniqueId()).Name_For_Container() == "Yellow") {
-                Blue.init(player);
+                Mocha.init(player);
                 BaseMocha.init(player);
             }
         }

@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul.Ultra;
+package xyz.yaszu.freedom.Soul.Base;
 
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
@@ -12,12 +12,13 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Soul.Base.BaseBlue;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.Util;
@@ -26,10 +27,10 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Yellow extends Util implements Base_Soul, Listener {
+public class BaseYellow extends Util implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
-        return "Yellow";
+        return "BaseYellow";
     }
     public static BaseBlue blue = new BaseBlue();
     @Override
@@ -61,7 +62,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
     public void AbilityOne(Player player) {
         if (player.hasPotionEffect(PotionEffectType.SPEED)) return;
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())){
-            player.addPotionEffect(PotionEffectType.SPEED.createEffect(400,1));
+            player.addPotionEffect(PotionEffectType.SPEED.createEffect(200,0));
             abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             drawClock(
                     player.getLocation(),
@@ -113,27 +114,27 @@ public class Yellow extends Util implements Base_Soul, Listener {
         Location originalspawn = center.clone().add(center.getDirection().multiply(-zombdistance));
         team.setAllowFriendlyFire(false);
         List<Entity> spawned = new ArrayList<>();
-        ItemStack helmet = ItemStack.of(Material.DIAMOND_HELMET);
-        helmet.addEnchantment(Enchantment.PROTECTION,4);
+        ItemStack helmet = ItemStack.of(Material.IRON_HELMET);
+        helmet.addEnchantment(Enchantment.PROTECTION,2);
         helmet.addEnchantment(Enchantment.UNBREAKING,3);
         helmet.addEnchantment(Enchantment.VANISHING_CURSE,1);
         helmet.addEnchantment(Enchantment.MENDING,1);
-        ItemStack chestplate = ItemStack.of(Material.DIAMOND_CHESTPLATE);
-        chestplate.addEnchantment(Enchantment.PROTECTION,4);
+        ItemStack chestplate = ItemStack.of(Material.IRON_CHESTPLATE);
+        chestplate.addEnchantment(Enchantment.PROTECTION,2);
         chestplate.addEnchantment(Enchantment.UNBREAKING,3);
         chestplate.addEnchantment(Enchantment.VANISHING_CURSE,1);
         chestplate.addEnchantment(Enchantment.MENDING,1);
-        ItemStack leggings = ItemStack.of(Material.DIAMOND_LEGGINGS);
-        leggings.addEnchantment(Enchantment.PROTECTION,4);
+        ItemStack leggings = ItemStack.of(Material.IRON_LEGGINGS);
+        leggings.addEnchantment(Enchantment.PROTECTION,2);
         leggings.addEnchantment(Enchantment.UNBREAKING,3);
         leggings.addEnchantment(Enchantment.VANISHING_CURSE,1);
         leggings.addEnchantment(Enchantment.MENDING,1);
-        ItemStack boots = ItemStack.of(Material.DIAMOND_BOOTS);
-        boots.addEnchantment(Enchantment.PROTECTION,4);
+        ItemStack boots = ItemStack.of(Material.IRON_BOOTS);
+        boots.addEnchantment(Enchantment.PROTECTION,2);
         boots.addEnchantment(Enchantment.UNBREAKING,3);
         boots.addEnchantment(Enchantment.VANISHING_CURSE,1);
         boots.addEnchantment(Enchantment.MENDING,1);
-        for (int iteration = 5; iteration < 12; iteration++) {
+        for (int iteration = 5; iteration < 10; iteration++) {
             Location spawn = rotpointX(center,iteration*5,originalspawn);
             Entity entity = world.spawnEntity(spawn, EntityType.ZOMBIE);
             spawned.add(entity);
@@ -208,7 +209,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
 
     @Override
     public long AbilityTwo_Cooldown() {
-        return 60000;
+        return 120000;
     }
 
     @Override

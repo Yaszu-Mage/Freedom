@@ -14,7 +14,6 @@ import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,7 +22,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Util.Util;
@@ -47,7 +45,7 @@ public class UltraselectionUi extends Util implements Listener {
             active_souls.add(new Purple());
         }
         if (active_souls_in_config.contains("Blue")) {
-            active_souls.add(new Blue());
+            active_souls.add(new Mocha());
         }
         if (active_souls_in_config.contains("Green")) {
             active_souls.add(new Green());
@@ -56,7 +54,7 @@ public class UltraselectionUi extends Util implements Listener {
             active_souls.add(new Black());
         }
         if (active_souls_in_config.contains("Yellow")) {
-            active_souls.add(new Yellow());
+            active_souls.add(new Cafe());
         }
         if (active_souls_in_config.contains("None")) {
             active_souls.add(new None());
@@ -152,8 +150,8 @@ public class UltraselectionUi extends Util implements Listener {
             Black.join(player);
             Black.join(player);
             if (currentsouls.get(player.getUniqueId()).Name_For_Container() == "Blue" || currentsouls.get(player.getUniqueId()).Name_For_Container() == "Yellow") {
-                Blue.init(player);
-                Blue.init(player);
+                Mocha.init(player);
+                Mocha.init(player);
             }
         }
 

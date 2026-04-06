@@ -14,6 +14,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
@@ -28,11 +29,11 @@ public class soulListener extends Util implements Listener {
 
     public static void registerSouls() {
         SOULS.put(SoulTypes.Red, new Red());
-        SOULS.put(SoulTypes.Cafe, new Yellow());
+        SOULS.put(SoulTypes.Cafe, new Cafe());
         SOULS.put(SoulTypes.Green, new Green());
         SOULS.put(SoulTypes.Black, new Black());
         SOULS.put(SoulTypes.Purple, new Purple());
-        SOULS.put(SoulTypes.Mocha, new Blue());
+        SOULS.put(SoulTypes.Mocha, new Mocha());
         SOULS.put(SoulTypes.Orange, new Orange());
         SOULS.put(SoulTypes.BaseRed, new BaseRed());
         SOULS.put(SoulTypes.BaseCafe, new BaseCafe());
@@ -41,6 +42,10 @@ public class soulListener extends Util implements Listener {
         SOULS.put(SoulTypes.BasePurple, new BasePurple());
         SOULS.put(SoulTypes.BaseMocha, new BaseMocha());
         SOULS.put(SoulTypes.BaseOrange, new BaseOrange());
+        SOULS.put(SoulTypes.Yellow, new Yellow());
+        SOULS.put(SoulTypes.BaseYellow, new BaseYellow());
+        SOULS.put(SoulTypes.BaseBlue, new BaseBlue());
+        SOULS.put(SoulTypes.Blue, new Blue());
     }
 
     public static Base_Soul getSoul(Player player) {
@@ -205,7 +210,25 @@ public class soulListener extends Util implements Listener {
 
     public void AbilityOne(Player player) {
         Base_Soul soul = getSoul(player);
+
         if (soul != null) {
+            String soulName = soul.Name_For_Container();
+            if (soulName.contains("Yellow") ||  soulName.contains("Blue")) {
+                ItemStack drop = player.getInventory().getItemInMainHand();
+                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                    player.sendMessage(dess("ABILITY"));
+                    soul.AbilityOne(player);
+                }
+                return;
+            }
+            if (soulName.contains("Blue")) {
+                ItemStack drop = player.getInventory().getItemInMainHand();
+                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                    player.sendMessage(dess("ABILITY"));
+                    soul.AbilityOne(player);
+                }
+                return;
+            }
             soul.AbilityOne(player);
         }
     }
@@ -223,6 +246,7 @@ public class soulListener extends Util implements Listener {
     }
 
     public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
+
         ItemStack drop = player.getInventory().getItemInMainHand();
         if (!Life_and_Death.is_alive(player)) return;
         Base_Soul soul = getSoul(player);
@@ -231,8 +255,9 @@ public class soulListener extends Util implements Listener {
         player.sendActionBar(dess("<green>Ability Two</green>"));
 
         String soulName = soul.Name_For_Container();
+        Freedom.get_plugin().getLogger().info(soulName);
         if (soulName != null) {
-            if (soulName.contains("Red")) {
+            if (soulName.contains("Red") || soulName.contains("Yellow") || soulName.contains("Blue")) {
                 if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
                     player.sendMessage(dess("ABILITY"));
                     soul.AbilityTwo(player, drop);
@@ -262,6 +287,7 @@ public class soulListener extends Util implements Listener {
                 soul.playerSneakEvent(player);
             }
         } else {
+            Freedom.get_plugin().getLogger().info(soulName);
             soul.ActivePassive(player);
         }
     }
@@ -284,8 +310,16 @@ public class soulListener extends Util implements Listener {
         if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             Base_Soul soul = getSoul(player);
             if (soul == null) return;
+            String soulName = soul.Name_For_Container();
+            if (soulName.contains("Yellow")) {
+                ItemStack drop = player.getInventory().getItemInMainHand();
+                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                    player.sendMessage(dess("ABILITY"));
+                    soul.AbilityOne(player);
+                }
+                return;
+            }
 
-            String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
             if (soulName != null && soulName.contains("Orange")) {
                 soul.AbilityOne(player);
             } else if (player.isSneaking()) {

@@ -38,7 +38,6 @@ public class PainScythe extends Util implements BaseItem, Listener {
         meta.setItemModel(NamespacedKey.minecraft("jx1dx1"));
         meta.displayName(Util.dess("<shadow:#000000FF><b><red>Pain Scythe</red>"));
         meta.setUnbreakable(true);
-        meta.addAttributeModifier(Attribute.ATTACK_SPEED,new AttributeModifier(keygen("PainScythe"), -0.2, AttributeModifier.Operation.ADD_NUMBER));
         meta.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(keygen("PainScythe"), 1.6, AttributeModifier.Operation.ADD_NUMBER));
         itemStack.setItemMeta(meta);
         return itemStack;
@@ -88,7 +87,9 @@ public class PainScythe extends Util implements BaseItem, Listener {
 
     @EventHandler
     public void PlayerMoveEvent(PlayerMoveEvent event) {
-        if (event.getPlayer().getPersistentDataContainer().getOrDefault(FreedomKeys.itemId(), PersistentDataType.STRING, "painscythe").equals("painscythe")) {
+        if (event.getPlayer().getInventory().getItemInMainHand().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING) == null) return;
+        if (event.getPlayer().getInventory().getItemInMainHand() == null) return;
+        if (event.getPlayer().getInventory().getItemInMainHand().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING).equals("painscythe")) {
             Integer change = random.nextInt(10000);
             if (change <= 10) {
             Integer messageIndex = random.nextInt(Jx1dx1.size());
@@ -115,7 +116,8 @@ public class PainScythe extends Util implements BaseItem, Listener {
     @EventHandler
     public void PrePlayerAttackEvent(PrePlayerAttackEntityEvent event) {
         Player player = event.getPlayer();
-        if (Objects.equals(player.getInventory().getItemInMainHand().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING), "painscythe")) {
+        if (player.getInventory().getItemInMainHand().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING) == null) return;
+        if (player.getInventory().getItemInMainHand().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING) == "painscythe") {
             player.setHealth(player.getHealth() - 1);
             ItemStack stack = player.getInventory().getItemInMainHand();
             ItemMeta meta = stack.getItemMeta();

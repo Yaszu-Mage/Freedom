@@ -11,7 +11,7 @@ public class FreedomKeys {
     }
 
     public static NamespacedKey soulPoint() {
-        return key("soulpoints");
+        return key("SoulPoint");
     }
 
     public static NamespacedKey spriteActive() {

@@ -40,7 +40,7 @@ public class SpellCompiler extends Util {
                     PortalParticleLifespan(stmt.location.clone().add(0,2,0),caster.getLocation().clone().add(0,2,4).setRotation(0,0));
                 }
                 case destruction -> {
-                    createRemoteExplosionParticles(stmt.location,15,stmt.range);
+                    createRemoteExplosionParticles(stmt.location,15,power);
                 }
                 case area -> {
                     for (Entity e : caster.getWorld().getNearbyEntities(stmt.location, power, power, power)) {
@@ -313,6 +313,7 @@ public class SpellCompiler extends Util {
             case ENCHANTED_GOLDEN_APPLE -> 7500;
             case NETHER_STAR -> 2500;
             case DEEPSLATE_COAL_ORE -> 2000;
+            case NETHERITE_BLOCK -> 6750;
             case NETHERITE_INGOT -> 750;
             case DIAMOND, EMERALD -> 600;
             case DRAGON_BREATH -> 500;

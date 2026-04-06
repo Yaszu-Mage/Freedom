@@ -1,9 +1,10 @@
-package xyz.yaszu.freedom.Soul.Ultra;
+package xyz.yaszu.freedom.Soul.Base;
 
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -13,7 +14,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class Blue extends Util implements Base_Soul, Listener {
+public class BaseBlue extends Util implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
-        return "Blue";
+        return "BaseBlue";
     }
 
     @Override
@@ -95,7 +95,7 @@ public class Blue extends Util implements Base_Soul, Listener {
                     }
                 });
                 tick++;
-                if (tick >= 200) {
+                if (tick >= 100) {
                     this.cancel();
                 }
             }
@@ -155,6 +155,18 @@ public class Blue extends Util implements Base_Soul, Listener {
             Location loadingLocation = player.getLocation();
             @Override
             public void run() {
+                if (loadingLocation != null) {
+                    if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
+                        player.sendMessage(dess("Too Far! (100 blocks)"));
+                        player.getPersistentDataContainer().remove(keygen("blue_save"));
+                        player.getPersistentDataContainer().remove(keygen("bluesaveX"));
+                        player.getPersistentDataContainer().remove(keygen("bluesaveY"));
+                        player.getPersistentDataContainer().remove(keygen("bluesaveZ"));
+                        player.getPersistentDataContainer().remove(keygen("blueworld"));
+                        this.cancel();
+                        return;
+                    }
+                }
                 if (player.getPersistentDataContainer().has(keygen("blueworld"),PersistentDataType.STRING)) {
                     loadingLocation = new Location(
                             Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blueworld"),PersistentDataType.STRING)),

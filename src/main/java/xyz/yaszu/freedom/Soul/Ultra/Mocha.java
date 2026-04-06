@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul.Base;
+package xyz.yaszu.freedom.Soul.Ultra;
 
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
@@ -6,9 +6,7 @@ import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -23,21 +21,21 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
-public class BaseMocha extends Util implements Base_Soul, Listener {
+public class Mocha extends Util implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {
-        return "BaseMocha";
+        return "Mocha";
     }
 
     @Override
     public Component Name() {
-        return dess("<color:#F9EBDE>Mocha</color:#F9EBDE>");
+        return dess("<color:#F9EBDE>Mocha</color>");
     }
 
     @Override
     public Component Description() {
-        return dess("Creates a bond when your other half is found");
+        return dess("Increases your bond with your other half");
     }
 
     @Override
@@ -53,50 +51,47 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("You can selectively with the Yellow one you are bonded with");
+        return dess("You can teleport across larger distances and more frequently");
     }
     @Override
-    public long AbilityOne_Cooldown() {return 45000L;}
-    @Override
     public void AbilityOne(Player player) {
-        if (!player.getPersistentDataContainer().has(keygen("tpyes"))) player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, true);
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
             //TODO implement VFX
-            if (player.getPersistentDataContainer().has(keygen("mochacafe"))) {
+            if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
 
-                Player mochacafe = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("mochacafe"), PersistentDataType.STRING));
-                if (mochacafe != null) {
-                Freedom.get_plugin().getLogger().info(String.valueOf(mochacafe.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)));
-                if (Bukkit.getPlayer(mochacafe.getPersistentDataContainer().get(keygen("mochacafe"),PersistentDataType.STRING)) == player) {
-                    if ( player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == true && mochacafe.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == false) {
-                        mochacafe.sendMessage(player.getName() + " has requested to swap!");
+                Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                if (doubleclock != null) {
+                Freedom.get_plugin().getLogger().info(String.valueOf(doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)));
+                if (Bukkit.getPlayer(doubleclock.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING)) == player) {
+                    if ( player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == true && doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == false) {
+                        doubleclock.sendMessage(player.getName() + " has requested to swap!");
                     } else {
-                        mochacafe.sendMessage(player.getName() + " has rescinded their request to swap.");
+                        doubleclock.sendMessage(player.getName() + " has rescinded their request to swap.");
                     }
 
-                if (mochacafe.getLocation().distanceSquared(player.getLocation()) <= 2500) {
-                if (mochacafe.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)) {
+                if (doubleclock.getLocation().distanceSquared(player.getLocation()) <= 10000) {
+                if (doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)) {
                     player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
-                    mochacafe.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
-                    Location doubleloc = mochacafe.getLocation().setRotation(0,0);
+                    doubleclock.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
+                    Location doubleloc = doubleclock.getLocation().setRotation(0,0);
                     Location location = player.getLocation().setRotation(0,0);
 
                     player.teleport(doubleloc);
-                    mochacafe.teleport(location);
+                    doubleclock.teleport(location);
                     abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
-                    abilityOneCooldowns.put(mochacafe.getUniqueId(),System.currentTimeMillis());
+                    abilityOneCooldowns.put(doubleclock.getUniqueId(),System.currentTimeMillis());
                     location = location.add(0,0.5,0);
                     doubleloc = doubleloc.add(0,0.5,0);
                     ItemDisplay onedisplay = location.getWorld().spawn(location, ItemDisplay.class);
                     ItemDisplay twodisplay = doubleloc.getWorld().spawn(doubleloc, ItemDisplay.class);
                     onedisplay.setItemStack(ItemStack.of(Material.CLOCK));
                     twodisplay.setItemStack(ItemStack.of(Material.CLOCK));
-                    mochacafe.getWorld().playSound(location,Sound.UI_BUTTON_CLICK,1,1);
+                    doubleclock.getWorld().playSound(location,Sound.UI_BUTTON_CLICK,1,1);
                     player.getWorld().playSound(location,Sound.UI_BUTTON_CLICK,1,1);
                     drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.REVERSE_PORTAL);
-                    drawCircle(mochacafe.getLocation(),1,mochacafe.getWorld(),16,Particle.REVERSE_PORTAL);
+                    drawCircle(doubleclock.getLocation(),1,doubleclock.getWorld(),16,Particle.REVERSE_PORTAL);
                     new BukkitRunnable() {
 
                         @Override
@@ -109,7 +104,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
                 }
             } else {
                     player.sendMessage(dess("YOU ARE TOO FAR TO SWAP!"));
-                    mochacafe.sendMessage(dess("YOU ARE TOO FAR TO SWAP!"));
+                    doubleclock.sendMessage(dess("YOU ARE TOO FAR TO SWAP!"));
                 }
         } else {
             //TODO send message
@@ -130,12 +125,11 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("Slows time for all but the one you are bonded with");
+        return dess("Further increases your control of time");
     }
-    public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
+
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             new BukkitRunnable() {
                 public static List<Entity> affectedEntities = new ArrayList<>();
@@ -155,10 +149,10 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
                             }
                         }
                     }
-                    if (player.getPersistentDataContainer().has(keygen("mochacafe"))) {
-                        Player mochacafe = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("mochacafe"), PersistentDataType.STRING));
-                        if (mochacafe != null) {
-                            ignoreplayer = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("mochacafe"), PersistentDataType.STRING));
+                    if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
+                        Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                        if (doubleclock != null) {
+                            ignoreplayer = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
                         }
                     }
                     for (Entity entity : nearguys) {
@@ -220,13 +214,13 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
         Player player = event.getPlayer();
             if (getSoulType(player) == SoulTypes.Mocha || getSoulType(player) == SoulTypes.Cafe) {
-                if (player.getPersistentDataContainer().has(keygen("mochacafe"))) {
-                    Player mochacafe = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("mochacafe"), PersistentDataType.STRING));
-                    if (mochacafe != null) {
-                        if (Bukkit.getPlayer(mochacafe.getPersistentDataContainer().get(keygen("mochacafe"),PersistentDataType.STRING)) == player) {
+                if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
+                    Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                    if (doubleclock != null) {
+                        if (Bukkit.getPlayer(doubleclock.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING)) == player) {
                         Collection<PotionEffect> potions = player.getActivePotionEffects();
                         Collection<PotionEffect> doublepotions = player.getActivePotionEffects();
-                        potioncheck(player,mochacafe,potions,doublepotions);
+                        potioncheck(player,doubleclock,potions,doublepotions);
                         }
                 }
             }
@@ -241,16 +235,16 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
             }
         }
     }
-    public void potioncheck(Player player, Player mochacafe, Collection<PotionEffect> clockpotion,Collection<PotionEffect> anticlockpotion) {
+    public void potioncheck(Player player, Player doubleclock, Collection<PotionEffect> clockpotion,Collection<PotionEffect> anticlockpotion) {
         List<PotionEffect> effects = new ArrayList<>();
         potionchecker.put(player.getUniqueId(),effects);
         potionrealcheck(clockpotion, anticlockpotion, effects,player.getUniqueId());
         potionrealcheck(anticlockpotion, clockpotion, effects,player.getUniqueId());
-        mochacafe.clearActivePotionEffects();
+        doubleclock.clearActivePotionEffects();
         player.clearActivePotionEffects();
         for (Object objpotion : potionchecker.get(player.getUniqueId())) {
             if (objpotion instanceof PotionEffect potion) {
-                mochacafe.addPotionEffect(potion);
+                doubleclock.addPotionEffect(potion);
                 player.addPotionEffect(potion);
             }
 
@@ -281,7 +275,12 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
     @Override
     public long AbilityTwo_Cooldown() {
-        return 9000L;
+        return 30000;
+    }
+
+    @Override
+    public long AbilityOne_Cooldown() {
+        return 30000;
     }
 
     @Override
@@ -292,10 +291,11 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
             if (lookedat.getPersistentDataContainer().has(keygen("soul"))) {
 
                 SoulTypes soulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+                Freedom.get_plugin().getLogger().info(String.valueOf(soulType));
                 Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Mocha || soulType == SoulTypes.Cafe));
                 SoulTypes selfsoulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                if ((soulType == SoulTypes.Mocha || selfsoulType == SoulTypes.Cafe) || (soulType == SoulTypes.Cafe || selfsoulType == SoulTypes.Mocha)|| (soulType == SoulTypes.BaseCafe || soulType == SoulTypes.BaseMocha)){
-                    player.getPersistentDataContainer().set(keygen("mochacafe"),PersistentDataType.STRING,lookedat.getName());
+                if ((soulType == SoulTypes.Mocha && selfsoulType == SoulTypes.Cafe) || (soulType == SoulTypes.Cafe && selfsoulType == SoulTypes.Mocha)){
+                    player.getPersistentDataContainer().set(keygen("doubleclock"),PersistentDataType.STRING,lookedat.getName());
 
                 }
             }

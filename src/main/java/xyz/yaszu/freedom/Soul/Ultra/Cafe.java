@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Soul.Base;
+package xyz.yaszu.freedom.Soul.Ultra;
 
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
@@ -18,40 +18,40 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class BaseCafe extends Util implements Base_Soul {
+public class Cafe extends Util implements Base_Soul {
     @Override
     public String Name_For_Container() {
-        return "BaseCafe";
+        return "Cafe";
     }
 
     @Override
     public Component Name() {
-        return dess("<color:#F9EBDE>Cafe</color>");
+        return dess("<color:#815854>Cafe</color>");
     }
 
     @Override
     public Component Description() {
-        return dess("What is it but coffee?");
+        return dess("Creates a bond when your other half is found");
     }
 
     @Override
     public ItemStack Icon() {
-        return ItemStack.of(Material.YELLOW_DYE);
+        return ItemStack.of(Material.COCOA_BEANS);
     }
 
     @Override
     public Component AbilityOneName() {
-        return dess("<color:#F9EBDE>Selective TP</color>");
+        return dess("<color:#815854>Selective TP</color>");
     }
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("You can selectively swap with the Cafe you are bonded with");
+        return dess("You can selectively swap with the Mocha one you are bonded with");
     }
-    BaseMocha mocha = new BaseMocha();
+    Mocha Mocha = new Mocha();
     @Override
     public void AbilityOne(Player player) {
-        mocha.AbilityOne(player);
+        Mocha.AbilityOne(player);
     }
 
     @Override
@@ -61,12 +61,12 @@ public class BaseCafe extends Util implements Base_Soul {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("<color:#F9EBDE> AOE </color>");
+        return dess("⬛⬛⬛⬛⬛⬛");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("Damage people within a 5 block radius with an AOE attack");
+        return dess("⬛⬛⬛⬛⬛⬛");
     }
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
@@ -77,7 +77,7 @@ public class BaseCafe extends Util implements Base_Soul {
                 int tick = 0;
                 @Override
                 public void run() {
-                    List<Entity> nearguys = player.getNearbyEntities(5,5,5);
+                    List<Entity> nearguys = player.getNearbyEntities(4,4,4);
                     Player ignoreplayer = player;
                     if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
                         Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
@@ -90,7 +90,7 @@ public class BaseCafe extends Util implements Base_Soul {
                             if (instplayer != ignoreplayer) {
                                 Freedom.get_plugin().getLogger().info("inst");
                                 double distance = Math.sqrt(instplayer.getLocation().distanceSquared(player.getLocation()));
-                                double damage = 5.5 + ((5-distance)*tick);
+                                double damage = 2.5 + ((5-distance)*tick);
                                 instplayer.damage(damage,player);
                             }
                         }
@@ -119,7 +119,7 @@ public class BaseCafe extends Util implements Base_Soul {
 
     @Override
     public Component Passive_Description() {
-        return dess("Shares your potion effects with your bonded half");
+        return dess("Shares you potion effects with your bonded half");
     }
 
     @Override
@@ -144,6 +144,6 @@ public class BaseCafe extends Util implements Base_Soul {
 
     @Override
     public void ActivePassive(Player player) {
-        mocha.ActivePassive(player);
+        Mocha.ActivePassive(player);
     }
 }

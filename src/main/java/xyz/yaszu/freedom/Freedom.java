@@ -41,7 +41,7 @@ import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
 import xyz.yaszu.freedom.Soul.Base.BaseOrange;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
-import xyz.yaszu.freedom.Soul.Ultra.Blue;
+import xyz.yaszu.freedom.Soul.Ultra.Mocha;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
 import xyz.yaszu.freedom.Subsystems.CombatTimer;
 import xyz.yaszu.freedom.Subsystems.CurseManager;
@@ -137,7 +137,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this,this);
         Bukkit.getPluginManager().registerEvents(new Black(),this);
         Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
-        Bukkit.getPluginManager().registerEvents(new Blue(), this);
+        Bukkit.getPluginManager().registerEvents(new Mocha(), this);
         Bukkit.getPluginManager().registerEvents(new Orange(),this);
         Bukkit.getPluginManager().registerEvents(new BaseOrange(),this);
         Bukkit.getPluginManager().registerEvents(new BaseBlack(),this);

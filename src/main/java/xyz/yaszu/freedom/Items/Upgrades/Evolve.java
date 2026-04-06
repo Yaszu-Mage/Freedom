@@ -37,12 +37,12 @@ public class Evolve implements BaseItem {
         switch (soulType) {
             case BaseRed -> soul = new Red();
             case BaseBlack -> soul = new Black();
-            case BaseMocha -> soul = new Blue();
+            case BaseMocha -> soul = new Mocha();
             case BaseGreen -> soul = new Green();
             case BaseNone -> soul = new None();
             case BaseOrange -> soul = new Orange();
             case BasePurple -> soul = new Purple();
-            case BaseCafe -> soul = new Yellow();
+            case BaseCafe -> soul = new Cafe();
             default -> cancel = true;
         }
         if (cancel) {

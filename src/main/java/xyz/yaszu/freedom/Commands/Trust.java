@@ -21,6 +21,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
@@ -48,20 +49,7 @@ public class Trust {
                             @Override
                             public void run() {
                                 Freedom.get_plugin().getLogger().info("Clock");
-                                drawClock(
-                                        loc,
-                                        2,
-                                        100,
-                                        20,
-                                        LocalTime.now().getHour() +(tick/48),
-                                        LocalTime.now().getMinute() + tick,
-                                        Particle.DUST,
-                                        new Particle.DustOptions(Color.AQUA, 1),
-                                        Particle.DUST,
-                                        Particle.DUST,
-                                        new Particle.DustOptions(Color.BLUE, 1),
-                                        new Particle.DustOptions(Color.AQUA, 1)
-                                );
+
                                 tick = tick - 12;
                                 if (tick <= -1200) {
                                     this.cancel();
