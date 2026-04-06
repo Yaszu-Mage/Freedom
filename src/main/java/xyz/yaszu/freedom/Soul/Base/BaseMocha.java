@@ -43,7 +43,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
     @Override
     public ItemStack Icon() {
         //TODO replace with blue clock
-        return ItemStack.of(Material.CLOCK);
+        return ItemStack.of(Material.COCOA_BEANS);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("You can selectively with the Yellow one you are bonded with");
+        return dess("You can selectively with the Cafe you are bonded with");
     }
     @Override
     public long AbilityOne_Cooldown() {return 45000L;}

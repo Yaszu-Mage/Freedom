@@ -26,6 +26,7 @@ public class Rifle implements BaseItem {
         SoulTypes soul = Util.getSoulType(player);
         if (soul != SoulTypes.Purple && soul != SoulTypes.BasePurple) {
             //do stuff
+
             event.setCancelled(true);
         }
     }

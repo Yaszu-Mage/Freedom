@@ -1,14 +1,19 @@
 package xyz.yaszu.freedom.Items;
 
+import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.BlockType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDropItemEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
@@ -55,6 +60,7 @@ public class ItemListener implements Listener {
                 BaseItem baseItem = ITEMS.get(itemId);
                 if (baseItem != null) {
                     baseItem.effect(event.getPlayer(), event, item);
+                    event.setCancelled(true);
                 }
             }
         }
@@ -62,6 +68,53 @@ public class ItemListener implements Listener {
 
     private final Random random = new Random();
     private static final int SUS_AMOUNT = 2;
+
+    @EventHandler
+    public void onPlayerSwaptoOffHand(PlayerSwapHandItemsEvent event) {
+        ItemStack mainhand = event.getMainHandItem();
+        ItemStack offhand = event.getOffHandItem();
+
+        if (mainhand != null) {
+            if (mainhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+                if (mainhand.getItemMeta() instanceof CrossbowMeta meta) {
+                    meta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
+                }
+            }
+        }
+        if (offhand != null) {
+            if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+                if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
+                    meta.addChargedProjectile(ItemStack.of(Material.AIR));
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onCrossbowLoad(EntityLoadCrossbowEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            if (player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+                if (player.getInventory().getItemInMainHand().getItemMeta() instanceof CrossbowMeta meta) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onCrossbowFire(EntityShootBowEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            if (event.getBow().getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+                if (event.getBow().getItemMeta() instanceof CrossbowMeta meta) {
+                    meta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
+                    event.getBow().setItemMeta(meta);
+                }
+                event.getProjectile().remove();
+                event.setCancelled(true);
+            }
+        }
+    }
+
 
     @EventHandler
     public void onBlockDropItem(BlockDropItemEvent event) {

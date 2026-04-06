@@ -138,22 +138,24 @@ public class SpellCompiler extends Util {
                     }
                     switch (stmt.element) {
                         case fire -> {
-
+                            //todo flamethrower
                         }
                         case air -> {
+                            //fling up
+                            Lift(caster);
                             caster.setVelocity(loc.getDirection().multiply(-(4 + (power / 2))));
                         }
                         case water -> {
-
+                            //ig water blast?
                         }
                         case earth -> {
-
+                            //todo throw rock or raise range
                         }
                         case poison -> {
-
+                            //todo green gas
                         }
                         case wither -> {
-
+                            //todo black gas
                         }
                     }
                 }

@@ -15,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
+import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
@@ -61,21 +62,6 @@ public class BasePurple extends Util implements Base_Soul {
         return dess("Teleport 5 blocks in the direction you are looking at.");
     }
 
-    public void drawCircle(Location center, double radius, World world, int points) {
-        for (int i = 0; i < points; i++) {
-            double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
-            double x = center.getX() + (radius * Math.cos(angle)); // Calculate X coordinate
-            double z = center.getZ() + (radius * Math.sin(angle)); // Calculate Z coordinate
-            double y = center.getY(); // Y remains constant for a flat circle
-
-            // Create a new location for the point
-            Location pointLocation = new Location(world, x, y, z);
-
-            // 2. Spawn particles
-            world.spawnParticle(Particle.REVERSE_PORTAL, pointLocation, 1);
-        }
-    }
-
     @Override
     public void AbilityOne(Player player) {
         //
@@ -84,7 +70,7 @@ public class BasePurple extends Util implements Base_Soul {
             World world = player.getWorld();
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
             Vector velocity = player.getVelocity();
-        drawCircle(player.getLocation().add(0,1,0), 1, player.getWorld(), 100);
+            drawStar(player.getLocation().add(0,1,0), 1, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8));
         Location location = player.getLocation().add(player.getLocation().getDirection().multiply(5));
         //Location location = player.getLocation().add(player.getEyeLocation().getDirection().multiply(5));
         while (!location.getBlock().isEmpty() && !location.add(0,1,0).getBlock().isEmpty()) {
@@ -106,12 +92,12 @@ public class BasePurple extends Util implements Base_Soul {
 
         }
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
-        drawCircle(player.getLocation().add(0,1,0), 1, player.getWorld(), 100);
+        drawIsoscelesTriangle(player.getLocation(), 1.5, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8));
         abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     } else {
             player.sendActionBar(dess("You can't use this ability yet"));
             double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
-            player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
         }
     }
 
@@ -120,7 +106,6 @@ public class BasePurple extends Util implements Base_Soul {
     @Override
     public ItemStack Related_Item() {
         ItemStack workingItem = ItemStack.of(Material.CROSSBOW);
-
         CrossbowMeta workingMeta = (CrossbowMeta) workingItem.getItemMeta();
         workingMeta.setItemModel(NamespacedKey.minecraft("rifle"));
         workingMeta.getPersistentDataContainer().set(keygen("rifle"), PersistentDataType.BOOLEAN, true);
@@ -156,6 +141,9 @@ public class BasePurple extends Util implements Base_Soul {
         }
 }
 
+
+
+
     public BukkitRunnable handleSnipe(Player player) {
         return new BukkitRunnable() {
             Vector direction = player.getLocation().getDirection();
@@ -167,6 +155,8 @@ public class BasePurple extends Util implements Base_Soul {
                 }
                 if (snipeLocation != player.getLocation()) {
                     world.spawnParticle(Particle.REVERSE_PORTAL,snipeLocation,30);
+                } else {
+                    createVerticleMinMagicCircle(snipeLocation.clone().add(player.getLocation().getDirection()),15, SoulTypes.Purple,player.getLocation().getYaw(),player.getLocation(),100,0.25);
                 }
 
                 snipeLocation.add(direction);

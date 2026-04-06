@@ -1096,7 +1096,6 @@ public class Util {
     public static void Lift(Player target) {
         Location loc = target.getLocation();
         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        target.setVelocity(new Vector(0, 40, 0));
         new BukkitRunnable() {
             int tick = 0;
             @Override
