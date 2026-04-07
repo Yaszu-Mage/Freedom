@@ -24,7 +24,7 @@ public class SpellCompiler extends Util {
 
 
     public enum ritualtype {
-        destruction(1500), teleport(50), area(40), effect(25),
+        destruction(750), teleport(50), area(40), effect(25),
         rain(45), sun(45), thundering(45), day(30), night(30),
         shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500);
 
@@ -34,8 +34,10 @@ public class SpellCompiler extends Util {
 
         public void execute(StatementNode stmt, Player caster) {
             int power = stmt.range + stmt.amplification * 2;
+            if (stmt.location == null) stmt.location = caster.getLocation();
             switch (this) {
                 case teleport -> {
+
                     PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), stmt.location.clone().add(0,0,4));
                     PortalParticleLifespan(stmt.location.clone().add(0,2,0),caster.getLocation().clone().add(0,2,4).setRotation(0,0));
                 }

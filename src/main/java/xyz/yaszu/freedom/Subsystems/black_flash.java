@@ -30,7 +30,6 @@ public class black_flash implements Listener {
         if (!attacker.equals(attacked)) {
             int value = random.nextInt(1001);
             if (value == 1) {
-                Freedom.get_plugin().getLogger().info(String.valueOf(value));
                 Bukkit.getPluginManager().getPlugin("Freedom").getLogger().info(attacker.getDisplayName() + " hit a black flash");
 
                 attacker.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#870700:#eb0c00>You hit a black flash!</gradient>"));

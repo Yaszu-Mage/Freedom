@@ -82,12 +82,10 @@ public class Alchemy implements Listener {
 
     public void ritual(Location centerLocation, SoulTypes soulType,ItemStack book,Player player) throws IOException, WorldEditException {
         File ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("ritual.schem").toFile();
-        Freedom.get_plugin().getLogger().info(String.valueOf(Freedom.get_plugin().getDataFolder().toPath()));
         Clipboard load = loadSchematic(ritualschem);
         if (load != null) {
 
             if (compareStructure(load, centerLocation)) {
-                Freedom.get_plugin().getLogger().info("Ritual structure matches!");
                 BookMeta meta = (BookMeta) book.getItemMeta();
                 String text = String.join(" ", meta.getPages());
                 int Casted = SpellCompiler.castSpell(text, centerLocation, player,true);
@@ -99,10 +97,8 @@ public class Alchemy implements Listener {
 
 
             } else {
-                Freedom.get_plugin().getLogger().info("Ritual structure does not match!");
             }
         } else {
-            Freedom.get_plugin().getLogger().info("CLIPBOARD IS NULL");
         }
 
     }
@@ -111,7 +107,6 @@ public class Alchemy implements Listener {
 
         ClipboardFormat format = ClipboardFormats.findByFile(file);
         if (format == null) {
-            Freedom.get_plugin().getLogger().info("UNSUPPORTED FORMAT");
             return null; // Unsupported format
         }
         try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {

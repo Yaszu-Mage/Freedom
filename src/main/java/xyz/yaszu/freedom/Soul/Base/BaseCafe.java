@@ -70,9 +70,7 @@ public class BaseCafe extends Util implements Base_Soul {
     }
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-        Freedom.get_plugin().getLogger().info("Baller");
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
-            Freedom.get_plugin().getLogger().info("Baller");
             new BukkitRunnable() {
                 int tick = 0;
                 @Override
@@ -88,7 +86,6 @@ public class BaseCafe extends Util implements Base_Soul {
                     for (Entity entity : nearguys) {
                         if (entity instanceof Player instplayer) {
                             if (instplayer != ignoreplayer) {
-                                Freedom.get_plugin().getLogger().info("inst");
                                 double distance = Math.sqrt(instplayer.getLocation().distanceSquared(player.getLocation()));
                                 double damage = 5.5 + ((5-distance)*tick);
                                 instplayer.damage(damage,player);

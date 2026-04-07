@@ -17,6 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Objective;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.ConfigManager;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 import xyz.yaszu.freedom.Util.player_util;
 
@@ -52,6 +53,19 @@ public class Life_and_Death implements org.bukkit.event.Listener{
             Entity damager = damageByEntity.getDamager();
 
             if (damager instanceof Player killer) {
+                if (killer.getPersistentDataContainer().has(FreedomKeys.trustedBy())) {
+                    if (victim.getPersistentDataContainer().has(FreedomKeys.trustedBy())) {
+                        String trustedby = killer.getPersistentDataContainer().get(FreedomKeys.trustedBy(),PersistentDataType.STRING);
+                        String trustedby2 = victim.getPersistentDataContainer().get(FreedomKeys.trustedBy(),PersistentDataType.STRING);
+                        if (trustedby != null && trustedby2 != null) {
+                            if (trustedby.contains(killer.getName()) && trustedby2.contains(damager.getName())) {
+                                victim.setHealth(1);
+                                victim.setFireTicks(0);
+                                return;
+                            }
+                        }
+                    }
+                }
                 player_util.set_type_value(
                         event.getPlayer(),
                         "life",
@@ -87,8 +101,12 @@ public class Life_and_Death implements org.bukkit.event.Listener{
     ConfigManager config = new ConfigManager(Bukkit.getPluginManager().getPlugin("Freedom").getConfig());
     @EventHandler
     public void Can_See_Ghost(PlayerMoveEvent event) {
+        if (event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER) <= 0) {
+            event.getPlayer().getPersistentDataContainer().set(keygen("ghost"), PersistentDataType.BOOLEAN,true);
+            event.getPlayer().setAllowFlight(true);
+        }
         if (event.getPlayer().getPersistentDataContainer().has(keygen("life"))) {
-            if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER) >= 0) {
+            if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER) > 0) {
                 event.getPlayer().getPersistentDataContainer().remove(keygen("ghost"));
             }
         } else {

@@ -70,7 +70,8 @@ public class BasePurple extends Util implements Base_Soul {
             World world = player.getWorld();
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
             Vector velocity = player.getVelocity();
-            drawStar(player.getLocation().add(0,1,0), 1, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8));
+            drawStar(player.getLocation().add(0,1,0), 1, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 1));
+            drawStar(player.getLocation().add(0,1,0), 1.3, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.YELLOW, 1));
         Location location = player.getLocation().add(player.getLocation().getDirection().multiply(5));
         //Location location = player.getLocation().add(player.getEyeLocation().getDirection().multiply(5));
         while (!location.getBlock().isEmpty() && !location.add(0,1,0).getBlock().isEmpty()) {
@@ -92,7 +93,8 @@ public class BasePurple extends Util implements Base_Soul {
 
         }
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
-        drawIsoscelesTriangle(player.getLocation(), 1.5, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 8));
+        drawIsoscelesTriangle(player.getLocation(), 1.5, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 1));
+            drawIsoscelesTriangle(player.getLocation(), 1.8, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.YELLOW, 1));
         abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     } else {
             player.sendActionBar(dess("You can't use this ability yet"));

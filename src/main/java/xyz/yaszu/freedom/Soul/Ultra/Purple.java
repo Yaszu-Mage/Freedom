@@ -14,6 +14,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base.BasePurple;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -75,43 +76,10 @@ public class Purple extends Util implements Base_Soul {
             world.spawnParticle(Particle.REVERSE_PORTAL, pointLocation, 1);
         }
     }
-
+    BasePurple purple = new BasePurple();
     @Override
     public void AbilityOne(Player player) {
-        //
-        World world = player.getWorld();
-        world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
-        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
-            Vector velocity = player.getVelocity();
-        drawCircle(player.getLocation().add(0,1,0), 1, player.getWorld(), 100);
-        Location location = player.getLocation().add(player.getLocation().getDirection().multiply(5));
-        //Location location = player.getLocation().add(player.getEyeLocation().getDirection().multiply(5));
-        while (!location.getBlock().isEmpty() && !location.add(0,1,0).getBlock().isEmpty()) {
-
-            location = location.add(0, 1, 0);
-        }
-        if (!location.add(0,1,0).getBlock().isEmpty()) {
-            if (location.add(0,1,0).getBlock().getBreakSpeed(player) < 25) {
-                location.add(0, 1, 0).getBlock().breakNaturally();
-            }
-        }
-
-        player.teleport(location);
-            try {
-                if (player.getNearbyEntities(3,5,3).size() == 1) {
-                    player.lookAt(player.getNearbyEntities(1, 1, 1).get(0).getLocation(), LookAnchor.EYES);
-                }
-            } catch (IndexOutOfBoundsException ignored) {
-
-            }
-            world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
-        drawCircle(player.getLocation().add(0,1,0), 1, player.getWorld(), 100);
-        abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
-    } else {
-            player.sendActionBar(dess("You can't use this ability yet"));
-            double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
-            player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
-        }
+        purple.AbilityOne(player);
     }
 
 
@@ -169,7 +137,6 @@ public class Purple extends Util implements Base_Soul {
 
                 snipeLocation.add(direction);
                 for (Entity inst : snipeLocation.getNearbyEntities(4,4,4)) {
-                    Freedom.get_plugin().getLogger().info(String.valueOf(inst.getLocation().distance(snipeLocation)));
                     if (inst instanceof Player) {
                         if (inst != player) {
                             if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {

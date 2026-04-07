@@ -48,7 +48,6 @@ public class Trust {
                             int tick = 0;
                             @Override
                             public void run() {
-                                Freedom.get_plugin().getLogger().info("Clock");
 
                                 tick = tick - 12;
                                 if (tick <= -1200) {
@@ -265,13 +264,15 @@ public class Trust {
         return Commands.literal("revive")
                 .then(Commands.argument("target", ArgumentTypes.player())
                         .executes(ctx -> {
+                            final Player sender = (Player) ctx.getSource().getSender();
                             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
                             final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                                                    if (!target.isOp()) {
+                                                    if (!sender.isOp()) {
                             target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                             return Command.SINGLE_SUCCESS;
                         };
-                            final Player sender = (Player) ctx.getSource().getSender();
+
+                            sender.sendMessage(dess("<shadow:#000000FF><b><green>Reviving <target>!</green></b>"));
                             Life_and_Death.revive_player(target,sender.getLocation());
                             return Command.SINGLE_SUCCESS;
                         }))

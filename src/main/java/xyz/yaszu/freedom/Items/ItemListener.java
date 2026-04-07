@@ -1,6 +1,7 @@
 package xyz.yaszu.freedom.Items;
 
 import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
+import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.BlockType;
@@ -27,12 +28,9 @@ import xyz.yaszu.freedom.Items.Upgrades.Revival;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-public class ItemListener implements Listener {
+public class ItemListener extends Util implements Listener {
     private static final Map<String, BaseItem> ITEMS = new HashMap<>();
 
     public static void registerItems() {
@@ -52,9 +50,38 @@ public class ItemListener implements Listener {
     }
 
     @EventHandler
+    public void onOffhandItem(PlayerInventorySlotChangeEvent event) {
+        ItemStack mainhand = event.getPlayer().getInventory().getItemInMainHand();
+        ItemStack offhand = event.getPlayer().getInventory().getItemInOffHand();
+        if (event.getSlot() != 40 && event.getSlot() >= 8|| (event.getSlot() > 8) && (event.getSlot() != 40)) return;
+        offhand = event.getNewItemStack();
+            if (offhand.getItemMeta() != null) {
+                if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+                    if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
+                        if (event.getSlot() == 40) {
+                            meta.setChargedProjectiles(new ArrayList<>());
+                        } else {
+                            meta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
+                        }
+                        offhand.setItemMeta(meta);
+                        event.getPlayer().getInventory().setItem(event.getSlot(), offhand);
+                    }
+                }
+            }
+        }
+
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item != null && item.hasItemMeta()) {
+            if (item.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+                if (event.getPlayer().getInventory().getItemInMainHand().getItemMeta() != null) {
+                    if (!event.getPlayer().hasCooldown(ITEMS.get("rifle").item())) {
+                        ITEMS.get("rifle").effect(event.getPlayer(), event, item);
+                    }
+                }
+                event.setCancelled(true);
+            }
             String itemId = item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING);
             if (itemId != null) {
                 BaseItem baseItem = ITEMS.get(itemId);
@@ -74,17 +101,21 @@ public class ItemListener implements Listener {
         ItemStack mainhand = event.getMainHandItem();
         ItemStack offhand = event.getOffHandItem();
 
-        if (mainhand != null) {
-            if (mainhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+        if (mainhand.getItemMeta() != null) {
+            if (mainhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || mainhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
                 if (mainhand.getItemMeta() instanceof CrossbowMeta meta) {
                     meta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
+                    mainhand.setItemMeta(meta);
+                    Freedom.get_plugin().getLogger().info("mainhand");
                 }
             }
         }
-        if (offhand != null) {
-            if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+        if (offhand.getItemMeta() != null) {
+            if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())|| offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
                 if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
-                    meta.addChargedProjectile(ItemStack.of(Material.AIR));
+                    meta.setChargedProjectiles(new ArrayList<>());
+                    offhand.setItemMeta(meta);
+                    Freedom.get_plugin().getLogger().info("offhand");
                 }
             }
         }
@@ -92,19 +123,36 @@ public class ItemListener implements Listener {
 
     @EventHandler
     public void onCrossbowLoad(EntityLoadCrossbowEvent event) {
+        Freedom.get_plugin().getLogger().info("loaded");
         if (event.getEntity() instanceof Player player) {
-            if (player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
-                if (player.getInventory().getItemInMainHand().getItemMeta() instanceof CrossbowMeta meta) {
-                    event.setCancelled(true);
+            ItemStack mainhand = player.getInventory().getItemInMainHand();
+            ItemStack offhand = player.getInventory().getItemInOffHand();
+            if (mainhand.getItemMeta() != null) {
+                if (mainhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || mainhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+                    if (mainhand.getItemMeta() instanceof CrossbowMeta meta) {
+                        meta.setChargedProjectiles(new ArrayList<>());
+                        mainhand.setItemMeta(meta);
+                        Freedom.get_plugin().getLogger().info("mainhand");
+                    }
                 }
             }
+            if (offhand.getItemMeta() != null) {
+                if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())|| offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+                    if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
+                        meta.setChargedProjectiles(new ArrayList<>());
+                        offhand.setItemMeta(meta);
+                        Freedom.get_plugin().getLogger().info("offhand");
+                    }
+                }
+            }
+
         }
     }
 
     @EventHandler
     public void onCrossbowFire(EntityShootBowEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (event.getBow().getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+            if (event.getBow().getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || event.getBow().getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
                 if (event.getBow().getItemMeta() instanceof CrossbowMeta meta) {
                     meta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
                     event.getBow().setItemMeta(meta);

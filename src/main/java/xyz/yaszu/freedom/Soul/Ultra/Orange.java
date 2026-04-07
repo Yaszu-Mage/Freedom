@@ -216,7 +216,6 @@ public class Orange extends Util implements Base_Soul, Listener {
         public void setInventory(Player player) {
             int max_players = Bukkit.getMaxPlayers();
             int remainder = max_players % 9;
-            Freedom.get_plugin().getLogger().info(String.valueOf(remainder));
             if (remainder == 0) {
                 inventory = Bukkit.createInventory(this,max_players);
             } else {

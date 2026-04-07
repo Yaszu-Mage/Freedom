@@ -68,7 +68,6 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
                 Player mochacafe = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("mochacafe"), PersistentDataType.STRING));
                 if (mochacafe != null) {
-                Freedom.get_plugin().getLogger().info(String.valueOf(mochacafe.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)));
                 if (Bukkit.getPlayer(mochacafe.getPersistentDataContainer().get(keygen("mochacafe"),PersistentDataType.STRING)) == player) {
                     if ( player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == true && mochacafe.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == false) {
                         mochacafe.sendMessage(player.getName() + " has requested to swap!");
@@ -165,7 +164,6 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
                         if (entity instanceof Player instplayer) {
                             affectedEntities.add(instplayer);
                             if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) == null && instplayer != ignoreplayer) {
-                                Freedom.get_plugin().getLogger().info("inst");
                                 instplayer.getAttribute(Attribute.JUMP_STRENGTH).addModifier(new AttributeModifier(keygen("anticlock"),-100000000000d, AttributeModifier.Operation.ADD_NUMBER));
                                 instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),10000000d, AttributeModifier.Operation.ADD_NUMBER));
                                 instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.0375d, AttributeModifier.Operation.ADD_NUMBER));

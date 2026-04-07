@@ -194,7 +194,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         if (event.getWorld() == Bukkit.getWorld("void") && !event.getChunk().getPersistentDataContainer().has(FreedomKeys.key("void"))) {
             event.getChunk().getPersistentDataContainer().set(FreedomKeys.key("void"),PersistentDataType.BOOLEAN,true);
             int currentrand = random.nextInt(1000);
-            Freedom.get_plugin().getLogger().info(String.valueOf(currentrand));
             if (currentrand <= 50) {
                 File ritualschem;
                 int rand = random.nextInt(0,4);

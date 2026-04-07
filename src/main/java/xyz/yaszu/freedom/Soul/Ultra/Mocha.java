@@ -63,7 +63,6 @@ public class Mocha extends Util implements Base_Soul, Listener {
 
                 Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
                 if (doubleclock != null) {
-                Freedom.get_plugin().getLogger().info(String.valueOf(doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)));
                 if (Bukkit.getPlayer(doubleclock.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING)) == player) {
                     if ( player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == true && doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN) == false) {
                         doubleclock.sendMessage(player.getName() + " has requested to swap!");
@@ -159,7 +158,6 @@ public class Mocha extends Util implements Base_Soul, Listener {
                         if (entity instanceof Player instplayer) {
                             affectedEntities.add(instplayer);
                             if (instplayer.getAttribute(Attribute.GRAVITY).getModifier(keygen("anticlock")) == null && instplayer != ignoreplayer) {
-                                Freedom.get_plugin().getLogger().info("inst");
                                 instplayer.getAttribute(Attribute.JUMP_STRENGTH).addModifier(new AttributeModifier(keygen("anticlock"),-100000000000d, AttributeModifier.Operation.ADD_NUMBER));
                                 instplayer.getAttribute(Attribute.GRAVITY).addModifier(new AttributeModifier(keygen("anticlock"),10000000d, AttributeModifier.Operation.ADD_NUMBER));
                                 instplayer.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("anticlock"),-0.0375d, AttributeModifier.Operation.ADD_NUMBER));
@@ -291,8 +289,6 @@ public class Mocha extends Util implements Base_Soul, Listener {
             if (lookedat.getPersistentDataContainer().has(keygen("soul"))) {
 
                 SoulTypes soulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                Freedom.get_plugin().getLogger().info(String.valueOf(soulType));
-                Freedom.get_plugin().getLogger().info(String.valueOf(soulType == SoulTypes.Mocha || soulType == SoulTypes.Cafe));
                 SoulTypes selfsoulType = SoulTypes.valueOf(lookedat.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
                 if ((soulType == SoulTypes.Mocha && selfsoulType == SoulTypes.Cafe) || (soulType == SoulTypes.Cafe && selfsoulType == SoulTypes.Mocha)){
                     player.getPersistentDataContainer().set(keygen("doubleclock"),PersistentDataType.STRING,lookedat.getName());

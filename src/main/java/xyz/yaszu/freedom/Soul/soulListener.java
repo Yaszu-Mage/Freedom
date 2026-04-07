@@ -15,6 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
+import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
@@ -125,7 +127,7 @@ public class soulListener extends Util implements Listener {
             player.setWalkSpeed(0.2f);
             player.setFlySpeed(0.1f);
         } else {
-            player.performCommand("openGui");
+            selectionUi.open_UI(player,SOULS.get(SoulTypes.Red));
             player.setWalkSpeed(0);
             player.setFlySpeed(0);
         }
@@ -255,11 +257,9 @@ public class soulListener extends Util implements Listener {
         player.sendActionBar(dess("<green>Ability Two</green>"));
 
         String soulName = soul.Name_For_Container();
-        Freedom.get_plugin().getLogger().info(soulName);
         if (soulName != null) {
             if (soulName.contains("Red") || soulName.contains("Yellow") || soulName.contains("Blue")) {
                 if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    player.sendMessage(dess("ABILITY"));
                     soul.AbilityTwo(player, drop);
                 }
 
@@ -314,7 +314,6 @@ public class soulListener extends Util implements Listener {
             if (soulName.contains("Yellow")) {
                 ItemStack drop = player.getInventory().getItemInMainHand();
                 if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    player.sendMessage(dess("ABILITY"));
                     soul.AbilityOne(player);
                 }
                 return;

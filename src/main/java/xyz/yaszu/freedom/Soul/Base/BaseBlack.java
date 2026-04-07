@@ -313,7 +313,6 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             player.playerListName(baller.name());
             setSkinByName(player,baller.getName());
             originalProfiles.put(player.getUniqueId(),disguise);
-            Freedom.get_plugin().getLogger().info(String.valueOf(originalProfiles.get(player.getUniqueId())));
             World world = player.getWorld();
             Location location = player.getLocation();
             //VFX
