@@ -15,6 +15,7 @@ public class Circle extends Util implements BaseInformation {
         BookMeta meta = (BookMeta) book.getItemMeta();
         meta.setTitle("Rituals for Stupid Stupid know nothing dummies");
         meta.setAuthor("B.L. Fegore");
+        meta.displayName(dess("Rituals for Stupid Stupid know nothing dummies"));
         meta.pages(
               dess("Rituals for Stupid Stupid know nothing dummies" + "\n-------------------" + "Thanks to my patron S.A. Tan. You will be forever remembered in our hearts."),
                 dess(
@@ -26,7 +27,9 @@ public class Circle extends Util implements BaseInformation {
                 ),
                 dess("How rituals Work." + "\n-------------------" + "Rituals are setup using Spell types and keywords where Spell type is first followed by keywords followed by additional spells(optional)" + "For example: " + "destruction location -1528 68 147" + "The list of action keywords are as follows,"),
                 dess("[teleport, destruction, area, effect, thundering, rain, sun, day, night, shock, blast]"),
-                dess("How Addatives work" + "\n-------------------" + "addatives are an addition that is added behind the spell type to further specify how the spell functions." + "For example: " + "destruction location -1528 68 147 range 25 delay 20" + "in this the addatives are range and delay making the spell have more effect and a 20 second delay" + "a list of the addatives are, " + "location, range, regeneration, haste, speed, jump, poison, wither, strength, weakness, "));
+                dess("How additives work" + "\n-------------------" + "additives are an addition that is added behind the spell type to further specify how the spell functions." + "For example: " + "destruction location -1528 68 147 range 25 delay 20" + " in this the additives are range and delay making the spell have more"),
+                dess("effect and a 20 second delay " + "a list of the additives are," + "location, range, regeneration, haste, speed, jump, poison, wither, strength, weakness, ")
+        );
         book.setItemMeta(meta);
         return book;
     }

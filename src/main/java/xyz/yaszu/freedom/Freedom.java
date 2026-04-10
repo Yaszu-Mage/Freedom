@@ -148,6 +148,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new CurseManager(), this);
         Bukkit.getPluginManager().registerEvents(new Alchemy(), this);
         Bukkit.getPluginManager().registerEvents(new PainScythe(), this);
+        Bukkit.getPluginManager().registerEvents(new Information_Handler(), this);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
