@@ -31,7 +31,7 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.*;
 
 public class ItemListener extends Util implements Listener {
-    private static final Map<String, BaseItem> ITEMS = new HashMap<>();
+    public static final Map<String, BaseItem> ITEMS = new HashMap<>();
 
     public static void registerItems() {
         register(new Evolve(), "evolutionstone");

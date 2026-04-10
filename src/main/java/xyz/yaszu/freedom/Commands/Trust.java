@@ -1,10 +1,13 @@
 package xyz.yaszu.freedom.Commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.ArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
@@ -13,15 +16,27 @@ import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.yaszu.freedom.Commands.Arguments.BookArguments;
+import xyz.yaszu.freedom.Commands.Arguments.ItemArguments;
+import xyz.yaszu.freedom.Commands.Arguments.SoulArguments;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Information.BaseEnumBook;
+import xyz.yaszu.freedom.Information.Information_Handler;
+import xyz.yaszu.freedom.Items.BaseEnumItem;
+import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
+import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
@@ -33,6 +48,82 @@ import static xyz.yaszu.freedom.Util.Util.*;
 
 public class Trust {
     public static Util util = new Util();
+
+    public static LiteralCommandNode<CommandSourceStack> soulArgument() {
+        return Commands.literal("setsoul")
+                .then(Commands.argument("flavor", new SoulArguments()).then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final SoulTypes soultype = ctx.getArgument("flavor", SoulTypes.class);
+                            if (ctx.getSource().getSender() instanceof Player sender) {
+                                if (sender.isOp()) {
+                                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                    final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                                    target.getPersistentDataContainer().set(keygen("soul"), PersistentDataType.STRING, xyz.yaszu.freedom.Soul.soulListener.SOULS.get(soultype).Name_For_Container());
+                                    target.sendRichMessage("Your soul has been set to <aqua>" + soultype.name() + "</aqua>");
+                                }
+                            }
+
+                            return Command.SINGLE_SUCCESS;
+                        })
+                ))
+                .build();
+
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> normalItemArgument() {
+        return Commands.literal("item").then(Commands.argument("flavor", new ItemArguments()).then(Commands.argument("target", ArgumentTypes.player()).then(Commands.argument("amount", IntegerArgumentType.integer(0,64)).executes(ctx -> {
+
+            if (ctx.getSource().getSender() instanceof Player sender) {
+                final BaseEnumItem soultype = ctx.getArgument("flavor", BaseEnumItem.class);
+                if (sender.isOp()) {
+                    final int rsolve = ctx.getArgument("amount", int.class);
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                    if (target == null) target = sender;
+                    Freedom.get_plugin().getLogger().info(soultype.name());
+                    Freedom.get_plugin().getLogger().info(target.getName());
+                    Freedom.get_plugin().getLogger().info(ItemListener.ITEMS.toString());
+                    ItemStack realitem = ItemListener.ITEMS.get(soultype.toString()).item();
+                    realitem.setAmount(rsolve);
+                    target.give(realitem);
+                }
+
+            }
+
+            return Command.SINGLE_SUCCESS;
+        })))).build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> bookItemArgument() {
+        return Commands.literal("book").then(Commands.argument("flavor", new BookArguments()).then(Commands.argument("target", ArgumentTypes.player()).then(Commands.argument("amount", IntegerArgumentType.integer(0,64)).executes(ctx -> {
+
+            if (ctx.getSource().getSender() instanceof Player sender) {
+                final BaseEnumBook soultype = ctx.getArgument("flavor", BaseEnumBook.class);
+                if (sender.isOp()) {
+                    final int rsolve = ctx.getArgument("amount", int.class);
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                    if (target == null) target = sender;
+                    Freedom.get_plugin().getLogger().info(soultype.name());
+                    Freedom.get_plugin().getLogger().info(target.getName());
+                    Freedom.get_plugin().getLogger().info(ItemListener.ITEMS.toString());
+                    ItemStack realitem = Information_Handler.ITEMS.get(soultype.toString()).information();
+                    realitem.setAmount(rsolve);
+                    target.give(realitem);
+                }
+
+            }
+
+            return Command.SINGLE_SUCCESS;
+        })))).build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> customItemArgument() {
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("bestow");
+        root.then(normalItemArgument());
+        root.then(bookItemArgument());
+        return root.build();
+    }
 
     public static LiteralCommandNode<CommandSourceStack> test() {
         return Commands.literal("test").executes(

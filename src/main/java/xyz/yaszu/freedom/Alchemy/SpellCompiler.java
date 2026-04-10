@@ -17,7 +17,7 @@ public class SpellCompiler extends Util {
     public enum ritualkeywords {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
-        rain, sun, thundering, day, night,shock,delay,goon,sixtyseven,nothing,
+        rain, sun, thundering, day, night, shock, delay, goon, sixtyseven,nothing,
         fire,water,earth,air,blast,up,down,look
     }
 

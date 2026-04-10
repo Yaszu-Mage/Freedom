@@ -30,4 +30,8 @@ commands:
     description: "Test"
   rules:
     description: "Rules"
+  setsoul:
+    description: "Set soul"
+  bestow:
+    description: "Bestow"
 softdepend: [ "SkinsRestorer" ]

@@ -36,6 +36,7 @@ import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
+import xyz.yaszu.freedom.Information.Information_Handler;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
@@ -165,9 +166,12 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.Passive());
             commands.registrar().register(Trust.test());
             commands.registrar().register(Trust.rules());
+            commands.registrar().register(Trust.soulArgument());
+            commands.registrar().register(Trust.customItemArgument());
         });
         removeOldFollowers();
         ItemListener.registerItems();
+        Information_Handler.register_Info();
         start_time = System.currentTimeMillis();
         createVoid();
 
