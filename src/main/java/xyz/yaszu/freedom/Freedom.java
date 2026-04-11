@@ -49,6 +49,7 @@ import xyz.yaszu.freedom.Subsystems.CurseManager;
 import xyz.yaszu.freedom.Subsystems.TabDistance;
 import xyz.yaszu.freedom.Subsystems.black_flash;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.ChunkLootManager;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
@@ -125,6 +126,8 @@ public final class Freedom extends JavaPlugin implements Listener {
     public void onEnable() {
         // Plugin startup logic
         this.saveDefaultConfig();
+        ItemListener.registerItems();
+        Information_Handler.register_Info();
         //Enable Listeners
         Util.skinsRestorerAPI = SkinsRestorerProvider.get();
         soulListener soulListener = new soulListener();
@@ -149,6 +152,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new Alchemy(), this);
         Bukkit.getPluginManager().registerEvents(new PainScythe(), this);
         Bukkit.getPluginManager().registerEvents(new Information_Handler(), this);
+        Bukkit.getPluginManager().registerEvents(new ChunkLootManager(), this);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
@@ -169,10 +173,9 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.rules());
             commands.registrar().register(Trust.soulArgument());
             commands.registrar().register(Trust.customItemArgument());
+            commands.registrar().register(Trust.processChunksArgument());
         });
         removeOldFollowers();
-        ItemListener.registerItems();
-        Information_Handler.register_Info();
         start_time = System.currentTimeMillis();
         createVoid();
 

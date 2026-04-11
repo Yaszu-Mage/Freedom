@@ -188,7 +188,7 @@ public class Purple extends Util implements Base_Soul {
 
     @Override
     public long AbilityOne_Cooldown() {
-        return 1500;
+        return 2500;
     }
 
     @Override

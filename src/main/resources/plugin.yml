@@ -34,4 +34,6 @@ commands:
     description: "Set soul"
   bestow:
     description: "Bestow"
+  processchunks:
+    description: "Process Chunk"
 softdepend: [ "SkinsRestorer" ]

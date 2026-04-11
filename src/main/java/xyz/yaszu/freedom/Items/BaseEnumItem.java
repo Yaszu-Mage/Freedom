@@ -1,9 +1,9 @@
 package xyz.yaszu.freedom.Items;
 
 public enum BaseEnumItem {
-    evolve,
+    evolutionstone,
     reset,
-    revival,
+    revivalstone,
     glock,
     painscythe,
     spellfocus,

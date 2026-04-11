@@ -18,7 +18,7 @@ public class SpellCompiler extends Util {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
         rain, sun, thundering, day, night, shock, delay, goon, sixtyseven,nothing,
-        fire,water,earth,air,blast,up,down,look
+        fire,water,earth,air,soul,blast,moveset,up,down,look
     }
 
 
@@ -26,7 +26,7 @@ public class SpellCompiler extends Util {
     public enum ritualtype {
         destruction(750), teleport(50), area(40), effect(25),
         rain(45), sun(45), thundering(45), day(30), night(30),
-        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500);
+        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500),moveset(250);
 
         private final int baseCost;
         ritualtype(int baseCost) { this.baseCost = baseCost; }
@@ -138,7 +138,8 @@ public class SpellCompiler extends Util {
                         createVerticleMinMagicCircle(loc.clone().add(0,4,0),15,getSoulType(caster),caster.getYaw() - 90,loc,100,0.4);
                         //vertical...
                     }
-                    switch (stmt.element) {
+                    ritualkeywords element = stmt.elements.isEmpty() ? ritualkeywords.air : stmt.elements.iterator().next();
+                    switch (element) {
                         case fire -> {
                             //todo flamethrower
                         }
@@ -160,6 +161,15 @@ public class SpellCompiler extends Util {
                             //todo black gas
                         }
                     }
+                }
+                case moveset -> {
+                    List<String> elementNames = stmt.elements.stream()
+                            .map(Enum::name)
+                            .sorted()
+                            .toList();
+                    String movesetId = String.join(",", elementNames);
+                    caster.getPersistentDataContainer().set(xyz.yaszu.freedom.Util.FreedomKeys.moveset(), org.bukkit.persistence.PersistentDataType.STRING, movesetId);
+                    caster.sendMessage("§aYour moveset has been set to: " + movesetId);
                 }
             }
         }
@@ -209,7 +219,7 @@ public class SpellCompiler extends Util {
 
     static class StatementNode {
         ritualkeywords direction = ritualkeywords.down;
-        ritualkeywords element = ritualkeywords.air;
+        Set<ritualkeywords> elements = new HashSet<>();
         ritualtype action;
         Location location;
         int range = 0;
@@ -243,8 +253,8 @@ public class SpellCompiler extends Util {
                             current.direction = key;
                             used = true;
                         }
-                        case fire,water,earth,air -> {
-                            current.element = key;
+                        case fire,water,earth,air,soul,poison,wither -> {
+                            current.elements.add(key);
                             used = true;
                         }
                         case amplification -> { current.amplification++; used = true; }
@@ -272,7 +282,7 @@ public class SpellCompiler extends Util {
                                 used = true;
                             }
                         }
-                        case regeneration, speed, strength, poison, wither, jump, haste -> {
+                        case regeneration, speed, strength, jump, haste -> {
                             current.effect = createEffect(key);
                             used = true;
                         }
@@ -286,7 +296,7 @@ public class SpellCompiler extends Util {
 
     static boolean isAction(ritualkeywords key) {
         return switch (key) {
-            case teleport, destruction, area, effect, thundering, rain, sun, day, night, shock,goon,sixtyseven,nothing,blast-> true;
+            case teleport, destruction, area, effect, thundering, rain, sun, day, night, shock,goon,sixtyseven,nothing,blast,moveset-> true;
             default -> false;
         };
     }
@@ -344,7 +354,7 @@ public class SpellCompiler extends Util {
         int totalRequiredPower = 0;
         for (StatementNode stmt : spell.statements) {
             // Base complexity: Range and Amp increase cost exponentially
-            int complexity = 1 + stmt.range + (stmt.amplification * 5);
+            int complexity = 1 + stmt.range + (stmt.amplification * 5) + (stmt.elements.size() * 10);
             log("Complexity " + complexity);
             int actionBase = stmt.action.getBaseCost();
             log("Action Base " + actionBase);

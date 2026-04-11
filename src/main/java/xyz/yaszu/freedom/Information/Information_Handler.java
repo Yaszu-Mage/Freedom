@@ -12,6 +12,7 @@ import xyz.yaszu.freedom.Information.Alchemy.Circle;
 public class Information_Handler extends Util implements Listener {
     public static void register_Info() {
         register(new Circle(),"circle");
+        BookCompiler.registerAllRecipes(ITEMS);
     }
 
     public static final Map<String, BaseInformation> ITEMS = new HashMap<>();

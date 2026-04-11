@@ -14,6 +14,7 @@ import kr.toxicity.model.api.BetterModelPlatform;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
+import org.bukkit.Chunk;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,6 +39,7 @@ import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.ChunkLootManager;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
@@ -116,6 +118,34 @@ public class Trust {
 
             return Command.SINGLE_SUCCESS;
         })))).build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> processChunksArgument() {
+        return Commands.literal("processchunks")
+                .then(Commands.argument("radius", IntegerArgumentType.integer(0, 10))
+                        .executes(ctx -> {
+                            if (ctx.getSource().getSender() instanceof Player player) {
+                                if (player.isOp()) {
+                                    int radius = ctx.getArgument("radius", int.class);
+                                    ChunkLootManager manager = new ChunkLootManager();
+                                    int count = manager.processChunks(player.getLocation().getChunk(), radius);
+                                    player.sendRichMessage("<green>Processed chunks in radius " + radius + ". Added items to " + count + " chests.</green>");
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        if (player.isOp()) {
+                            ChunkLootManager manager = new ChunkLootManager();
+                            int count = manager.processChunks(player.getLocation().getChunk(), 0);
+                            player.sendRichMessage("<green>Processed current chunk. Added items to " + count + " chests.</green>");
+                        }
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+                .build();
     }
 
     public static LiteralCommandNode<CommandSourceStack> customItemArgument() {

@@ -30,6 +30,10 @@ public class FreedomKeys {
         return key("soul");
     }
 
+    public static NamespacedKey moveset() {
+        return key("moveset");
+    }
+
     public static NamespacedKey key(String key) {
         return new NamespacedKey(Freedom.get_plugin(),key);
     }

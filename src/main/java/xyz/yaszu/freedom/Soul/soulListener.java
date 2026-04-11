@@ -13,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
@@ -23,8 +24,7 @@ import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 public class soulListener extends Util implements Listener {
     public static final Map<SoulTypes, Base_Soul> SOULS = new EnumMap<>(SoulTypes.class);
@@ -179,6 +179,9 @@ public class soulListener extends Util implements Listener {
         if (!player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             return;
         }
+
+        applyMovesetPassives(player);
+
         if (!player.getPersistentDataContainer().has(FreedomKeys.soul()) ||
                 (!player.isSneaking()) ||
                 !player.getPersistentDataContainer().has(FreedomKeys.soulPoint())) {
@@ -210,22 +213,27 @@ public class soulListener extends Util implements Listener {
         soul.ActivePassive(player);
     }
 
+    private ItemStack findItemInHand(Player player, String key) {
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if (mainHand.getPersistentDataContainer().has(keygen(key))) {
+            return mainHand;
+        }
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+        if (offHand.getPersistentDataContainer().has(keygen(key))) {
+            if (keygen(key).equals(keygen("rifle"))) return null;
+            return offHand;
+        }
+        return null;
+    }
+
+
     public void AbilityOne(Player player) {
         Base_Soul soul = getSoul(player);
 
         if (soul != null) {
             String soulName = soul.Name_For_Container();
             if (soulName.contains("Yellow") ||  soulName.contains("Blue")) {
-                ItemStack drop = player.getInventory().getItemInMainHand();
-                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    player.sendMessage(dess("ABILITY"));
-                    soul.AbilityOne(player);
-                }
-                return;
-            }
-            if (soulName.contains("Blue")) {
-                ItemStack drop = player.getInventory().getItemInMainHand();
-                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                if (findItemInHand(player, "timepiece") != null) {
                     player.sendMessage(dess("ABILITY"));
                     soul.AbilityOne(player);
                 }
@@ -249,7 +257,6 @@ public class soulListener extends Util implements Listener {
 
     public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
 
-        ItemStack drop = player.getInventory().getItemInMainHand();
         if (!Life_and_Death.is_alive(player)) return;
         Base_Soul soul = getSoul(player);
         if (soul == null) return;
@@ -259,14 +266,16 @@ public class soulListener extends Util implements Listener {
         String soulName = soul.Name_For_Container();
         if (soulName != null) {
             if (soulName.contains("Red") || soulName.contains("Yellow") || soulName.contains("Blue")) {
-                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    soul.AbilityTwo(player, drop);
+                ItemStack item = findItemInHand(player, "timepiece");
+                if (item != null) {
+                    soul.AbilityTwo(player, item);
                 }
 
                 return;
             } else if (soulName.contains("Purple")) {
-                if (drop.getPersistentDataContainer().has(keygen("rifle"))) {
-                    soul.AbilityTwo(player, drop);
+                ItemStack item = findItemInHand(player, "rifle");
+                if (item != null) {
+                    soul.AbilityTwo(player, item);
                 }
                 return;
             }
@@ -312,8 +321,7 @@ public class soulListener extends Util implements Listener {
             if (soul == null) return;
             String soulName = soul.Name_For_Container();
             if (soulName.contains("Yellow")) {
-                ItemStack drop = player.getInventory().getItemInMainHand();
-                if (drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                if (findItemInHand(player, "timepiece") != null) {
                     soul.AbilityOne(player);
                 }
                 return;
@@ -338,7 +346,7 @@ public class soulListener extends Util implements Listener {
 
             String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
             if (soulName != null) {
-                if (soulName.contains("Red") && drop.getPersistentDataContainer().has(keygen("timepiece"))) {
+                if ((soulName.contains("Red") || soulName.contains("Yellow") || soulName.contains("Blue")) && drop.getPersistentDataContainer().has(keygen("timepiece"))) {
                     soul.AbilityTwo(player, drop);
                     event.setCancelled(true);
                     return;
@@ -358,11 +366,94 @@ public class soulListener extends Util implements Listener {
         Player player = event.getPlayer();
         if (!Life_and_Death.is_alive(event.getPlayer())) return;
         Base_Soul soul = getSoul(player);
+
+        applyMovesetAttackPassives(player, event);
+
         if (soul == null) return;
 
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
         if (soulName != null && soulName.contains("Red")) {
             soul.Passive(player, event);
+        }
+    }
+
+    private void applyMovesetPassives(Player player) {
+        String moveset = player.getPersistentDataContainer().get(FreedomKeys.moveset(), PersistentDataType.STRING);
+        if (moveset == null) return;
+
+        String[] elements = moveset.split(",");
+        Set<String> elementSet = new HashSet<>(Arrays.asList(elements));
+
+        // Basic Elements
+        if (elementSet.contains("fire")) player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60, 0));
+        if (elementSet.contains("water")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 60, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 60, 0));
+        }
+        if (elementSet.contains("earth")) player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 0));
+        if (elementSet.contains("air")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 60, 1));
+        }
+        if (elementSet.contains("soul")) player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 60, 1));
+
+        // Combinations
+        if (elementSet.contains("fire") && elementSet.contains("water")) {
+            // Steam: Invisibility + Smoke
+            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0));
+            player.getWorld().spawnParticle(org.bukkit.Particle.SMOKE, player.getLocation(), 5, 0.5, 0.5, 0.5, 0.05);
+        }
+        if (elementSet.contains("fire") && elementSet.contains("earth")) {
+            // Magma: Strength + Fire Resistance
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 60, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60, 1));
+        }
+        if (elementSet.contains("water") && elementSet.contains("earth")) {
+            // Mud: Slow nearby entities
+            for (org.bukkit.entity.Entity e : player.getNearbyEntities(5, 5, 5)) {
+                if (e instanceof org.bukkit.entity.LivingEntity le && le != player) {
+                    le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1));
+                }
+            }
+        }
+        if (elementSet.contains("air") && elementSet.contains("soul")) {
+            // Spirit: Regeneration + Levitation (briefly or slow fall)
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 60, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 60, 0));
+        }
+        if (elementSet.contains("soul") && elementSet.contains("fire")) {
+            // Cursed Fire: Strength II + Speed II
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 60, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1));
+        }
+    }
+
+    private void applyMovesetAttackPassives(Player player, PrePlayerAttackEntityEvent event) {
+        String moveset = player.getPersistentDataContainer().get(FreedomKeys.moveset(), PersistentDataType.STRING);
+        if (moveset == null) return;
+
+        String[] elements = moveset.split(",");
+        Set<String> elementSet = new HashSet<>(Arrays.asList(elements));
+
+        if (elementSet.contains("fire")) {
+            event.getAttacked().setFireTicks(100);
+        }
+        if (elementSet.contains("water")) {
+            if (event.getAttacked() instanceof org.bukkit.entity.LivingEntity le) {
+                le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 0));
+            }
+        }
+        if (elementSet.contains("earth")) {
+            event.getAttacked().setVelocity(event.getAttacked().getVelocity().add(new org.bukkit.util.Vector(0, 0.5, 0)));
+        }
+        if (elementSet.contains("air")) {
+            org.bukkit.util.Vector dir = player.getLocation().getDirection().normalize().multiply(1.5);
+            event.getAttacked().setVelocity(event.getAttacked().getVelocity().add(dir));
+        }
+        if (elementSet.contains("soul")) {
+            if (player.getHealth() < player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue()) {
+                player.setHealth(Math.min(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue(), player.getHealth() + 1));
+            }
         }
     }
 }

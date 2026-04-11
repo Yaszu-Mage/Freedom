@@ -79,7 +79,14 @@ public class Blue extends Util implements Base_Soul, Listener {
                         new Particle.DustOptions(Color.AQUA,1f)
                 );
                 Collection<Player> near = player.getLocation().getNearbyEntitiesByType(Player.class,2);
-                Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING));
+                Player doubleclock;
+                if (player.getPersistentDataContainer().has(keygen("doubleclock"),PersistentDataType.STRING)) {
+                    doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING));
+                } else {
+                    doubleclock = player;
+                }
+
+                if (doubleclock != null) {}
                 near.forEach(iterator -> {
                     if (iterator != player) {
                         if (doubleclock != null) {
@@ -362,17 +369,16 @@ BaseYellow yellow = new BaseYellow();
         if (!player.getPersistentDataContainer().has(FreedomKeys.soulPoint())) return;
         if (player.getPersistentDataContainer().get(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE) >= 5) {
             ItemStack item = player.getInventory().getItemInMainHand();
+            if (!(item.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable)) {
+                item = player.getInventory().getItemInOffHand();
+            }
             if (item.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable damageable) {
                 // damage = 0 is full health, higher = more used
-                Freedom.get_plugin().getLogger().info(String.valueOf(damageable.getDamage()));
-                Freedom.get_plugin().getLogger().info(String.valueOf(damageable.getDamage() - 25));
                 damageable.setDamage(Math.max(0,damageable.getDamage() - 25));
                 item.setItemMeta((ItemMeta) damageable);
                 player.getPersistentDataContainer().set(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE,player.getPersistentDataContainer().get(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE) - 5);
                 player.sendMessage(dess("Healed 25 durability."));
             }
-
-
         }
     }
 }

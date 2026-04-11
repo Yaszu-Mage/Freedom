@@ -9,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -31,7 +32,6 @@ public class black_flash implements Listener {
             int value = random.nextInt(1001);
             if (value == 1) {
                 Bukkit.getPluginManager().getPlugin("Freedom").getLogger().info(attacker.getDisplayName() + " hit a black flash");
-
                 attacker.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#870700:#eb0c00>You hit a black flash!</gradient>"));
                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.7f);
 

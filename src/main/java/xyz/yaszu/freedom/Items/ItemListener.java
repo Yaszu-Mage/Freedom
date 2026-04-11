@@ -20,6 +20,7 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
 import xyz.yaszu.freedom.Items.Parts.Burger;
+import xyz.yaszu.freedom.Items.Parts.SpellFocus;
 import xyz.yaszu.freedom.Items.Relics.Glock;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
@@ -42,11 +43,15 @@ public class ItemListener extends Util implements Listener {
         register(new Burger(),"burger");
         register(new PainScythe(),"painscythe");
         register(new Glock(), "glock");
+        register(new SpellFocus.Orb(), "orb");
+        register(new SpellFocus.Staff(), "staff");
     }
 
     private static void register(BaseItem item, String id) {
         ITEMS.put(id, item);
-        Bukkit.addRecipe(item.recipe());
+        if (item.recipe() != null) {
+            Bukkit.addRecipe(item.recipe());
+        }
     }
 
     @EventHandler
