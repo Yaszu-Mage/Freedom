@@ -1,14 +1,16 @@
 package xyz.yaszu.freedom.Items.Artifacts;
 
 public enum ArtifactTypes {
-    miner,
-    warrior,
     scholar,
-    feather,
-    ocean,
-    fire,
-    night,
-    guardian,
-    athlete,
-    healer
+    gourmet,
+    bastion,
+    ambassador,
+    lumi,
+    wind,
+    spider,
+    slime,
+    hive,
+    tide,
+    fishbowl,
+    chronos
 }

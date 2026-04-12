@@ -75,7 +75,7 @@ public class BaseRed extends Util implements Base_Soul {
                 spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
                 abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
-            double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
         }
 
@@ -127,7 +127,7 @@ public class BaseRed extends Util implements Base_Soul {
             abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             handleFireball(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
         } else {
-            double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
         }
     }

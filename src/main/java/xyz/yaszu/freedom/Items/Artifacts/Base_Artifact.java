@@ -17,44 +17,62 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface Base_Artifact extends Listener, BaseItem {
+public class Base_Artifact extends Util implements Listener, BaseItem {
 
-    Util util = new Util();
+    private final String id;
+    private final Component name;
+    private final Component description;
+    private final Material material;
+    private final int customModelData;
+    private final List<PotionEffect> buffs;
 
-    Component Name();
-    Component Description();
-    List<PotionEffect> getBuffs();
-    String getID();
-    Material getMaterial();
+    public Base_Artifact(String id, Component name, Component description, Material material, int customModelData, List<PotionEffect> buffs) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.material = material;
+        this.customModelData = customModelData;
+        this.buffs = buffs;
+    }
+
+    public Component Name() { return name; }
+    public Component Description() { return description; }
+    public List<PotionEffect> getBuffs() { return buffs; }
+    public String getID() { return id; }
+    public Material getMaterial() { return material; }
+    public int getCustomModelData() { return customModelData; }
 
     @Override
-    default ItemStack item() {
+    public ItemStack item() {
         ItemStack item = ItemStack.of(getMaterial());
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING, getID());
-            meta.getPersistentDataContainer().set(util.keygen(getID()), PersistentDataType.BOOLEAN, true);
+            meta.getPersistentDataContainer().set(keygen(getID()), PersistentDataType.BOOLEAN, true);
             meta.displayName(Name());
             List<Component> lore = new ArrayList<>();
             lore.add(Description());
-            lore.add(util.dess("<gray>Sleep with this in your inventory to get a buff!</gray>"));
+            lore.add(dess("<gray>Sleep with this in your inventory to get a buff!</gray>"));
             meta.lore(lore);
+            if (getCustomModelData() != 0) {
+                meta.setCustomModelData(getCustomModelData());
+            }
             item.setItemMeta(meta);
         }
         return item;
     }
 
     @Override
-    default void effect(Player player, PlayerInteractEvent event, ItemStack item) {
+    public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
         // Artifacts have passive effects when sleeping, no active effect
     }
 
     @Override
-    default Recipe recipe() {
+    public Recipe recipe() {
         return null;
     }
 
-    default boolean hasArtifact(Player player) {
+    public boolean hasArtifact(Player player) {
         for (ItemStack item : player.getInventory().getContents()) {
             if (item == null || !item.hasItemMeta()) continue;
             String id = item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING);

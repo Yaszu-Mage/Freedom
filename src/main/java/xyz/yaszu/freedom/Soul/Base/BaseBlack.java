@@ -263,7 +263,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
         } else {
             // no no ability
             if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
-                double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+                double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
                 player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
             }
         }

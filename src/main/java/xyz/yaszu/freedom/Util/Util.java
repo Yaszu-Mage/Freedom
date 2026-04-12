@@ -177,7 +177,7 @@ public class Util {
         Base_Soul soul = getSoul(player);
         player.setScoreboard(score);
         if (soul == null) return;
-        double seconds = (double) (soul.AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+        double seconds = (double) (soul.effective_cooldown(soul.AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
         if (soul.can_ability(soul.AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             objective.getScore("XAbility1").customName(
                     dess("   <shadow:#000000FF><b><aqua>Ability 1</aqua>: ").append(
@@ -194,7 +194,7 @@ public class Util {
 
         objective.getScore("XAbility1").numberFormat(NumberFormat.blank());
         objective.getScore("XAbility2").numberFormat(NumberFormat.blank());
-        double twoseconds = (double) (soul.AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+        double twoseconds = (double) (soul.effective_cooldown(soul.AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
         if (soul.can_ability(soul.AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
             objective.getScore("XAbility2").customName(
                     dess("   <shadow:#000000FF><b><aqua>Ability 2</aqua>: ").append(

@@ -122,7 +122,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             }
 
         } else {
-            double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING,1,-1);
             player.sendActionBar(dess("<Red>Cooldown!</Red> Please wait " + Math.round(seconds) + " seconds!"));
         }
@@ -165,7 +165,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             // no no ability
             Freedom.get_plugin().getLogger().info("Ability Two - Orange");
             if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
-                double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+                double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
                 player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
             } else {
 

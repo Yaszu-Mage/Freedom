@@ -44,12 +44,22 @@ public interface Base_Soul {
     public long AbilityOne_Cooldown();
     //Active Passive - A passive that requires a condition to activate
     public void ActivePassive(Player player);
+    default long effective_cooldown(long base_cooldown, java.util.UUID playerUUID) {
+        org.bukkit.entity.Player player = org.bukkit.Bukkit.getPlayer(playerUUID);
+        if (player != null) {
+            String activeData = player.getPersistentDataContainer().get(xyz.yaszu.freedom.Util.FreedomKeys.activeArtifact(), org.bukkit.persistence.PersistentDataType.STRING);
+            if (activeData != null && java.util.Arrays.asList(activeData.split(",")).contains("chronos")) {
+                return (long) (base_cooldown * 0.7);
+            }
+        }
+        return base_cooldown;
+    }
 
-    default boolean can_ability(long cooldown, HashMap<UUID, Long> cooldown_list, UUID player) {
+    default boolean can_ability(long cooldown, java.util.HashMap<java.util.UUID, Long> cooldown_list, java.util.UUID player) {
         if (cooldown_list.get(player) == null) {
             return true;
         } else {
-            if (cooldown_list.get(player) + cooldown > System.currentTimeMillis()) {
+            if (cooldown_list.get(player) + effective_cooldown(cooldown,player) > System.currentTimeMillis()) {
                 return false;
             }
         }

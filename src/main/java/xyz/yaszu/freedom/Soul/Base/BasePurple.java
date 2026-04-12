@@ -101,7 +101,7 @@ public class BasePurple extends Util implements Base_Soul {
         abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     } else {
             player.sendActionBar(dess("You can't use this ability yet"));
-            double seconds = (double) (AbilityOne_Cooldown() - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
         }
     }
@@ -141,7 +141,7 @@ public class BasePurple extends Util implements Base_Soul {
         handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
         abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
-            double seconds = (double) (AbilityTwo_Cooldown() - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
         }
 }
