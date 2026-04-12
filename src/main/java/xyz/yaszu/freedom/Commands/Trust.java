@@ -28,12 +28,14 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.yaszu.freedom.Commands.Arguments.ArtifactArguments;
 import xyz.yaszu.freedom.Commands.Arguments.BookArguments;
 import xyz.yaszu.freedom.Commands.Arguments.ItemArguments;
 import xyz.yaszu.freedom.Commands.Arguments.SoulArguments;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Information.BaseEnumBook;
 import xyz.yaszu.freedom.Information.Information_Handler;
+import xyz.yaszu.freedom.Items.Artifacts.ArtifactTypes;
 import xyz.yaszu.freedom.Items.BaseEnumItem;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
@@ -121,6 +123,28 @@ public class Trust {
         })))).build();
     }
 
+    public static LiteralCommandNode<CommandSourceStack> artifactArgument() {
+        return Commands.literal("artifact").then(Commands.argument("flavor", new ArtifactArguments()).then(Commands.argument("target", ArgumentTypes.player()).then(Commands.argument("amount", IntegerArgumentType.integer(0, 64)).executes(ctx -> {
+
+            if (ctx.getSource().getSender() instanceof Player sender) {
+                final ArtifactTypes artifactType = ctx.getArgument("flavor", ArtifactTypes.class);
+                if (sender.isOp()) {
+                    final int rsolve = ctx.getArgument("amount", int.class);
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                    if (target == null) target = sender;
+
+                    ItemStack realitem = ItemListener.ITEMS.get(artifactType.toString()).item();
+                    realitem.setAmount(rsolve);
+                    target.give(realitem);
+                }
+
+            }
+
+            return Command.SINGLE_SUCCESS;
+        })))).build();
+    }
+
     public static LiteralCommandNode<CommandSourceStack> processChunksArgument() {
         return Commands.literal("processchunks")
                 .then(Commands.argument("radius", IntegerArgumentType.integer(0, 10))
@@ -153,6 +177,7 @@ public class Trust {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("bestow");
         root.then(normalItemArgument());
         root.then(bookItemArgument());
+        root.then(artifactArgument());
         return root.build();
     }
 

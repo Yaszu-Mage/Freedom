@@ -39,6 +39,7 @@ import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.GUI.SettingsGui.SettingsMenu;
 import xyz.yaszu.freedom.GUI.SettingsGui.TrustMenu;
 import xyz.yaszu.freedom.Information.Information_Handler;
+import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
@@ -160,6 +161,9 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.GUI.SettingsGui.TrustMemberMenu(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.SitManager(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
+        ArtifactManager artifactManager = new ArtifactManager();
+        Bukkit.getPluginManager().registerEvents(artifactManager, this);
+        artifactManager.startTask();
         xyz.yaszu.freedom.Subsystems.ProvinceManager.loadProvinces();
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands

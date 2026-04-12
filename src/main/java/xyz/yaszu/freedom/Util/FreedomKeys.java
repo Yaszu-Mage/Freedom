@@ -50,6 +50,10 @@ public class FreedomKeys {
         return key("province_explosions");
     }
 
+    public static NamespacedKey activeArtifact() {
+        return key("active_artifact");
+    }
+
     public static NamespacedKey key(String key) {
         return new NamespacedKey(Freedom.get_plugin(),key);
     }

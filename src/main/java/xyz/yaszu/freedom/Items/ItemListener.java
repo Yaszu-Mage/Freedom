@@ -17,6 +17,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
+import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
 import xyz.yaszu.freedom.Items.Parts.Burger;
@@ -45,6 +47,11 @@ public class ItemListener extends Util implements Listener {
         register(new Glock(), "glock");
         register(new SpellFocus.Orb(), "orb");
         register(new SpellFocus.Staff(), "staff");
+
+        ArtifactManager.registerArtifacts();
+        for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
+            register(artifact, artifact.getID());
+        }
     }
 
     private static void register(BaseItem item, String id) {

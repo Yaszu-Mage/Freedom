@@ -38,7 +38,8 @@ public class PainScythe extends Util implements BaseItem, Listener {
         meta.setItemModel(NamespacedKey.minecraft("jx1dx1"));
         meta.displayName(Util.dess("<shadow:#000000FF><b><red>Pain Scythe</red>"));
         meta.setUnbreakable(true);
-        meta.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(keygen("PainScythe"), 1.6, AttributeModifier.Operation.ADD_NUMBER));
+        meta.addAttributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(keygen("PainScythe"),-1.25,AttributeModifier.Operation.ADD_NUMBER));
+        meta.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(keygen("PainScythe"), 16, AttributeModifier.Operation.ADD_NUMBER));
         itemStack.setItemMeta(meta);
         return itemStack;
     }
@@ -118,7 +119,12 @@ public class PainScythe extends Util implements BaseItem, Listener {
         Player player = event.getPlayer();
         if (player.getInventory().getItemInMainHand().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING) == null) return;
         if (player.getInventory().getItemInMainHand().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING) == "painscythe") {
-            player.setHealth(player.getHealth() - 1);
+            try {
+                player.setHealth(player.getHealth() - 1);
+            } catch (Exception ignored) {
+
+            }
+
             ItemStack stack = player.getInventory().getItemInMainHand();
             ItemMeta meta = stack.getItemMeta();
             Integer pain = meta.getPersistentDataContainer().get(painKey, PersistentDataType.INTEGER) + 1;

@@ -9,5 +9,15 @@ public enum BaseEnumItem {
     spellfocus,
     burger,
     rifle,
-    timepiece
+    timepiece,
+    miner,
+    warrior,
+    scholar,
+    feather,
+    ocean,
+    fire,
+    night,
+    guardian,
+    athlete,
+    healer
 }
