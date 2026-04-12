@@ -36,6 +36,8 @@ import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
+import xyz.yaszu.freedom.GUI.SettingsGui.SettingsMenu;
+import xyz.yaszu.freedom.GUI.SettingsGui.TrustMenu;
 import xyz.yaszu.freedom.Information.Information_Handler;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
@@ -153,6 +155,12 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new PainScythe(), this);
         Bukkit.getPluginManager().registerEvents(new Information_Handler(), this);
         Bukkit.getPluginManager().registerEvents(new ChunkLootManager(), this);
+        Bukkit.getPluginManager().registerEvents(new SettingsMenu(), this);
+        Bukkit.getPluginManager().registerEvents(new TrustMenu(), this);
+        Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.GUI.SettingsGui.TrustMemberMenu(), this);
+        Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.SitManager(), this);
+        Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
+        xyz.yaszu.freedom.Subsystems.ProvinceManager.loadProvinces();
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
@@ -174,6 +182,9 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.soulArgument());
             commands.registrar().register(Trust.customItemArgument());
             commands.registrar().register(Trust.processChunksArgument());
+            commands.registrar().register(Trust.interruptRitualArgument());
+            commands.registrar().register(xyz.yaszu.freedom.Subsystems.SitManager.sitCommand());
+            commands.registrar().register(SettingsMenu.settingsCommand());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
@@ -193,6 +204,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     }
     @Override
     public void onDisable() {
+        xyz.yaszu.freedom.Subsystems.ProvinceManager.saveProvinces();
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
     }

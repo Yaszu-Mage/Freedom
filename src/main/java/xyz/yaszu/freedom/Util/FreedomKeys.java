@@ -34,6 +34,22 @@ public class FreedomKeys {
         return key("moveset");
     }
 
+    public static NamespacedKey provinceBlockBreak() {
+        return key("province_block_break");
+    }
+
+    public static NamespacedKey provinceBlockPlace() {
+        return key("province_block_place");
+    }
+
+    public static NamespacedKey provinceFireSpread() {
+        return key("province_fire_spread");
+    }
+
+    public static NamespacedKey provinceExplosions() {
+        return key("province_explosions");
+    }
+
     public static NamespacedKey key(String key) {
         return new NamespacedKey(Freedom.get_plugin(),key);
     }

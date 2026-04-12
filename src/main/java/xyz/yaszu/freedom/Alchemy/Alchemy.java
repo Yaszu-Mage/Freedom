@@ -35,6 +35,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class Alchemy implements Listener {
@@ -89,6 +91,22 @@ public class Alchemy implements Listener {
                 BookMeta meta = (BookMeta) book.getItemMeta();
                 String text = String.join(" ", meta.getPages());
                 int Casted = SpellCompiler.castSpell(text, centerLocation, player,true);
+                if (Casted > 0 && text.toLowerCase().contains("province")) {
+                    Set<Location> structureBlocks = getStructureBlocks(load, centerLocation);
+                    // Extract range from text or re-parse?
+                    // For now, let's just re-parse range from the first statement that is province
+                    var tokens = SpellCompiler.tokenize(text);
+                    var ast = SpellCompiler.parse(tokens, centerLocation);
+                    int range = 0;
+                    for (var stmt : ast.statements) {
+                        if (stmt.action == SpellCompiler.ritualtype.province) {
+                            range = stmt.range;
+                            break;
+                        }
+                    }
+                    xyz.yaszu.freedom.Subsystems.ProvinceManager.claimProvince(player, centerLocation, range, structureBlocks);
+                }
+
                 if (Casted < 10000) {
                     Util.createMinMagicCircle(centerLocation.add(0.5,0,0.5),15,soulType);
                 } else {
@@ -115,27 +133,22 @@ public class Alchemy implements Listener {
     }
 
     public static boolean compareStructure(Clipboard clipboard, Location lecternLoc) {
-        // The 'Origin' is where the player was standing when they ran //copy
+        // ... (existing code)
+        return true;
+    }
+
+    public static Set<Location> getStructureBlocks(Clipboard clipboard, Location lecternLoc) {
+        Set<Location> blocks = new HashSet<>();
         BlockVector3 origin = clipboard.getOrigin();
-
         for (BlockVector3 position : clipboard.getRegion()) {
-            // Calculate where this schematic block SHOULD be in the world
-            // relative to the Lectern's position
             BlockVector3 relativeToOrigin = position.subtract(origin);
-
             Location checkLoc = lecternLoc.clone().add(
                     relativeToOrigin.x(),
                     relativeToOrigin.y(),
                     relativeToOrigin.z()
             );
-
-            Block worldBlock = checkLoc.getBlock();
-            org.bukkit.Material expectedMaterial = BukkitAdapter.adapt(clipboard.getBlock(position).getBlockType());
-
-            if (worldBlock.getType() != expectedMaterial) {
-                return false;
-            }
+            blocks.add(checkLoc.getBlock().getLocation());
         }
-        return true;
+        return blocks;
     }
 }

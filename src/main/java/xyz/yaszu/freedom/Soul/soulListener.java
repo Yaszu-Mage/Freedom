@@ -377,82 +377,171 @@ public class soulListener extends Util implements Listener {
         }
     }
 
-    private void applyMovesetPassives(Player player) {
-        String moveset = player.getPersistentDataContainer().get(FreedomKeys.moveset(), PersistentDataType.STRING);
-        if (moveset == null) return;
+    private static class MovesetData {
+        Set<String> elements = new HashSet<>();
+        int amp = 0;
+        int range = 0;
+    }
 
-        String[] elements = moveset.split(",");
-        Set<String> elementSet = new HashSet<>(Arrays.asList(elements));
+    private MovesetData parseMoveset(Player player) {
+        String moveset = player.getPersistentDataContainer().get(FreedomKeys.moveset(), PersistentDataType.STRING);
+        if (moveset == null) return null;
+
+        MovesetData data = new MovesetData();
+        if (!moveset.contains(";")) {
+            // Old format
+            data.elements.addAll(Arrays.asList(moveset.split(",")));
+            return data;
+        }
+
+        String[] parts = moveset.split(";");
+        for (String part : parts) {
+            String[] kv = part.split(":");
+            if (kv.length != 2) continue;
+            try {
+                switch (kv[0]) {
+                    case "elements" -> data.elements.addAll(Arrays.asList(kv[1].split(",")));
+                    case "amp" -> data.amp = Integer.parseInt(kv[1]);
+                    case "range" -> data.range = Integer.parseInt(kv[1]);
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+        return data;
+    }
+
+    private void applyMovesetPassives(Player player) {
+        MovesetData data = parseMoveset(player);
+        if (data == null) return;
+
+        Set<String> elementSet = data.elements;
+        int amp = data.amp;
+        int range = data.range;
 
         // Basic Elements
-        if (elementSet.contains("fire")) player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60, 0));
+        if (elementSet.contains("fire")) player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60, amp));
         if (elementSet.contains("water")) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 60, 0));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 60, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 60, amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 60, amp));
         }
-        if (elementSet.contains("earth")) player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 0));
+        if (elementSet.contains("earth")) player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, amp));
         if (elementSet.contains("air")) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 60, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1 + amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 60, 1 + amp));
         }
-        if (elementSet.contains("soul")) player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 60, 1));
+        if (elementSet.contains("soul")) player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 60, 1 + amp));
+        if (elementSet.contains("poison")) player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 60, amp));
+        if (elementSet.contains("wither")) player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 60, 1 + amp));
 
         // Combinations
         if (elementSet.contains("fire") && elementSet.contains("water")) {
             // Steam: Invisibility + Smoke
             player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0));
-            player.getWorld().spawnParticle(org.bukkit.Particle.SMOKE, player.getLocation(), 5, 0.5, 0.5, 0.5, 0.05);
+            player.getWorld().spawnParticle(org.bukkit.Particle.SMOKE, player.getLocation(), 5 + range, 0.5, 0.5, 0.5, 0.05);
         }
         if (elementSet.contains("fire") && elementSet.contains("earth")) {
             // Magma: Strength + Fire Resistance
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 60, 0));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 60, amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60, 1 + amp));
         }
         if (elementSet.contains("water") && elementSet.contains("earth")) {
             // Mud: Slow nearby entities
-            for (org.bukkit.entity.Entity e : player.getNearbyEntities(5, 5, 5)) {
+            for (org.bukkit.entity.Entity e : player.getNearbyEntities(5 + range, 5 + range, 5 + range)) {
                 if (e instanceof org.bukkit.entity.LivingEntity le && le != player) {
-                    le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1));
+                    le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1 + amp));
                 }
             }
         }
         if (elementSet.contains("air") && elementSet.contains("soul")) {
             // Spirit: Regeneration + Levitation (briefly or slow fall)
-            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 60, 0));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 60, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 60, amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 60, amp));
         }
         if (elementSet.contains("soul") && elementSet.contains("fire")) {
             // Cursed Fire: Strength II + Speed II
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 60, 1));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 60, 1 + amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1 + amp));
+        }
+        if (elementSet.contains("fire") && elementSet.contains("air")) {
+            // Lightning: Speed II + Haste
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1 + amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 60, amp));
+        }
+        if (elementSet.contains("water") && elementSet.contains("air")) {
+            // Ice: Resistance + Night Vision
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0));
+        }
+        if (elementSet.contains("earth") && elementSet.contains("soul")) {
+            // Golem: Resistance II + Slowness (heavy but strong)
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 1 + amp));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 0));
+        }
+        if (elementSet.contains("poison") && elementSet.contains("water")) {
+            // Acid: Wither nearby
+            for (org.bukkit.entity.Entity e : player.getNearbyEntities(5 + range, 5 + range, 5 + range)) {
+                if (e instanceof org.bukkit.entity.LivingEntity le && le != player) {
+                    le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, amp));
+                }
+            }
+        }
+        if (elementSet.contains("wither") && elementSet.contains("air")) {
+            // Void: Levitation nearby
+            for (org.bukkit.entity.Entity e : player.getNearbyEntities(5 + range, 5 + range, 5 + range)) {
+                if (e instanceof org.bukkit.entity.LivingEntity le && le != player) {
+                    le.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 60, amp));
+                }
+            }
         }
     }
 
     private void applyMovesetAttackPassives(Player player, PrePlayerAttackEntityEvent event) {
-        String moveset = player.getPersistentDataContainer().get(FreedomKeys.moveset(), PersistentDataType.STRING);
-        if (moveset == null) return;
+        MovesetData data = parseMoveset(player);
+        if (data == null) return;
 
-        String[] elements = moveset.split(",");
-        Set<String> elementSet = new HashSet<>(Arrays.asList(elements));
+        Set<String> elementSet = data.elements;
+        int amp = data.amp;
 
         if (elementSet.contains("fire")) {
-            event.getAttacked().setFireTicks(100);
+            event.getAttacked().setFireTicks(100 + (amp * 20));
         }
         if (elementSet.contains("water")) {
             if (event.getAttacked() instanceof org.bukkit.entity.LivingEntity le) {
-                le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 0));
+                le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40 + (amp * 20), amp));
             }
         }
         if (elementSet.contains("earth")) {
-            event.getAttacked().setVelocity(event.getAttacked().getVelocity().add(new org.bukkit.util.Vector(0, 0.5, 0)));
+            event.getAttacked().setVelocity(event.getAttacked().getVelocity().add(new org.bukkit.util.Vector(0, 0.5 + (amp * 0.2), 0)));
         }
         if (elementSet.contains("air")) {
-            org.bukkit.util.Vector dir = player.getLocation().getDirection().normalize().multiply(1.5);
+            org.bukkit.util.Vector dir = player.getLocation().getDirection().normalize().multiply(1.5 + (amp * 0.5));
             event.getAttacked().setVelocity(event.getAttacked().getVelocity().add(dir));
         }
         if (elementSet.contains("soul")) {
             if (player.getHealth() < player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue()) {
-                player.setHealth(Math.min(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue(), player.getHealth() + 1));
+                player.setHealth(Math.min(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue(), player.getHealth() + 1 + amp));
+            }
+        }
+        if (elementSet.contains("poison")) {
+            if (event.getAttacked() instanceof org.bukkit.entity.LivingEntity le) {
+                le.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100 + (amp * 20), amp));
+            }
+        }
+        if (elementSet.contains("wither")) {
+            if (event.getAttacked() instanceof org.bukkit.entity.LivingEntity le) {
+                le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100 + (amp * 20), amp));
+            }
+        }
+        if (elementSet.contains("fire") && elementSet.contains("air")) {
+            // Lightning: Strike lightning on attack (purely visual?) or extra damage
+            event.getAttacked().getWorld().strikeLightningEffect(event.getAttacked().getLocation());
+            if (event.getAttacked() instanceof org.bukkit.entity.LivingEntity le) {
+                le.damage(2.0 + (amp * 1.0));
+            }
+        }
+        if (elementSet.contains("water") && elementSet.contains("air")) {
+            // Ice: High slowness
+            if (event.getAttacked() instanceof org.bukkit.entity.LivingEntity le) {
+                le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60 + (amp * 20), 2 + amp));
             }
         }
     }

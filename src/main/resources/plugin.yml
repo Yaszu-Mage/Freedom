@@ -36,4 +36,10 @@ commands:
     description: "Bestow"
   processchunks:
     description: "Process Chunk"
+  settings:
+    description: "Settings"
+  interruptritual:
+    description: "Interruption"
+  sit:
+    description: "Sit"
 softdepend: [ "SkinsRestorer" ]

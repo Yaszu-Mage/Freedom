@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
+import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
@@ -187,24 +188,18 @@ public class Green extends Util implements Base_Soul {
             @Override
             public void run() {
                 player.getLocation().getNearbyEntitiesByType(Player.class, 10).forEach(iterator -> {
-                        String trusted;
-                        if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
-
-                            trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
-                            if (trusted.contains(player.getName()) && iterator.getLocation().distanceSquared(player.getLocation()) <= 10) {
-                                iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 2));
-                                iterator.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, iterator.getLocation(),8);
-                                if (!player.hasPotionEffect(PotionEffectType.SLOWNESS)) {
-                                    player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, 0));
-                                } else {
-                                    int amplifier = player.getPotionEffect(PotionEffectType.SLOWNESS).getAmplifier();
-                                    player.removePotionEffect(PotionEffectType.SLOWNESS);
-                                    player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, amplifier + 1));
-                                }
-
+                        if ((TrustManager.isTrustedBy(iterator, player) || TrustManager.isTrustedByName(iterator, player.getName())) && iterator.getLocation().distanceSquared(player.getLocation()) <= 100) {
+                            iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 2));
+                            iterator.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, iterator.getLocation(),8);
+                            if (!player.hasPotionEffect(PotionEffectType.SLOWNESS)) {
+                                player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, 0));
+                            } else {
+                                int amplifier = player.getPotionEffect(PotionEffectType.SLOWNESS).getAmplifier();
+                                player.removePotionEffect(PotionEffectType.SLOWNESS);
+                                player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, amplifier + 1));
                             }
-                        }
 
+                        }
                 });
                 tick++;
                 if (tick == 2) {
@@ -234,14 +229,9 @@ public class Green extends Util implements Base_Soul {
                 World world = player.getWorld();
               for (Player iterator : world.getPlayers()) {
                   if (iterator != player) {
-                      String trusted;
-                      if (iterator.getPersistentDataContainer().has(keygen("trustedby"), PersistentDataType.STRING)) {
-                          trusted = iterator.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
-                          if (trusted.contains(player.getName()) && iterator.getLocation().distanceSquared(player.getLocation()) <= 100) {
-                              iterator.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
-                          }
+                      if ((TrustManager.isTrustedBy(iterator, player) || TrustManager.isTrustedByName(iterator, player.getName())) && iterator.getLocation().distanceSquared(player.getLocation()) <= 100) {
+                          iterator.addPotionEffect(PotionEffectType.REGENERATION.createEffect(80, 0));
                       }
-
                   }
               }
             }

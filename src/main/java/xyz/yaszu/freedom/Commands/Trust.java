@@ -38,6 +38,7 @@ import xyz.yaszu.freedom.Items.BaseEnumItem;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.ChunkLootManager;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
@@ -299,7 +300,10 @@ public class Trust {
         return Commands.literal("comoraction").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
-                        if (player.getPersistentDataContainer().get(keygen("ComorAction"),PersistentDataType.BOOLEAN)) {
+                        Boolean current = player.getPersistentDataContainer().get(keygen("ComorAction"), PersistentDataType.BOOLEAN);
+                        boolean actionsOnly = current != null && current;
+
+                        if (actionsOnly) {
                             player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, false);
                             player.sendRichMessage("You have selected to use Commands Instead of Actions");
                         } else {
@@ -329,29 +333,18 @@ public class Trust {
         return Commands.literal("trust")
                 .then(Commands.argument("target", ArgumentTypes.player())
                         .executes(ctx -> {
+                            final Player sender = (Player) ctx.getSource().getSender();
                             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
                             final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                            final Player sender = (Player) ctx.getSource().getSender();
-                            if (target.getPersistentDataContainer().has(keygen("trustedby"))) {
-                                String trustedby = target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING);
-                                if (!trustedby.contains(sender.getName())) {
-                                    trustedby = trustedby + sender.getName();
-                                    ctx.getSource().getSender().sendRichMessage("You have trusted <target>.",
-                                            Placeholder.component("target", target.name())
-                                    );
-                                } else {
-                                    trustedby = trustedby.replace(sender.getName(), "");
-                                    ctx.getSource().getSender().sendRichMessage("You have untrusted <target>.",
-                                            Placeholder.component("target", target.name())
-                                    );
-                                }
 
-                                target.getPersistentDataContainer().set(keygen("trustedby"), PersistentDataType.STRING, trustedby);
-                                Freedom.get_plugin().getLogger().info(trustedby);
+                            if (TrustManager.isTrustedBy(target, sender)) {
+                                TrustManager.removeTrust(target, sender);
+                                sender.sendRichMessage("You have untrusted <target>.",
+                                        Placeholder.component("target", target.name())
+                                );
                             } else {
-                                Freedom.get_plugin().getLogger().info(sender.getName());
-                                target.getPersistentDataContainer().set(keygen("trustedby"), PersistentDataType.STRING, sender.getName());
-                                ctx.getSource().getSender().sendRichMessage("You have trusted <target>.",
+                                TrustManager.addTrust(target, sender);
+                                sender.sendRichMessage("You have trusted <target>.",
                                         Placeholder.component("target", target.name())
                                 );
                             }
@@ -397,6 +390,17 @@ public class Trust {
                             Life_and_Death.revive_player(target,sender.getLocation());
                             return Command.SINGLE_SUCCESS;
                         }))
+                .build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> interruptRitualArgument() {
+        return Commands.literal("interruptritual")
+                .executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        xyz.yaszu.freedom.Subsystems.ProvinceManager.interruptRitual(player);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
                 .build();
     }
 

@@ -18,6 +18,7 @@ import org.bukkit.*;
 import org.bukkit.block.Lectern;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -37,6 +38,12 @@ import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 public class Util {
     public static SkinsRestorer skinsRestorerAPI;
 
+    public static ItemStack emptyItem(ItemStack item) {
+        ItemMeta workingMeta = item.getItemMeta();
+        workingMeta.displayName(dess("\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33"));
+        item.setItemMeta(workingMeta);
+        return item;
+    }
     public static NamespacedKey keygen(String key) {
         return FreedomKeys.key(key);
     }
@@ -344,6 +351,70 @@ public class Util {
                     drawCircle(center, 1, center.getWorld(), 30, Particle.DUST);
                     tick = tick + tickRate;
                     if (tick >= 1000) {
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(Freedom.get_plugin(), 5, 10);
+        }
+
+    }
+
+
+    public static void createMinMagicCircle(Location center, int tickRate, SoulTypes soulType,int time) {
+        Color color = Color.PURPLE;
+        switch (soulType) {
+            case Green, BaseGreen -> color = Color.GREEN;
+            case Red, BaseRed -> color = Color.RED;
+            case Cafe, BaseCafe -> color = Color.YELLOW;
+            case Orange, BaseOrange -> color = Color.ORANGE;
+            case BaseMocha, Mocha -> color = Color.BLUE;
+            case Black, BaseBlack -> color = Color.BLACK;
+        }
+        Color finalColor = color;
+        if (center.clone().add(0, 0, 0).getBlock().getType() == Material.LECTERN) {
+            Freedom.get_plugin().getLogger().info("LECTURN");
+            new BukkitRunnable() {
+                int tick = 1;
+
+                @Override
+                public void run() {
+                    multisquare(center, tick, 4, Particle.DUST, 90, new Particle.DustOptions(finalColor.setBlue(0), 2f));
+                    multisquare(center, tick, 10, Particle.DUST, 30, new Particle.DustOptions(finalColor, 2f));
+                    if (tick % 3 == 0 || tick % 8 == 0) {
+                        // multiple of 10
+                        randompointoncircle(center, 30, 1, Particle.DUST);
+                    }
+                    drawCircle(center, 1, center.getWorld(), 30, Particle.DUST);
+                    tick = tick + tickRate;
+
+                    if (center.clone().add(0, 0, 0).getBlock().getType() != Material.LECTERN) {
+                        this.cancel();
+                    }
+                    if (center.clone().add(0, 0, 0).getBlock().getType() == Material.LECTERN) {
+                        Lectern lectern = (Lectern) center.clone().add(0, 0, 0).getBlock().getState();
+                        if (lectern.getInventory().getItem(0) == null && tick > 4) {
+                            this.cancel();
+                        }
+
+                    }
+
+                }
+            }.runTaskTimer(Freedom.get_plugin(), 5, 10);
+        } else {
+            new BukkitRunnable() {
+                int tick = 1;
+
+                @Override
+                public void run() {
+                    multisquare(center, tick, 4, Particle.DUST, 90, new Particle.DustOptions(finalColor.setBlue(0), 2f));
+                    multisquare(center, tick, 10, Particle.DUST, 30, new Particle.DustOptions(finalColor, 2f));
+                    if (tick % 3 == 0 || tick % 8 == 0) {
+                        // multiple of 10
+                        randompointoncircle(center, 30, 1, Particle.DUST);
+                    }
+                    drawCircle(center, 1, center.getWorld(), 30, Particle.DUST);
+                    tick = tick + tickRate;
+                    if (tick >= time) {
                         this.cancel();
                     }
                 }

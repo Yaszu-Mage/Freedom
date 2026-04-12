@@ -2,6 +2,7 @@ package xyz.yaszu.freedom.Subsystems;
 
 import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
@@ -24,7 +25,16 @@ public class ChunkLootManager implements Listener {
         if (!event.isNewChunk()) return;
         int chance = random.nextInt(0, 100);
         boolean chance_bool = chance > 95;
-        if (chance_bool) {
+        if (chance_bool && !(
+                event.getChunk().contains(Biome.OCEAN)) ||
+                event.getChunk().contains(Biome.COLD_OCEAN) ||
+                event.getChunk().contains(Biome.DEEP_OCEAN) ||
+                event.getChunk().contains(Biome.DEEP_COLD_OCEAN) ||
+                event.getChunk().contains(Biome.DEEP_FROZEN_OCEAN) ||
+                event.getChunk().contains(Biome.FROZEN_OCEAN) ||
+                event.getChunk().contains(Biome.DEEP_LUKEWARM_OCEAN)||
+                event.getChunk().contains(Biome.LUKEWARM_OCEAN
+                )){
             // Ensure we have items to add
             if (Information_Handler.ITEMS.isEmpty()) return;
 

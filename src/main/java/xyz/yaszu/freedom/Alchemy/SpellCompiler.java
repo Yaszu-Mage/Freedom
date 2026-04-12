@@ -18,7 +18,7 @@ public class SpellCompiler extends Util {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
         rain, sun, thundering, day, night, shock, delay, goon, sixtyseven,nothing,
-        fire,water,earth,air,soul,blast,moveset,up,down,look
+        fire,water,earth,air,soul,blast,moveset,province,up,down,look
     }
 
 
@@ -26,7 +26,7 @@ public class SpellCompiler extends Util {
     public enum ritualtype {
         destruction(750), teleport(50), area(40), effect(25),
         rain(45), sun(45), thundering(45), day(30), night(30),
-        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500),moveset(250);
+        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500),moveset(250),province(1000);
 
         private final int baseCost;
         ritualtype(int baseCost) { this.baseCost = baseCost; }
@@ -167,9 +167,14 @@ public class SpellCompiler extends Util {
                             .map(Enum::name)
                             .sorted()
                             .toList();
-                    String movesetId = String.join(",", elementNames);
+                    String elements = String.join(",", elementNames);
+                    String movesetId = "elements:" + elements + ";amp:" + stmt.amplification + ";range:" + stmt.range;
                     caster.getPersistentDataContainer().set(xyz.yaszu.freedom.Util.FreedomKeys.moveset(), org.bukkit.persistence.PersistentDataType.STRING, movesetId);
                     caster.sendMessage("§aYour moveset has been set to: " + movesetId);
+                }
+                case province -> {
+
+                    // Logic handled in Alchemy.java or after execution
                 }
             }
         }
@@ -296,7 +301,7 @@ public class SpellCompiler extends Util {
 
     static boolean isAction(ritualkeywords key) {
         return switch (key) {
-            case teleport, destruction, area, effect, thundering, rain, sun, day, night, shock,goon,sixtyseven,nothing,blast,moveset-> true;
+            case teleport, destruction, area, effect, thundering, rain, sun, day, night, shock,goon,sixtyseven,nothing,blast,moveset,province-> true;
             default -> false;
         };
     }
