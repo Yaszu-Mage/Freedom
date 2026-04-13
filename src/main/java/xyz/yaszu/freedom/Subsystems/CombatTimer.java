@@ -58,6 +58,7 @@ public class CombatTimer extends Util implements Listener {
 
 
     public void combatcheck(Player player) {
+        if (xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(player)) return;
         if (!player.getPersistentDataContainer().has(keygen("combattimer"))) {
             player.getPersistentDataContainer().set(keygen("combattimer"), PersistentDataType.BOOLEAN,true);
             combatTimer.put(player.getUniqueId(),System.currentTimeMillis());

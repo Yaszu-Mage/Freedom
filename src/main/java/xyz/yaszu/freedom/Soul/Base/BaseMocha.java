@@ -131,7 +131,6 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
     public Component AbilityTwoDescription() {
         return dess("Slows time for all but the one you are bonded with");
     }
-    public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
 

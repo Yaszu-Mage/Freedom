@@ -43,7 +43,9 @@ public class Rifle implements BaseItem {
         } else {
             handleSnipe(player,11).runTaskTimer(Freedom.get_plugin(),0,1);
         }
-        player.setCooldown(item,100);
+        if (!xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(player)) {
+            player.setCooldown(item, 100);
+        }
     }
 
     @Override

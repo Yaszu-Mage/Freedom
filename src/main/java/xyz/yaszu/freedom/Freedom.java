@@ -246,7 +246,14 @@ public final class Freedom extends JavaPlugin implements Listener {
         start_time = System.currentTimeMillis();
         createVoid();
 
-
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    xyz.yaszu.freedom.Soul.soulListener.showSoulPoints(player);
+                }
+            }
+        }.runTaskTimer(this, 0, 20);
     }
 
 

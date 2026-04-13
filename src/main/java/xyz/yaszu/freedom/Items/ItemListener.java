@@ -107,7 +107,7 @@ public class ItemListener extends Util implements Listener {
         if (item != null && item.hasItemMeta()) {
             if (item.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
                 if (event.getPlayer().getInventory().getItemInMainHand().getItemMeta() != null) {
-                    if (!event.getPlayer().hasCooldown(ITEMS.get("rifle").item())) {
+                    if (xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(event.getPlayer()) || !event.getPlayer().hasCooldown(ITEMS.get("rifle").item())) {
                         ITEMS.get("rifle").effect(event.getPlayer(), event, item);
                     }
                 }

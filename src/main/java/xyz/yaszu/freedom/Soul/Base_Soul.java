@@ -56,6 +56,10 @@ public interface Base_Soul {
     }
 
     default boolean can_ability(long cooldown, java.util.HashMap<java.util.UUID, Long> cooldown_list, java.util.UUID player) {
+        org.bukkit.entity.Player p = org.bukkit.Bukkit.getPlayer(player);
+        if (p != null && xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(p)) {
+            return true;
+        }
         if (cooldown_list.get(player) == null) {
             return true;
         } else {

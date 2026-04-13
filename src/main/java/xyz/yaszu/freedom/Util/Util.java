@@ -180,6 +180,12 @@ public class Util {
         Base_Soul soul = getSoul(player);
         player.setScoreboard(score);
         if (soul == null) return;
+        if (!abilityOneCooldowns.containsKey(player.getUniqueId())) {
+            abilityOneCooldowns.put(player.getUniqueId(), 0L);
+        }
+        if (!abilityTwoCooldowns.containsKey(player.getUniqueId())) {
+            abilityTwoCooldowns.put(player.getUniqueId(), 0L);
+        }
         double seconds = (double) (soul.effective_cooldown(soul.AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
         if (soul.can_ability(soul.AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             objective.getScore("XAbility1").customName(
