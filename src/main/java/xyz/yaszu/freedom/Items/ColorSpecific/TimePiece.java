@@ -8,6 +8,7 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.SmithingTransformRecipe;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Red;
 import xyz.yaszu.freedom.Util.FreedomKeys;
@@ -37,5 +38,10 @@ public class TimePiece implements BaseItem {
         RecipeChoice addition = new RecipeChoice.MaterialChoice(Material.GUNPOWDER);
         ItemStack result = item();
         return new SmithingTransformRecipe(FreedomKeys.key("timepiece"), result, template, base, addition);
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.COLOR_SPECIFIC;
     }
 }

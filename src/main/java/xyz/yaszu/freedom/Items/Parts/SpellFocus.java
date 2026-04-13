@@ -15,6 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Alchemy.SpellCompiler;
 import xyz.yaszu.freedom.GUI.BaseItems;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -56,6 +57,11 @@ public class SpellFocus implements Listener {
             recipe.setIngredient('E', Material.ENDER_PEARL);
             return recipe;
         }
+
+        @Override
+        public CustomItemType getType() {
+            return CustomItemType.PART;
+        }
     }
 
     public static class Staff extends Util implements BaseItem {
@@ -89,6 +95,11 @@ public class SpellFocus implements Listener {
             recipe.setIngredient('B', Material.BLAZE_ROD);
             recipe.setIngredient('D', Material.DIAMOND);
             return recipe;
+        }
+
+        @Override
+        public CustomItemType getType() {
+            return CustomItemType.PART;
         }
     }
 
@@ -124,6 +135,11 @@ public class SpellFocus implements Listener {
             recipe.setIngredient('D', Material.DIAMOND);
             recipe.setIngredient('O', Material.OBSIDIAN);
             return recipe;
+        }
+
+        @Override
+        public CustomItemType getType() {
+            return CustomItemType.PART;
         }
     }
 

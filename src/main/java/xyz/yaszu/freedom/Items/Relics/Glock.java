@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -49,5 +50,10 @@ public class Glock extends Util implements BaseItem {
         RecipeChoice addition = new RecipeChoice.MaterialChoice(Material.IRON_INGOT);
         SmithingTransformRecipe recipe = new SmithingTransformRecipe(keygen("glock"),item(),template,base,addition);
         return recipe;
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.RELIC;
     }
 }

@@ -23,6 +23,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -55,6 +56,11 @@ public class PainScythe extends Util implements BaseItem, Listener {
         RecipeChoice base = new RecipeChoice.MaterialChoice(Material.NETHERITE_SWORD);
         RecipeChoice addition = new RecipeChoice.MaterialChoice(Material.ENCHANTED_GOLDEN_APPLE);
         return new SmithingTransformRecipe(painKey,item(),template,base,addition);
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.RELIC;
     }
 
     @EventHandler

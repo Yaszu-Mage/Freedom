@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Purple;
 import xyz.yaszu.freedom.Util.FreedomKeys;
@@ -52,6 +53,11 @@ public class Rifle implements BaseItem {
         RecipeChoice addition = new RecipeChoice.MaterialChoice(Material.GUNPOWDER);
         ItemStack result = item();
         return new SmithingTransformRecipe(FreedomKeys.key("rifle"), result, template, base, addition);
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.COLOR_SPECIFIC;
     }
 
     public BukkitRunnable handleSnipe(Player player,int damage) {

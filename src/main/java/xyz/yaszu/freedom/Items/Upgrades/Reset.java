@@ -9,6 +9,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.Ultra.Red;
 import xyz.yaszu.freedom.Util.FreedomKeys;
@@ -46,5 +47,10 @@ public class Reset implements BaseItem {
         ItemStack result = item();
 
         return new SmithingTransformRecipe(FreedomKeys.key("reset"), result, template, base, addition);
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.UPGRADE;
     }
 }

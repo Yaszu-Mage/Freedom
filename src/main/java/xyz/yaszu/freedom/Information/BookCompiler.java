@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BookMeta;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -36,6 +37,11 @@ public class BookCompiler extends Util {
                     @Override
                     public ItemStack information() {
                         return createRecipeBook(finalRecipe);
+                    }
+
+                    @Override
+                    public CustomItemType getType() {
+                        return CustomItemType.BOOK;
                     }
                 });
             }

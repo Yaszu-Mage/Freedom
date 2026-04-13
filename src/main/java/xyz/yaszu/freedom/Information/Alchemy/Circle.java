@@ -6,6 +6,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import xyz.yaszu.freedom.Information.BaseInformation;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.Util;
 
 public class Circle extends Util implements BaseInformation {
@@ -32,5 +33,10 @@ public class Circle extends Util implements BaseInformation {
         );
         book.setItemMeta(meta);
         return book;
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.BOOK;
     }
 }

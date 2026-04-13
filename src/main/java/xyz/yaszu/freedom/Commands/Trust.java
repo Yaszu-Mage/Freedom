@@ -32,15 +32,13 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-import xyz.yaszu.freedom.Commands.Arguments.ArtifactArguments;
-import xyz.yaszu.freedom.Commands.Arguments.BookArguments;
-import xyz.yaszu.freedom.Commands.Arguments.ItemArguments;
+import xyz.yaszu.freedom.Commands.Arguments.CustomItemArgument;
 import xyz.yaszu.freedom.Commands.Arguments.SoulArguments;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Information.BaseEnumBook;
+import xyz.yaszu.freedom.Information.BaseInformation;
 import xyz.yaszu.freedom.Information.Information_Handler;
-import xyz.yaszu.freedom.Items.Artifacts.ArtifactTypes;
-import xyz.yaszu.freedom.Items.BaseEnumItem;
+import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.SoulTypes;
@@ -86,76 +84,6 @@ public class Trust {
 
     }
 
-    public static LiteralCommandNode<CommandSourceStack> normalItemArgument() {
-        return Commands.literal("item").then(Commands.argument("flavor", new ItemArguments()).then(Commands.argument("target", ArgumentTypes.player()).then(Commands.argument("amount", IntegerArgumentType.integer(0,64)).executes(ctx -> {
-
-            if (ctx.getSource().getSender() instanceof Player sender) {
-                final BaseEnumItem soultype = ctx.getArgument("flavor", BaseEnumItem.class);
-                if (sender.isOp()) {
-                    final int rsolve = ctx.getArgument("amount", int.class);
-                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
-                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                    if (target == null) target = sender;
-                    Freedom.get_plugin().getLogger().info(soultype.name());
-                    Freedom.get_plugin().getLogger().info(target.getName());
-                    Freedom.get_plugin().getLogger().info(ItemListener.ITEMS.toString());
-                    ItemStack realitem = ItemListener.ITEMS.get(soultype.toString()).item();
-                    realitem.setAmount(rsolve);
-                    target.give(realitem);
-                }
-
-            }
-
-            return Command.SINGLE_SUCCESS;
-        })))).build();
-    }
-
-    public static LiteralCommandNode<CommandSourceStack> bookItemArgument() {
-        return Commands.literal("book").then(Commands.argument("flavor", new BookArguments()).then(Commands.argument("target", ArgumentTypes.player()).then(Commands.argument("amount", IntegerArgumentType.integer(0,64)).executes(ctx -> {
-
-            if (ctx.getSource().getSender() instanceof Player sender) {
-                final BaseEnumBook soultype = ctx.getArgument("flavor", BaseEnumBook.class);
-                if (sender.isOp()) {
-                    final int rsolve = ctx.getArgument("amount", int.class);
-                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
-                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                    if (target == null) target = sender;
-                    Freedom.get_plugin().getLogger().info(soultype.name());
-                    Freedom.get_plugin().getLogger().info(target.getName());
-                    Freedom.get_plugin().getLogger().info(ItemListener.ITEMS.toString());
-                    ItemStack realitem = Information_Handler.ITEMS.get(soultype.toString()).information();
-                    realitem.setAmount(rsolve);
-                    target.give(realitem);
-                }
-
-            }
-
-            return Command.SINGLE_SUCCESS;
-        })))).build();
-    }
-
-    public static LiteralCommandNode<CommandSourceStack> artifactArgument() {
-        return Commands.literal("artifact").then(Commands.argument("flavor", new ArtifactArguments()).then(Commands.argument("target", ArgumentTypes.player()).then(Commands.argument("amount", IntegerArgumentType.integer(0, 64)).executes(ctx -> {
-
-            if (ctx.getSource().getSender() instanceof Player sender) {
-                final ArtifactTypes artifactType = ctx.getArgument("flavor", ArtifactTypes.class);
-                if (sender.isOp()) {
-                    final int rsolve = ctx.getArgument("amount", int.class);
-                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
-                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                    if (target == null) target = sender;
-
-                    ItemStack realitem = ItemListener.ITEMS.get(artifactType.toString()).item();
-                    realitem.setAmount(rsolve);
-                    target.give(realitem);
-                }
-
-            }
-
-            return Command.SINGLE_SUCCESS;
-        })))).build();
-    }
-
     public static LiteralCommandNode<CommandSourceStack> processChunksArgument() {
         return Commands.literal("processchunks")
                 .then(Commands.argument("radius", IntegerArgumentType.integer(0, 10))
@@ -186,9 +114,52 @@ public class Trust {
 
     public static LiteralCommandNode<CommandSourceStack> customItemArgument() {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("bestow");
-        root.then(normalItemArgument());
-        root.then(bookItemArgument());
-        root.then(artifactArgument());
+        for (CustomItemType type : CustomItemType.values()) {
+            root.then(Commands.literal(type.name().toLowerCase())
+                    .then(Commands.argument("item", new CustomItemArgument(type))
+                            .then(Commands.argument("target", ArgumentTypes.player())
+                                    .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64))
+                                            .executes(ctx -> {
+                                                if (ctx.getSource().getSender() instanceof Player sender && sender.isOp()) {
+                                                    String itemId = ctx.getArgument("item", String.class);
+                                                    PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                                                    int amount = ctx.getArgument("amount", Integer.class);
+
+                                                    ItemStack stack;
+                                                    if (type == CustomItemType.BOOK) {
+                                                        stack = Information_Handler.ITEMS.get(itemId).information();
+                                                    } else {
+                                                        stack = ItemListener.ITEMS.get(itemId).item();
+                                                    }
+                                                    stack.setAmount(amount);
+                                                    target.getInventory().addItem(stack);
+                                                    sender.sendRichMessage("<green>Bestowed " + amount + "x " + itemId + " upon " + target.getName() + ".</green>");
+                                                }
+                                                return Command.SINGLE_SUCCESS;
+                                            })
+                                    )
+                                    .executes(ctx -> {
+                                        if (ctx.getSource().getSender() instanceof Player sender && sender.isOp()) {
+                                            String itemId = ctx.getArgument("item", String.class);
+                                            PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                            Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+
+                                            ItemStack stack;
+                                            if (type == CustomItemType.BOOK) {
+                                                stack = Information_Handler.ITEMS.get(itemId).information();
+                                            } else {
+                                                stack = ItemListener.ITEMS.get(itemId).item();
+                                            }
+                                            target.getInventory().addItem(stack);
+                                            sender.sendRichMessage("<green>Bestowed " + itemId + " upon " + target.getName() + ".</green>");
+                                        }
+                                        return Command.SINGLE_SUCCESS;
+                                    })
+                            )
+                    )
+            );
+        }
         return root.build();
     }
 

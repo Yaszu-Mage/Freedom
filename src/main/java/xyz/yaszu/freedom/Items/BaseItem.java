@@ -10,4 +10,5 @@ public interface BaseItem {
     public ItemStack item();
     public void effect(Player player, PlayerInteractEvent event,ItemStack item);
     public Recipe recipe();
+    public CustomItemType getType();
 }

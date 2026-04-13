@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -71,6 +72,11 @@ public class Base_Artifact extends Util implements Listener, BaseItem {
     @Override
     public Recipe recipe() {
         return null;
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.ARTIFACT;
     }
 
     public boolean hasArtifact(Player player) {

@@ -12,6 +12,7 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
@@ -59,5 +60,10 @@ public class Revival implements BaseItem {
         rec.setIngredient('T', Material.TOTEM_OF_UNDYING);
         rec.setIngredient('S', Material.NETHER_STAR);
         return rec;
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.UPGRADE;
     }
 }

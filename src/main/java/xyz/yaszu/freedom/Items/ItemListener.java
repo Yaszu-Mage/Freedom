@@ -9,10 +9,12 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -85,6 +87,22 @@ public class ItemListener extends Util implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+        // Cancel book opening if a spell focus is being used in either hand
+        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            ItemStack item = event.getItem();
+            if (item != null && (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.WRITABLE_BOOK)) {
+                ItemStack otherHand = event.getHand() == EquipmentSlot.HAND ?
+                        event.getPlayer().getInventory().getItemInOffHand() :
+                        event.getPlayer().getInventory().getItemInMainHand();
+
+                if (otherHand != null && otherHand.hasItemMeta() &&
+                        otherHand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.spellFocus(), PersistentDataType.BYTE)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+
         ItemStack item = event.getItem();
         if (item != null && item.hasItemMeta()) {
             if (item.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {

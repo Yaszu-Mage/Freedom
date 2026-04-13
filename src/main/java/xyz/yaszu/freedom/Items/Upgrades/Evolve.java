@@ -9,6 +9,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.*;
@@ -62,5 +63,10 @@ public class Evolve implements BaseItem {
         ItemStack result = item();
 
         return new SmithingTransformRecipe(FreedomKeys.key("evolve"), result, template, base, addition);
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.UPGRADE;
     }
 }

@@ -17,6 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -56,5 +57,10 @@ public class Burger extends Util implements BaseItem {
         recipe.addIngredient(ItemStack.of(Material.CLOCK));
 
         return recipe;
+    }
+
+    @Override
+    public CustomItemType getType() {
+        return CustomItemType.PART;
     }
 }
