@@ -42,4 +42,14 @@ commands:
     description: "Interruption"
   sit:
     description: "Sit"
-softdepend: [ "SkinsRestorer" ]
+  spawnstructure:
+    description: "Spawn Structure"
+  undo:
+    description: "Undo structure"
+  hat:
+    description: "Hat"
+  sudo:
+    description: "Sudo"
+  sky:
+    description: "Change sky color"
+softdepend: [ "SkinsRestorer", "packetevents" ]

@@ -54,6 +54,22 @@ public class FreedomKeys {
         return key("active_artifact");
     }
 
+    public static NamespacedKey isSudo() {
+        return key("is_sudo");
+    }
+
+    public static NamespacedKey originalState() {
+        return key("original_state");
+    }
+
+    public static NamespacedKey sudoState() {
+        return key("sudo_state");
+    }
+
+    public static NamespacedKey spellFocus() {
+        return key("spell_focus");
+    }
+
     public static NamespacedKey key(String key) {
         return new NamespacedKey(Freedom.get_plugin(),key);
     }

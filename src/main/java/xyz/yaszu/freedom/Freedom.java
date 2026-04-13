@@ -11,7 +11,12 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
+import com.github.retrooper.packetevents.event.PacketListener;
+import com.github.retrooper.packetevents.PacketEvents;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -20,6 +25,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -47,28 +54,36 @@ import xyz.yaszu.freedom.Soul.Base.BaseOrange;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.Ultra.Mocha;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
-import xyz.yaszu.freedom.Subsystems.CombatTimer;
-import xyz.yaszu.freedom.Subsystems.CurseManager;
-import xyz.yaszu.freedom.Subsystems.TabDistance;
-import xyz.yaszu.freedom.Subsystems.black_flash;
+import xyz.yaszu.freedom.Subsystems.*;
 import xyz.yaszu.freedom.Soul.soulListener;
-import xyz.yaszu.freedom.Subsystems.ChunkLootManager;
-import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
+import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import static xyz.yaszu.freedom.Alchemy.Alchemy.loadSchematic;
 import static xyz.yaszu.freedom.Soul.Ultra.Green.removeOldFollowers;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
 public final class Freedom extends JavaPlugin implements Listener {
 
     public static int version = 6942067;
+    public record StructureInfo(float weight, List<String> worlds) {}
+
+    public static final Map<String, StructureInfo> STRUCTURES = Map.of(
+            "ritual.schem", new StructureInfo(5.0f, List.of("world")),
+            "voidisland.schem", new StructureInfo(10.0f, List.of("void")),
+            "voidisland2.schem", new StructureInfo(10.0f, List.of("void")),
+            "voidisland3.schem", new StructureInfo(10.0f, List.of("void")),
+            "voidisland4.schem", new StructureInfo(10.0f, List.of("void")),
+            "kfc.schem", new StructureInfo(0.01f, List.of("world"))
+    );
 
     public void reapplyCurseWeakness(Player player) {
         if (player == null || !player.isOnline()) return;
@@ -107,18 +122,42 @@ public final class Freedom extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        if (event.getPlayer().getName().equals("TheMoonLady")) {
+        if (AdminManager.isSudo(event.getPlayer())) {
+            AdminManager.AdminProfile profile = AdminManager.getProfile(event.getPlayer().getUniqueId());
+            if (profile != null) {
+                event.quitMessage(Component.text(profile.sudoName() + " has left", NamedTextColor.YELLOW));
+            }
             event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
         }
+        AdminManager.handleQuit(event.getPlayer());
     }
 
     @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event){
+        AdminManager.handleJoin(event.getPlayer());
+        if (AdminManager.isSudo(event.getPlayer())) {
+            AdminManager.AdminProfile profile = AdminManager.getProfile(event.getPlayer().getUniqueId());
+            if (profile != null) {
+                event.joinMessage(Component.text(profile.sudoName() + " has joined", NamedTextColor.YELLOW));
+            }
+            event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+        }
         removeOldFollowers();
         event.getPlayer().performCommand("rules");
         event.getPlayer().getPersistentDataContainer().set(FreedomKeys.spriteActive(),PersistentDataType.BOOLEAN,false);
-        if (event.getPlayer().getName().equals("TheMoonLady")) {
-            event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+    }
+
+    @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        if (AdminManager.isSudo(event.getPlayer())) {
+            event.getTo().getWorld().strikeLightningEffect(event.getTo());
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        if (AdminManager.isSudo(event.getPlayer())) {
+            event.getRespawnLocation().getWorld().strikeLightningEffect(event.getRespawnLocation());
         }
     }
 
@@ -127,6 +166,14 @@ public final class Freedom extends JavaPlugin implements Listener {
     public long start_time = 0;
     @Override
     public void onEnable() {
+        PacketEvents.getAPI().init();
+        PacketEvents.getAPI().getEventManager().registerListener(packetManager);
+
+        // Handle online players on startup (for reloads)
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            AdminManager.handleJoin(player);
+        }
+
         // Plugin startup logic
         this.saveDefaultConfig();
         ItemListener.registerItems();
@@ -187,6 +234,11 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.customItemArgument());
             commands.registrar().register(Trust.processChunksArgument());
             commands.registrar().register(Trust.interruptRitualArgument());
+            commands.registrar().register(Trust.spawnStructureArgument());
+            commands.registrar().register(Trust.undoArgument());
+            commands.registrar().register(Trust.hatArgument());
+            commands.registrar().register(Trust.sudoArgument());
+            commands.registrar().register(Trust.skyArgument());
             commands.registrar().register(xyz.yaszu.freedom.Subsystems.SitManager.sitCommand());
             commands.registrar().register(SettingsMenu.settingsCommand());
         });
@@ -199,6 +251,13 @@ public final class Freedom extends JavaPlugin implements Listener {
 
 
     public static Util util = new Util();
+    public static PacketManager packetManager = new PacketManager();
+
+    @Override
+    public void onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().load();
+    }
 
     public static void clearPlayerPersistentData(Player player) {
         PersistentDataContainer container = player.getPersistentDataContainer();
@@ -208,6 +267,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     }
     @Override
     public void onDisable() {
+        PacketEvents.getAPI().terminate();
         xyz.yaszu.freedom.Subsystems.ProvinceManager.saveProvinces();
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
@@ -219,29 +279,29 @@ public final class Freedom extends JavaPlugin implements Listener {
             event.getChunk().getPersistentDataContainer().set(FreedomKeys.key("void"),PersistentDataType.BOOLEAN,true);
             int currentrand = random.nextInt(1000);
             if (currentrand <= 50) {
-                File ritualschem;
-                int rand = random.nextInt(0,4);
+                String resourceName;
+                int rand = random.nextInt(0, 4);
                 switch (rand) {
-                    case 1 -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland2.schem").toFile();
-                    case 2 -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland3.schem").toFile();
-                    case 3 -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland4.schem").toFile();
-                    default -> ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("voidisland.schem").toFile();
+                    case 1 -> resourceName = "voidisland2.schem";
+                    case 2 -> resourceName = "voidisland3.schem";
+                    case 3 -> resourceName = "voidisland4.schem";
+                    default -> resourceName = "voidisland.schem";
                 }
-                Freedom.get_plugin().getLogger().info(String.valueOf(Freedom.get_plugin().getDataFolder().toPath()));
-                int x = (event.getChunk().getX() + random.nextInt(0,16)) * 16;
-                int z = (event.getChunk().getZ() + random.nextInt(0,16)) * 16;
-                int y = random.nextInt(0,128) * 16;
-                Clipboard load = loadSchematic(ritualschem);
-                World adapter = BukkitAdapter.adapt(Bukkit.getWorld("void"));
-                try (EditSession editSession = WorldEdit.getInstance().newEditSession(adapter)) {
-                    Operation operation = new ClipboardHolder(load)
-                            .createPaste(editSession)
-                            .to(BlockVector3.at(x, y, z))
-                            // configure here
-                            .build();
-                    Operations.complete(operation);
+                Freedom.get_plugin().getLogger().info("Loading structure: " + resourceName);
+                int x = (event.getChunk().getX() + random.nextInt(0, 16)) * 16;
+                int z = (event.getChunk().getZ() + random.nextInt(0, 16)) * 16;
+                int y = random.nextInt(0, 128) * 16;
+                Clipboard load = StructureUtil.loadSchematicFromResource(resourceName);
+                if (load != null) {
+                    World adapter = BukkitAdapter.adapt(Bukkit.getWorld("void"));
+                    try (EditSession editSession = WorldEdit.getInstance().newEditSession(adapter)) {
+                        Operation operation = new ClipboardHolder(load)
+                                .createPaste(editSession)
+                                .to(BlockVector3.at(x, y, z))
+                                .build();
+                        Operations.complete(operation);
+                    }
                 }
-
             }
         }
     }

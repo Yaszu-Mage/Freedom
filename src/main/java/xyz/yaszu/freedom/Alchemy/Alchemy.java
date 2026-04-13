@@ -27,12 +27,12 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -83,8 +83,7 @@ public class Alchemy implements Listener {
     }
 
     public void ritual(Location centerLocation, SoulTypes soulType,ItemStack book,Player player) throws IOException, WorldEditException {
-        File ritualschem = Freedom.get_plugin().getDataFolder().toPath().resolve("ritual.schem").toFile();
-        Clipboard load = loadSchematic(ritualschem);
+        Clipboard load = StructureUtil.loadSchematicFromResource("ritual.schem");
         if (load != null) {
 
             if (compareStructure(load, centerLocation)) {
@@ -119,17 +118,6 @@ public class Alchemy implements Listener {
         } else {
         }
 
-    }
-
-    public static Clipboard loadSchematic(File file) throws IOException {
-
-        ClipboardFormat format = ClipboardFormats.findByFile(file);
-        if (format == null) {
-            return null; // Unsupported format
-        }
-        try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {
-            return reader.read();
-        }
     }
 
     public static boolean compareStructure(Clipboard clipboard, Location lecternLoc) {

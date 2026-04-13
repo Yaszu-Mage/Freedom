@@ -2,8 +2,12 @@ package xyz.yaszu.freedom.Commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -40,19 +44,26 @@ import xyz.yaszu.freedom.Items.BaseEnumItem;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Subsystems.PacketManager;
 import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.ChunkLootManager;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Subsystems.AdminManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
+import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static xyz.yaszu.freedom.Util.Util.*;
 
 public class Trust {
     public static Util util = new Util();
+    private static final Map<UUID, EditSession> lastEditSessions = new HashMap<>();
 
     public static LiteralCommandNode<CommandSourceStack> soulArgument() {
         return Commands.literal("setsoul")
@@ -191,17 +202,6 @@ public class Trust {
                             return Command.SINGLE_SUCCESS;
                         };
                         Location loc = target.getLocation();
-                        new BukkitRunnable() {
-                            int tick = 0;
-                            @Override
-                            public void run() {
-
-                                tick = tick - 12;
-                                if (tick <= -1200) {
-                                    this.cancel();
-                                }
-                            }
-                        }.runTaskTimer(Freedom.get_plugin(), 0, 10);
 
 
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
@@ -427,6 +427,125 @@ public class Trust {
                     return Command.SINGLE_SUCCESS;
                 })
                 .build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> spawnStructureArgument() {
+        return Commands.literal("spawnstructure")
+                .then(Commands.argument("name", StringArgumentType.string())
+                        .executes(ctx -> {
+                            if (ctx.getSource().getSender() instanceof Player player) {
+                                if (player.isOp()) {
+                                    String name = ctx.getArgument("name", String.class);
+                                    EditSession session = null;
+                                    if (name.endsWith(".schem") || name.endsWith(".schematic")) {
+                                        Clipboard clipboard = StructureUtil.loadSchematicFromResource(name);
+                                        if (clipboard != null) {
+                                            session = StructureUtil.spawnSchematic(clipboard, player.getLocation());
+                                            player.sendRichMessage("<green>Spawned schematic: " + name + "</green>");
+                                        } else {
+                                            player.sendRichMessage("<red>Failed to load schematic: " + name + "</red>");
+                                        }
+                                    } else if (name.endsWith(".nbt")) {
+                                        StructureUtil.spawnVanillaStructureFromResource(name, player.getLocation());
+                                        player.sendRichMessage("<green>Spawned vanilla structure: " + name + "</green>");
+                                        lastEditSessions.remove(player.getUniqueId());
+                                        // Vanilla undo not yet supported
+                                    } else {
+                                        // Try both with .schem by default
+                                        Clipboard clipboard = StructureUtil.loadSchematicFromResource(name + ".schem");
+                                        if (clipboard != null) {
+                                            session = StructureUtil.spawnSchematic(clipboard, player.getLocation());
+                                            player.sendRichMessage("<green>Spawned schematic: " + name + ".schem</green>");
+                                        } else {
+                                            player.sendRichMessage("<red>Unknown structure format or file not found: " + name + "</red>");
+                                        }
+                                    }
+
+                                    if (session != null) {
+                                        lastEditSessions.put(player.getUniqueId(), session);
+                                    }
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> undoArgument() {
+        return Commands.literal("undo")
+                .executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        if (player.isOp()) {
+                            EditSession session = lastEditSessions.remove(player.getUniqueId());
+                            if (session != null) {
+                                try (EditSession undoSession = WorldEdit.getInstance().newEditSession(session.getWorld())) {
+                                    session.undo(undoSession);
+                                }
+                                session.close();
+                                player.sendRichMessage("<green>Undid last structure spawn.</green>");
+                            } else {
+                                player.sendRichMessage("<red>Nothing to undo!</red>");
+                            }
+                        }
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+                .build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> sudoArgument() {
+        return Commands.literal("sudo")
+                .executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        AdminManager.toggleSudo(player);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+                .build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> hatArgument() {
+        return Commands.literal("hat")
+                .executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        ItemStack itemInHand = player.getInventory().getItemInMainHand();
+                        if (itemInHand.getType().isAir()) {
+                            player.sendRichMessage("<red>You are not holding anything!</red>");
+                            return Command.SINGLE_SUCCESS;
+                        }
+
+                        ItemStack helmet = player.getInventory().getHelmet();
+                        if (helmet != null && !helmet.getType().isAir()) {
+                            player.sendRichMessage("<red>You already have a helmet on!</red>");
+                            return Command.SINGLE_SUCCESS;
+                        }
+
+                        player.getInventory().setHelmet(itemInHand);
+                        player.getInventory().setItemInMainHand(null);
+                        player.sendRichMessage("<green>Enjoy your new hat!</green>");
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+                .build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> skyArgument() {
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("sky");
+        for (PacketManager.SkyType type : PacketManager.SkyType.values()) {
+            root.then(Commands.literal(type.name().toLowerCase())
+                    .executes(ctx -> {
+                        if (ctx.getSource().getSender() instanceof Player player) {
+                            if (player.isOp()) {
+                                PacketManager.setSky(player, type);
+                                player.sendRichMessage("<green>Sky set to " + type.name().toLowerCase() + ".</green>");
+                            }
+                        }
+                        return Command.SINGLE_SUCCESS;
+                    })
+            );
+        }
+        return root.build();
     }
 
 

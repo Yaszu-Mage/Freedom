@@ -6,6 +6,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Subsystems.AdminManager;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
@@ -325,7 +327,12 @@ public class SpellCompiler extends Util {
     /**
      * Assigns a power value to every material in Minecraft.
      */
-    private static int getItemValue(Material mat) {
+    public static int getItemValue(Material mat) {
+        return getItemValue(mat, false);
+    }
+
+    public static int getItemValue(Material mat, boolean isMobile) {
+        if (isMobile && mat == Material.REDSTONE) return 100;
         int value = switch (mat) {
             case PLAYER_HEAD -> 15000;
             case DRAGON_EGG -> 10000;
@@ -406,7 +413,7 @@ public class SpellCompiler extends Util {
         for (RitualLayer layer : layers) {
             for (ItemFrame frame : layer.frames) {
                 ItemStack item = frame.getItem();
-                totalProvided += (getItemValue(item.getType()) * item.getAmount());
+                totalProvided += (getItemValue(item.getType(), false) * item.getAmount());
             }
         }
 
@@ -424,7 +431,7 @@ public class SpellCompiler extends Util {
                 ItemStack item = frame.getItem();
                 if (item.getType() == Material.AIR) continue;
 
-                int val = getItemValue(item.getType());
+                int val = getItemValue(item.getType(), false);
                 int amountNeeded = (int) Math.ceil((double) debt / val);
                 int toTake = Math.min(item.getAmount(), amountNeeded);
 
@@ -477,19 +484,92 @@ public class SpellCompiler extends Util {
 
         var layers = scanLayers(center);
         int powerRequired = calculateTotalPowerCost(ast);
+        boolean isSudo = AdminManager.isSudo(caster);
 
-        var costErrors = validateTotalCost(powerRequired, layers);
-        if (!costErrors.isEmpty()) {
-            costErrors.forEach(e -> caster.sendMessage("§c" + e));
+        if (!isSudo) {
+            var costErrors = validateTotalCost(powerRequired, layers);
+            if (!costErrors.isEmpty()) {
+                costErrors.forEach(e -> caster.sendMessage("§c" + e));
+                return 0;
+            }
+            consumePowerResources(powerRequired, layers);
+            execute(ast, caster);
+            caster.sendMessage("§aSpell cast successfully! (" + powerRequired + " material consumed)");
+        } else {
+            execute(ast, caster);
+            caster.sendMessage("§aSpell cast successfully! (Sudo mode: No materials consumed)");
+        }
+
+        return powerRequired > 0 ? powerRequired : 1;
+    }
+
+    public static int castMobileSpell(String text, Player caster) {
+        var tokens = tokenize(text);
+        var ast = parse(tokens, caster.getLocation());
+
+        var errors = validate(ast);
+        if (!errors.isEmpty()) {
+            errors.forEach(e -> caster.sendMessage("§c" + e));
             return 0;
         }
 
-        consumePowerResources(powerRequired, layers);
-        execute(ast, caster);
-        caster.sendMessage("§aSpell cast successfully! (" + powerRequired + " material consumed)");
+        int powerRequired = calculateTotalPowerCost(ast);
+        if (powerRequired > 1000) {
+            caster.sendMessage("§cThis spell is too powerful for a mobile focus! (Limit: 1000, Required: " + powerRequired + ")");
+            return 0;
+        }
 
-        return powerRequired;
+        boolean isSudo = AdminManager.isSudo(caster);
+
+        if (!isSudo) {
+            if (!hasResources(caster, powerRequired)) {
+                caster.sendMessage("§cInsufficient materials in inventory for this mobile spell!");
+                return 0;
+            }
+            consumeFromInventory(caster, powerRequired);
+            execute(ast, caster);
+            caster.sendMessage("§aMobile spell cast successfully! (" + powerRequired + " material consumed from inventory)");
+        } else {
+            execute(ast, caster);
+            caster.sendMessage("§aMobile spell cast successfully! (Sudo mode: No materials consumed)");
+        }
+
+        return powerRequired > 0 ? powerRequired : 1;
     }
+
+    private static boolean hasResources(Player player, int powerRequired) {
+        int totalProvided = 0;
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item != null && item.getType() != Material.AIR) {
+                totalProvided += (getItemValue(item.getType(), true) * item.getAmount());
+            }
+        }
+        return totalProvided >= powerRequired;
+    }
+
+    private static void consumeFromInventory(Player player, int powerRequired) {
+        int debt = powerRequired;
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack item = contents[i];
+            if (item == null || item.getType() == Material.AIR) continue;
+            
+            // Skip the focus item and the spell book
+            if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(FreedomKeys.spellFocus(), org.bukkit.persistence.PersistentDataType.BYTE)) continue;
+            if (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.WRITABLE_BOOK) continue;
+
+            int val = getItemValue(item.getType(), true);
+            int amountNeeded = (int) Math.ceil((double) debt / val);
+            int toTake = Math.min(item.getAmount(), amountNeeded);
+
+            debt -= (toTake * val);
+            item.setAmount(item.getAmount() - toTake);
+            
+            if (debt <= 0) break;
+        }
+        player.getInventory().setContents(contents);
+    }
+
     public static int cost(String text, Player caster) {
         var tokens = tokenize(text);
         var ast = parse(tokens, caster.getLocation());
@@ -501,7 +581,11 @@ public class SpellCompiler extends Util {
         }
         int powerRequired = calculateTotalPowerCost(ast);
 
-        caster.sendActionBar("§aThis spell costs (" + powerRequired + ")!");
+        if (AdminManager.isSudo(caster)) {
+            caster.sendActionBar("§aThis spell is FREE (Sudo mode)!");
+        } else {
+            caster.sendActionBar("§aThis spell costs (" + powerRequired + ")!");
+        }
 
         return powerRequired;
     }

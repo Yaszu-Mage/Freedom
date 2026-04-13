@@ -1,6 +1,7 @@
 package xyz.yaszu.freedom.Subsystems;
 
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
@@ -10,11 +11,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Information.BaseInformation;
 import xyz.yaszu.freedom.Information.Information_Handler;
+import xyz.yaszu.freedom.Util.StructureUtil;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class ChunkLootManager implements Listener {
@@ -23,6 +28,65 @@ public class ChunkLootManager implements Listener {
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
         if (!event.isNewChunk()) return;
+
+        // Chance to spawn a random structure
+        int structureChance = random.nextInt(100);
+        if (structureChance > 98) { // 2% chance for structure
+            String worldName = event.getWorld().getName();
+            Map<String, Freedom.StructureInfo> allStructures = Freedom.STRUCTURES;
+
+            // Filter structures by world and calculate total weight
+            float totalWeight = 0;
+            List<Map.Entry<String, Freedom.StructureInfo>> validStructures = new ArrayList<>();
+            for (Map.Entry<String, Freedom.StructureInfo> entry : allStructures.entrySet()) {
+                if (entry.getValue().worlds().contains(worldName)) {
+                    validStructures.add(entry);
+                    totalWeight += entry.getValue().weight();
+                }
+            }
+
+            if (!validStructures.isEmpty()) {
+                float rand = random.nextFloat() * totalWeight;
+                float currentWeight = 0;
+                String structureName = null;
+                for (Map.Entry<String, Freedom.StructureInfo> entry : validStructures) {
+                    currentWeight += entry.getValue().weight();
+                    if (rand < currentWeight) {
+                        structureName = entry.getKey();
+                        break;
+                    }
+                }
+
+                if (structureName == null) return;
+
+                Chunk chunk = event.getChunk();
+                int rx = random.nextInt(16);
+                int rz = random.nextInt(16);
+                int x = (chunk.getX() << 4) + rx;
+                int z = (chunk.getZ() << 4) + rz;
+                int y = chunk.getWorld().getHighestBlockYAt(x, z);
+                Location loc = new Location(chunk.getWorld(), x, y, z);
+
+                if (structureName.endsWith(".schem") || structureName.endsWith(".schematic")) {
+                    Clipboard clipboard = StructureUtil.loadSchematicFromResource(structureName);
+                    if (clipboard != null) {
+                        StructureUtil.spawnSchematic(clipboard, loc);
+                    }
+                } else if (structureName.endsWith(".nbt")) {
+                    StructureUtil.spawnVanillaStructureFromResource(structureName, loc);
+                } else {
+                    // Try .schem by default
+                    Clipboard clipboard = StructureUtil.loadSchematicFromResource(structureName + ".schem");
+                    if (clipboard != null) {
+                        StructureUtil.spawnSchematic(clipboard, loc);
+                    }
+                }
+                
+                // Fill chests in the chunk after spawning structure
+                processChunk(chunk);
+            }
+        }
+
         int chance = random.nextInt(0, 100);
         boolean chance_bool = chance > 95;
         if (chance_bool && !(

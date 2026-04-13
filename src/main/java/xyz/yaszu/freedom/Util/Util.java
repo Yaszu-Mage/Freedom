@@ -10,8 +10,11 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
+import net.skinsrestorer.api.connections.MineSkinAPI;
+import net.skinsrestorer.api.connections.model.MineSkinResponse;
 import net.skinsrestorer.api.property.InputDataResult;
 import net.skinsrestorer.api.property.SkinProperty;
+import net.skinsrestorer.api.property.SkinVariant;
 import net.skinsrestorer.api.storage.PlayerStorage;
 import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.*;
@@ -1078,6 +1081,21 @@ public class Util {
             // Apply the skin visually
             skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player);
         }
+    }
+
+    public static void setSkinByUrl(Player player, String url) throws MineSkinException, DataRequestException {
+        MineSkinAPI mineSkinAPI = skinsRestorerAPI.getMineSkinAPI();
+        // Generate skin from URL (use CLASSIC as default)
+        MineSkinResponse response = mineSkinAPI.genSkin(url, SkinVariant.CLASSIC);
+        SkinProperty skinProperty = response.getProperty();
+        // Apply directly to player
+        skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player, skinProperty);
+    }
+
+    public static void setSkinByProperties(Player player, String value, String signature) {
+        SkinProperty skinProperty = SkinProperty.of(value, signature);
+        // Apply directly to player
+        skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player, skinProperty);
     }
 
 
