@@ -59,6 +59,7 @@ public class Blue extends Util implements Base_Soul, Listener {
     public void AbilityOne(Player player) {
         if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) return;
         abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+        player.getWorld().playSound(player.getLocation(),"custom.timestop",1.5f,1);
         new BukkitRunnable() {
             int tick = 0;
             HashMap<UUID, Location> locations = new HashMap<>();

@@ -2,6 +2,7 @@ package xyz.yaszu.freedom.Items.Artifacts;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,18 +33,18 @@ public class ArtifactManager extends Util implements Listener {
     public static final Map<String, Base_Artifact> ARTIFACTS = new HashMap<>();
 
     public static void registerArtifacts() {
-        register(new Base_Artifact("scholar", dess("<yellow>Scholar's Scroll</yellow>"), dess("<gray>Grants Luck III.</gray>"), Material.PAPER, 101, List.of(new PotionEffect(PotionEffectType.LUCK, 12000, 2))));
-        register(new Base_Artifact("gourmet", dess("<gold>Gourmet's Delight</gold>"), dess("<gray>Grants Saturation.</gray>"), Material.COOKED_BEEF, 102, List.of(new PotionEffect(PotionEffectType.SATURATION, 12000, 0))));
-        register(new Base_Artifact("bastion", dess("<blue>Bastion's Heart</blue>"), dess("<gray>Grants Absorption II.</gray>"), Material.SHIELD, 103, List.of(new PotionEffect(PotionEffectType.ABSORPTION, 12000, 1))));
-        register(new Base_Artifact("ambassador", dess("<green>Ambassador's Seal</green>"), dess("<gray>Grants Hero of the Village.</gray>"), Material.EMERALD, 104, List.of(new PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, 12000, 0))));
-        register(new Base_Artifact("lumi", dess("<white>Lumi's Essence</white>"), dess("<gray>Grants Glowing.</gray>"), Material.GLOWSTONE_DUST, 105, List.of(new PotionEffect(PotionEffectType.GLOWING, 12000, 0))));
-        register(new Base_Artifact("wind", dess("<aqua>Gusty Feather</aqua>"), dess("<gray>Grants Wind Charged.</gray>"), Material.FEATHER, 106, List.of(new PotionEffect(PotionEffectType.WIND_CHARGED, 12000, 0))));
-        register(new Base_Artifact("spider", dess("<dark_gray>Silk Weaver</dark_gray>"), dess("<gray>Grants Weaving.</gray>"), Material.COBWEB, 107, List.of(new PotionEffect(PotionEffectType.WEAVING, 12000, 0))));
-        register(new Base_Artifact("slime", dess("<green>Sticky Core</green>"), dess("<gray>Grants Oozing.</gray>"), Material.SLIME_BALL, 108, List.of(new PotionEffect(PotionEffectType.OOZING, 12000, 0))));
-        register(new Base_Artifact("hive", dess("<yellow>Prickly Hive</yellow>"), dess("<gray>Grants Infested.</gray>"), Material.BEE_NEST, 109, List.of(new PotionEffect(PotionEffectType.INFESTED, 12000, 0))));
-        register(new Base_Artifact("tide", dess("<blue>Tidal Prism</blue>"), dess("<gray>Grants Conduit Power.</gray>"), Material.PRISMARINE_SHARD, 110, List.of(new PotionEffect(PotionEffectType.CONDUIT_POWER, 12000, 0))));
-        register(new Base_Artifact("fishbowl", dess("<aqua>Small Fish Bowl</aqua>"), dess("<gray>Increases the odds of fishing a rare drop by 30%.</gray>"), Material.FLOWER_POT, 111, List.of()));
-        register(new Base_Artifact("chronos", dess("<light_purple>Chronos' Hourglass</light_purple>"), dess("<gray>Reduces soul ability cooldowns by 30%.</gray>"), Material.CLOCK, 112, List.of()));
+        register(new Base_Artifact("scholar", dess("<yellow>Scholar's Scroll</yellow>"), dess("<gray>Grants Luck III.</gray>"), Material.PAPER, NamespacedKey.minecraft("scholar"), List.of(new PotionEffect(PotionEffectType.LUCK, 12000, 2))));
+        register(new Base_Artifact("gourmet", dess("<gold>Gourmet's Delight</gold>"), dess("<gray>Grants Saturation.</gray>"), Material.COOKED_BEEF, NamespacedKey.minecraft("saturation"), List.of(new PotionEffect(PotionEffectType.SATURATION, 12000, 0))));
+        register(new Base_Artifact("bastion", dess("<blue>Bastion's Heart</blue>"), dess("<gray>Grants Absorption II.</gray>"), Material.SHIELD, NamespacedKey.minecraft("bastionheart"), List.of(new PotionEffect(PotionEffectType.ABSORPTION, 12000, 1))));
+        register(new Base_Artifact("ambassador", dess("<green>Ambassador's Seal</green>"), dess("<gray>Grants Hero of the Village.</gray>"), Material.EMERALD, NamespacedKey.minecraft("ambassadors"), List.of(new PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, 12000, 0))));
+        register(new Base_Artifact("lumi", dess("<white>Lumi's Essence</white>"), dess("<gray>Grants Glowing.</gray>"), Material.GLOWSTONE_DUST, NamespacedKey.minecraft("lumi"), List.of(new PotionEffect(PotionEffectType.GLOWING, 12000, 0))));
+        register(new Base_Artifact("wind", dess("<aqua>Gusty Feather</aqua>"), dess("<gray>Grants Wind Charged.</gray>"), Material.FEATHER, NamespacedKey.minecraft("wind"), List.of(new PotionEffect(PotionEffectType.WIND_CHARGED, 12000, 0))));
+        register(new Base_Artifact("spider", dess("<dark_gray>Silk Weaver</dark_gray>"), dess("<gray>Grants Weaving.</gray>"), Material.COBWEB, NamespacedKey.minecraft("silk"), List.of(new PotionEffect(PotionEffectType.WEAVING, 12000, 0))));
+        register(new Base_Artifact("slime", dess("<green>Sticky Core</green>"), dess("<gray>Grants Oozing.</gray>"), Material.SLIME_BALL, NamespacedKey.minecraft("slime"), List.of(new PotionEffect(PotionEffectType.OOZING, 12000, 0))));
+        register(new Base_Artifact("hive", dess("<yellow>Prickly Hive</yellow>"), dess("<gray>Grants Infested.</gray>"), Material.BEE_NEST, NamespacedKey.minecraft("hive"), List.of(new PotionEffect(PotionEffectType.INFESTED, 12000, 0))));
+        register(new Base_Artifact("tide", dess("<blue>Tidal Prism</blue>"), dess("<gray>Grants Conduit Power.</gray>"), Material.PRISMARINE_SHARD, NamespacedKey.minecraft("tide"), List.of(new PotionEffect(PotionEffectType.CONDUIT_POWER, 12000, 0))));
+        register(new Base_Artifact("fishbowl", dess("<aqua>Small Fish Bowl</aqua>"), dess("<gray>Increases the odds of fishing a rare drop by 30%.</gray>"), Material.FLOWER_POT, NamespacedKey.minecraft("fishbowl"), List.of()));
+        register(new Base_Artifact("chronos", dess("<light_purple>Chronos' Hourglass</light_purple>"), dess("<gray>Reduces soul ability cooldowns by 30%.</gray>"), Material.CLOCK, NamespacedKey.minecraft("chronos"), List.of()));
     }
 
     private static void register(Base_Artifact artifact) {

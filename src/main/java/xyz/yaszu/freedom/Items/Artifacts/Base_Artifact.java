@@ -2,6 +2,7 @@ package xyz.yaszu.freedom.Items.Artifacts;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -23,10 +24,10 @@ public class Base_Artifact extends Util implements Listener, BaseItem {
     private final Component name;
     private final Component description;
     private final Material material;
-    private final int customModelData;
+    private final NamespacedKey customModelData;
     private final List<PotionEffect> buffs;
 
-    public Base_Artifact(String id, Component name, Component description, Material material, int customModelData, List<PotionEffect> buffs) {
+    public Base_Artifact(String id, Component name, Component description, Material material, NamespacedKey customModelData, List<PotionEffect> buffs) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -40,7 +41,7 @@ public class Base_Artifact extends Util implements Listener, BaseItem {
     public List<PotionEffect> getBuffs() { return buffs; }
     public String getID() { return id; }
     public Material getMaterial() { return material; }
-    public int getCustomModelData() { return customModelData; }
+    public NamespacedKey getCustomModelData() { return customModelData; }
 
     @Override
     public ItemStack item() {
@@ -54,8 +55,8 @@ public class Base_Artifact extends Util implements Listener, BaseItem {
             lore.add(Description());
             lore.add(dess("<gray>Sleep with this in your inventory to get a buff!</gray>"));
             meta.lore(lore);
-            if (getCustomModelData() != 0) {
-                meta.setCustomModelData(getCustomModelData());
+            if (getCustomModelData() != null) {
+                meta.setItemModel(customModelData);
             }
             item.setItemMeta(meta);
         }
