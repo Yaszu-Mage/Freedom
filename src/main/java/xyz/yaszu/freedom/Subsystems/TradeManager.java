@@ -17,8 +17,10 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -136,11 +138,24 @@ public class TradeManager extends Util implements Listener {
         Player player = (Player) event.getWhoClicked();
         int slot = event.getRawSlot();
 
+        // Handle collection bug (Double-clicking in your own inventory to grab items from top inventory)
+        if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+            event.setCancelled(true);
+            return;
+        }
+
         // Prevent clicking top inventory empty/divider slots
         if (slot >= 0 && slot < 54) {
             boolean isP1 = player.getUniqueId().equals(session.p1.getUniqueId());
             boolean isP2 = player.getUniqueId().equals(session.p2.getUniqueId());
 
+            // Check if player is one of the traders
+            if (!isP1 && !isP2) {
+                event.setCancelled(true);
+                return;
+            }
+
+            // Ensure player can only interact with their own side
             if (isP1) {
                 if (slot == P1_CONFIRM_SLOT) {
                     event.setCancelled(true);
@@ -151,7 +166,7 @@ public class TradeManager extends Util implements Listener {
                     event.setCancelled(true);
                     return;
                 }
-            } else if (isP2) {
+            } else { // isP2
                 if (slot == P2_CONFIRM_SLOT) {
                     event.setCancelled(true);
                     session.handleConfirmClick(player);
@@ -161,17 +176,61 @@ public class TradeManager extends Util implements Listener {
                     event.setCancelled(true);
                     return;
                 }
-            } else {
-                event.setCancelled(true);
-                return;
             }
 
+            // Block dragging/placing items into other people's slots via certain actions if they slipped through
+            // (The above checks should catch most, but some edge cases might exist with DRAG which isn't handled here)
+            
             // If an item is added/removed, reset ready status and start countdown if needed
-            session.onItemChange();
+            // Use a slight delay to ensure the item is actually in the inventory if it was placed
+            Bukkit.getScheduler().runTask(Freedom.get_plugin(), session::onItemChange);
         } else if (event.isShiftClick()) {
             // Shift clicking from bottom inventory
             event.setCancelled(true); // Simplify for now, Hypixel often prevents shift-click in trade to avoid errors
             player.sendMessage(Component.text("Shift-clicking is disabled in trades.", NamedTextColor.RED));
+        }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getInventory().getHolder() instanceof TradeSession session)) return;
+
+        Player player = (Player) event.getWhoClicked();
+        boolean isP1 = player.getUniqueId().equals(session.p1.getUniqueId());
+        boolean isP2 = player.getUniqueId().equals(session.p2.getUniqueId());
+
+        if (!isP1 && !isP2) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Check each slot the player is dragging over
+        for (int slot : event.getRawSlots()) {
+            if (slot < 54) { // Top inventory
+                if (isP1) {
+                    if (!contains(P1_SLOTS, slot)) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                } else { // isP2
+                    if (!contains(P2_SLOTS, slot)) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // If dragging into their own slots, reset ready status
+        boolean topInventoryTouched = false;
+        for (int slot : event.getRawSlots()) {
+            if (slot < 54) {
+                topInventoryTouched = true;
+                break;
+            }
+        }
+        if (topInventoryTouched) {
+            Bukkit.getScheduler().runTask(Freedom.get_plugin(), session::onItemChange);
         }
     }
 

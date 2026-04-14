@@ -88,6 +88,9 @@ public class Yellow extends Util implements Base_Soul, Listener {
                         if (Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING)) != null) {
                             //apply buffs + draw Line
                             Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
+                            try {
+
+
                             if (doubleclock.getLocation().distanceSquared(player.getLocation()) <= 100) {
                             Color color = Color.YELLOW;
                             int clockcoil = player.getPersistentDataContainer().get(keygen("clockcoil"), PersistentDataType.INTEGER);
@@ -106,7 +109,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
                                 }
                             }
                             drawLine(doubleclock.getLocation().clone().add(0,1,0),player.getLocation().clone().add(0,1,0),player.getWorld(),32,Particle.DUST,new Particle.DustOptions(color,0.5f));
-                        }
+                        }} catch (Exception ignored) {}
                         }
 
                     }
