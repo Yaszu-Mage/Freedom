@@ -33,8 +33,8 @@ public class ChunkLootManager implements Listener {
     public void onChunkLoad(ChunkLoadEvent event) {
         if (!event.isNewChunk()) return;
         // Chance to spawn a random structure
-        int structureChance = random.nextInt(0,100);
-        boolean structureChanceBool = structureChance > 98 && ((!event.getChunk().contains(Biome.OCEAN)) || !event.getChunk().contains(Biome.COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_OCEAN) || !event.getChunk().contains(Biome.DEEP_COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_FROZEN_OCEAN) || !event.getChunk().contains(Biome.FROZEN_OCEAN) || !event.getChunk().contains(Biome.DEEP_LUKEWARM_OCEAN)|| !event.getChunk().contains(Biome.LUKEWARM_OCEAN) || !event.getChunk().contains(Biome.WARM_OCEAN) || !event.getChunk().contains(Biome.RIVER) );
+        int structureChance = random.nextInt(0,1000);
+        boolean structureChanceBool = structureChance > 995 && ((!event.getChunk().contains(Biome.OCEAN)) || !event.getChunk().contains(Biome.COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_OCEAN) || !event.getChunk().contains(Biome.DEEP_COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_FROZEN_OCEAN) || !event.getChunk().contains(Biome.FROZEN_OCEAN) || !event.getChunk().contains(Biome.DEEP_LUKEWARM_OCEAN)|| !event.getChunk().contains(Biome.LUKEWARM_OCEAN) || !event.getChunk().contains(Biome.WARM_OCEAN) || !event.getChunk().contains(Biome.RIVER) );
         if (!structureChanceBool) {
             return;
         } else {

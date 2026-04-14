@@ -151,16 +151,11 @@ public class AdminManager {
     public static void handleJoin(Player player) {
         UUID uuid = player.getUniqueId();
         if (isSudo(player)) {
-            if (sessionSudoPlayers.contains(uuid)) {
-                // Relog in the same session - maintain sudo
-                applySudoIdentity(player, ADMINS.get(uuid));
-                PacketManager.updateSudoStatus(player, true);
-                player.sendRichMessage("<green>Sudo mode maintained.</green>");
-            } else {
-                // Join after server start - revert to normal
-                disableSudo(player, false);
-                player.sendRichMessage("<yellow>Sudo mode reverted due to server restart.</yellow>");
-            }
+            // Restore sudo identity and status
+            applySudoIdentity(player, ADMINS.get(uuid));
+            PacketManager.updateSudoStatus(player, true);
+            sessionSudoPlayers.add(uuid);
+            player.sendRichMessage("<green>Sudo mode restored.</green>");
         } else {
             // Not in sudo mode - ensure deopped
             player.setOp(false);
