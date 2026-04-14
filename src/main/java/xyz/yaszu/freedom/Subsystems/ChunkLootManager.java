@@ -12,6 +12,10 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.math.BlockVector3;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.structure.Structure;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Information.BaseInformation;
 import xyz.yaszu.freedom.Information.Information_Handler;
@@ -30,7 +34,7 @@ public class ChunkLootManager implements Listener {
         if (!event.isNewChunk()) return;
         // Chance to spawn a random structure
         int structureChance = random.nextInt(0,100);
-        boolean structureChanceBool = structureChance > 95 && ((!event.getChunk().contains(Biome.OCEAN)) || !event.getChunk().contains(Biome.COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_OCEAN) || !event.getChunk().contains(Biome.DEEP_COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_FROZEN_OCEAN) || !event.getChunk().contains(Biome.FROZEN_OCEAN) || !event.getChunk().contains(Biome.DEEP_LUKEWARM_OCEAN)|| !event.getChunk().contains(Biome.LUKEWARM_OCEAN) || !event.getChunk().contains(Biome.WARM_OCEAN) || !event.getChunk().contains(Biome.RIVER) );
+        boolean structureChanceBool = structureChance > 98 && ((!event.getChunk().contains(Biome.OCEAN)) || !event.getChunk().contains(Biome.COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_OCEAN) || !event.getChunk().contains(Biome.DEEP_COLD_OCEAN) || !event.getChunk().contains(Biome.DEEP_FROZEN_OCEAN) || !event.getChunk().contains(Biome.FROZEN_OCEAN) || !event.getChunk().contains(Biome.DEEP_LUKEWARM_OCEAN)|| !event.getChunk().contains(Biome.LUKEWARM_OCEAN) || !event.getChunk().contains(Biome.WARM_OCEAN) || !event.getChunk().contains(Biome.RIVER) );
         if (!structureChanceBool) {
             return;
         } else {
@@ -67,25 +71,68 @@ public class ChunkLootManager implements Listener {
                     int rz = random.nextInt(16);
                     int x = (chunk.getX() << 4) + rx;
                     int z = (chunk.getZ() << 4) + rz;
-                    int y = chunk.getWorld().getHighestBlockYAt(x, z);
+                    int y = chunk.getWorld().getHighestBlockYAt(x, z) + 1;
                     Location loc = new Location(chunk.getWorld(), x, y, z);
                     if (loc.getBlock().getType() == Material.WATER && loc.getBlock().getType() != Material.ICE) {
                         Freedom.get_plugin().getLogger().info("Structure not placed in water");
                         return;
                     }
-                    loc.add(0, 1, 0);
+
+                    Material groundMaterial = loc.getBlock().getType();
+                    if (groundMaterial == Material.AIR) {
+                        groundMaterial = loc.clone().add(0, -1, 0).getBlock().getType();
+                    }
+                    if (groundMaterial == Material.AIR) groundMaterial = Material.GRASS_BLOCK;
+
                     if (structureName.endsWith(".schem") || structureName.endsWith(".schematic")) {
                         Clipboard clipboard = StructureUtil.loadSchematicFromResource(structureName);
                         if (clipboard != null) {
+                            BlockVector3 dimensions = StructureUtil.getDimensions(clipboard);
+                            BlockVector3 offset = StructureUtil.getOffset(clipboard);
+
+                            int minX = x + offset.x();
+                            int minZ = z + offset.z();
+                            int maxX = minX + dimensions.x() - 1;
+                            int maxZ = minZ + dimensions.z() - 1;
+                            int startY = y + offset.y();
+                            int endY = startY + dimensions.y() - 1;
+
+                            StructureUtil.clearAbove(chunk.getWorld(), minX, minZ, maxX, maxZ, endY + 1);
                             StructureUtil.spawnSchematic(clipboard, loc);
+                            StructureUtil.fillBelow(chunk.getWorld(), minX, minZ, maxX, maxZ, startY, groundMaterial);
                         }
                     } else if (structureName.endsWith(".nbt")) {
-                        StructureUtil.spawnVanillaStructureFromResource(structureName, loc);
+                        Structure structure = StructureUtil.loadVanillaStructureFromResource(structureName);
+                        if (structure != null) {
+                            org.bukkit.util.Vector size = structure.getSize();
+                            int minX = x;
+                            int minZ = z;
+                            int maxX = x + size.getBlockX() - 1;
+                            int maxZ = z + size.getBlockZ() - 1;
+                            int startY = y + 1;
+                            int endY = startY + size.getBlockY() - 1;
+
+                            StructureUtil.clearAbove(chunk.getWorld(), minX, minZ, maxX, maxZ, endY + 1);
+                            StructureUtil.spawnVanillaStructureFromResource(structureName, loc.clone().add(0, 1, 0));
+                            StructureUtil.fillBelow(chunk.getWorld(), minX, minZ, maxX, maxZ, startY, groundMaterial);
+                        }
                     } else {
                         // Try .schem by default
                         Clipboard clipboard = StructureUtil.loadSchematicFromResource(structureName + ".schem");
                         if (clipboard != null) {
+                            BlockVector3 dimensions = StructureUtil.getDimensions(clipboard);
+                            BlockVector3 offset = StructureUtil.getOffset(clipboard);
+
+                            int minX = x + offset.x();
+                            int minZ = z + offset.z();
+                            int maxX = minX + dimensions.x() - 1;
+                            int maxZ = minZ + dimensions.z() - 1;
+                            int startY = y + offset.y();
+                            int endY = startY + dimensions.y() - 1;
+
+                            StructureUtil.clearAbove(chunk.getWorld(), minX, minZ, maxX, maxZ, endY + 1);
                             StructureUtil.spawnSchematic(clipboard, loc);
+                            StructureUtil.fillBelow(chunk.getWorld(), minX, minZ, maxX, maxZ, startY, groundMaterial);
                         }
                     }
 

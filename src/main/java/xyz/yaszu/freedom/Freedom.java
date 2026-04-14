@@ -75,12 +75,13 @@ public final class Freedom extends JavaPlugin implements Listener {
     public record StructureInfo(float weight, List<String> worlds) {}
 
     public static final Map<String, StructureInfo> STRUCTURES = Map.of(
-            "ritual.schem", new StructureInfo(5.0f, List.of("world")),
+            "ritual.schem", new StructureInfo(1.0f, List.of("world")),
             "voidisland.schem", new StructureInfo(10.0f, List.of("void")),
             "voidisland2.schem", new StructureInfo(10.0f, List.of("void")),
             "voidisland3.schem", new StructureInfo(10.0f, List.of("void")),
             "voidisland4.schem", new StructureInfo(10.0f, List.of("void")),
-            "kfc.schematic", new StructureInfo(0.01f, List.of("world"))
+            "kfc.schematic", new StructureInfo(0.01f, List.of("world")),
+            "evilcampfire.schem", new StructureInfo(1f,List.of("world"))
     );
 
     public void reapplyCurseWeakness(Player player) {

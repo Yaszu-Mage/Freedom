@@ -278,7 +278,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
                     player.getPersistentDataContainer().set(keygen("clockcoil"), PersistentDataType.INTEGER, 2);
                     player.sendActionBar(dess("<Green>Healing Mode"));
                     try {
-                        player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(new AttributeModifier(keygen("clockcoil"),5, AttributeModifier.Operation.ADD_NUMBER));
+                        player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(new AttributeModifier(keygen("clockcoil"),0.05, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.MAX_HEALTH).addModifier(new AttributeModifier(keygen("clockcoil"),5, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(new AttributeModifier(keygen("clockcoil"),2, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.ATTACK_SPEED).removeModifier(new AttributeModifier(keygen("clockcoil"),-0.2, AttributeModifier.Operation.ADD_NUMBER));
@@ -290,7 +290,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
                     player.getPersistentDataContainer().set(keygen("clockcoil"), PersistentDataType.INTEGER, 3);
                     player.sendActionBar(dess("<Blue>Speed Mode"));
                     try {
-                        player.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("clockcoil"),0.1, AttributeModifier.Operation.ADD_NUMBER));
+                        player.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(keygen("clockcoil"),0.05, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.MAX_HEALTH).removeModifier(new AttributeModifier(keygen("clockcoil"),5, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(new AttributeModifier(keygen("clockcoil"),2, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.ATTACK_SPEED).removeModifier(new AttributeModifier(keygen("clockcoil"),-0.2, AttributeModifier.Operation.ADD_NUMBER));
@@ -301,9 +301,9 @@ public class Yellow extends Util implements Base_Soul, Listener {
                     player.getPersistentDataContainer().set(keygen("clockcoil"), PersistentDataType.INTEGER, 1);
                     player.sendActionBar(dess("<Red>Damage Mode"));
                     try {
-                        player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(new AttributeModifier(keygen("clockcoil"),5, AttributeModifier.Operation.ADD_NUMBER));
+                        player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(new AttributeModifier(keygen("clockcoil"),0.05, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.MAX_HEALTH).removeModifier(new AttributeModifier(keygen("clockcoil"),5, AttributeModifier.Operation.ADD_NUMBER));
-                        player.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(new AttributeModifier(keygen("clockcoil"),1, AttributeModifier.Operation.ADD_NUMBER));
+                        player.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(new AttributeModifier(keygen("clockcoil"),4, AttributeModifier.Operation.ADD_NUMBER));
                         player.getAttribute(Attribute.ATTACK_SPEED).addModifier(new AttributeModifier(keygen("clockcoil"),-0.2, AttributeModifier.Operation.ADD_NUMBER));
                     } catch (Exception ignored) {}
                     player.getWorld().playSound(player.getLocation(), "custom.orchestra0",1,1.2f);
