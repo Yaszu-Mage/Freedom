@@ -31,7 +31,7 @@ public class ChunkLootManager implements Listener {
 
         // Chance to spawn a random structure
         int structureChance = random.nextInt(100);
-        if (structureChance > 98) { // 2% chance for structure
+        if (structureChance > 90) { // 10% chance for structure
             String worldName = event.getWorld().getName();
             Map<String, Freedom.StructureInfo> allStructures = Freedom.STRUCTURES;
 

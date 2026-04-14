@@ -84,7 +84,7 @@ public class TrustMenu extends Util implements Listener {
                 lore.add(dess(trusted ? "<green>Status: TRUSTED" : "<red>Status: NOT TRUSTED"));
                 lore.add(dess("<gray>Left-Click to toggle general trust"));
                 lore.add(dess("<gray>Right-Click to manage province permissions"));
-                lore.add(dess("<gray>General trust allows them to heal you"));
+                lore.add(dess("<gray>General trust allows abilities to not explicitly target them"));
                 meta.lore(lore);
                 
                 skull.setItemMeta(meta);

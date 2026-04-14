@@ -245,6 +245,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         removeOldFollowers();
         start_time = System.currentTimeMillis();
         createVoid();
+        createDoubleVoid();
 
         new BukkitRunnable() {
             @Override
@@ -297,7 +298,7 @@ public final class Freedom extends JavaPlugin implements Listener {
                 Freedom.get_plugin().getLogger().info("Loading structure: " + resourceName);
                 int x = (event.getChunk().getX() + random.nextInt(0, 16)) * 16;
                 int z = (event.getChunk().getZ() + random.nextInt(0, 16)) * 16;
-                int y = random.nextInt(0, 128) * 16;
+                int y = random.nextInt(50, 128) * 16;
                 Clipboard load = StructureUtil.loadSchematicFromResource(resourceName);
                 if (load != null) {
                     World adapter = BukkitAdapter.adapt(Bukkit.getWorld("void"));
@@ -325,6 +326,24 @@ public final class Freedom extends JavaPlugin implements Listener {
             public void run() {
                 Objects.requireNonNull(Bukkit.getWorld("void")).setTime(17000);
                 Util.drawEye(new Location(Bukkit.getWorld("void"),0,-63,0),1);
+            }
+        }.runTaskTimer(this,0,20);
+    }
+    public void createDoubleVoid() {
+        WorldCreator worldCreator = new WorldCreator("doublevoid");
+        worldCreator.generator(new voidGenerator());
+        worldCreator.createWorld();
+        Objects.requireNonNull(Bukkit.getWorld("doublevoid")).setTime(17000);
+        Objects.requireNonNull(Bukkit.getWorld("doublevoid")).setStorm(false);
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.getWorld().getName().equals("doublevoid")) {
+                        PacketManager.setSky(player, PacketManager.SkyType.END);
+                    }
+                }
             }
         }.runTaskTimer(this,0,20);
     }

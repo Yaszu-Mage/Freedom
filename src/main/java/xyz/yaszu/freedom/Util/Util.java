@@ -307,6 +307,7 @@ public class Util {
 
     public static void createMinMagicCircle(Location center, int tickRate, SoulTypes soulType) {
         Color color = Color.PURPLE;
+
         switch (soulType) {
             case Green, BaseGreen -> color = Color.GREEN;
             case Red, BaseRed -> color = Color.RED;
@@ -380,7 +381,7 @@ public class Util {
             case Black, BaseBlack -> color = Color.BLACK;
         }
         Color finalColor = color;
-        if (center.clone().add(0, 0, 0).getBlock().getType() == Material.LECTERN) {
+        if (center.clone().getBlock().getType() == Material.LECTERN) {
             Freedom.get_plugin().getLogger().info("LECTURN");
             new BukkitRunnable() {
                 int tick = 1;

@@ -84,6 +84,8 @@ public class Trust {
 
     }
 
+
+
     public static LiteralCommandNode<CommandSourceStack> processChunksArgument() {
         return Commands.literal("processchunks")
                 .then(Commands.argument("radius", IntegerArgumentType.integer(0, 10))

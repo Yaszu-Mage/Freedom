@@ -25,11 +25,9 @@ import java.util.*;
 public class AdminManager {
 
     public record AdminProfile(String sudoName, String skinSource, String skinSignature) {}
-
-    // Hardcoded admin profiles - UUID based as requested
     private static final Map<UUID, AdminProfile> ADMINS = Map.of(
             // Example: TheMoonLady (Source can be a skin name or a URL)
-            UUID.fromString("83849cc9-677d-4599-8a2d-09d1c0469038"), new AdminProfile("TheGrandMage", "https://s.namemc.com/i/7c2b160450e0839c.png", null),
+            UUID.fromString("83849cc9-677d-4599-8a2d-09d1c0469038"), new AdminProfile("Gr4ndMage", "https://s.namemc.com/i/7c2b160450e0839c.png", null),
             // Example with a URL skin
             UUID.fromString("7b39a2df-ead1-4f91-910e-f1542fa8c333"), new AdminProfile("TheCarp", "https://s.namemc.com/i/f7998f18d571ff92.png", null),
             UUID.fromString("7d86f8b4-d11f-4735-ba6f-829f2d63401a"), new AdminProfile("AntiClock","https://s.namemc.com/i/76b47e0741aefbbd.png",null)
@@ -174,7 +172,7 @@ public class AdminManager {
         // We don't necessarily need to clear on quit if we use PDC for persistence.
     }
 
-    private static void savePlayerState(Player player, NamespacedKey key) {
+    public static void savePlayerState(Player player, NamespacedKey key) {
         try {
             Map<String, Object> state = new HashMap<>();
             state.put("inventory", player.getInventory().getContents());
@@ -191,7 +189,6 @@ public class AdminManager {
             state.put("potions", new ArrayList<>(player.getActivePotionEffects()));
             state.put("fireTicks", player.getFireTicks());
             state.put("remainingAir", player.getRemainingAir());
-
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
             dataOutput.writeObject(state);
@@ -213,9 +210,11 @@ public class AdminManager {
                 player.setLevel(0);
                 player.setHealth(20);
                 player.setFoodLevel(20);
+
                 for (PotionEffect effect : player.getActivePotionEffects()) {
                     player.removePotionEffect(effect.getType());
                 }
+
             }
             return;
         }

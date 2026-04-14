@@ -148,7 +148,7 @@ public class SpellCompiler extends Util {
                         case air -> {
                             //fling up
                             Lift(caster);
-                            caster.setVelocity(loc.getDirection().multiply(-(4 + (power / 2))));
+                            caster.setVelocity(loc.getDirection().multiply(-(2 + (power / 2))));
                         }
                         case water -> {
                             //ig water blast?
