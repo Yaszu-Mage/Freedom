@@ -17,6 +17,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.PacketEvents;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import net.kyori.adventure.title.Title;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -62,13 +63,10 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 import static xyz.yaszu.freedom.Soul.Ultra.Green.removeOldFollowers;
+import static xyz.yaszu.freedom.Util.Util.dess;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
 public final class Freedom extends JavaPlugin implements Listener {
@@ -82,7 +80,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             "voidisland2.schem", new StructureInfo(10.0f, List.of("void")),
             "voidisland3.schem", new StructureInfo(10.0f, List.of("void")),
             "voidisland4.schem", new StructureInfo(10.0f, List.of("void")),
-            "kfc.schem", new StructureInfo(0.01f, List.of("world"))
+            "kfc.schematic", new StructureInfo(0.01f, List.of("world"))
     );
 
     public void reapplyCurseWeakness(Player player) {
@@ -127,7 +125,27 @@ public final class Freedom extends JavaPlugin implements Listener {
             if (profile != null) {
                 event.quitMessage(Component.text(profile.sudoName() + " has left", NamedTextColor.YELLOW));
             }
-            event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+            if (event.getPlayer().getUniqueId() == UUID.fromString("83849cc9-677d-4599-8a2d-09d1c0469038") || event.getPlayer().getUniqueId() == UUID.fromString("7b39a2df-ead1-4f91-910e-f1542fa8c333")) {
+                event.getPlayer().getLocation().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+            } else {
+                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
+                type.forEach(player -> {
+                    
+                    
+                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
+                    new BukkitRunnable() {
+                        int tick = 0;
+                        @Override
+                        public void run() {
+                            PacketManager.setSky(player, PacketManager.SkyType.END);
+                            tick++;
+                            if (tick >= 40) {
+                                this.cancel();
+                            }
+                        }
+                    }.runTaskLater(Freedom.get_plugin(), 1);
+                });
+            }
         }
         AdminManager.handleQuit(event.getPlayer());
     }
@@ -140,7 +158,27 @@ public final class Freedom extends JavaPlugin implements Listener {
             if (profile != null) {
                 event.joinMessage(Component.text(profile.sudoName() + " has joined", NamedTextColor.YELLOW));
             }
-            event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+            if (!event.getPlayer().getName().equals("TheAntiClock")) {
+                event.getPlayer().getLocation().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+            } else {
+                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
+                type.forEach(player -> {
+                    
+                    
+                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
+                    new BukkitRunnable() {
+                        int tick = 0;
+                        @Override
+                        public void run() {
+                            PacketManager.setSky(player, PacketManager.SkyType.END);
+                            tick++;
+                            if (tick >= 40) {
+                                this.cancel();
+                            }
+                        }
+                    }.runTaskLater(Freedom.get_plugin(), 1);
+                });
+            }
         }
         removeOldFollowers();
         event.getPlayer().performCommand("rules");
@@ -150,14 +188,55 @@ public final class Freedom extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         if (AdminManager.isSudo(event.getPlayer())) {
-            event.getTo().getWorld().strikeLightningEffect(event.getTo());
+            if (!event.getPlayer().getName().equals("TheAntiClock")) {
+                event.getTo().getWorld().strikeLightningEffect(event.getTo());
+            } else {
+                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
+                type.forEach(player -> {
+                    
+                    
+                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
+                    new BukkitRunnable() {
+                        int tick = 0;
+                        @Override
+                        public void run() {
+                            PacketManager.setSky(player, PacketManager.SkyType.END);
+                            tick++;
+                            if (tick >= 40) {
+                                this.cancel();
+                            }
+                        }
+                    }.runTaskLater(Freedom.get_plugin(), 1);
+                });
+            }
+
         }
     }
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         if (AdminManager.isSudo(event.getPlayer())) {
-            event.getRespawnLocation().getWorld().strikeLightningEffect(event.getRespawnLocation());
+            if (!event.getPlayer().getName().equals("TheAntiClock")) {
+                event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
+            } else {
+                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
+                type.forEach(player -> {
+                    
+                    
+                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
+                    new BukkitRunnable() {
+                        int tick = 0;
+                        @Override
+                        public void run() {
+                            PacketManager.setSky(player, PacketManager.SkyType.END);
+                            tick++;
+                            if (tick >= 40) {
+                                this.cancel();
+                            }
+                        }
+                    }.runTaskLater(Freedom.get_plugin(), 1);
+                });
+            }
         }
     }
 
@@ -208,6 +287,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.GUI.SettingsGui.TrustMemberMenu(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.SitManager(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
+        DuelManager duelManager = new DuelManager();
+        Bukkit.getPluginManager().registerEvents(duelManager, this);
         ArtifactManager artifactManager = new ArtifactManager();
         Bukkit.getPluginManager().registerEvents(artifactManager, this);
         artifactManager.startTask();
@@ -241,6 +322,9 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.skyArgument());
             commands.registrar().register(xyz.yaszu.freedom.Subsystems.SitManager.sitCommand());
             commands.registrar().register(SettingsMenu.settingsCommand());
+            commands.registrar().register(duelManager.duel());
+            commands.registrar().register(duelManager.savekit());
+            commands.registrar().register(duelManager.saveAdminkit());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
@@ -286,7 +370,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         if (event.getWorld() == Bukkit.getWorld("void") && !event.getChunk().getPersistentDataContainer().has(FreedomKeys.key("void"))) {
             event.getChunk().getPersistentDataContainer().set(FreedomKeys.key("void"),PersistentDataType.BOOLEAN,true);
             int currentrand = random.nextInt(1000);
-            if (currentrand <= 50) {
+            if (currentrand <= 10) {
                 String resourceName;
                 int rand = random.nextInt(0, 4);
                 switch (rand) {
@@ -298,7 +382,9 @@ public final class Freedom extends JavaPlugin implements Listener {
                 Freedom.get_plugin().getLogger().info("Loading structure: " + resourceName);
                 int x = (event.getChunk().getX() + random.nextInt(0, 16)) * 16;
                 int z = (event.getChunk().getZ() + random.nextInt(0, 16)) * 16;
-                int y = random.nextInt(50, 128) * 16;
+                int y = 60 + random.nextInt(-5, 20);
+                if (y < 0) y = 60;
+                Freedom.get_plugin().getLogger().info("Placing structure at " + x + ", " + y + ", " + z);
                 Clipboard load = StructureUtil.loadSchematicFromResource(resourceName);
                 if (load != null) {
                     World adapter = BukkitAdapter.adapt(Bukkit.getWorld("void"));
@@ -327,7 +413,7 @@ public final class Freedom extends JavaPlugin implements Listener {
                 Objects.requireNonNull(Bukkit.getWorld("void")).setTime(17000);
                 Util.drawEye(new Location(Bukkit.getWorld("void"),0,-63,0),1);
             }
-        }.runTaskTimer(this,0,20);
+        }.runTaskTimer(this,0,1);
     }
     public void createDoubleVoid() {
         WorldCreator worldCreator = new WorldCreator("doublevoid");
@@ -345,6 +431,6 @@ public final class Freedom extends JavaPlugin implements Listener {
                     }
                 }
             }
-        }.runTaskTimer(this,0,20);
+        }.runTaskTimer(this,0,1);
     }
 }

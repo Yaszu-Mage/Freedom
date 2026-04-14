@@ -44,6 +44,9 @@ public class Life_and_Death implements org.bukkit.event.Listener{
 
     @EventHandler
     public void PlayerDeathEvent(PlayerDeathEvent event) {
+        if (DuelManager.playerInDuelArena.containsKey(event.getPlayer().getUniqueId())) {
+            return;
+        }
         if ((Integer) player_util.get_type_value(event.getPlayer(), "life",PersistentDataType.INTEGER) <= 0) {
             return;
         }

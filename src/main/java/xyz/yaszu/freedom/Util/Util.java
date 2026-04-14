@@ -1093,7 +1093,7 @@ public class Util {
     public static void setSkinByUrl(Player player, String url) throws MineSkinException, DataRequestException {
         MineSkinAPI mineSkinAPI = skinsRestorerAPI.getMineSkinAPI();
         // Generate skin from URL (use CLASSIC as default)
-        MineSkinResponse response = mineSkinAPI.genSkin(url, SkinVariant.CLASSIC);
+        MineSkinResponse response = mineSkinAPI.genSkin(url, SkinVariant.SLIM);
         SkinProperty skinProperty = response.getProperty();
         // Apply directly to player
         skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player, skinProperty);
@@ -1102,6 +1102,7 @@ public class Util {
     public static void setSkinByProperties(Player player, String value, String signature) {
         SkinProperty skinProperty = SkinProperty.of(value, signature);
         // Apply directly to player
+
         skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player, skinProperty);
     }
 

@@ -30,7 +30,8 @@ public class AdminManager {
             UUID.fromString("83849cc9-677d-4599-8a2d-09d1c0469038"), new AdminProfile("Gr4ndMage", "https://s.namemc.com/i/7c2b160450e0839c.png", null),
             // Example with a URL skin
             UUID.fromString("7b39a2df-ead1-4f91-910e-f1542fa8c333"), new AdminProfile("TheCarp", "https://s.namemc.com/i/f7998f18d571ff92.png", null),
-            UUID.fromString("7d86f8b4-d11f-4735-ba6f-829f2d63401a"), new AdminProfile("AntiClock","https://s.namemc.com/i/76b47e0741aefbbd.png",null)
+            UUID.fromString("7d86f8b4-d11f-4735-ba6f-829f2d63401a"), new AdminProfile("TheInfluence","https://s.namemc.com/i/a55fc6de61f6bf4a.png",null),
+            UUID.fromString("e86b0c18-465c-4d83-86ac-7857e286158a"), new AdminProfile("xXMarkPl4yzXx","https://s.namemc.com/i/5587a028623bec8a.png",null)
 
     );
 
@@ -200,7 +201,7 @@ public class AdminManager {
         }
     }
 
-    private static void loadPlayerState(Player player, NamespacedKey key) {
+    public static void loadPlayerState(Player player, NamespacedKey key) {
         if (!player.getPersistentDataContainer().has(key, PersistentDataType.BYTE_ARRAY)) {
             // If no state saved (first time sudo), just clear for sudo
             if (key.equals(FreedomKeys.sudoState())) {

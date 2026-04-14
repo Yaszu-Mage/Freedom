@@ -168,6 +168,9 @@ public class soulListener extends Util implements Listener {
 
         }
         Integer life = player.getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER);
+        if (life == null) {
+            player.getPersistentDataContainer().set(keygen("life"),PersistentDataType.INTEGER,9);
+        }
         open(player, (int) SoulPoints,life);
     }
 

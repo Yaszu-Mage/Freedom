@@ -52,4 +52,10 @@ commands:
     description: "Sudo"
   sky:
     description: "Change sky color"
+  duel:
+    description: "Duel"
+  savekit:
+    description: "Save kit"
+  saveadminkit:
+    description: "Save admin kit"
 softdepend: [ "SkinsRestorer", "packetevents" ]
