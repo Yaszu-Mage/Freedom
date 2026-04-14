@@ -3,11 +3,23 @@ package xyz.yaszu.freedom.Subsystems;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.function.pattern.RandomPattern;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.block.BlockTypes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,11 +28,13 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,18 +92,47 @@ public class SoulImbueManager extends Util implements Listener {
     public static boolean isImbued(ItemStack item) {
         return item.getItemMeta().getPersistentDataContainer().has(keygen("soul")) || item.getItemMeta().getPersistentDataContainer().has(keygen("soultwo"));
     }
+    public static boolean isNotSelfImbued(ItemStack item) {
+        return item.getItemMeta().getPersistentDataContainer().has(keygen("soul"));
+    }
 
-
+    public HashMap<Location, EditSession> activeVisits = new HashMap<>();
 
 
     public LiteralCommandNode<CommandSourceStack> visit() {
         return Commands.literal("visit").executes( ctx -> {
             if (ctx.getSource().getSender() instanceof Player player) {
                 if (player.getInventory().getItemInMainHand() != null) {
-                    if (isImbued(player.getInventory().getItemInMainHand())) {
+                    if (isImbued(player.getInventory().getItemInMainHand()) && isNotSelfImbued(player.getInventory().getItemInMainHand())) {
                         ItemStack item = player.getInventory().getItemInMainHand();
                         SoulTypes soulType = SoulTypes.valueOf(item.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+                        // Example for WorldEdit 7.x
+                        Location location = new Location(Bukkit.getWorld("doublevoid"),0,-60,0);
+                        while (activeVisits.containsKey(location)) {
+                            location = location.add(1000,0,0);
+                        }
 
+
+                        BlockVector3 center = BlockVector3.at(location.x(), location.y(), location.z());
+                        int radius = 5; // Total size will be (radius * 2) + 1
+                        World world = BukkitAdapter.adapt(location.getWorld());
+                        BlockVector3 pos1 = center.subtract(radius, radius, radius);
+                        BlockVector3 pos2 = center.add(radius, radius, radius);
+
+                        CuboidRegion region = new CuboidRegion(world, pos1, pos2);
+
+                        // Create the hollow cube (only the 6 faces)
+                        EditSession editSession = WorldEdit.getInstance().newEditSession(world);
+                        RandomPattern pattern = new RandomPattern();
+                        pattern.add(BlockTypes.BLACK_CONCRETE.getDefaultState(),0.5);
+                        try {
+                            editSession.makeCuboidFaces(region, pattern);
+                        } catch (MaxChangedBlocksException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        activeVisits.put(location,editSession);
+                    } else {
                     }
                 }
             }
@@ -109,7 +152,7 @@ public class SoulImbueManager extends Util implements Listener {
                                     UnImbueItem(player.getInventory().getItemInMainHand(), 0);
                                 } else {
                                     SoulTypes soul = getSoulType(player);
-                                    ImbueItem(player.getInventory().getItemInMainHand(), player, soul, true);
+                                    ImbueItem(player.getInventory().getItemInMainHand(), player, soul, true,player);
                                 }
                             }
                         } else {
@@ -118,7 +161,7 @@ public class SoulImbueManager extends Util implements Listener {
                                     UnImbueItem(target.getInventory().getItemInMainHand(), 1);
                                 } else {
                                     SoulTypes soul = getSoulType(target);
-                                    ImbueItem(target.getInventory().getItemInMainHand(), target, soul, false);
+                                    ImbueItem(target.getInventory().getItemInMainHand(), target, soul, false,player);
                                 }
                             }
                         }
@@ -182,7 +225,7 @@ public class SoulImbueManager extends Util implements Listener {
      * @param soulType soultype to imbue
      * @param selfimbue if the soul is being imbued by the player itself
      */
-    public static void ImbueItem(ItemStack item, Player player, SoulTypes soulType, boolean selfimbue) {
+    public static void ImbueItem(ItemStack item, Player player, SoulTypes soulType, boolean selfimbue, @Nullable Player imbueperson) {
         ItemMeta meta = item.getItemMeta();
         if (selfimbue) {
             meta.getPersistentDataContainer().set(keygen("soultwo"), PersistentDataType.STRING, soulType.name());
@@ -190,6 +233,7 @@ public class SoulImbueManager extends Util implements Listener {
         } else {
             meta.getPersistentDataContainer().set(keygen("soul"), PersistentDataType.STRING, soulType.name());
             meta.getPersistentDataContainer().set(keygen("soulowner"), PersistentDataType.STRING, player.getUniqueId().toString());
+            player.getPersistentDataContainer().set(keygen("imbueperson"),PersistentDataType.STRING,imbueperson.getUniqueId().toString());
         }
         item.setItemMeta(meta);
     }
