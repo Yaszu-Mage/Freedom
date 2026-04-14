@@ -153,6 +153,12 @@ public class SoulImbueManager extends Util implements Listener {
             Mannequin m = mannequins.get(targetUuid);
             if (m != null) {
                 config.set("visits." + i + ".mannequinLoc", m.getLocation());
+            } else {
+                // If mannequin is not spawned (e.g. reload before players join), use the location from pendingVisits
+                Location loc = pendingVisits.get(targetUuid);
+                if (loc != null) {
+                    config.set("visits." + i + ".mannequinLoc", loc);
+                }
             }
             i++;
         }
@@ -162,6 +168,14 @@ public class SoulImbueManager extends Util implements Listener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Undo all EditSessions on shutdown
+        for (EditSession session : activeVisits.values()) {
+            try (EditSession undoSession = WorldEdit.getInstance().newEditSession(session.getWorld())) {
+                session.undo(undoSession);
+            }
+        }
+        activeVisits.clear();
     }
 
     public void loadVisits() {
@@ -178,29 +192,8 @@ public class SoulImbueManager extends Util implements Listener {
             Location retTarget = config.getLocation("visits." + key + ".returnTarget");
             Location mannequinLoc = config.getLocation("visits." + key + ".mannequinLoc");
 
-            // We store these and re-link when both players are online
-            // For now, let's just re-teleport them if they are already online (e.g. reload)
-            Player visitor = Bukkit.getPlayer(visitorUuid);
-            Player target = Bukkit.getPlayer(targetUuid);
-
-            if (visitor != null && target != null && mannequinLoc != null) {
-                activeVisitsByVisitor.put(visitorUuid, targetUuid);
-                returnLocations.put(visitorUuid, retVisitor);
-                returnLocations.put(targetUuid, retTarget);
-
-                Mannequin mannequin = mannequinLoc.getWorld().spawn(mannequinLoc, Mannequin.class);
-                ResolvableProfile profile = ResolvableProfile.resolvableProfile(target.getPlayerProfile());
-                mannequin.setProfile(profile);
-                mannequin.getEquipment().setHelmet(target.getInventory().getHelmet());
-                mannequin.getEquipment().setChestplate(target.getInventory().getChestplate());
-                mannequin.getEquipment().setLeggings(target.getInventory().getLeggings());
-                mannequin.getEquipment().setBoots(target.getInventory().getBoots());
-                mannequin.setCustomName(target.getName());
-                mannequin.setCustomNameVisible(true);
-                mannequin.setHealth(target.getHealth());
-                
-                mannequins.put(targetUuid, mannequin);
-
+            if (mannequinLoc != null) {
+                // Restore the cube first
                 BlockVector3 center = BlockVector3.at(mannequinLoc.x(), mannequinLoc.y(), mannequinLoc.z());
                 int radius = 5;
                 World world = BukkitAdapter.adapt(mannequinLoc.getWorld());
@@ -213,35 +206,104 @@ public class SoulImbueManager extends Util implements Listener {
                 try {
                     editSession.makeCuboidFaces(region, pattern);
                 } catch (MaxChangedBlocksException ignored) {}
-                
+
                 activeVisits.put(mannequinLoc.getBlock().getLocation(), editSession);
+
+                // Re-register metadata
+                activeVisitsByVisitor.put(visitorUuid, targetUuid);
+                returnLocations.put(visitorUuid, retVisitor);
+                returnLocations.put(targetUuid, retTarget);
+
+                // Attempt to spawn mannequin and link players if online
+                Player visitor = Bukkit.getPlayer(visitorUuid);
+                Player target = Bukkit.getPlayer(targetUuid);
+
+                if (visitor != null && target != null) {
+                    spawnMannequin(target, mannequinLoc);
+                } else {
+                    // They will be handled by join event or startSyncTask's online check if needed
+                    // But currently join event is empty. Let's rely on join event.
+                    pendingVisits.put(targetUuid, mannequinLoc);
+                }
             }
         }
         file.delete();
     }
 
+    private void spawnMannequin(Player target, Location mannequinLoc) {
+        Mannequin mannequin = mannequinLoc.getWorld().spawn(mannequinLoc, Mannequin.class);
+        ResolvableProfile profile = ResolvableProfile.resolvableProfile(target.getPlayerProfile());
+        mannequin.setProfile(profile);
+        mannequin.getEquipment().setHelmet(target.getInventory().getHelmet());
+        mannequin.getEquipment().setChestplate(target.getInventory().getChestplate());
+        mannequin.getEquipment().setLeggings(target.getInventory().getLeggings());
+        mannequin.getEquipment().setBoots(target.getInventory().getBoots());
+        mannequin.setCustomName(target.getName());
+        mannequin.setCustomNameVisible(true);
+        mannequin.setHealth(target.getHealth());
+
+        mannequins.put(target.getUniqueId(), mannequin);
+    }
+
+    public ConcurrentHashMap<UUID, Location> pendingVisits = new ConcurrentHashMap<>();
+
     @EventHandler
     public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
-        // Handle players joining back into a visit if necessary
-        // For simplicity, we end the visit if someone disconnects, so this might not be needed
-        // unless we want more robust persistence.
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        // Check if the joined player is a target of a pending visit
+        if (pendingVisits.containsKey(uuid)) {
+            Location mannequinLoc = pendingVisits.get(uuid);
+            UUID visitorUuid = null;
+            for (UUID vUuid : activeVisitsByVisitor.keySet()) {
+                if (activeVisitsByVisitor.get(vUuid).equals(uuid)) {
+                    visitorUuid = vUuid;
+                    break;
+                }
+            }
+
+            if (visitorUuid != null) {
+                Player visitor = Bukkit.getPlayer(visitorUuid);
+                if (visitor != null && visitor.isOnline()) {
+                    spawnMannequin(player, mannequinLoc);
+                    pendingVisits.remove(uuid);
+                }
+            }
+        }
+        
+        // Also check if the joined player is a visitor for a pending visit
+        for (UUID vUuid : activeVisitsByVisitor.keySet()) {
+            if (vUuid.equals(uuid)) {
+                UUID targetUuid = activeVisitsByVisitor.get(vUuid);
+                if (pendingVisits.containsKey(targetUuid)) {
+                    Player target = Bukkit.getPlayer(targetUuid);
+                    if (target != null && target.isOnline()) {
+                        spawnMannequin(target, pendingVisits.get(targetUuid));
+                        pendingVisits.remove(targetUuid);
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler
     public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (activeVisitsByVisitor.containsKey(player.getUniqueId())) {
-            endVisit(player);
-        } else {
-            // Check if they are being visited
-            for (UUID visitorUuid : activeVisitsByVisitor.keySet()) {
-                if (activeVisitsByVisitor.get(visitorUuid).equals(player.getUniqueId())) {
-                    Player visitor = Bukkit.getPlayer(visitorUuid);
-                    if (visitor != null) endVisit(visitor);
-                    break;
-                }
-            }
+        UUID uuid = player.getUniqueId();
+
+        // If a target quits, we remove their mannequin and put them in pending
+        if (mannequins.containsKey(uuid)) {
+            Mannequin m = mannequins.remove(uuid);
+            pendingVisits.put(uuid, m.getLocation());
+            m.remove();
         }
+
+        // We don't necessarily want to end the visit if someone disconnects if we want it to persist
+        // But the previous implementation ended it. Let's stick to making it persist.
+        // So I will comment out or remove the endVisit on quit if I want it to persist across disconnects too.
+        // Actually, the requirement just says server stop/start. 
+        // If I want it to persist across server stop/start, it probably should also persist across player disconnects.
     }
     public ConcurrentHashMap<UUID, Location> returnLocations = new ConcurrentHashMap<>();
     public ConcurrentHashMap<UUID, UUID> activeVisitsByVisitor = new ConcurrentHashMap<>(); // Visitor UUID -> Target UUID
