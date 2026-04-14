@@ -38,6 +38,8 @@ import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
@@ -246,6 +248,21 @@ public class SoulImbueManager extends Util implements Listener {
     }
 
     public ConcurrentHashMap<UUID, Location> pendingVisits = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, ImbueRequest> pendingImbueRequests = new ConcurrentHashMap<>();
+
+    private record ImbueRequest(UUID requesterId, SoulTypes soulType, boolean selfImbue) {}
+
+    private static boolean hasImbuedItem(Player player) {
+        return player.getPersistentDataContainer().has(keygen("has_imbued_item"), PersistentDataType.BOOLEAN);
+    }
+
+    private static void setHasImbuedItem(Player player, boolean value) {
+        if (value) {
+            player.getPersistentDataContainer().set(keygen("has_imbued_item"), PersistentDataType.BOOLEAN, true);
+        } else {
+            player.getPersistentDataContainer().remove(keygen("has_imbued_item"));
+        }
+    }
 
     @EventHandler
     public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
@@ -438,29 +455,112 @@ public class SoulImbueManager extends Util implements Listener {
 
     public LiteralCommandNode<CommandSourceStack> imbue() {
         return Commands.literal("imbue").then(Commands.argument("target", ArgumentTypes.player())).executes(ctx -> {
-                    PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
-                    Player target = targetResolver.resolve(ctx.getSource()).getFirst();
-                    if (ctx.getSource().getSender() instanceof Player player) {
-                        if (target == player) {
-                            if (player.getInventory().getItemInMainHand() != null) {
-                                if (isImbued(player.getInventory().getItemInMainHand())) {
-                                    UnImbueItem(player.getInventory().getItemInMainHand(), 0);
-                                } else {
-                                    SoulTypes soul = getSoulType(player);
-                                    ImbueItem(player.getInventory().getItemInMainHand(), player, soul, true,player);
-                                }
-                            }
-                        } else {
-                            if (target.getInventory().getItemInMainHand() != null) {
-                                if (isImbued(target.getInventory().getItemInMainHand())) {
-                                    UnImbueItem(target.getInventory().getItemInMainHand(), 1);
-                                } else {
-                                    SoulTypes soul = getSoulType(target);
-                                    ImbueItem(target.getInventory().getItemInMainHand(), target, soul, false,player);
-                                }
-                            }
-                        }
+            PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+            Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+            if (ctx.getSource().getSender() instanceof Player player) {
+                if (hasImbuedItem(player)) {
+                    player.sendMessage(dess("<red>You have already imbued an item. You can only imbue one item at a time."));
+                    return Command.SINGLE_SUCCESS;
+                }
+
+                if (target == player) {
+                    if (!player.getPersistentDataContainer().has(keygen("ghost"))) {
+                        player.sendMessage(dess("<red>Only dead players can imbue items."));
+                        return Command.SINGLE_SUCCESS;
                     }
+                    if (player.getInventory().getItemInMainHand() != null && !player.getInventory().getItemInMainHand().getType().isAir()) {
+                        ItemStack item = player.getInventory().getItemInMainHand();
+                        if (isImbued(item)) {
+                            player.sendMessage(dess("<red>This item is already imbued."));
+                        } else {
+                            SoulTypes soul = getSoulType(player);
+                            ImbueItem(item, player, soul, true, player);
+                            player.sendMessage(dess("<green>You have self-imbued your item with your " + soul.name() + " soul."));
+                        }
+                    } else {
+                        player.sendMessage(dess("<red>You must be holding an item to imbue it."));
+                    }
+                } else {
+                    if (!player.getPersistentDataContainer().has(keygen("ghost"))) {
+                        player.sendMessage(dess("<red>Only dead players can imbue items."));
+                        return Command.SINGLE_SUCCESS;
+                    }
+                    if (target.getInventory().getItemInMainHand() != null && !target.getInventory().getItemInMainHand().getType().isAir()) {
+                        ItemStack targetItem = target.getInventory().getItemInMainHand();
+                        if (isImbued(targetItem)) {
+                            player.sendMessage(dess("<red>The target player's item is already imbued."));
+                        } else {
+                            SoulTypes soul = getSoulType(player);
+                            pendingImbueRequests.put(target.getUniqueId(), new ImbueRequest(player.getUniqueId(), soul, false));
+                            target.sendMessage(dess("<gold>" + player.getName() + " wants to imbue your held item with their " + soul.name() + " soul. Use /acceptimbue or /denyimbue."));
+                            player.sendMessage(dess("<green>Imbue request sent to " + target.getName() + "."));
+                        }
+                    } else {
+                        player.sendMessage(dess("<red>The target player must be holding an item to be imbued."));
+                    }
+                }
+            }
+            return Command.SINGLE_SUCCESS;
+        }).build();
+    }
+
+    public LiteralCommandNode<CommandSourceStack> acceptImbue() {
+        return Commands.literal("acceptimbue").executes(ctx -> {
+            if (ctx.getSource().getSender() instanceof Player target) {
+                ImbueRequest request = pendingImbueRequests.remove(target.getUniqueId());
+                if (request == null) {
+                    target.sendMessage(dess("<red>You have no pending imbue requests."));
+                    return Command.SINGLE_SUCCESS;
+                }
+
+                Player requester = Bukkit.getPlayer(request.requesterId());
+                if (requester == null || !requester.isOnline()) {
+                    target.sendMessage(dess("<red>The requester is no longer online."));
+                    return Command.SINGLE_SUCCESS;
+                }
+
+                if (hasImbuedItem(requester)) {
+                    target.sendMessage(dess("<red>The requester has already imbued another item."));
+                    requester.sendMessage(dess("<red>Your imbue request to " + target.getName() + " failed because you already have an imbued item."));
+                    return Command.SINGLE_SUCCESS;
+                }
+
+                ItemStack item = target.getInventory().getItemInMainHand();
+                if (item == null || item.getType().isAir()) {
+                    target.sendMessage(dess("<red>You must be holding an item to accept the imbue."));
+                    requester.sendMessage(dess("<red>" + target.getName() + " is no longer holding an item."));
+                    return Command.SINGLE_SUCCESS;
+                }
+
+                if (isImbued(item)) {
+                    target.sendMessage(dess("<red>This item is already imbued."));
+                    requester.sendMessage(dess("<red>" + target.getName() + "'s item is already imbued."));
+                    return Command.SINGLE_SUCCESS;
+                }
+
+                ImbueItem(item, requester, request.soulType(), false, requester);
+                target.sendMessage(dess("<green>Your item has been imbued by " + requester.getName() + "."));
+                requester.sendMessage(dess("<green>You have successfully imbued " + target.getName() + "'s item."));
+            }
+            return Command.SINGLE_SUCCESS;
+        }).build();
+    }
+
+    public LiteralCommandNode<CommandSourceStack> denyImbue() {
+        return Commands.literal("denyimbue").executes(ctx -> {
+            if (ctx.getSource().getSender() instanceof Player target) {
+                ImbueRequest request = pendingImbueRequests.remove(target.getUniqueId());
+                if (request == null) {
+                    target.sendMessage(dess("<red>You have no pending imbue requests."));
+                    return Command.SINGLE_SUCCESS;
+                }
+
+                target.sendMessage(dess("<red>You denied the imbue request."));
+                Player requester = Bukkit.getPlayer(request.requesterId());
+                if (requester != null) {
+                    requester.sendMessage(dess("<red>" + target.getName() + " denied your imbue request."));
+                }
+            }
             return Command.SINGLE_SUCCESS;
         }).build();
     }
@@ -472,13 +572,15 @@ public class SoulImbueManager extends Util implements Listener {
             if (ctx.getSource().getSender() instanceof Player player) {
                 if (target == player) {
                     ItemStack stack = player.getInventory().getItemInMainHand();
-                    UnImbueItem(stack, ctx.getArgument("slot", Integer.class));
+                    if (stack != null && !stack.getType().isAir()) {
+                        UnImbueItem(stack, ctx.getArgument("slot", Integer.class));
+                    }
                 } else {
-                    if (target.getInventory().getItemInMainHand() != null) {
+                    if (target.getInventory().getItemInMainHand() != null && !target.getInventory().getItemInMainHand().getType().isAir()) {
                         ItemStack stack = target.getInventory().getItemInMainHand();
                         List<Player> players = getWhoImbued(stack);
                         try {
-                            if (!players.isEmpty()) {
+                            if (players != null && !players.isEmpty()) {
                                 if (players.contains(player)) {
                                     UnImbueItem(stack, 0);
                                 } else {
@@ -492,6 +594,22 @@ public class SoulImbueManager extends Util implements Listener {
             }
             return Command.SINGLE_SUCCESS;
         }))).build();
+    }
+
+    public LiteralCommandNode<CommandSourceStack> forceUnimbue() {
+        return Commands.literal("forceunimbue").then(Commands.argument("slot", IntegerArgumentType.integer(0, 1)).executes(ctx -> {
+            if (ctx.getSource().getSender() instanceof Player player) {
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                if (stack != null && !stack.getType().isAir()) {
+                    int slot = ctx.getArgument("slot", Integer.class);
+                    UnImbueItem(stack, slot);
+                    player.sendMessage(dess("<green>Successfully unimbued slot " + slot + "."));
+                } else {
+                    player.sendMessage(dess("<red>You must be holding an item to unimbue it."));
+                }
+            }
+            return Command.SINGLE_SUCCESS;
+        })).build();
     }
 
 
@@ -528,29 +646,91 @@ public class SoulImbueManager extends Util implements Listener {
         } else {
             meta.getPersistentDataContainer().set(keygen("soul"), PersistentDataType.STRING, soulType.name());
             meta.getPersistentDataContainer().set(keygen("soulowner"), PersistentDataType.STRING, player.getUniqueId().toString());
-            player.getPersistentDataContainer().set(keygen("imbueperson"),PersistentDataType.STRING,imbueperson.getUniqueId().toString());
+            if (imbueperson != null) {
+                player.getPersistentDataContainer().set(keygen("imbueperson"), PersistentDataType.STRING, imbueperson.getUniqueId().toString());
+            }
         }
+
+        List<Component> lore = meta.lore();
+        if (lore == null) lore = new java.util.ArrayList<>();
+        String imbuerName = (imbueperson != null) ? imbueperson.getName() : player.getName();
+        lore.add(dess("<gray>Imbued by: <gold>" + imbuerName));
+        meta.lore(lore);
+
         item.setItemMeta(meta);
+        if (imbueperson != null) {
+            setHasImbuedItem(imbueperson, true);
+        } else {
+            setHasImbuedItem(player, true);
+        }
     }
+
     /**
-     * Adds alcohol to a player.
+     * Unimbue player item
      *
      * @param item   Itemstack to unimbue
      * @param slot   slot within item to unimbue
      */
     public static void UnImbueItem(ItemStack item, int slot) {
+        ItemMeta meta = item.getItemMeta();
+        UUID imbuerUuid = null;
         switch (slot) {
             case 0 -> {
-                ItemMeta meta = item.getItemMeta();
+                if (meta.getPersistentDataContainer().has(keygen("soulowner"), PersistentDataType.STRING)) {
+                    imbuerUuid = UUID.fromString(meta.getPersistentDataContainer().get(keygen("soulowner"), PersistentDataType.STRING));
+                }
                 meta.getPersistentDataContainer().remove(keygen("soul"));
                 meta.getPersistentDataContainer().remove(keygen("soulowner"));
-                item.setItemMeta(meta);
             }
             case 1 -> {
-                ItemMeta meta = item.getItemMeta();
+                if (meta.getPersistentDataContainer().has(keygen("soulownertwo"), PersistentDataType.STRING)) {
+                    imbuerUuid = UUID.fromString(meta.getPersistentDataContainer().get(keygen("soulownertwo"), PersistentDataType.STRING));
+                }
                 meta.getPersistentDataContainer().remove(keygen("soultwo"));
                 meta.getPersistentDataContainer().remove(keygen("soulownertwo"));
-                item.setItemMeta(meta);
+            }
+        }
+
+        if (imbuerUuid != null) {
+            Player imbuer = Bukkit.getPlayer(imbuerUuid);
+            if (imbuer != null) {
+                setHasImbuedItem(imbuer, false);
+            } else {
+                // If offline, we'd need another way to clear it, but for now let's hope they are online or use a more robust system later.
+                // Actually, since it's in PDC, we can't easily clear it if they are offline without loading their data.
+                // But the requirement says "player can only imbue one item", so if they unimbue it (or someone else does), they should be free.
+            }
+        }
+
+        List<Component> lore = meta.lore();
+        if (lore != null) {
+            lore.removeIf(component -> MiniMessage.miniMessage().serialize(component).contains("Imbued by:"));
+            meta.lore(lore);
+        }
+
+        item.setItemMeta(meta);
+    }
+    public static void unimbuePlayer(Player player) {
+        setHasImbuedItem(player, false);
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            for (ItemStack item : onlinePlayer.getInventory().getContents()) {
+                if (item != null && isImbued(item)) {
+                    ItemMeta meta = item.getItemMeta();
+                    boolean modified = false;
+                    if (meta.getPersistentDataContainer().has(keygen("soulowner"), PersistentDataType.STRING)) {
+                        String ownerUuid = meta.getPersistentDataContainer().get(keygen("soulowner"), PersistentDataType.STRING);
+                        if (player.getUniqueId().toString().equals(ownerUuid)) {
+                            UnImbueItem(item, 0);
+                            modified = true;
+                        }
+                    }
+                    if (!modified && meta.getPersistentDataContainer().has(keygen("soulownertwo"), PersistentDataType.STRING)) {
+                        String ownerUuid = meta.getPersistentDataContainer().get(keygen("soulownertwo"), PersistentDataType.STRING);
+                        if (player.getUniqueId().toString().equals(ownerUuid)) {
+                            UnImbueItem(item, 1);
+                        }
+                    }
+                }
             }
         }
     }

@@ -64,4 +64,10 @@ commands:
     description: "Imbue"
   unimbue:
     description: "Unimbue"
+  acceptimbue:
+    description: "Accept imbue request"
+  denyimbue:
+    description: "Deny imbue request"
+  forceunimbue:
+    description: "Force unimbue slot"
 softdepend: [ "SkinsRestorer", "packetevents" ]

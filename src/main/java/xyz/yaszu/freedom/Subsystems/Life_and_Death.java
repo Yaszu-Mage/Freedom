@@ -90,12 +90,12 @@ public class Life_and_Death implements org.bukkit.event.Listener{
     public void Player_Join_Event(PlayerJoinEvent event) {
         if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
             for (Player player : Bukkit.getOnlinePlayers() ) {
-                if (!player_util.does_player_have_tag(player,"ghost") && player != event.getPlayer() ) {
-
+                if (player.getWorld().getName().equals("doublevoid") || player_util.does_player_have_tag(player, "ghost")) {
+                    player.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
+                } else if (!player_util.does_player_have_tag(player,"ghost") && player != event.getPlayer() ) {
                     event.getPlayer().setAllowFlight(true);
                     player.hidePlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
                 } else {
-
                     player.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
                 }
             }
@@ -117,7 +117,9 @@ public class Life_and_Death implements org.bukkit.event.Listener{
         }
         if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
             for (Player player : Bukkit.getOnlinePlayers() ) {
-                if (!player_util.does_player_have_tag(player,"ghost") && player != event.getPlayer() ) {
+                if (player.getWorld().getName().equals("doublevoid") || player_util.does_player_have_tag(player, "ghost")) {
+                    player.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
+                } else if (!player_util.does_player_have_tag(player,"ghost") && player != event.getPlayer() ) {
                     player.hidePlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
                 } else {
                     player.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), event.getPlayer());
@@ -142,6 +144,7 @@ public class Life_and_Death implements org.bukkit.event.Listener{
         player.teleport(location);
         clearPlayerPersistentData(player);
         player.getInventory().clear();
+        SoulImbueManager.unimbuePlayer(player);
         Random random = new Random();
         int random_int = random.nextInt(1,4);
         switch (random_int) {
@@ -180,14 +183,14 @@ public class Life_and_Death implements org.bukkit.event.Listener{
 
     @EventHandler
     public void DamageEvent(EntityDamageEvent event) {
-        if (event.getEntity().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getEntity().getPersistentDataContainer().has(keygen("ghost")) && !event.getEntity().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void HungerEvent(FoodLevelChangeEvent event) {
-        if (event.getEntity().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getEntity().getPersistentDataContainer().has(keygen("ghost")) && !event.getEntity().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
@@ -195,7 +198,7 @@ public class Life_and_Death implements org.bukkit.event.Listener{
     @EventHandler
     public void BlockBreakEvent(org.bukkit.event.block.BlockBreakEvent event) {
 
-        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && !event.getPlayer().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
@@ -211,27 +214,27 @@ public class Life_and_Death implements org.bukkit.event.Listener{
 
     @EventHandler
     public void GhostPickupEvent(PlayerAttemptPickupItemEvent event){
-        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && !event.getPlayer().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void GhostInteractEvent(PlayerInteractEntityEvent event){
-        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && !event.getPlayer().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void GhostBlockInteract(PlayerInteractEntityEvent event){
-        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && !event.getPlayer().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void GhostMoveEvent(PlayerArmorStandManipulateEvent event){
-        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && !event.getPlayer().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
@@ -239,14 +242,14 @@ public class Life_and_Death implements org.bukkit.event.Listener{
 
     @EventHandler
     public void GhostMoveEvent(PrePlayerAttackEntityEvent event){
-        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
+        if (event.getPlayer().getPersistentDataContainer().has(keygen("ghost")) && !event.getPlayer().getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void GhostChestEvent(InventoryClickEvent event){
         Player player = (Player) event.getWhoClicked();
-        if (player.getPersistentDataContainer().has(keygen("ghost"))) {
+        if (player.getPersistentDataContainer().has(keygen("ghost")) && !player.getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }
@@ -254,7 +257,7 @@ public class Life_and_Death implements org.bukkit.event.Listener{
     @EventHandler
     public void GhostChestEvent3(InventoryInteractEvent event){
         Player player = (Player) event.getWhoClicked();
-        if (player.getPersistentDataContainer().has(keygen("ghost"))) {
+        if (player.getPersistentDataContainer().has(keygen("ghost")) && !player.getWorld().getName().equals("doublevoid")) {
             event.setCancelled(true);
         }
     }

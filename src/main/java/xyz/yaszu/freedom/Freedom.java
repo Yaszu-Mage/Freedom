@@ -335,6 +335,9 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(soulImbueManager.visit());
             commands.registrar().register(soulImbueManager.imbue());
             commands.registrar().register(soulImbueManager.unimbue());
+            commands.registrar().register(soulImbueManager.acceptImbue());
+            commands.registrar().register(soulImbueManager.denyImbue());
+            commands.registrar().register(soulImbueManager.forceUnimbue());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
