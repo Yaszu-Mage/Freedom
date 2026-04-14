@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -43,7 +44,7 @@ public class BaseNone extends Util implements Base_Soul, Listener {
 
     @Override
     public void AbilityOne(Player player) {
-
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class BaseNone extends Util implements Base_Soul, Listener {
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
     }
 
     @Override

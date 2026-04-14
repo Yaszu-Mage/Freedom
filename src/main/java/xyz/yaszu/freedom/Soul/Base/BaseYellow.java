@@ -63,6 +63,8 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
     @Override
     public void AbilityOne(Player player) {
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())){
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.5f);
             drawClock(
                     player.getLocation(),
                     1.5,
@@ -152,6 +154,9 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
 
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BELL_USE, 1.0f, 0.8f);
+        player.getWorld().spawnParticle(Particle.SOUL, player.getLocation().add(0, 1, 0), 50, 1.0, 1.0, 1.0, 0.1);
 
         Scoreboard score = Bukkit.getScoreboardManager().getMainScoreboard();
         Team team;
@@ -225,6 +230,10 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
             }
         player.setScoreboard(score);
         abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+        } else {
+            double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+            player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
     }
 
@@ -284,6 +293,7 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
                     } catch (Exception ignored) {}
 
                     player.getWorld().playSound(player.getLocation(), "custom.orchestra0",1,1);
+                    player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.1);
                 }
                 case 2 -> {
                     player.getPersistentDataContainer().set(keygen("clockcoil"), PersistentDataType.INTEGER, 3);
@@ -295,6 +305,7 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
                         player.getAttribute(Attribute.ATTACK_SPEED).removeModifier(new AttributeModifier(keygen("clockcoil"),-0.2, AttributeModifier.Operation.ADD_NUMBER));
                     } catch (Exception ignored) {}
                     player.getWorld().playSound(player.getLocation(), "custom.orchestra0",1,1.1f);
+                    player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.1);
                 }
                 case 3 -> {
                     player.getPersistentDataContainer().set(keygen("clockcoil"), PersistentDataType.INTEGER, 1);
@@ -306,11 +317,13 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
                         player.getAttribute(Attribute.ATTACK_SPEED).addModifier(new AttributeModifier(keygen("clockcoil"),-0.2, AttributeModifier.Operation.ADD_NUMBER));
                     } catch (Exception ignored) {}
                     player.getWorld().playSound(player.getLocation(), "custom.orchestra0",1,1.2f);
+                    player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.1);
                 }
             }
         } else {
             player.getPersistentDataContainer().set(keygen("clockcoil"), PersistentDataType.INTEGER, 1);
             player.getWorld().playSound(player.getLocation(), "custom.orchestra0",1,0);
+            player.getWorld().spawnParticle(Particle.ENCHANTED_HIT, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.1);
         }
 
     }

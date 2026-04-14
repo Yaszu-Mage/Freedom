@@ -61,7 +61,7 @@ public class FreedomKeys {
     public static NamespacedKey originalState() {
         return key("original_state");
     }
-
+    public static NamespacedKey alcohol() {return key("alcohol");}
 
     public static NamespacedKey sudoState() {
         return key("sudo_state");

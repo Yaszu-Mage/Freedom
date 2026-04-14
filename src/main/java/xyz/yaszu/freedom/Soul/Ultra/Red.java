@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -69,11 +70,13 @@ public class Red extends Util implements Base_Soul {
         PersistentDataContainer playerContainer = player.getPersistentDataContainer();
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
                 player.setVelocity(player.getLocation().getDirection().multiply(2));
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1.0f, 1.2f);
                 spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
             abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
             double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
 
 
@@ -89,8 +92,9 @@ public class Red extends Util implements Base_Soul {
                     this.cancel();
                 }
                 tick = tick + 1;
-                player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 0, 0), 5);
-                player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME,player.getLocation().add(0, 0, 0), 5);
+                player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 0, 0), 10, 0.2, 0.2, 0.2, 0.05);
+                player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME,player.getLocation().add(0, 0, 0), 10, 0.2, 0.2, 0.2, 0.05);
+                player.getWorld().spawnParticle(Particle.LAVA, player.getLocation().add(0, 0, 0), 2, 0.1, 0.1, 0.1, 0.02);
             }
         };
     }
@@ -122,10 +126,12 @@ public class Red extends Util implements Base_Soul {
     public void AbilityTwo(Player player,ItemStack abilityItem) {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
             abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_SHOOT, 1.0f, 1.0f);
             handleFireball(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
         } else {
             double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
     }
 

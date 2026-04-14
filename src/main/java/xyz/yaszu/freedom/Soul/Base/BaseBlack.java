@@ -109,7 +109,9 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                     }
                 }
                 drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.SMOKE);
+                drawCircle(player.getLocation(),0.5,player.getWorld(),8,Particle.LARGE_SMOKE);
                 drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
+                drawCircle(loadingLocation,0.5,player.getWorld(),8,Particle.DRAGON_BREATH);
             }
         }.runTaskTimer(Freedom.get_plugin(),20,20);
         new BukkitRunnable() {
@@ -178,6 +180,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                     drawCircle(loadingLocation,1,player.getWorld(),32,Particle.VAULT_CONNECTION);
                     player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BANJO,SoundCategory.PLAYERS,1,tick);
                     player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,SoundCategory.PLAYERS,1,tick-1);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 1.0f, 0.5f);
                 }
                 tick = tick + 1;
             }
@@ -256,6 +259,8 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
             player.playSound(player.getLocation(),Sound.BLOCK_DISPENSER_DISPENSE,1,1);
+            player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 0.5f);
+            player.getWorld().spawnParticle(Particle.WITCH, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.05);
             InventoryGui inventoryGui = new InventoryGui();
             inventoryGui.setInventory(player);
             player.openInventory(inventoryGui.getInventory());
@@ -265,6 +270,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
                 double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
                 player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
             }
         }
         if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {

@@ -84,6 +84,8 @@ public class BaseGreen extends Util implements Base_Soul {
                 registerSprite(player, player);
             }
         }
+    } else {
+        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
     }
 }
     public static void removeOldFollowers() {
@@ -102,6 +104,8 @@ public class BaseGreen extends Util implements Base_Soul {
     public void registerSprite(Player target, Player player) {
         target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 2));
         Location location = target.getLocation();
+        target.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, location.clone().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.1);
+        target.getWorld().playSound(location, Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 1.0f, 1.5f);
         Entity entity = target.getWorld().spawnEntity(location, EntityType.WOLF);
         entity.setCustomName(player.getName() + "'s Sprite");
         entity.setCustomNameVisible(true);
@@ -181,14 +185,17 @@ public class BaseGreen extends Util implements Base_Soul {
     public void AbilityTwo(Player player, ItemStack ability_item) {
         //
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 0.8f);
         new BukkitRunnable() {
             int tick = 0;
             @Override
             public void run() {
+                player.getWorld().spawnParticle(Particle.COMPOSTER, player.getLocation().add(0, 1, 0), 30, 2.0, 1.0, 2.0, 0.1);
                 player.getLocation().getNearbyEntitiesByType(Player.class, 10).forEach(iterator -> {
                         if ((TrustManager.isTrustedBy(iterator, player) || TrustManager.isTrustedByName(iterator, player.getName())) && iterator.getLocation().distanceSquared(player.getLocation()) <= 100) {
                             iterator.addPotionEffect(PotionEffectType.INSTANT_HEALTH.createEffect(1, 0));
-                            iterator.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, iterator.getLocation(),8);
+                            iterator.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, iterator.getLocation(),15, 0.3, 0.5, 0.3, 0.05);
+                            iterator.getWorld().playSound(iterator.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f);
                             if (!player.hasPotionEffect(PotionEffectType.SLOWNESS)) {
                                 player.addPotionEffect(PotionEffectType.SLOWNESS.createEffect(120, 0));
                             } else {
@@ -205,7 +212,11 @@ public class BaseGreen extends Util implements Base_Soul {
                 }
             }
         }.runTaskTimer(Freedom.get_plugin(),0,80);
-
+        abilityTwoCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+    } else {
+        double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+        player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
     }
     }
 

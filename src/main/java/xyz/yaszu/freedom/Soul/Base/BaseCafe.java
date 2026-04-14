@@ -71,6 +71,7 @@ public class BaseCafe extends Util implements Base_Soul {
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 0.5f);
             new BukkitRunnable() {
                 int tick = 0;
                 @Override
@@ -97,7 +98,9 @@ public class BaseCafe extends Util implements Base_Soul {
                         this.cancel();
                     }
                     player.getLocation().getWorld().playSound(player.getLocation(), Sound.UI_BUTTON_CLICK,1,1);
+                    player.getLocation().getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 0.5f);
                     drawCircle(player.getLocation(),1,player.getLocation().getWorld(),16, Particle.LANDING_HONEY);
+                    drawCircle(player.getLocation(),1,player.getLocation().getWorld(),8, Particle.DUST, new Particle.DustOptions(Color.MAROON, 1.0f));
                     drawCircle(player.getLocation(),5,player.getLocation().getWorld(),16,Particle.SWEEP_ATTACK);
                     tick++;
                 }
@@ -111,6 +114,11 @@ public class BaseCafe extends Util implements Base_Soul {
             abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
             // TODO no no ability + time
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+            if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
+                double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+                player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
+            }
         }
     }
 

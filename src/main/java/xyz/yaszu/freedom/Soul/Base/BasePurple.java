@@ -68,12 +68,14 @@ public class BasePurple extends Util implements Base_Soul {
 
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             World world = player.getWorld();
+            world.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1.2f);
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
             Vector velocity = player.getVelocity();
             drawStar(player.getLocation().add(0,1,0), 1.4, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 3));
             drawStar(player.getLocation().add(0,1,0), 2, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.YELLOW, 2));
             drawStar(player.getLocation().add(0,1,0), 0.5, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.BLACK, 8));
         Location location = player.getLocation().add(player.getLocation().getDirection().multiply(5));
+        //Location location = player.getLocation().add(player.getEyeLocation().getDirection().multiply(5));
         //Location location = player.getLocation().add(player.getEyeLocation().getDirection().multiply(5));
 //        while (!location.getBlock().isEmpty() && !location.add(0,1,0).getBlock().isEmpty()) {
 //
@@ -94,6 +96,7 @@ public class BasePurple extends Util implements Base_Soul {
 
         }
         player.setVelocity(velocity.multiply(1.1).add(player.getLocation().getDirection()));
+            world.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.8f);
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
             drawIsoscelesTriangle(player.getLocation(), 0.8, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.BLACK, 8));
         drawIsoscelesTriangle(player.getLocation(), 1.5, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 4));
@@ -103,6 +106,7 @@ public class BasePurple extends Util implements Base_Soul {
             player.sendActionBar(dess("You can't use this ability yet"));
             double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
     }
 
@@ -137,12 +141,15 @@ public class BasePurple extends Util implements Base_Soul {
 
         player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
         player.getWorld().playSound(player.getLocation(),Sound.ENTITY_WARDEN_SONIC_BOOM,10f,0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+        player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, player.getLocation().add(player.getLocation().getDirection()), 1);
 
         handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
         abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
             double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
 }
 
@@ -159,7 +166,8 @@ public class BasePurple extends Util implements Base_Soul {
                     snipeLocation = player.getLocation().add(0,1,0);
                 }
                 if (snipeLocation != player.getLocation()) {
-                    world.spawnParticle(Particle.REVERSE_PORTAL,snipeLocation,30);
+                    world.spawnParticle(Particle.REVERSE_PORTAL,snipeLocation,30, 0.1, 0.1, 0.1, 0.05);
+                    world.spawnParticle(Particle.WITCH, snipeLocation, 5, 0.05, 0.05, 0.05, 0.02);
                 } else {
                     createVerticleMinMagicCircle(snipeLocation.clone().add(player.getLocation().getDirection()),15, SoulTypes.Purple,player.getLocation().getYaw(),player.getLocation(),100,0.25);
                 }
@@ -172,6 +180,8 @@ public class BasePurple extends Util implements Base_Soul {
                             if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                                 LivingEntity entity = (LivingEntity) inst;
                                 entity.damage(4.5 + player.getLocation().distance(snipeLocation)/2, player);
+                                entity.getWorld().spawnParticle(Particle.FLASH, entity.getLocation().add(0, 1, 0), 1);
+                                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
                                 this.cancel();
                             }
                         }
@@ -179,6 +189,8 @@ public class BasePurple extends Util implements Base_Soul {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                             LivingEntity entity = (LivingEntity) inst;
                             entity.damage(4.5+ player.getLocation().distance(snipeLocation)/2, player);
+                            entity.getWorld().spawnParticle(Particle.FLASH, entity.getLocation().add(0, 1, 0), 1);
+                            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
                             this.cancel();
                         }
                     }

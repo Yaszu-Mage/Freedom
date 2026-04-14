@@ -88,7 +88,9 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                 player.addPotionEffect(new PotionEffect(pot.getType(),pot.getDuration(),pot.getAmplifier() + 1,pot.isAmbient(),pot.hasParticles()));
                 Color color = Color.ORANGE;
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING,1,4);
+                player.playSound(player.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 1.0f, 2.0f);
                 drawSpiral(player.getLocation(),8, 3,player.getWorld(),64, Particle.DUST,new Particle.DustOptions(color,8f));
+                player.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.1);
             }
             List<Entity> entities = player.getNearbyEntities(2,2,2);
             for (Entity entity : entities) {
@@ -108,9 +110,11 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                                 player.sendMessage(dess("<shadow:#000000FF><b><green>Amplified: </shadow></b>" + pot.getType().toString() + ", duration " + pot.getDuration() + "."));
                                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING,1,1);
                                 playeriterated.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING,1,1);
+                                playeriterated.playSound(playeriterated.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 1.0f, 2.0f);
                                 playeriterated.addPotionEffect(new PotionEffect(pot.getType(),pot.getDuration(),pot.getAmplifier() + 1,pot.isAmbient(),pot.hasParticles()));
                                 Color color = Color.ORANGE;
                                 drawSpiral(player.getLocation(),6, 3,player.getWorld(),16, Particle.DUST,new Particle.DustOptions(color,1.0f));
+                                playeriterated.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, playeriterated.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.1);
                             }
                         }
                     }
@@ -153,11 +157,13 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().getOrDefault(keygen("disguised"), PersistentDataType.BOOLEAN, false)) {
             if (Bukkit.getOnlinePlayers().size() >= 2) {
                 player.playSound(player.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE,1,1);
+                player.playSound(player.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1.0f, 1.0f);
                 InventoryGui inventoryGui = new InventoryGui();
                 inventoryGui.setInventory(player);
                 player.openInventory(inventoryGui.getInventory());
             } else {
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING,1,-1);
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
                 player.sendMessage(dess("<shadow:#000000FF><b><Red>ERROR</Red>:</shadow> You need at least <shadow:#000000FF><b>2</shadow> players online to use this ability!"));
             }
 
@@ -167,6 +173,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
                 double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
                 player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
             } else {
 
             }

@@ -23,6 +23,8 @@ import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
 import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
+import xyz.yaszu.freedom.Items.Parts.Ale;
+import xyz.yaszu.freedom.Items.Parts.Beer;
 import xyz.yaszu.freedom.Items.Parts.Burger;
 import xyz.yaszu.freedom.Items.Parts.SpellFocus;
 import xyz.yaszu.freedom.Items.Relics.Glock;
@@ -39,6 +41,8 @@ public class ItemListener extends Util implements Listener {
     public static final Map<String, BaseItem> ITEMS = new HashMap<>();
 
     public static void registerItems() {
+        register(new Ale(),"ale");
+        register(new Beer(),"beer");
         register(new Evolve(), "evolutionstone");
         register(new Revival(), "revival");
         register(new Rifle(), "rifle");
@@ -50,11 +54,10 @@ public class ItemListener extends Util implements Listener {
         register(new SpellFocus.Orb(), "orb");
         register(new SpellFocus.Staff(), "staff");
         register(new SpellFocus.Grimoire(), "grimoire");
-
         ArtifactManager.registerArtifacts();
-        for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
-            register(artifact, artifact.getID());
-        }
+//        for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
+//            register(artifact, artifact.getID());
+//        }
     }
 
     private static void register(BaseItem item, String id) {

@@ -84,6 +84,8 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
                     player.teleport(doubleloc);
                     mochacafe.teleport(location);
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                    mochacafe.getWorld().playSound(mochacafe.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
                     abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
                     abilityOneCooldowns.put(mochacafe.getUniqueId(),System.currentTimeMillis());
                     location = location.add(0,0.5,0);
@@ -135,11 +137,14 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
 
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.0f);
             new BukkitRunnable() {
                 public static List<Entity> affectedEntities = new ArrayList<>();
                 int tick = 0;
                 @Override
                 public void run() {
+                    player.getWorld().spawnParticle(Particle.ENCHANTED_HIT, player.getLocation().add(0, 1, 0), 10, 2.0, 1.0, 2.0, 0.1);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 0.5f, 1.5f);
                     List<Entity> nearguys = player.getNearbyEntities(5,5,5);
                     Player ignoreplayer = player;
                     for (Entity affected : affectedEntities) {
@@ -199,6 +204,11 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
             abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
             // TODO no no ability + time
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+            if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
+                double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+                player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
+            }
         }
     }
 

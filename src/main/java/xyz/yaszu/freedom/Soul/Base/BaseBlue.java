@@ -57,9 +57,13 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
 
     @Override
     public void AbilityOne(Player player) {
-        if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) return;
+        if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) {
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+            return;
+        }
         abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         player.getWorld().playSound(player.getLocation(),"custom.timestop",1.5f,1);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.5f, 2.0f);
         new BukkitRunnable() {
             int tick = 0;
             HashMap<UUID, Location> locations = new HashMap<>();
@@ -91,6 +95,8 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                         } else {
                             locations.put(iterator.getUniqueId(),iterator.getLocation());
                             iterator.teleport(locations.get(iterator.getUniqueId()));
+                            iterator.getWorld().spawnParticle(Particle.SNOWFLAKE, iterator.getLocation().add(0, 1, 0), 20, 0.5, 0.8, 0.5, 0.05);
+                            iterator.getWorld().playSound(iterator.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 0.5f);
                         }
                         iterator.setVelocity(new Vector(0,0,0));
                     }
@@ -147,7 +153,9 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                     }
                 }
                 drawCircle(player.getLocation(),1,player.getWorld(),16, Particle.SMOKE);
+                drawCircle(player.getLocation(),1,player.getWorld(),8, Particle.BUBBLE);
                 drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
+                drawCircle(loadingLocation,1,player.getWorld(),8, Particle.SOUL);
             }
         }.runTaskTimer(Freedom.get_plugin(),20,20);
         new BukkitRunnable() {
@@ -315,6 +323,8 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
         player.getPersistentDataContainer().set(keygen("bluesaveZ"), PersistentDataType.DOUBLE, player.getLocation().getZ());
         player.getPersistentDataContainer().set(keygen("blueworld"), PersistentDataType.STRING, player.getWorld().getName());
         player.sendActionBar(dess("Saved Location at (" + player.getLocation().getX() + "," + player.getLocation().getY() + "," + player.getLocation().getZ() + ")"));
+        player.getWorld().spawnParticle(Particle.ENTITY_EFFECT, player.getLocation(), 30, 0.5, 1.0, 0.5, 1.0, Color.AQUA);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 1.0f, 1.5f);
         new BukkitRunnable() {
             int tick = 0;
             @Override
@@ -384,6 +394,8 @@ BaseYellow yellow = new BaseYellow();
                 item.setItemMeta((ItemMeta) damageable);
                 player.getPersistentDataContainer().set(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE,player.getPersistentDataContainer().get(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE) - 5);
                 player.sendMessage(dess("Healed 25 durability."));
+                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 0.5f, 2.0f);
+                player.getWorld().spawnParticle(Particle.SCRAPE, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
             }
 
 
