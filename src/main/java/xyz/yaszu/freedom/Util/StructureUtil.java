@@ -93,7 +93,6 @@ public class StructureUtil {
                     if (block.getType() == Material.AIR || block.getType() == Material.CAVE_AIR || block.getType() == Material.WATER || block.getType() == Material.LAVA) {
                         block.setType(material);
                     } else {
-                        // Stop if we hit solid ground? The requirement says "all blocks under the structure match"
                         // Usually this means filling until we hit something non-air/non-liquid to ground it.
                         break;
                     }

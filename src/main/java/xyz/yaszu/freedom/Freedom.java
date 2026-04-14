@@ -294,6 +294,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(artifactManager, this);
         artifactManager.startTask();
         xyz.yaszu.freedom.Subsystems.ProvinceManager.loadProvinces();
+        TradeManager tradeManager = new TradeManager();
+        Bukkit.getPluginManager().registerEvents(tradeManager, this);
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
@@ -326,6 +328,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(duelManager.duel());
             commands.registrar().register(duelManager.savekit());
             commands.registrar().register(duelManager.saveAdminkit());
+            commands.registrar().register(TradeManager.tradeCommand());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
