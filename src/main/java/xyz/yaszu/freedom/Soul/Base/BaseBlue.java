@@ -164,6 +164,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
             Location loadingLocation = player.getLocation();
             @Override
             public void run() {
+                try{
                 if (loadingLocation != null) {
                     if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
                         player.sendMessage(dess("Too Far! (100 blocks)"));
@@ -293,6 +294,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                     player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,SoundCategory.PLAYERS,1,tick-1);
                 }
                 tick = tick + 1;
+            } catch (Exception ignored) {}
             }
             @Override
             public synchronized void cancel() throws IllegalStateException {

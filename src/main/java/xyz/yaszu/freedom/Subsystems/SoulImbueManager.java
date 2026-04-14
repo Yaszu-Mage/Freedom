@@ -75,7 +75,6 @@ public class SoulImbueManager extends Util implements Listener {
                                 damageable.setDamage(Math.max(0,damageable.getDamage() - 1));
                                 item.setItemMeta((ItemMeta) damageable);
                                 player.getPersistentDataContainer().set(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE,player.getPersistentDataContainer().get(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE) - 5);
-                                player.sendMessage(dess("Healed 25 durability."));
                             }
                         }
                         case Orange,BaseOrange -> {

@@ -163,6 +163,7 @@ public class Blue extends Util implements Base_Soul, Listener {
             Location loadingLocation = player.getLocation();
             @Override
             public void run() {
+                try {
                 if (player.getPersistentDataContainer().has(keygen("blueworld"),PersistentDataType.STRING)) {
                     loadingLocation = new Location(
                             Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blueworld"),PersistentDataType.STRING)),
@@ -280,6 +281,7 @@ public class Blue extends Util implements Base_Soul, Listener {
                     player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,SoundCategory.PLAYERS,1,tick-1);
                 }
                 tick = tick + 1;
+            }catch (Exception ignored) {}
             }
             @Override
             public synchronized void cancel() throws IllegalStateException {

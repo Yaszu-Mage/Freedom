@@ -69,7 +69,8 @@ public class Mocha extends Util implements Base_Soul, Listener {
                     } else {
                         doubleclock.sendMessage(player.getName() + " has rescinded their request to swap.");
                     }
-
+                if (doubleclock.getWorld() != player.getWorld()) return;
+                if (doubleclock.getWorld() == Bukkit.getWorld("doublevoid") || player.getWorld() == Bukkit.getWorld("doublevoid")) return;
                 if (doubleclock.getLocation().distanceSquared(player.getLocation()) <= 10000) {
                 if (doubleclock.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN)) {
                     player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN,false);
