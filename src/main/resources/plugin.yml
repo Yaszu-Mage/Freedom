@@ -58,4 +58,10 @@ commands:
     description: "Save kit"
   saveadminkit:
     description: "Save admin kit"
+  visit:
+    description: "Visit"
+  imbue:
+    description: "Imbue"
+  unimbue:
+    description: "Unimbue"
 softdepend: [ "SkinsRestorer", "packetevents" ]

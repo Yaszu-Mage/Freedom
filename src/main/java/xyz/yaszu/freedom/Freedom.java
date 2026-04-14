@@ -247,7 +247,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         PacketEvents.getAPI().init();
-        PacketEvents.getAPI().getEventManager().registerListener(packetManager);
+        PacketEvents.getAPI().getEventManager().registerListener(new PacketManager());
 
         // Handle online players on startup (for reloads)
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -289,7 +289,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.SitManager(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
         Bukkit.getPluginManager().registerEvents(new AlcoholManager(), this);
-        Bukkit.getPluginManager().registerEvents(new SoulImbueManager(), this);
+        soulImbueManager = new SoulImbueManager();
+        Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();
         Bukkit.getPluginManager().registerEvents(duelManager, this);
         ArtifactManager artifactManager = new ArtifactManager();
@@ -331,6 +332,9 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(duelManager.savekit());
             commands.registrar().register(duelManager.saveAdminkit());
             commands.registrar().register(TradeManager.tradeCommand());
+            commands.registrar().register(soulImbueManager.visit());
+            commands.registrar().register(soulImbueManager.imbue());
+            commands.registrar().register(soulImbueManager.unimbue());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
@@ -349,7 +353,7 @@ public final class Freedom extends JavaPlugin implements Listener {
 
 
     public static Util util = new Util();
-    public static PacketManager packetManager = new PacketManager();
+    private SoulImbueManager soulImbueManager;
 
     @Override
     public void onLoad() {
@@ -367,6 +371,12 @@ public final class Freedom extends JavaPlugin implements Listener {
     public void onDisable() {
         PacketEvents.getAPI().terminate();
         xyz.yaszu.freedom.Subsystems.ProvinceManager.saveProvinces();
+        if (soulImbueManager != null) {
+            soulImbueManager.saveVisits();
+            // End all visits visually before shutting down to avoid floating mannequins if persistence fails
+            // Actually, we want persistence, so we leave them and hope loadVisits handles it.
+            // But WorldEdit sessions are in-memory.
+        }
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
     }

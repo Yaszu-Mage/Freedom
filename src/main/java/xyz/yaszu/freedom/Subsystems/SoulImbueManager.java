@@ -18,9 +18,11 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,15 +30,21 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.potion.PotionEffect;
 
 public class SoulImbueManager extends Util implements Listener {
 
@@ -96,48 +104,273 @@ public class SoulImbueManager extends Util implements Listener {
         return item.getItemMeta().getPersistentDataContainer().has(keygen("soul"));
     }
 
-    public HashMap<Location, EditSession> activeVisits = new HashMap<>();
+    public SoulImbueManager() {
+        startSyncTask();
+        loadVisits();
+    }
+
+    private void startSyncTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (UUID visitorUuid : activeVisitsByVisitor.keySet()) {
+                    UUID targetUuid = activeVisitsByVisitor.get(visitorUuid);
+                    Player visitor = Bukkit.getPlayer(visitorUuid);
+                    Player target = Bukkit.getPlayer(targetUuid);
+                    Mannequin mannequin = mannequins.get(targetUuid);
+
+                    if (visitor == null || !visitor.isOnline() || target == null || !target.isOnline() || mannequin == null || !mannequin.isValid()) {
+                        if (visitor != null && visitor.isOnline()) {
+                            endVisit(visitor);
+                        }
+                        continue;
+                    }
+
+                    // Sync target -> mannequin
+                    mannequin.setHealth(target.getHealth());
+                    mannequin.setFireTicks(target.getFireTicks());
+                    // Clear and add potion effects
+                    for (PotionEffect effect : mannequin.getActivePotionEffects()) {
+                        mannequin.removePotionEffect(effect.getType());
+                    }
+                    mannequin.addPotionEffects(target.getActivePotionEffects());
+                }
+            }
+        }.runTaskTimer(xyz.yaszu.freedom.Freedom.get_plugin(), 0, 5); // Sync every 5 ticks
+    }
+
+    public void saveVisits() {
+        File file = new File(xyz.yaszu.freedom.Freedom.get_plugin().getDataFolder(), "visits.yml");
+        YamlConfiguration config = new YamlConfiguration();
+
+        int i = 0;
+        for (UUID visitorUuid : activeVisitsByVisitor.keySet()) {
+            UUID targetUuid = activeVisitsByVisitor.get(visitorUuid);
+            config.set("visits." + i + ".visitor", visitorUuid.toString());
+            config.set("visits." + i + ".target", targetUuid.toString());
+            config.set("visits." + i + ".returnVisitor", returnLocations.get(visitorUuid));
+            config.set("visits." + i + ".returnTarget", returnLocations.get(targetUuid));
+            Mannequin m = mannequins.get(targetUuid);
+            if (m != null) {
+                config.set("visits." + i + ".mannequinLoc", m.getLocation());
+            }
+            i++;
+        }
+
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadVisits() {
+        File file = new File(xyz.yaszu.freedom.Freedom.get_plugin().getDataFolder(), "visits.yml");
+        if (!file.exists()) return;
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if (config.getConfigurationSection("visits") == null) return;
+
+        for (String key : config.getConfigurationSection("visits").getKeys(false)) {
+            UUID visitorUuid = UUID.fromString(config.getString("visits." + key + ".visitor"));
+            UUID targetUuid = UUID.fromString(config.getString("visits." + key + ".target"));
+            Location retVisitor = config.getLocation("visits." + key + ".returnVisitor");
+            Location retTarget = config.getLocation("visits." + key + ".returnTarget");
+            Location mannequinLoc = config.getLocation("visits." + key + ".mannequinLoc");
+
+            // We store these and re-link when both players are online
+            // For now, let's just re-teleport them if they are already online (e.g. reload)
+            Player visitor = Bukkit.getPlayer(visitorUuid);
+            Player target = Bukkit.getPlayer(targetUuid);
+
+            if (visitor != null && target != null && mannequinLoc != null) {
+                activeVisitsByVisitor.put(visitorUuid, targetUuid);
+                returnLocations.put(visitorUuid, retVisitor);
+                returnLocations.put(targetUuid, retTarget);
+
+                Mannequin mannequin = mannequinLoc.getWorld().spawn(mannequinLoc, Mannequin.class);
+                ResolvableProfile profile = ResolvableProfile.resolvableProfile(target.getPlayerProfile());
+                mannequin.setProfile(profile);
+                mannequin.getEquipment().setHelmet(target.getInventory().getHelmet());
+                mannequin.getEquipment().setChestplate(target.getInventory().getChestplate());
+                mannequin.getEquipment().setLeggings(target.getInventory().getLeggings());
+                mannequin.getEquipment().setBoots(target.getInventory().getBoots());
+                mannequin.setCustomName(target.getName());
+                mannequin.setCustomNameVisible(true);
+                mannequin.setHealth(target.getHealth());
+                
+                mannequins.put(targetUuid, mannequin);
+
+                BlockVector3 center = BlockVector3.at(mannequinLoc.x(), mannequinLoc.y(), mannequinLoc.z());
+                int radius = 5;
+                World world = BukkitAdapter.adapt(mannequinLoc.getWorld());
+                BlockVector3 pos1 = center.subtract(radius, radius, radius);
+                BlockVector3 pos2 = center.add(radius, radius, radius);
+                CuboidRegion region = new CuboidRegion(world, pos1, pos2);
+                EditSession editSession = WorldEdit.getInstance().newEditSession(world);
+                RandomPattern pattern = new RandomPattern();
+                pattern.add(BlockTypes.BLACK_CONCRETE.getDefaultState(), 1.0);
+                try {
+                    editSession.makeCuboidFaces(region, pattern);
+                } catch (MaxChangedBlocksException ignored) {}
+                
+                activeVisits.put(mannequinLoc.getBlock().getLocation(), editSession);
+            }
+        }
+        file.delete();
+    }
+
+    @EventHandler
+    public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
+        // Handle players joining back into a visit if necessary
+        // For simplicity, we end the visit if someone disconnects, so this might not be needed
+        // unless we want more robust persistence.
+    }
+
+    @EventHandler
+    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (activeVisitsByVisitor.containsKey(player.getUniqueId())) {
+            endVisit(player);
+        } else {
+            // Check if they are being visited
+            for (UUID visitorUuid : activeVisitsByVisitor.keySet()) {
+                if (activeVisitsByVisitor.get(visitorUuid).equals(player.getUniqueId())) {
+                    Player visitor = Bukkit.getPlayer(visitorUuid);
+                    if (visitor != null) endVisit(visitor);
+                    break;
+                }
+            }
+        }
+    }
+    public ConcurrentHashMap<UUID, Location> returnLocations = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<UUID, UUID> activeVisitsByVisitor = new ConcurrentHashMap<>(); // Visitor UUID -> Target UUID
+    public ConcurrentHashMap<UUID, Mannequin> mannequins = new ConcurrentHashMap<>(); // Target UUID -> Mannequin
+    public ConcurrentHashMap<Location, EditSession> activeVisits = new ConcurrentHashMap<>();
 
 
     public LiteralCommandNode<CommandSourceStack> visit() {
-        return Commands.literal("visit").executes( ctx -> {
+        return Commands.literal("visit").executes(ctx -> {
             if (ctx.getSource().getSender() instanceof Player player) {
+                if (activeVisitsByVisitor.containsKey(player.getUniqueId())) {
+                    endVisit(player);
+                    return Command.SINGLE_SUCCESS;
+                }
+
                 if (player.getInventory().getItemInMainHand() != null) {
-                    if (isImbued(player.getInventory().getItemInMainHand()) && isNotSelfImbued(player.getInventory().getItemInMainHand())) {
-                        ItemStack item = player.getInventory().getItemInMainHand();
-                        SoulTypes soulType = SoulTypes.valueOf(item.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-                        // Example for WorldEdit 7.x
-                        Location location = new Location(Bukkit.getWorld("doublevoid"),0,-60,0);
-                        while (activeVisits.containsKey(location)) {
-                            location = location.add(1000,0,0);
+                    ItemStack item = player.getInventory().getItemInMainHand();
+                    if (isImbued(item) && isNotSelfImbued(item)) {
+                        String ownerUuidStr = item.getItemMeta().getPersistentDataContainer().get(keygen("soulowner"), PersistentDataType.STRING);
+                        if (ownerUuidStr == null) {
+                            player.sendMessage(dess("<red>Invalid soul owner data."));
+                            return Command.SINGLE_SUCCESS;
+                        }
+                        UUID targetUuid = UUID.fromString(ownerUuidStr);
+                        Player target = Bukkit.getPlayer(targetUuid);
+                        if (target == null) {
+                            player.sendMessage(dess("<red>The soul owner is not online."));
+                            return Command.SINGLE_SUCCESS;
                         }
 
-
-                        BlockVector3 center = BlockVector3.at(location.x(), location.y(), location.z());
-                        int radius = 5; // Total size will be (radius * 2) + 1
-                        World world = BukkitAdapter.adapt(location.getWorld());
-                        BlockVector3 pos1 = center.subtract(radius, radius, radius);
-                        BlockVector3 pos2 = center.add(radius, radius, radius);
-
-                        CuboidRegion region = new CuboidRegion(world, pos1, pos2);
-
-                        // Create the hollow cube (only the 6 faces)
-                        EditSession editSession = WorldEdit.getInstance().newEditSession(world);
-                        RandomPattern pattern = new RandomPattern();
-                        pattern.add(BlockTypes.BLACK_CONCRETE.getDefaultState(),0.5);
-                        try {
-                            editSession.makeCuboidFaces(region, pattern);
-                        } catch (MaxChangedBlocksException e) {
-                            throw new RuntimeException(e);
+                        if (returnLocations.containsKey(player.getUniqueId())) {
+                            player.sendMessage(dess("<red>You are already in a visit!"));
+                            return Command.SINGLE_SUCCESS;
+                        }
+                        if (returnLocations.containsKey(target.getUniqueId())) {
+                            player.sendMessage(dess("<red>The target is already being visited!"));
+                            return Command.SINGLE_SUCCESS;
                         }
 
-                        activeVisits.put(location,editSession);
+                        startVisit(player, target);
+
                     } else {
+                        player.sendMessage(dess("<red>You must be holding an imbued item (not self-imbued) to visit."));
                     }
                 }
             }
             return Command.SINGLE_SUCCESS;
         }).build();
+    }
+
+    private void startVisit(Player player, Player target) {
+        Location location = new Location(Bukkit.getWorld("doublevoid"), 0, -60, 0);
+        while (activeVisits.containsKey(location)) {
+            location = location.clone().add(100, 0, 0);
+        }
+
+        Mannequin mannequin = location.getWorld().spawn(location, Mannequin.class);
+        ResolvableProfile profile = ResolvableProfile.resolvableProfile(target.getPlayerProfile());
+        mannequin.setProfile(profile);
+        mannequin.getEquipment().setHelmet(target.getInventory().getHelmet());
+        mannequin.getEquipment().setChestplate(target.getInventory().getChestplate());
+        mannequin.getEquipment().setLeggings(target.getInventory().getLeggings());
+        mannequin.getEquipment().setBoots(target.getInventory().getBoots());
+        mannequin.setCustomName(target.getName());
+        mannequin.setCustomNameVisible(true);
+        mannequin.setHealth(target.getHealth());
+        mannequin.setFireTicks(target.getFireTicks());
+        mannequin.setRemainingAir(target.getRemainingAir());
+        mannequin.setFallDistance(target.getFallDistance());
+
+        BlockVector3 center = BlockVector3.at(location.x(), location.y(), location.z());
+        int radius = 5;
+        World world = BukkitAdapter.adapt(location.getWorld());
+        BlockVector3 pos1 = center.subtract(radius, radius, radius);
+        BlockVector3 pos2 = center.add(radius, radius, radius);
+
+        CuboidRegion region = new CuboidRegion(world, pos1, pos2);
+
+        EditSession editSession = WorldEdit.getInstance().newEditSession(world);
+        RandomPattern pattern = new RandomPattern();
+        pattern.add(BlockTypes.BLACK_CONCRETE.getDefaultState(), 1.0);
+        try {
+            editSession.makeCuboidFaces(region, pattern);
+        } catch (MaxChangedBlocksException e) {
+            throw new RuntimeException(e);
+        }
+
+        activeVisits.put(location, editSession);
+        mannequins.put(target.getUniqueId(), mannequin);
+        activeVisitsByVisitor.put(player.getUniqueId(), target.getUniqueId());
+
+        Location spawnLoc = location.clone().add(0, 1, 0);
+        returnLocations.put(player.getUniqueId(), player.getLocation());
+        returnLocations.put(target.getUniqueId(), target.getLocation());
+
+        player.teleport(spawnLoc);
+        target.teleport(spawnLoc);
+
+        player.sendMessage(dess("<green>You are now visiting " + target.getName() + ". Use /visit again to end."));
+        target.sendMessage(dess("<green>" + player.getName() + " is visiting you."));
+    }
+
+    private void endVisit(Player player) {
+        UUID targetUuid = activeVisitsByVisitor.remove(player.getUniqueId());
+        if (targetUuid == null) return;
+
+        Player target = Bukkit.getPlayer(targetUuid);
+        Location returnPlayer = returnLocations.remove(player.getUniqueId());
+        if (returnPlayer != null && player.isOnline()) player.teleport(returnPlayer);
+
+        Location returnTarget = returnLocations.remove(targetUuid);
+        if (returnTarget != null && target != null && target.isOnline()) target.teleport(returnTarget);
+
+        Mannequin mannequin = mannequins.remove(targetUuid);
+        if (mannequin != null) {
+            Location loc = mannequin.getLocation().getBlock().getLocation();
+            EditSession editSession = activeVisits.remove(loc);
+            if (editSession != null) {
+                try (EditSession undoSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(loc.getWorld()))) {
+                    undoSession.undo(editSession);
+                }
+            }
+            mannequin.remove();
+        }
+
+        player.sendMessage(dess("<red>Visit ended."));
+        if (target != null && target.isOnline()) {
+            target.sendMessage(dess("<red>The visit has ended."));
+        }
     }
 
 
