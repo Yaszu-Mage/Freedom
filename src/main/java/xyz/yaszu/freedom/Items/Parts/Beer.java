@@ -39,7 +39,7 @@ public class Beer extends Util implements BaseItem {
 
     @Override
     public Recipe recipe() {
-        ShapelessRecipe recipe = new ShapelessRecipe(FreedomKeys.itemId(),item());
+        ShapelessRecipe recipe = new ShapelessRecipe(keygen("beer"),item());
         recipe.addIngredient(ItemStack.of(Material.WATER_BUCKET));
         recipe.addIngredient(ItemStack.of(Material.WHEAT));
         return recipe;

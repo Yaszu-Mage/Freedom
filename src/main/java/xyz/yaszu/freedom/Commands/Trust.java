@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static xyz.yaszu.freedom.Subsystems.AlcoholManager.removeAlcohol;
 import static xyz.yaszu.freedom.Util.Util.*;
 
 public class Trust {
@@ -175,7 +176,7 @@ public class Trust {
                             return Command.SINGLE_SUCCESS;
                         };
                         Location loc = target.getLocation();
-
+                        removeAlcohol(target,0);
 
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());

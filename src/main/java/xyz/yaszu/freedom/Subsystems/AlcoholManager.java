@@ -7,19 +7,59 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
+
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AlcoholManager extends Util implements Listener {
 
     public static int minSeconds = 4;
     public static int maxSeconds = 120;
+    private static final double TWO_PI = Math.PI * 2.0D;
+    private static final ConcurrentHashMap<UUID, DrunkSwayState> swayStates = new ConcurrentHashMap<>();
 
+    private static final class DrunkSwayState {
+        private final double phaseOffset;
+        private double smoothedOffset;
+        private double anchorX;
+        private double anchorZ;
+        private double passiveOffsetX;
+        private double passiveOffsetZ;
+        private double passiveTargetX;
+        private double passiveTargetZ;
+        private long nextRetargetAtMs;
+        private String worldName;
+
+        private DrunkSwayState(double phaseOffset, Location start) {
+            this.phaseOffset = phaseOffset;
+            this.anchorX = start.getX();
+            this.anchorZ = start.getZ();
+            this.worldName = start.getWorld() == null ? "" : start.getWorld().getName();
+            pickNewPassiveTarget(this, 1.0D);
+        }
+    }
+
+    private static void pickNewPassiveTarget(DrunkSwayState state, double maxRadius) {
+        double angle = random.nextDouble() * TWO_PI;
+        double radius = Math.sqrt(random.nextDouble()) * maxRadius;
+        state.passiveTargetX = Math.cos(angle) * radius;
+        state.passiveTargetZ = Math.sin(angle) * radius;
+        state.nextRetargetAtMs = System.currentTimeMillis() + random.nextLong(900L, 2200L);
+    }
+
+
+    public static void removeAlcohol(Player player,int alcoholpotency) {
+        player.getPersistentDataContainer().remove(FreedomKeys.alcohol());
+    }
 
     /**
      * Adds alcohol to a player.
@@ -52,48 +92,104 @@ public class AlcoholManager extends Util implements Listener {
     @EventHandler
     public void playerdrunkenmove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if (player.getPersistentDataContainer().has(FreedomKeys.alcohol())) {
-            int alcohollevel = 0;
-            try {
-                alcohollevel = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
-            }catch (Exception ignored) {}
-            switch (alcohollevel) {
-                case 1 -> {
-                    //sway with value of 0.1
-                    Location loc = event.getTo();
-                    event.setTo(loc.add(loc.clone().multiply(0.1)));
-                }
-                case 2 -> {
-                    //sway with value of 0.2
-                    Location loc = event.getTo();
-                    event.setTo(loc.add(loc.clone().multiply(0.2)));
-                }
-                case 3 -> {
-                    //sway with value of 0.3
-                    Location loc = event.getTo();
-                    event.setTo(loc.add(loc.clone().multiply(0.3)));
-
-                }
-                case 4 -> {
-                    Location loc = event.getTo();
-                    event.setTo(loc.add(loc.clone().multiply(0.4)));
-                    player.addPotionEffect(PotionEffectType.NAUSEA.createEffect(20,0));
-                    //sway with value of 0.4
-                    //nausea 1
-                    //drunken fist
-                }
-                case 5 -> {
-                    Location loc = event.getTo();
-                    event.setTo(loc.add(loc.clone().multiply(0.5)));
-                    player.addPotionEffect(PotionEffectType.NAUSEA.createEffect(20,1));
-                    //sway with value of 0.5
-                    //nausea 2
-                    //stronger drunken fist
-                }
-
-            }
+        int alcoholLevel = getAlcoholLevel(player);
+        if (alcoholLevel <= 0) {
+            swayStates.remove(player.getUniqueId());
+            return;
         }
 
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (to == null || from.getWorld() == null || to.getWorld() == null || from.getWorld() != to.getWorld()) {
+            return;
+        }
+
+        Vector horizontalMotion = to.toVector().subtract(from.toVector()).setY(0);
+        if (horizontalMotion.lengthSquared() < 1.0E-6D) {
+            return;
+        }
+
+        DrunkSwayState state = swayStates.computeIfAbsent(player.getUniqueId(), ignored -> new DrunkSwayState(random.nextDouble() * TWO_PI, to));
+        String worldName = to.getWorld().getName();
+        if (!worldName.equals(state.worldName)) {
+            state.anchorX = to.getX();
+            state.anchorZ = to.getZ();
+            state.passiveOffsetX = 0.0D;
+            state.passiveOffsetZ = 0.0D;
+            state.worldName = worldName;
+            pickNewPassiveTarget(state, 1.0D);
+        }
+
+        // Keep anchor following natural movement while passive offset moves around it.
+        state.anchorX += horizontalMotion.getX();
+        state.anchorZ += horizontalMotion.getZ();
+
+        long nowMs = System.currentTimeMillis();
+        if (nowMs >= state.nextRetargetAtMs) {
+            pickNewPassiveTarget(state, 1.0D);
+        }
+
+        // Smoothly chase the random target to create passive drifting motion.
+        double passiveBlend = 0.14D;
+        state.passiveOffsetX += (state.passiveTargetX - state.passiveOffsetX) * passiveBlend;
+        state.passiveOffsetZ += (state.passiveTargetZ - state.passiveOffsetZ) * passiveBlend;
+        double passiveLength = Math.hypot(state.passiveOffsetX, state.passiveOffsetZ);
+        if (passiveLength > 1.0D) {
+            state.passiveOffsetX = (state.passiveOffsetX / passiveLength);
+            state.passiveOffsetZ = (state.passiveOffsetZ / passiveLength);
+        }
+
+        double normalized = Math.min(alcoholLevel, 5) / 5.0D;
+        double amplitude = 0.03D + (0.15D * normalized);
+        double frequency = 0.8D + (1.4D * normalized);
+        double nowSeconds = System.currentTimeMillis() / 1000.0D;
+        double targetOffset = Math.sin((nowSeconds * TWO_PI * frequency) + state.phaseOffset) * amplitude;
+
+        // Smooth the wave to prevent sharp position snaps on uneven move event timing.
+        state.smoothedOffset += (targetOffset - state.smoothedOffset) * 0.35D;
+        state.smoothedOffset = Math.max(-0.22D, Math.min(0.22D, state.smoothedOffset));
+
+        Vector moveDirection = horizontalMotion.normalize();
+        Vector lateral = new Vector(-moveDirection.getZ(), 0, moveDirection.getX());
+        Vector activeOffset = lateral.multiply(state.smoothedOffset);
+
+        double swayX = state.anchorX + state.passiveOffsetX + activeOffset.getX();
+        double swayZ = state.anchorZ + state.passiveOffsetZ + activeOffset.getZ();
+        double swayY = to.getY();
+        float yaw = to.getYaw();
+        float pitch = to.getPitch();
+
+        // Apply sway directly to the destination without teleporting
+        // by smoothly moving the player toward the swayed position incrementally
+        Location adjusted = to.clone();
+        adjusted.setX(swayX);
+        adjusted.setZ(swayZ);
+        event.setTo(adjusted);
+
+        if (alcoholLevel >= 5) {
+            player.addPotionEffect(PotionEffectType.NAUSEA.createEffect(20, 1));
+        } else if (alcoholLevel >= 4) {
+            player.addPotionEffect(PotionEffectType.NAUSEA.createEffect(20, 0));
+        }
+    }
+
+    private void sendSwayPacket(Player player, double x, double y, double z, float yaw, float pitch) {
+        try {
+            // Sway is applied directly via event.setTo() instead of teleporting
+            // This avoids jumpy client-side movements
+        } catch (Exception ignored) {
+            // Fallback if packet sending fails
+        }
+    }
+
+    private int getAlcoholLevel(Player player) {
+        Integer alcohol = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
+        return alcohol == null ? 0 : alcohol;
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        swayStates.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

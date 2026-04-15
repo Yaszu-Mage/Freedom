@@ -17,7 +17,7 @@ public class TabDistance implements Listener {
         if (!Life_and_Death.is_alive(player)) return;
         ArrayList<Player> players = new ArrayList<>();
         for (Player instancedplayer : player.getLocation().getNearbyEntitiesByType(Player.class, tabradius) ) {
-            if (Life_and_Death.is_alive(instancedplayer)) {
+            if (Life_and_Death.is_alive(instancedplayer) || instancedplayer.getWorld() == Bukkit.getWorld("doublevoid")) {
                 players.add(instancedplayer);
             }
         }

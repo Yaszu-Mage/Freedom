@@ -269,7 +269,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new black_flash(),this);
         Bukkit.getPluginManager().registerEvents(new Life_and_Death(), this);
         Bukkit.getPluginManager().registerEvents(this,this);
-        Bukkit.getPluginManager().registerEvents(new Black(),this);
+        Bukkit.getPluginManager().registerEvents(new ChatManager(), this);
+        //Bukkit.getPluginManager().registerEvents(new Black(),this);
         Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
         Bukkit.getPluginManager().registerEvents(new Mocha(), this);
         Bukkit.getPluginManager().registerEvents(new Orange(),this);
@@ -289,6 +290,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.SitManager(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
         Bukkit.getPluginManager().registerEvents(new AlcoholManager(), this);
+        Bukkit.getPluginManager().registerEvents(new VoidManager(),this);
         soulImbueManager = new SoulImbueManager();
         Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();
