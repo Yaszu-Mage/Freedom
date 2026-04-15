@@ -19,9 +19,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Mannequin;
@@ -32,6 +30,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -43,6 +42,8 @@ import xyz.yaszu.freedom.Util.Util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
@@ -79,26 +80,47 @@ public class SoulImbueManager extends Util implements Listener {
                         }
                         case Purple,BasePurple -> {
                             //more xp
+                            int rand = random.nextInt(0,10);
+                            if (rand > 9) {
+                                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+                                player.teleport(event.getEntity().getLocation());
+                                drawStar(player.getLocation(),8,player.getWorld(),32, Particle.DUST,new Particle.DustOptions(Color.YELLOW,1f));
+                            }
                         }
                         case Yellow,BaseYellow,Blue,BaseBlue -> {
                             if (item.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable damageable) {
                                 // damage = 0 is full health, higher = more used
-                                damageable.setDamage(Math.max(0,damageable.getDamage() - 10));
+                                damageable.setDamage(Math.max(0,damageable.getDamage() - 2));
                                 item.setItemMeta((ItemMeta) damageable);
                                 player.getPersistentDataContainer().set(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE,player.getPersistentDataContainer().get(FreedomKeys.soulPoint(),PersistentDataType.DOUBLE) - 5);
                             }
                         }
                         case Orange,BaseOrange -> {
                             //turn into a cat
+                            Random random = new Random();
+                            int rand = random.nextInt(0,10);
+                            if (rand > 8) {
+                                drawSpiral(player.getLocation(),8,3,player.getWorld(),32, Particle.DUST,new Particle.DustOptions(Color.ORANGE,1f));
+                                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_CAT_PURR, 1, 1);
+                                player.addPotionEffect(PotionEffectType.SATURATION.createEffect(40,0));
+                            }
                         }
-                        case Cafe,BaseCafe -> {
-
+                        case Cafe,BaseCafe,Mocha,BaseMocha -> {
+                            Random random = new Random();
+                            int rand = random.nextInt(0,10);
+                            if (rand > 8) {
+                                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP, 1, 1);
+                                player.addPotionEffect(PotionEffectType.HASTE.createEffect(40, 0));
+                                player.addPotionEffect(PotionEffectType.SPEED.createEffect(40, 0));
+                            }
                         }
                         case Black,BaseBlack -> {
-                            //Idek
-                        }
-                        case Mocha,BaseMocha -> {
-
+                            int rand = random.nextInt(0,11);
+                            if (rand > 9) {
+                                drawStar(player.getLocation(),8,player.getWorld(),32, Particle.DUST,new Particle.DustOptions(Color.YELLOW,1f));
+                                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITCH_DRINK, 1, 1);
+                                player.addPotionEffect(PotionEffectType.INVISIBILITY.createEffect(40,0));
+                            }
                         }
                     }
                 }
@@ -136,14 +158,12 @@ public class SoulImbueManager extends Util implements Listener {
                     boolean isindoublevoid = visitor.getWorld().getName().equals("doublevoid");
                     if (visitor == null || !visitor.isOnline() || target == null || !target.isOnline() || mannequin == null || !isindoublevoid) {
                         if (visitor != null && visitor.isOnline()) {
-                            Freedom.get_plugin().getLogger().info("ENDING VISITING B");
                             endVisit(visitor);
                             try {
                                 mannequin.remove();
                             }catch (Exception ignored){}
 
                         }
-                        Freedom.get_plugin().getLogger().info("ENDING VISITING C");
                         endVisit(visitor);
                         continue;
                     }
@@ -166,6 +186,9 @@ public class SoulImbueManager extends Util implements Listener {
             }
         }.runTaskTimer(xyz.yaszu.freedom.Freedom.get_plugin(), 0, 5); // Sync every 5 ticks
     }
+
+
+
 
     public void saveVisits() {
         File file = new File(xyz.yaszu.freedom.Freedom.get_plugin().getDataFolder(), "visits.yml");
@@ -279,7 +302,6 @@ public class SoulImbueManager extends Util implements Listener {
                 Player target = Bukkit.getPlayer(targetUuid);
 
                 if (visitor != null && target != null) {
-                    Freedom.get_plugin().getLogger().info("SPAWNING MANNEQUIN");
                     spawnMannequin(visitor, mannequinLoc != null ? mannequinLoc : normalizedBoxLoc);
                 } else {
                     // They will be handled by join event or startSyncTask's online check if needed
@@ -496,7 +518,7 @@ public class SoulImbueManager extends Util implements Listener {
             return;
         }
 
-        spawnMannequin(player, returnTarget.clone());
+        spawnMannequin(player, returnVisitor.clone());
         BlockVector3 center = BlockVector3.at(location.x(), location.y(), location.z());
         int radius = 5;
         World world = BukkitAdapter.adapt(location.getWorld());
@@ -578,6 +600,10 @@ public class SoulImbueManager extends Util implements Listener {
             PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
             Player target = targetResolver.resolve(ctx.getSource()).getFirst();
             if (ctx.getSource().getSender() instanceof Player player) {
+                if (player.getWorld() == Bukkit.getWorld("doublevoid") || target.getWorld() == Bukkit.getWorld("doublevoid")) {
+                    player.sendMessage(dess("<red>You must be in a non-dev world to imbue items."));
+                    return Command.SINGLE_SUCCESS;
+                }
                 if (hasImbuedItem(player)) {
                     player.sendMessage(dess("<red>You have already imbued an item. You can only imbue one item at a time."));
                     return Command.SINGLE_SUCCESS;
@@ -660,6 +686,8 @@ public class SoulImbueManager extends Util implements Listener {
 
                 ImbueItem(item, requester, request.soulType(), false, requester);
                 target.sendMessage(dess("<green>Your item has been imbued by " + requester.getName() + "."));
+                requester.sendMessage(dess("<Red> DO NOT LOSE THE IMBUED ITEM"));
+                target.sendMessage(dess("<red>DO NOT LOSE THE IMBUED ITEM"));
                 requester.sendMessage(dess("<green>You have successfully imbued " + target.getName() + "'s item."));
             }
             return Command.SINGLE_SUCCESS;

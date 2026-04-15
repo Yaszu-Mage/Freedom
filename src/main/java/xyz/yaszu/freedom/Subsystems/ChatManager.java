@@ -39,7 +39,6 @@ public class ChatManager extends Util implements Listener {
             // Apply CurseManager modifications
             String processedMessage = CurseManager.handleChat(player, message);
             event.setMessage(processedMessage);
-
             boolean isDisguised = player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN);
             if (isDisguised) {
                 PlayerDisguise disguise = Black.originalProfiles.get(player.getUniqueId());
@@ -59,7 +58,6 @@ public class ChatManager extends Util implements Listener {
                     } else {
                         // Target is offline, substitute name in current event format
                         String targetName = disguise.getName();
-                        
                         // Temporarily set names if plugins use them
                         player.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(targetName));
                         player.customName(LegacyComponentSerializer.legacyAmpersand().deserialize(targetName));
@@ -100,7 +98,7 @@ public class ChatManager extends Util implements Listener {
                     }
                 } else {
                     // Dead chat (ghost): only to other dead players
-                    if (!Life_and_Death.is_alive(recipient) || (recipient.getWorld() == Bukkit.getWorld("doublevoid") && recipient.getLocation().distanceSquared(player.getLocation()) < 100)) {
+                    if (!Life_and_Death.is_alive(recipient) || (recipient.getWorld() == Bukkit.getWorld("doublevoid") && recipient.getLocation().distanceSquared(player.getLocation()) <= 100)) {
                         event.getRecipients().add(recipient);
                         playProximitySound(recipient, processedMessage);
                     }

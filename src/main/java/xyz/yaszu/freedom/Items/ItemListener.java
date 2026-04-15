@@ -23,10 +23,7 @@ import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
 import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
-import xyz.yaszu.freedom.Items.Parts.Ale;
-import xyz.yaszu.freedom.Items.Parts.Beer;
-import xyz.yaszu.freedom.Items.Parts.Burger;
-import xyz.yaszu.freedom.Items.Parts.SpellFocus;
+import xyz.yaszu.freedom.Items.Parts.*;
 import xyz.yaszu.freedom.Items.Relics.Glock;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
@@ -43,6 +40,7 @@ public class ItemListener extends Util implements Listener {
     public static void registerItems() {
         register(new Ale(),"ale");
         register(new Beer(),"beer");
+        register(new Wine(),"wine");
         register(new Evolve(), "evolutionstone");
         register(new Revival(), "revival");
         register(new Rifle(), "rifle");

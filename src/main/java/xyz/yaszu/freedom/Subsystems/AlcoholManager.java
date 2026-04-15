@@ -21,6 +21,7 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -203,6 +204,36 @@ public class AlcoholManager extends Util implements Listener {
             player.getPersistentDataContainer().set(FreedomKeys.alcohol(), PersistentDataType.INTEGER, alcohol - 1);
         } catch (Exception ignored) {}
     }
+
+
+
+    public static boolean isDrunk(Player player) {
+        return player.getPersistentDataContainer().has(FreedomKeys.alcohol());
+    }
+
+
+
+    //TODO finish drunk chat
+    public static String handleChat(Player player, String message) {
+        if (!isDrunk(player)) return message;
+
+        String[] msg = message.split(" ");
+        StringBuilder newmsg = new StringBuilder();
+        int alcohollevel = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
+        switch (alcohollevel) {
+            case 0 -> {
+                return message;
+            }
+            case 1 -> {
+                for (int i = 0; i < msg.length; i++) {
+                    int rand = random.nextInt(0,4);
+                }
+            }
+        }
+
+        return newmsg.toString().trim();
+    }
+
 
     private void displayDrunkenessBar(Player player, int alcoholLevel) {
         if (alcoholLevel <= 0) return;
