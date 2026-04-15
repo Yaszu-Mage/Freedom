@@ -74,15 +74,22 @@ public class TradeManager extends Util implements Listener {
             context.getSource().getSender().sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
             return 0;
         }
+        if (!Life_and_Death.is_alive(sender)) {
+            sender.sendMessage(Component.text("You are not alive!", NamedTextColor.RED));
+            return 0;
+        }
 
-        String targetName = StringArgumentType.getString(context, "player");
+            String targetName = StringArgumentType.getString(context, "player");
         Player target = Bukkit.getPlayer(targetName);
 
         if (target == null || !target.isOnline()) {
             sender.sendMessage(Component.text("Player not found.", NamedTextColor.RED));
             return 0;
         }
-
+        if (!Life_and_Death.is_alive(target)) {
+            sender.sendMessage(Component.text(target.getName() + " is not alive!", NamedTextColor.RED));
+            return 0;
+        }
         if (target.equals(sender)) {
             sender.sendMessage(Component.text("You cannot trade with yourself!", NamedTextColor.RED));
             return 0;
