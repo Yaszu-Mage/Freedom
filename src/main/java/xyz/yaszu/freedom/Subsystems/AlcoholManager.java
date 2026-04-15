@@ -1,7 +1,10 @@
 package xyz.yaszu.freedom.Subsystems;
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
@@ -9,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -72,7 +76,13 @@ public class AlcoholManager extends Util implements Listener {
     public static void addAlcohol(Player player,int saturation,int foodLevel,int alcoholpotency) {
         player.setSaturation(player.getSaturation()+saturation);
         player.setFoodLevel(player.getFoodLevel()+foodLevel);
-        player.getPersistentDataContainer().set(FreedomKeys.alcohol(), PersistentDataType.INTEGER,alcoholpotency);
+        int alcoholvalue = 0;
+        if (player.getPersistentDataContainer().has(FreedomKeys.alcohol())) {
+            alcoholvalue = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
+        }
+        // Clamp alcohol to maximum of 5
+        int newAlcoholValue = Math.min(alcoholvalue + alcoholpotency, 5);
+        player.getPersistentDataContainer().set(FreedomKeys.alcohol(), PersistentDataType.INTEGER, newAlcoholValue);
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -153,18 +163,22 @@ public class AlcoholManager extends Util implements Listener {
         Vector lateral = new Vector(-moveDirection.getZ(), 0, moveDirection.getX());
         Vector activeOffset = lateral.multiply(state.smoothedOffset);
 
-        double swayX = state.anchorX + state.passiveOffsetX + activeOffset.getX();
-        double swayZ = state.anchorZ + state.passiveOffsetZ + activeOffset.getZ();
-        double swayY = to.getY();
-        float yaw = to.getYaw();
-        float pitch = to.getPitch();
+        // Calculate total sway offset
+        double swayOffsetX = state.passiveOffsetX + activeOffset.getX();
+        double swayOffsetZ = state.passiveOffsetZ + activeOffset.getZ();
 
-        // Apply sway directly to the destination without teleporting
-        // by smoothly moving the player toward the swayed position incrementally
-        Location adjusted = to.clone();
-        adjusted.setX(swayX);
-        adjusted.setZ(swayZ);
-        event.setTo(adjusted);
+        // Apply sway using velocity push to avoid teleportation
+        Vector currentVelocity = player.getVelocity();
+        Vector swayVelocity = new Vector(swayOffsetX, 0, swayOffsetZ).multiply(0.05D);
+        player.setVelocity(currentVelocity.add(swayVelocity));
+
+        // Random chance to reduce alcohol (low chance so drunkenness lasts ~20 minutes)
+        if (random.nextDouble() < 0.02D) {
+            decreaseAlcoholLevel(player);
+        }
+
+        // Display drunkenness level on actionbar
+        displayDrunkenessBar(player, alcoholLevel);
 
         if (alcoholLevel >= 5) {
             player.addPotionEffect(PotionEffectType.NAUSEA.createEffect(20, 1));
@@ -173,18 +187,69 @@ public class AlcoholManager extends Util implements Listener {
         }
     }
 
-    private void sendSwayPacket(Player player, double x, double y, double z, float yaw, float pitch) {
-        try {
-            // Sway is applied directly via event.setTo() instead of teleporting
-            // This avoids jumpy client-side movements
-        } catch (Exception ignored) {
-            // Fallback if packet sending fails
-        }
-    }
 
     private int getAlcoholLevel(Player player) {
         Integer alcohol = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
         return alcohol == null ? 0 : alcohol;
+    }
+
+    private void decreaseAlcoholLevel(Player player) {
+        try {
+            Integer alcohol = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
+            if (alcohol == null || alcohol <= 1) {
+                player.getPersistentDataContainer().remove(FreedomKeys.alcohol());
+                return;
+            }
+            player.getPersistentDataContainer().set(FreedomKeys.alcohol(), PersistentDataType.INTEGER, alcohol - 1);
+        } catch (Exception ignored) {}
+    }
+
+    private void displayDrunkenessBar(Player player, int alcoholLevel) {
+        if (alcoholLevel <= 0) return;
+
+        // Create a progress bar for drunkenness (1-5 scale)
+        StringBuilder bar = new StringBuilder();
+        int filledBlocks = Math.min(alcoholLevel, 5);
+        int emptyBlocks = 5 - filledBlocks;
+
+        // Add filled blocks (red)
+        for (int i = 0; i < filledBlocks; i++) {
+            bar.append("█");
+        }
+        // Add empty blocks (gray)
+        for (int i = 0; i < emptyBlocks; i++) {
+            bar.append("░");
+        }
+
+        // Determine color based on alcohol level
+        NamedTextColor barColor;
+        if (alcoholLevel >= 5) {
+            barColor = NamedTextColor.RED;
+        } else if (alcoholLevel >= 4) {
+            barColor = NamedTextColor.GOLD;
+        } else if (alcoholLevel >= 3) {
+            barColor = NamedTextColor.YELLOW;
+        } else {
+            barColor = NamedTextColor.GRAY;
+        }
+
+        // Create actionbar message with drunkenness bar and level
+        Component actionBar = Component.text("Drunkenness: ", NamedTextColor.WHITE)
+                .append(Component.text(bar.toString(), barColor))
+                .append(Component.text(" [" + alcoholLevel + "/5]", NamedTextColor.GRAY));
+
+        player.sendActionBar(actionBar);
+    }
+
+    @EventHandler
+    public void onPlayerConsumeItem(PlayerItemConsumeEvent event) {
+        Player player = event.getPlayer();
+        Material consumedMaterial = event.getItem().getType();
+
+        // Subtract alcohol when eating bread or drinking milk
+        if (consumedMaterial == Material.BREAD || consumedMaterial == Material.MILK_BUCKET) {
+            decreaseAlcoholLevel(player);
+        }
     }
 
     @EventHandler
