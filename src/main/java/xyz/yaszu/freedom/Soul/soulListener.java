@@ -72,7 +72,7 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        player.setResourcePack("https://www.dropbox.com/scl/fo/h91az0ps0s36ovw1u12wh/AP97wFsQ1gIsBwMdoeu5CLU?rlkey=5unbjew1tualfdv84l94m7yte&st=uan1lu5e&dl=1");
+        player.setResourcePack("https://files.yaszu.xyz/rp/?zip");
         if (!player.getPersistentDataContainer().has(keygen("ComorAction"))) {
             player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, true);
         }
