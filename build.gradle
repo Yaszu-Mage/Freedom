@@ -8,7 +8,12 @@ group = 'xyz.yaszu'
 version = '1.0-SNAPSHOT'
 
 repositories {
-    mavenCentral()
+    mavenCentral {
+        metadataSources {
+            mavenPom()
+            artifact()
+        }
+    }
     maven {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
@@ -37,12 +42,25 @@ repositories {
 
 dependencies {
     implementation("com.github.retrooper:packetevents-spigot:2.11.2")
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.0.1")
     compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.15")
     compileOnly ('net.skinsrestorer:skinsrestorer-api:15.11.0')
     compileOnly ('com.sk89q.worldedit:worldedit-bukkit:7.4.0')
+    implementation 'com.github.bsommerfeld.pathetic-bukkit:core:5.4.7-a'
+    implementation 'com.github.javafaker:javafaker:1.0.2'
 
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testCompileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+    testRuntimeOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
 }
 
 tasks {
@@ -71,6 +89,10 @@ tasks.withType(JavaCompile).configureEach {
         options.release.set(targetJavaVersion)
     }
 }
+shadowJar {
+    relocate 'de.bsommerfeld.pathetic', 'xyz.yaszu.freedom.pathetic'
+    relocate 'com.github.javafaker', 'xyz.yaszu.freedom.javafaker'
+}
 
 processResources {
     def props = [version: version]
@@ -82,3 +104,7 @@ processResources {
 
 
     }
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

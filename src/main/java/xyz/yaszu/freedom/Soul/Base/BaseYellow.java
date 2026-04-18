@@ -61,7 +61,12 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())){
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.5f);
@@ -151,7 +156,12 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
     }
     public static int zombdistance = 2;
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 1.0f, 1.0f);
@@ -328,3 +338,5 @@ public class BaseYellow extends Util implements Base_Soul, Listener {
 
     }
 }
+
+

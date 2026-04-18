@@ -50,7 +50,12 @@ public class Cafe extends Util implements Base_Soul {
     }
     Mocha Mocha = new Mocha();
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         Mocha.AbilityOne(player);
     }
 
@@ -69,7 +74,12 @@ public class Cafe extends Util implements Base_Soul {
         return dess("⬛⬛⬛⬛⬛⬛");
     }
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             new BukkitRunnable() {
                 int tick = 0;
@@ -144,3 +154,5 @@ public class Cafe extends Util implements Base_Soul {
         Mocha.ActivePassive(player);
     }
 }
+
+

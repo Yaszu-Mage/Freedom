@@ -56,7 +56,12 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
             return;
@@ -346,7 +351,12 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
         }.runTaskTimer(Freedom.get_plugin(),0,1);
     }
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (!player.getPersistentDataContainer().has(keygen("blue_save"), PersistentDataType.BOOLEAN)) {
             save(player);
             return;
@@ -404,3 +414,5 @@ BaseYellow yellow = new BaseYellow();
         }
     }
 }
+
+

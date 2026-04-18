@@ -63,7 +63,12 @@ public class BasePurple extends Util implements Base_Soul {
     }
 
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         //
 
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
@@ -136,7 +141,12 @@ public class BasePurple extends Util implements Base_Soul {
     }
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) {
+ public void AbilityTwo(Player player, ItemStack ability_item) {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
 
         player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
@@ -242,3 +252,5 @@ public class BasePurple extends Util implements Base_Soul {
         }
     }
 }
+
+

@@ -229,21 +229,44 @@ public class soulListener extends Util implements Listener {
         return null;
     }
 
+    private SoulTypes getOwnedSoulType(Player player) {
+        String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+        if (soulName == null) return null;
+        try {
+            return SoulTypes.valueOf(soulName);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
+    private Base_Soul getImbueLiteSoul(Player player) {
+        SoulTypes type = getOwnedSoulType(player);
+        if (type == null) return null;
+        return SOULS.get(type.toBaseVariant());
+    }
+
 
     public void AbilityOne(Player player) {
         Base_Soul soul = getSoul(player);
+        if (soul == null) return;
 
-        if (soul != null) {
-            String soulName = soul.Name_For_Container();
-            if (soulName.contains("Yellow") ||  soulName.contains("Blue")) {
-                if (findItemInHand(player, "timepiece") != null) {
-                    player.sendMessage(dess("ABILITY"));
-                    soul.AbilityOne(player);
-                }
-                return;
+        if (!Life_and_Death.is_alive(player)) {
+            Player imbueHolder = soul.getImbuePlayer(player);
+            Base_Soul liteSoul = getImbueLiteSoul(player);
+            if (imbueHolder != null && liteSoul != null) {
+                liteSoul.AbilityOneLite(imbueHolder, player);
             }
-            soul.AbilityOne(player);
+            return;
         }
+
+        String soulName = soul.Name_For_Container();
+        if (soulName.contains("Yellow") ||  soulName.contains("Blue")) {
+            if (findItemInHand(player, "timepiece") != null) {
+                soul.AbilityOne(player);
+            }
+            return;
+        }
+        soul.AbilityOne(player);
     }
 
     @EventHandler
@@ -260,9 +283,20 @@ public class soulListener extends Util implements Listener {
 
     public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
 
-        if (!Life_and_Death.is_alive(player)) return;
         Base_Soul soul = getSoul(player);
         if (soul == null) return;
+
+        if (!Life_and_Death.is_alive(player)) {
+            Player imbueHolder = soul.getImbuePlayer(player);
+            Base_Soul liteSoul = getImbueLiteSoul(player);
+            if (imbueHolder != null && liteSoul != null) {
+                ItemStack imbuedItem = liteSoul.getOwnersImbuedItemInHand(imbueHolder, player);
+                if (imbuedItem != null) {
+                    liteSoul.AbilityTwoLite(imbueHolder, player, imbuedItem);
+                }
+            }
+            return;
+        }
 
         player.sendActionBar(dess("<green>Ability Two</green>"));
 
@@ -317,23 +351,28 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void AbilityOneListener(PlayerJumpEvent event) {
-        if (!Life_and_Death.is_alive(event.getPlayer())) return;
         Player player = event.getPlayer();
         if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             Base_Soul soul = getSoul(player);
             if (soul == null) return;
+
+            if (!Life_and_Death.is_alive(player) && soul.ImbueActive(player)) {
+                AbilityOne(player);
+                return;
+            }
+
             String soulName = soul.Name_For_Container();
             if (soulName.contains("Yellow")) {
                 if (findItemInHand(player, "timepiece") != null) {
-                    soul.AbilityOne(player);
+                    AbilityOne(player);
                 }
                 return;
             }
 
             if (soulName != null && soulName.contains("Orange")) {
-                soul.AbilityOne(player);
+                AbilityOne(player);
             } else if (player.isSneaking()) {
-                soul.AbilityOne(player);
+                AbilityOne(player);
             }
         }
     }
@@ -342,10 +381,15 @@ public class soulListener extends Util implements Listener {
     public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
         Player player = event.getPlayer();
         ItemStack drop = event.getItemDrop().getItemStack();
-        if (!Life_and_Death.is_alive(event.getPlayer())) return;
         if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             Base_Soul soul = getSoul(player);
             if (soul == null) return;
+
+            if (!Life_and_Death.is_alive(player) && soul.ImbueActive(player)) {
+                AbilityTwo(player);
+                event.setCancelled(true);
+                return;
+            }
 
             String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
             if (soulName != null) {

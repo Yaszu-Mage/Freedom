@@ -54,7 +54,12 @@ public class Mocha extends Util implements Base_Soul, Listener {
         return dess("You can teleport across larger distances and more frequently");
     }
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
@@ -129,7 +134,12 @@ public class Mocha extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             new BukkitRunnable() {
                 public static List<Entity> affectedEntities = new ArrayList<>();
@@ -300,5 +310,7 @@ public class Mocha extends Util implements Base_Soul, Listener {
     }
 }
 }
+
+
 
 

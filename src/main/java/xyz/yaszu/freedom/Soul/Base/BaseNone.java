@@ -43,7 +43,12 @@ public class BaseNone extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
     }
 
@@ -63,7 +68,12 @@ public class BaseNone extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
     }
 
@@ -99,3 +109,5 @@ public class BaseNone extends Util implements Base_Soul, Listener {
 
 
 }
+
+

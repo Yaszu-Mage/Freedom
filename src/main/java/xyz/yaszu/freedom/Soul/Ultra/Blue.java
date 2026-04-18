@@ -56,58 +56,120 @@ public class Blue extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityOne(Player player) {
-        if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) return;
-        abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
-        player.getWorld().playSound(player.getLocation(),"custom.timestop",1.5f,1);
-        new BukkitRunnable() {
-            int tick = 0;
-            HashMap<UUID, Location> locations = new HashMap<>();
-            @Override
-            public void run() {
-                drawClock(
-                        player.getLocation(),
-                        1.5,
-                        32,
-                        12,
-                        LocalTime.now().getHour(),
-                        LocalTime.now().getMinute(),
-                        Particle.DUST,
-                        new Particle.DustOptions(Color.AQUA,1f),
-                        Particle.DUST,
-                        Particle.DUST,
-                        new Particle.DustOptions(Color.AQUA,1f),
-                        new Particle.DustOptions(Color.AQUA,1f)
-                );
-                Collection<Player> near = player.getLocation().getNearbyEntitiesByType(Player.class,2);
-                Player doubleclock;
-                if (player.getPersistentDataContainer().has(keygen("doubleclock"),PersistentDataType.STRING)) {
-                    doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING));
-                } else {
-                    doubleclock = player;
-                }
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
 
-                if (doubleclock != null) {}
-                near.forEach(iterator -> {
-                    if (iterator != player) {
-                        if (doubleclock != null) {
-                            if (iterator == doubleclock) return;
-                        }
-                        if (locations.containsKey(iterator.getUniqueId())) {
-                            iterator.teleport(locations.get(iterator.getUniqueId()));
-                        } else {
-                            locations.put(iterator.getUniqueId(),iterator.getLocation());
-                            iterator.teleport(locations.get(iterator.getUniqueId()));
-                        }
-                        iterator.setVelocity(new Vector(0,0,0));
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
+        if (alive(player)) {
+            if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) return;
+            abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+            player.getWorld().playSound(player.getLocation(),"custom.timestop",1.5f,1);
+            new BukkitRunnable() {
+                int tick = 0;
+                HashMap<UUID, Location> locations = new HashMap<>();
+                @Override
+                public void run() {
+                    drawClock(
+                            player.getLocation(),
+                            1.5,
+                            32,
+                            12,
+                            LocalTime.now().getHour(),
+                            LocalTime.now().getMinute(),
+                            Particle.DUST,
+                            new Particle.DustOptions(Color.AQUA,1f),
+                            Particle.DUST,
+                            Particle.DUST,
+                            new Particle.DustOptions(Color.AQUA,1f),
+                            new Particle.DustOptions(Color.AQUA,1f)
+                    );
+                    Collection<Player> near = player.getLocation().getNearbyEntitiesByType(Player.class,2);
+                    Player doubleclock;
+                    if (player.getPersistentDataContainer().has(keygen("doubleclock"),PersistentDataType.STRING)) {
+                        doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING));
+                    } else {
+                        doubleclock = player;
                     }
-                });
-                tick++;
-                if (tick >= 200) {
-                    this.cancel();
+
+                    if (doubleclock != null) {}
+                    near.forEach(iterator -> {
+                        if (iterator != player) {
+                            if (doubleclock != null) {
+                                if (iterator == doubleclock) return;
+                            }
+                            if (locations.containsKey(iterator.getUniqueId())) {
+                                iterator.teleport(locations.get(iterator.getUniqueId()));
+                            } else {
+                                locations.put(iterator.getUniqueId(),iterator.getLocation());
+                                iterator.teleport(locations.get(iterator.getUniqueId()));
+                            }
+                            iterator.setVelocity(new Vector(0,0,0));
+
+                        }
+                    });
+                    tick++;
+                    if (tick >= 200) {
+                        this.cancel();
+                    }
                 }
-            }
-        }.runTaskTimer(Freedom.get_plugin(),0,1);
+            }.runTaskTimer(Freedom.get_plugin(),0,1);
+        } else {
+            if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) return;
+
+            abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+            player.getWorld().playSound(player.getLocation(),"custom.timestop",1.5f,1);
+            new BukkitRunnable() {
+                int tick = 0;
+                HashMap<UUID, Location> locations = new HashMap<>();
+                @Override
+                public void run() {
+                    drawClock(
+                            player.getLocation(),
+                            1.5,
+                            32,
+                            12,
+                            LocalTime.now().getHour(),
+                            LocalTime.now().getMinute(),
+                            Particle.DUST,
+                            new Particle.DustOptions(Color.AQUA,1f),
+                            Particle.DUST,
+                            Particle.DUST,
+                            new Particle.DustOptions(Color.AQUA,1f),
+                            new Particle.DustOptions(Color.AQUA,1f)
+                    );
+                    Collection<Player> near = player.getLocation().getNearbyEntitiesByType(Player.class,2);
+                    Player doubleclock;
+                    if (player.getPersistentDataContainer().has(keygen("doubleclock"),PersistentDataType.STRING)) {
+                        doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING));
+                    } else {
+                        doubleclock = player;
+                    }
+
+                    if (doubleclock != null) {}
+                    near.forEach(iterator -> {
+                        if (iterator != player) {
+                            if (doubleclock != null) {
+                                if (iterator == doubleclock) return;
+                            }
+                            if (locations.containsKey(iterator.getUniqueId())) {
+                                iterator.teleport(locations.get(iterator.getUniqueId()));
+                            } else {
+                                locations.put(iterator.getUniqueId(),iterator.getLocation());
+                                iterator.teleport(locations.get(iterator.getUniqueId()));
+                            }
+                            iterator.setVelocity(new Vector(0,0,0));
+                        }
+                    });
+                    tick++;
+                    if (tick >= 200) {
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(Freedom.get_plugin(),0,1);
+        }
+
 
     }
 
@@ -331,7 +393,12 @@ public class Blue extends Util implements Base_Soul, Listener {
         }.runTaskTimer(Freedom.get_plugin(),0,1);
     }
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (!player.getPersistentDataContainer().has(keygen("blue_save"), PersistentDataType.BOOLEAN)) {
             save(player);
             return;
@@ -385,3 +452,5 @@ BaseYellow yellow = new BaseYellow();
         }
     }
 }
+
+

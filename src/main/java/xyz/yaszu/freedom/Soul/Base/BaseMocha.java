@@ -58,7 +58,12 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
     @Override
     public long AbilityOne_Cooldown() {return 45000L;}
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         if (!player.getPersistentDataContainer().has(keygen("tpyes"))) player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, true);
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
@@ -134,7 +139,12 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
         return dess("Slows time for all but the one you are bonded with");
     }
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
 
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.0f);
@@ -310,5 +320,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
     }
 }
 }
+
+
 
 

@@ -42,7 +42,12 @@ public class None extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
 
     }
 
@@ -62,7 +67,12 @@ public class None extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
 
     }
 
@@ -98,3 +108,5 @@ public class None extends Util implements Base_Soul, Listener {
 
 
 }
+
+

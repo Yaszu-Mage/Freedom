@@ -10,6 +10,7 @@ import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
+import de.bsommerfeld.pathetic.bukkit.PatheticBukkit;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -246,6 +247,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     public long start_time = 0;
     @Override
     public void onEnable() {
+        PatheticBukkit.initialize(this);
         PacketEvents.getAPI().init();
         PacketEvents.getAPI().getEventManager().registerListener(new PacketManager());
 

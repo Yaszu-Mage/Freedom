@@ -20,5 +20,20 @@ public enum SoulTypes {
     Black,
     None,
     Cafe,
-    Orange
+    Orange;
+
+    public SoulTypes toBaseVariant() {
+        return switch (this) {
+            case Red, BaseRed -> BaseRed;
+            case Green, BaseGreen -> BaseGreen;
+            case Mocha, BaseMocha -> BaseMocha;
+            case Purple, BasePurple -> BasePurple;
+            case Black, BaseBlack -> BaseBlack;
+            case Cafe, BaseCafe -> BaseCafe;
+            case Orange, BaseOrange -> BaseOrange;
+            case Yellow, BaseYellow -> BaseYellow;
+            case Blue, BaseBlue -> BaseBlue;
+            case None, BaseNone -> BaseNone;
+        };
+    }
 }

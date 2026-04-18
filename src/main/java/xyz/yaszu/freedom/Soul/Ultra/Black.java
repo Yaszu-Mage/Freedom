@@ -39,6 +39,9 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static xyz.yaszu.freedom.Subsystems.SoulImbueManager.getWhoImbued;
+import static xyz.yaszu.freedom.Subsystems.SoulImbueManager.isImbued;
+
 public class Black extends Util implements Base_Soul, Listener {
 
     @Override
@@ -72,14 +75,106 @@ public class Black extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityOne(Player player) {
-        if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-            save(player);
-            return;
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
+        if (alive(player)) {
+            if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
+                save(player);
+                return;
+            }
+            if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
+                load(player);
+            }
+        } else {
+            //imbue ability
+            if (ImbueActive(player)) {
+                Player imbue = getImbuePlayer(player);
+                try {
+                    if (imbue.getLocation().distanceSquared(player.getLocation()) < 10000) {
+                        deadload(imbue,player);
+                        abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+                    } else {
+                        imbue.sendMessage(dess("You are too far away to teleport."));
+                    }
+                } catch (Exception e) {
+                    imbue.sendMessage(dess("You are too far away to teleport."));
+                }
+
+            }
         }
-        if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-            load(player);
-        }
+    }
+
+    public void deadload(Player imbue,Player player) {
+        //VFX
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                Location loadingLocation = imbue.getLocation();
+                drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.SMOKE);
+                drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
+            }
+        }.runTaskTimer(Freedom.get_plugin(),20,20);
+        new BukkitRunnable() {
+            public int tick = 0;
+            public double last_health = player.getHealth();
+            Location loadingLocation = player.getLocation();
+            @Override
+            public void run() {
+
+                if (player.getHealth() > last_health || !player.isSneaking() || player.isDead()) {
+                    this.cancel();
+                    player.sendActionBar(dess("Teleport Cancelled."));
+                }
+                if (tick >= 4) {
+                    drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.GUST);
+                    player.playSound(player.getLocation(),Sound.ENTITY_WIND_CHARGE_WIND_BURST,1,1);
+                    List<Entity> entities = player.getNearbyEntities(2,2,2);
+                    for (Entity entity : entities) {
+                        if (entity instanceof Player trustcheck) {
+                            if (player.getPersistentDataContainer().has(keygen("trustedby"))) {
+                                String trustedby = trustcheck.getPersistentDataContainer().get(keygen("trustedby"),PersistentDataType.STRING);
+                                if (trustedby.contains(player.getName())) {
+                                    drawCircle(trustcheck.getLocation(),1,player.getWorld(),32,Particle.REVERSE_PORTAL);
+                                    trustcheck.teleport(loadingLocation);
+                                    drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
+                                    player.getWorld().playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);
+                                }
+
+                            }
+                        }
+                    }
+                    player.teleport(loadingLocation);
+                    drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
+                    player.playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);
+                    this.cancel();
+                } else {
+                    if (threes(tick) == 3) {
+                        player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds..."));
+                    } else if (threes(tick) == 2) {
+                        player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds.."));
+                    } else {
+                        player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds."));
+                    }
+                    drawCircle(player.getLocation(),1.5,player.getWorld(),32,Particle.SOUL_FIRE_FLAME);
+                    drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.VAULT_CONNECTION);
+                    drawCircle(loadingLocation,1,player.getWorld(),32,Particle.VAULT_CONNECTION);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BANJO,SoundCategory.PLAYERS,1,tick);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,SoundCategory.PLAYERS,1,tick-1);
+                }
+                tick = tick + 1;
+            }
+            @Override
+            public synchronized void cancel() throws IllegalStateException {
+                Bukkit.getScheduler().cancelTask(getTaskId());
+            }
+        }.runTaskTimer(Freedom.get_plugin(),0,20);
+
+
     }
 
     public void load(Player player) {
@@ -229,55 +324,131 @@ public class Black extends Util implements Base_Soul, Listener {
 
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-        if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
-            player.playSound(player.getLocation(),Sound.BLOCK_DISPENSER_DISPENSE,1,1);
-            InventoryGui inventoryGui = new InventoryGui();
-            inventoryGui.setInventory(player);
-            player.openInventory(inventoryGui.getInventory());
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
 
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
+        if (alive(player)) {
+            if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
+                player.playSound(player.getLocation(),Sound.BLOCK_DISPENSER_DISPENSE,1,1);
+                InventoryGui inventoryGui = new InventoryGui();
+                inventoryGui.setInventory(player);
+                player.openInventory(inventoryGui.getInventory());
+
+            } else {
+                // no no ability
+                if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
+                    double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+                    player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+                }
+            }
+            if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
+                if (originalProfiles.get(player.getUniqueId()) != null) {
+                    DisguiseAPI.undisguiseToAll(player);
+
+                    PlayerDisguise disguise =originalProfiles.get(player.getUniqueId());
+                    player.getWorld();
+                    World world = player.getWorld();
+                    Location location = player.getLocation();
+                    world.spawnParticle(Particle.SMOKE, location,128);
+                    world.playSound(location,Sound.ENTITY_WARDEN_HEARTBEAT,1,1);
+                    disguise.removePlayer(player);
+                    disguise.stopDisguise();
+                    disguise.removeDisguise();
+
+
+                    try {
+                        join(player);
+                    } catch (MineSkinException | DataRequestException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
+                        player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
+                    }
+                    setSkinByName(player,player.getName());
+                    originalProfiles.remove(player.getUniqueId());
+                }
+                player.playerListName(player.name());
+                player.displayName(player.name());
+                player.customName(null);
+                player.setCustomNameVisible(false);
+                player.customName(player.name());
+                player.getPersistentDataContainer().remove(keygen("disguiseid"));
+                player.getPersistentDataContainer().remove(keygen("disguised"));
+                player.sendActionBar(dess("Disguise Removed."));
+            }
         } else {
-            // no no ability
-            if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
-                double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
-                player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
+            if (ImbueActive(player)) {
+                Player imbue = getImbuePlayer(player);
+                if (originalProfiles.get(player.getUniqueId()) == null && originalProfiles.get(imbue.getUniqueId()) == null) {
+                    PlayerDisguise disguise = new PlayerDisguise(player);
+                    disguise.setHearSelfDisguise(false);
+                    disguise.setEntity(player);
+
+                    // Comprehensive Impersonation: Mimic Equipment
+                    PlayerWatcher watcher = disguise.getWatcher();
+                    watcher.setArmor(player.getInventory().getArmorContents());
+                    watcher.setItemInMainHand(player.getInventory().getItemInMainHand());
+                    watcher.setItemInOffHand(player.getInventory().getItemInOffHand());
+
+                    imbue.getPersistentDataContainer().set(keygen("disguised"),PersistentDataType.BOOLEAN,true);
+                    disguise.startDisguise();
+                    if (imbue.getAttribute(Attribute.SCALE).getModifier(keygen("black")) != null) {
+                        imbue.getAttribute(Attribute.SCALE).removeModifier(keygen("black"));
+                    }
+                    imbue.playerListName(player.name());
+                    imbue.displayName(player.displayName());
+                    imbue.customName(Component.text(player.getName()));
+                    imbue.setCustomNameVisible(true);
+                    setSkinByName(imbue,player.getName());
+                    originalProfiles.put(player.getUniqueId(),disguise);
+
+                    World world = player.getWorld();
+                    Location location = player.getLocation();
+                    //VFX
+                    int disguiseid = random.nextInt();
+                    imbue.getPersistentDataContainer().set(keygen("disguiseid"),PersistentDataType.INTEGER,disguiseid);
+                    world.playSound(location,Sound.ENTITY_WARDEN_EMERGE,1,1);
+                    world.spawnParticle(Particle.SMOKE, location,128);
+                    abilityTwoCooldowns.put(imbue.getUniqueId(),System.currentTimeMillis());
+                    return;
+                }
+
+                if (originalProfiles.get(player.getUniqueId()) != null && originalProfiles.get(imbue.getUniqueId()) == null) {
+                    DisguiseAPI.undisguiseToAll(imbue);
+                    PlayerDisguise disguise = originalProfiles.get(imbue.getUniqueId());
+                    imbue.getWorld();
+                    World world = imbue.getWorld();
+                    Location location = imbue.getLocation();
+                    world.spawnParticle(Particle.SMOKE, location, 128);
+                    world.playSound(location, Sound.ENTITY_WARDEN_HEARTBEAT, 1, 1);
+                    disguise.removePlayer(imbue);
+                    disguise.stopDisguise();
+                    disguise.removeDisguise();
+                    try {
+                        join(player);
+                    } catch (MineSkinException | DataRequestException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (imbue.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
+                        imbue.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"), -0.20, AttributeModifier.Operation.ADD_NUMBER));
+                    }
+                    setSkinByName(imbue, player.getName());
+                    originalProfiles.remove(player.getUniqueId());
+                }
+                imbue.playerListName(player.name());
+                imbue.displayName(player.name());
+                imbue.customName(null);
+                imbue.setCustomNameVisible(false);
+                imbue.customName(player.name());
+                imbue.getPersistentDataContainer().remove(keygen("disguiseid"));
+                imbue.getPersistentDataContainer().remove(keygen("disguised"));
+                imbue.sendActionBar(dess("Disguise Removed."));
             }
         }
-        if (player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
-            if (originalProfiles.get(player.getUniqueId()) != null) {
-                DisguiseAPI.undisguiseToAll(player);
 
-                PlayerDisguise disguise =originalProfiles.get(player.getUniqueId());
-                player.getWorld();
-                World world = player.getWorld();
-                Location location = player.getLocation();
-                world.spawnParticle(Particle.SMOKE, location,128);
-                world.playSound(location,Sound.ENTITY_WARDEN_HEARTBEAT,1,1);
-                disguise.removePlayer(player);
-                disguise.stopDisguise();
-                disguise.removeDisguise();
-
-
-                try {
-                    join(player);
-                } catch (MineSkinException | DataRequestException e) {
-                    throw new RuntimeException(e);
-                }
-                if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
-                    player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
-                }
-                setSkinByName(player,player.getName());
-                originalProfiles.remove(player.getUniqueId());
-            }
-            player.playerListName(player.name());
-            player.displayName(player.name());
-            player.customName(null);
-            player.setCustomNameVisible(false);
-            player.customName(player.name());
-            player.getPersistentDataContainer().remove(keygen("disguiseid"));
-            player.getPersistentDataContainer().remove(keygen("disguised"));
-            player.sendActionBar(dess("Disguise Removed."));
-        }
     }
     public static Random random = new Random();
     public static HashMap<UUID,PlayerDisguise> originalProfiles = new HashMap<>();
@@ -603,3 +774,5 @@ public class Black extends Util implements Base_Soul, Listener {
 
     }
 }
+
+

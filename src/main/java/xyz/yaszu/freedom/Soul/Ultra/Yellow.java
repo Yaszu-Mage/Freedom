@@ -60,7 +60,12 @@ public class Yellow extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())){
             drawClock(
                     player.getLocation(),
@@ -151,7 +156,12 @@ public class Yellow extends Util implements Base_Soul, Listener {
     }
     public static int zombdistance = 2;
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
 
 
@@ -319,3 +329,5 @@ public class Yellow extends Util implements Base_Soul, Listener {
 
     }
 }
+
+

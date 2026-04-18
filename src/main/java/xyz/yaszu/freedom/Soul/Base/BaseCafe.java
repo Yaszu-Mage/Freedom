@@ -47,7 +47,12 @@ public class BaseCafe extends Util implements Base_Soul {
     }
     BaseMocha mocha = new BaseMocha();
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         mocha.AbilityOne(player);
     }
 
@@ -66,7 +71,12 @@ public class BaseCafe extends Util implements Base_Soul {
         return dess("Damage people within a 5 block radius with an AOE attack");
     }
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+ public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(), abilityTwoCooldowns,player.getUniqueId())) {
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 0.5f);
             new BukkitRunnable() {
@@ -149,3 +159,5 @@ public class BaseCafe extends Util implements Base_Soul {
         mocha.ActivePassive(player);
     }
 }
+
+

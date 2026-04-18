@@ -61,7 +61,12 @@ public class Green extends Util implements Base_Soul {
     }
 
     @Override
-    public void AbilityOne(Player player) {
+ public void AbilityOne(Player player) {
+        AbilityOne(player, false);
+    }
+
+    @Override
+ public void AbilityOne(Player player, boolean is_imbue) {
         if (player.getPersistentDataContainer().has(keygen("sprite_active"))) {
             if (Boolean.FALSE.equals(player.getPersistentDataContainer().get(keygen("sprite_active"), PersistentDataType.BOOLEAN))) {
             RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), player.getEyeLocation().toVector(), 5d);
@@ -180,7 +185,12 @@ public class Green extends Util implements Base_Soul {
 
 
     @Override
-    public void AbilityTwo(Player player, ItemStack ability_item) {
+ public void AbilityTwo(Player player, ItemStack ability_item) {
+        AbilityTwo(player, ability_item, false);
+    }
+
+    @Override
+ public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) {
         //
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId())) {
         new BukkitRunnable() {
@@ -262,3 +272,5 @@ public class Green extends Util implements Base_Soul {
         }
     }
 }
+
+
