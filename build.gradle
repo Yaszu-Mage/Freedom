@@ -91,7 +91,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 shadowJar {
     relocate 'de.bsommerfeld.pathetic', 'xyz.yaszu.freedom.pathetic'
-    relocate 'com.github.javafaker', 'xyz.yaszu.freedom.javafaker'
 }
 
 processResources {

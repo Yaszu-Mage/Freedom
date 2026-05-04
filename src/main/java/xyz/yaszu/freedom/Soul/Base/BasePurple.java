@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -66,12 +67,13 @@ public class BasePurple extends Util implements Base_Soul {
  public void AbilityOne(Player player) {
         AbilityOne(player, false);
     }
+    public static double dragTime = 600;
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         //
 
-        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(player),abilityOneCooldowns,player.getUniqueId())) {
             World world = player.getWorld();
             world.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1.2f);
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
@@ -80,6 +82,8 @@ public class BasePurple extends Util implements Base_Soul {
             drawStar(player.getLocation().add(0,1,0), 2, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.YELLOW, 2));
             drawStar(player.getLocation().add(0,1,0), 0.5, player.getWorld(), 20, Particle.DUST, new Particle.DustOptions(Color.BLACK, 8));
         Location location = player.getLocation().add(player.getLocation().getDirection().multiply(5));
+        List<Player> trustedNearby = getNearbyTrusted(player,1);
+
         //Location location = player.getLocation().add(player.getEyeLocation().getDirection().multiply(5));
         //Location location = player.getLocation().add(player.getEyeLocation().getDirection().multiply(5));
 //        while (!location.getBlock().isEmpty() && !location.add(0,1,0).getBlock().isEmpty()) {
@@ -91,7 +95,19 @@ public class BasePurple extends Util implements Base_Soul {
                 location.add(0, 1, 0).getBlock().breakNaturally();
             }
         }
-
+            if (!trustedNearby.isEmpty()) {
+                trustedNearby.forEach(iterated -> {
+                    iterated.teleport(location);
+                    iterated.setVelocity(velocity.multiply(1.1).add(iterated.getLocation().getDirection()));
+                });
+                player.getPersistentDataContainer().set(keygen("purpledrag"), PersistentDataType.BOOLEAN, true);
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        player.getPersistentDataContainer().remove(keygen("purpledrag"));
+                    }
+                }.runTaskLater(Bukkit.getPluginManager().getPlugin("Freedom"), (long) dragTime);
+            }
         player.teleport(location);
         try {
             if (player.getNearbyEntities(2,5,2).size() == 1) {
@@ -100,6 +116,7 @@ public class BasePurple extends Util implements Base_Soul {
         } catch (IndexOutOfBoundsException ignored) {
 
         }
+
         player.setVelocity(velocity.multiply(1.1).add(player.getLocation().getDirection()));
             world.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.8f);
             world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1f, 0f);
@@ -109,7 +126,7 @@ public class BasePurple extends Util implements Base_Soul {
         abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     } else {
             player.sendActionBar(dess("You can't use this ability yet"));
-            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(null), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
@@ -237,10 +254,20 @@ public class BasePurple extends Util implements Base_Soul {
     public long AbilityTwo_Cooldown() {
         return 30000;
     }
+    public HashMap<UUID, Long> abilityOneCooldowns = new HashMap<>();
 
     @Override
-    public long AbilityOne_Cooldown() {
-        return 2500;
+    public long AbilityOne_Cooldown(Object obj) {
+        if (obj instanceof Player player) {
+            PersistentDataContainer data = player.getPersistentDataContainer();
+            Boolean hasTransportedAnother = data.get(keygen("purpledrag"), PersistentDataType.BOOLEAN);
+            if (hasTransportedAnother == null) {
+                return 2500;
+            } else if (hasTransportedAnother) {
+                return 10000;
+            }
+        }
+            return 2500;
     }
 
     @Override

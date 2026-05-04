@@ -111,6 +111,7 @@ public final class Freedom extends JavaPlugin implements Listener {
 
     public static Plugin get_plugin() {
         return Bukkit.getPluginManager().getPlugin("Freedom");
+
     }
     @EventHandler
     public void WorldLoadEvent(WorldLoadEvent event) {
@@ -132,6 +133,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             } else {
                 Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
                 type.forEach(player -> {
+                    
                     
                     
                     player.showTitle(Title.title(dess("Look up at the stars"), dess("")));

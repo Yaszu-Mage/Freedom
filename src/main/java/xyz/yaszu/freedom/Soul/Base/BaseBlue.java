@@ -62,7 +62,7 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) {
+        if (can_ability(AbilityOne_Cooldown(null), abilityOneCooldowns, player.getUniqueId()) == false) {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
             return;
         }
@@ -388,7 +388,7 @@ BaseYellow yellow = new BaseYellow();
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 30000;
     }
 

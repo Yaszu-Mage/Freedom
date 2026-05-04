@@ -56,7 +56,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
         return dess("You can selectively with the Cafe you are bonded with");
     }
     @Override
-    public long AbilityOne_Cooldown() {return 45000L;}
+    public long AbilityOne_Cooldown(Object obj) {return 45000L;}
     @Override
  public void AbilityOne(Player player) {
         AbilityOne(player, false);
@@ -66,7 +66,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
  public void AbilityOne(Player player, boolean is_imbue) {
         if (!player.getPersistentDataContainer().has(keygen("tpyes"))) player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, true);
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
-        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
             //TODO implement VFX
             if (player.getPersistentDataContainer().has(keygen("mochacafe"))) {

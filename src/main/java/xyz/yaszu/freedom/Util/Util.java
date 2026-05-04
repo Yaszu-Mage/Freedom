@@ -33,6 +33,7 @@ import xyz.yaszu.freedom.Soul.Base.BaseRed;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Subsystems.CombatTimer;
+import xyz.yaszu.freedom.Subsystems.TrustManager;
 
 import java.util.*;
 
@@ -186,8 +187,8 @@ public class Util {
         if (!abilityTwoCooldowns.containsKey(player.getUniqueId())) {
             abilityTwoCooldowns.put(player.getUniqueId(), 0L);
         }
-        double seconds = (double) (soul.effective_cooldown(soul.AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
-        if (soul.can_ability(soul.AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
+        double seconds = (double) (soul.effective_cooldown(soul.AbilityOne_Cooldown(null), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+        if (soul.can_ability(soul.AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())) {
             objective.getScore("XAbility1").customName(
                     dess("   <shadow:#000000FF><b><aqua>Ability 1</aqua>: ").append(
                             dess("<shadow:#000000FF><b><green>READY!")
@@ -1245,7 +1246,15 @@ public class Util {
         }
     }
 
-
+    public static List<Player> getNearbyTrusted(Player player,int radius) {
+        List<Player> players = new ArrayList<>();
+        player.getLocation().getNearbyEntitiesByType(Player.class,radius).forEach( iterated -> {
+                if (TrustManager.isTrustedBy(player,iterated) && TrustManager.isTrustedBy(iterated,player) && !iterated.equals(player)) {
+                    players.add(iterated);
+                }
+        });
+        return players;
+    }
 
 
 

@@ -1,158 +1,172 @@
 package xyz.yaszu.freedom.Subsystems;
 
-import com.github.javafaker.Faker;
 import com.destroystokyo.paper.profile.PlayerProfile;
-import de.bsommerfeld.pathetic.api.factory.PathfinderFactory;
-import de.bsommerfeld.pathetic.api.pathing.Pathfinder;
-import de.bsommerfeld.pathetic.api.pathing.configuration.PathfinderConfiguration;
-import de.bsommerfeld.pathetic.api.wrapper.PathPosition;
-import de.bsommerfeld.pathetic.bukkit.context.BukkitEnvironmentContext;
-import de.bsommerfeld.pathetic.bukkit.mapper.BukkitMapper;
-import de.bsommerfeld.pathetic.bukkit.provider.LoadingNavigationPointProvider;
-import de.bsommerfeld.pathetic.engine.factory.AStarPathfinderFactory;
+import com.destroystokyo.paper.profile.ProfileProperty;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
-import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Util.CopypartyClient;
+import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URI;
-import java.util.List;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.UUID;
+import java.util.Random;
+
 
 public class NpcManager extends Util implements Listener {
-
-    public static Faker faker = new Faker();
-    private static final CopypartyClient COPYPARTY_CLIENT = new CopypartyClient();
-    private static final int MAX_PROFILE_NAME_LENGTH = 16;
-
-    private static final List<String> SKINS = List.of(
-            "https://s.namemc.com/i/7c2b160450e0839c.png",
-            "https://s.namemc.com/i/f7998f18d571ff92.png",
-            "https://s.namemc.com/i/a55fc6de61f6bf4a.png",
-            "https://s.namemc.com/i/5587a028623bec8a.png"
-    );
-
-    public static String getRandomNpcSkin() {
-        return getRandomNpcSkin(COPYPARTY_CLIENT);
-    }
-
-    static String getRandomNpcSkin(CopypartyClient copypartyClient) {
-        return copypartyClient.fetchRandomSkinOrFallback(SKINS);
-    }
-
-    public void spawnNpc(Location location) {
-        Mannequin mannequin = location.getWorld().spawn(location, Mannequin.class);
-        Npc npc = new Npc();
-        npc.npc = mannequin;
-
-        npc.name = faker.funnyName().name();
-        npc.skin = getRandomNpcSkin();
-
-        applyNpcProfile(mannequin, npc.name, npc.skin);
-    }
-
-    private static void applyNpcProfile(Mannequin mannequin, String name, String skinUrl) {
-        try {
-            mannequin.setProfile(buildProfile(name, skinUrl));
-        } catch (Exception ex) {
-            // If skin URL parsing/profile build fails, keep a valid profile with just the generated name.
-            mannequin.setProfile(buildProfile(name, null));
-        }
-
-        mannequin.setCustomName(name);
-        mannequin.setCustomNameVisible(true);
-    }
-
-    private static ResolvableProfile buildProfile(String rawName, String skinUrl) {
-        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), sanitizeProfileName(rawName));
-        if (skinUrl != null && !skinUrl.isBlank()) {
-            try {
-                profile.getTextures().setSkin(URI.create(skinUrl).toURL());
-            } catch (IllegalArgumentException | MalformedURLException ex) {
-                throw new IllegalArgumentException("Invalid skin URL for NPC profile: " + skinUrl, ex);
-            }
-        }
-
-        return ResolvableProfile.resolvableProfile(profile);
-    }
-
-    private static String sanitizeProfileName(String rawName) {
-        String normalized = rawName == null ? "FreedomNPC" : rawName.replaceAll("[^A-Za-z0-9_]", "_");
-        if (normalized.isBlank()) {
-            normalized = "FreedomNPC";
-        }
-        return normalized.length() > MAX_PROFILE_NAME_LENGTH
-                ? normalized.substring(0, MAX_PROFILE_NAME_LENGTH)
-                : normalized;
-    }
-
-    public void NpcThink(Mannequin npc) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                //Calculate Goals
-
-            }
-        }.runTaskLater(Freedom.get_plugin(),1);
-    }
-
-    public static enum goals {
-        Eat,
-        Rest,
-        Farm,
-        Hunt,
-        Build,
+    public static enum NpcGoal {
         Socialize,
-        Mine
-    }
-    public class Npc {
-        public Mannequin npc;
-        public String name;
-        public String skin;
-        public goals goal;
-
-
+        Mine,
+        Construct,
+        Farm,
+        Wander,
+        Harvest,
+        Think
     }
 
-    private void findPath(Location start, Location target,Mannequin mannequin) {
+    public class NPC {
+        public static Mannequin mannequin;
+        public static Double hunger = 20d;
+        public static NpcGoal goal = NpcGoal.Think;
+        public static double StepCuts = 1; // In Blocks
+        public Mannequin constructMannequin(Location location) throws IOException, InterruptedException {
+            Mannequin mannequin = location.getWorld().spawn(location, Mannequin.class);
+            String baseUrl = "https://files.yaszu.xyz/skins/";
+            // 1. Get file list as JSON
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "?ls"))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            JsonObject jsonResponse = new Gson().fromJson(response.body(), JsonObject.class);
+            JsonArray files = jsonResponse.getAsJsonArray("files");
 
-        PathPosition startPos = BukkitMapper.toPathPosition(start);
-        PathPosition targetPos = BukkitMapper.toPathPosition(target);
-        World world = start.getWorld();
+            if (files != null && !files.isEmpty()) {
+                Random rand = new Random();
+                JsonObject randomFile = files.asList().get(rand.nextInt(files.size())).getAsJsonObject();
+                String fileName = randomFile.get("name").getAsString();
 
-        pathfinder.findPath(startPos, targetPos, new BukkitEnvironmentContext(world))
-                .ifPresent(result -> {
+                HttpRequest skinRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl + fileName))
+                        .GET()
+                        .build();
+                String skinResponse = client.send(skinRequest, HttpResponse.BodyHandlers.ofString()).body().trim();
 
-                    // We have an usable result since it either found the path, or fallen back.
-                    result.getPath().forEach(position -> {
-                        Location location = BukkitMapper.toLocation(position, world);
-                        // Do something with it.
-                    });
+                String textureValue = skinResponse;
+                if (skinResponse.startsWith("{")) {
+                    JsonObject skinJson = new Gson().fromJson(skinResponse, JsonObject.class);
+                    if (skinJson != null) {
+                        if (skinJson.has("value")) {
+                            textureValue = skinJson.get("value").getAsString();
+                        } else if (skinJson.has("textures")) {
+                            textureValue = skinJson.get("textures").getAsString();
+                        }
+                    }
+                }
 
-                }).orElse(ignored -> {
-                    // Handle no path found scenario
-                    System.out.println("No path found between start and target positions.");
+                PlayerProfile playerProfile = Bukkit.createProfile(UUID.randomUUID(), fileName);
+                playerProfile.getProperties().add(new ProfileProperty("textures", textureValue));
 
-                }).exceptionally(ex -> System.err.println("An exception occurred -> " + ex));
+                ResolvableProfile profile = ResolvableProfile.resolvableProfile(playerProfile);
+                mannequin.setProfile(profile);
+            }
+
+            return mannequin;
+        }
+        public NPC(Mannequin Givenmannequin, Double GivenHunger, String givengoal){
+            NpcGoal goalInstance = NpcGoal.valueOf(givengoal);
+            if (goalInstance != null) goal = goalInstance;
+            mannequin = Givenmannequin;
+            hunger = GivenHunger;
+        }
+
+        public void move(Location targetLocation) {
+            if (mannequin == null || targetLocation == null || !mannequin.isValid()) return;
+
+            Location currentLocation = mannequin.getLocation().clone();
+            if (currentLocation.getWorld() == null || targetLocation.getWorld() == null) return;
+
+            if (!currentLocation.getWorld().equals(targetLocation.getWorld())) {
+                mannequin.teleport(targetLocation);
+                return;
+            }
+
+            double stepSize = Math.max(0.1d, StepCuts);
+            double stopDistanceSq = stepSize * stepSize;
+            int maxIterations = (int) Math.max(16, (currentLocation.distance(targetLocation) / stepSize) * 4);
+
+            for (int i = 0; i < maxIterations; i++) {
+                if (currentLocation.distanceSquared(targetLocation) <= stopDistanceSq) break;
+
+                Vector direction = targetLocation.toVector().subtract(currentLocation.toVector());
+                if (direction.lengthSquared() == 0) break;
+                direction.normalize().multiply(stepSize);
+
+                Location projectedStep = currentLocation.clone().add(direction);
+                PathNode bestNode = null;
+                double bestCost = Double.MAX_VALUE;
+
+                // Sample a 3x3 grid around the projected step and choose the cheapest valid node.
+                for (int x = -1; x <= 1; x++) {
+                    for (int z = -1; z <= 1; z++) {
+                        Location candidate = projectedStep.clone().add(x * stepSize, 0, z * stepSize);
+                        if (!isStandable(candidate)) continue;
+
+                        PathNode node = new PathNode(candidate);
+                        node.calculateCost(currentLocation, targetLocation);
+                        double nodeCost = node.Fcost();
+
+                        if (nodeCost < bestCost) {
+                            bestCost = nodeCost;
+                            bestNode = node;
+                        }
+                    }
+                }
+
+                if (bestNode == null) break;
+                if (bestNode.location.distanceSquared(targetLocation) >= currentLocation.distanceSquared(targetLocation)) break;
+
+                mannequin.teleport(bestNode.location);
+                currentLocation = bestNode.location.clone();
+            }
+
+            if (currentLocation.distanceSquared(targetLocation) <= stopDistanceSq) {
+                mannequin.teleport(targetLocation);
+            }
+        }
+
+        private boolean isStandable(Location location) {
+            return location.getBlock().isPassable()
+                    && location.clone().add(0, 1, 0).getBlock().isPassable()
+                    && !location.clone().add(0, -1, 0).getBlock().isPassable();
+        }
+
     }
+    public class PathNode {
+        public double Hcost = 0d;
+        public double Gcost = 0d;
+        public Location location;
+        public PathNode(Location givenLocation) {
+            location = givenLocation;
+        }
 
-    PathfinderFactory factory = new AStarPathfinderFactory();
 
-    // Configure the pathfinder
-    PathfinderConfiguration configuration = PathfinderConfiguration.builder()
-            .provider(new LoadingNavigationPointProvider())
-            .async(true)
-            .maxIterations(100_000_000)
-            .build();
-
-    // Create the pathfinder instance
-    Pathfinder pathfinder = factory.createPathfinder(configuration);
-
+        public void calculateCost(Location startingLocation, Location targetLocation) {
+            Hcost = startingLocation.distanceSquared(location);
+            Gcost = targetLocation.distanceSquared(location);
+        }
+        public double Fcost() {
+            return Hcost + Gcost;
+        }
+    }
 }

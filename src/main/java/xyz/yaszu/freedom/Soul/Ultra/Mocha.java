@@ -61,7 +61,7 @@ public class Mocha extends Util implements Base_Soul, Listener {
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
-        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
             //TODO implement VFX
             if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
@@ -288,7 +288,7 @@ public class Mocha extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 30000;
     }
 

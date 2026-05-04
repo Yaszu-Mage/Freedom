@@ -68,13 +68,13 @@ public class Red extends Util implements Base_Soul {
     // Flame Dash -- Player Dashes after Crouching and Jumping in the direction of their movement
     public void AbilityOne(Player player) {
         PersistentDataContainer playerContainer = player.getPersistentDataContainer();
-        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())) {
                 player.setVelocity(player.getLocation().getDirection().multiply(2));
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1.0f, 1.2f);
                 spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
             abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
-            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(null), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + seconds + " seconds"));
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
@@ -235,7 +235,7 @@ public class Red extends Util implements Base_Soul {
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 30000;
     }
 

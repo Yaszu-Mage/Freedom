@@ -145,7 +145,7 @@ public class Cafe extends Util implements Base_Soul {
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 0;
     }
 

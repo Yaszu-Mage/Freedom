@@ -63,7 +63,7 @@ public class Blue extends Util implements Base_Soul, Listener {
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         if (alive(player)) {
-            if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) return;
+            if (can_ability(AbilityOne_Cooldown(null), abilityOneCooldowns, player.getUniqueId()) == false) return;
             abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             player.getWorld().playSound(player.getLocation(),"custom.timestop",1.5f,1);
             new BukkitRunnable() {
@@ -116,7 +116,7 @@ public class Blue extends Util implements Base_Soul, Listener {
                 }
             }.runTaskTimer(Freedom.get_plugin(),0,1);
         } else {
-            if (can_ability(AbilityOne_Cooldown(), abilityOneCooldowns, player.getUniqueId()) == false) return;
+            if (can_ability(AbilityOne_Cooldown(null), abilityOneCooldowns, player.getUniqueId()) == false) return;
 
             abilityOneCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
             player.getWorld().playSound(player.getLocation(),"custom.timestop",1.5f,1);
@@ -430,7 +430,7 @@ BaseYellow yellow = new BaseYellow();
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 30000;
     }
 

@@ -79,7 +79,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
+        if (can_ability(AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())) {
             boolean hasactivated = false;
             Collection<PotionEffect> pots = player.getActivePotionEffects();
             if (!pots.isEmpty()) {
@@ -131,7 +131,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
             }
 
         } else {
-            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(null), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING,1,-1);
             player.sendActionBar(dess("<Red>Cooldown!</Red> Please wait " + Math.round(seconds) + " seconds!"));
         }
@@ -307,7 +307,7 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 10000;
     }
 

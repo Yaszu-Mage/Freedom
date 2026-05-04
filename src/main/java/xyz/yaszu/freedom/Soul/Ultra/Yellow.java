@@ -66,7 +66,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        if (can_ability(AbilityOne_Cooldown(),abilityOneCooldowns,player.getUniqueId())){
+        if (can_ability(AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())){
             drawClock(
                     player.getLocation(),
                     1.5,
@@ -275,7 +275,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 120000;
     }
 

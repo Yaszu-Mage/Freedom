@@ -92,7 +92,6 @@ public class Purple extends Util implements Base_Soul {
     @Override
     public ItemStack Related_Item() {
         ItemStack workingItem = ItemStack.of(Material.CROSSBOW);
-
         CrossbowMeta workingMeta = (CrossbowMeta) workingItem.getItemMeta();
         workingMeta.setItemModel(NamespacedKey.minecraft("rifle"));
         workingMeta.getPersistentDataContainer().set(keygen("rifle"), PersistentDataType.BOOLEAN, true);
@@ -197,7 +196,7 @@ public class Purple extends Util implements Base_Soul {
     }
 
     @Override
-    public long AbilityOne_Cooldown() {
+    public long AbilityOne_Cooldown(Object obj) {
         return 2500;
     }
 

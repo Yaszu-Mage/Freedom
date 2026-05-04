@@ -54,7 +54,7 @@ public interface Base_Soul {
 
     public Component ActivePassive_Description();
     public long AbilityTwo_Cooldown();
-    public long AbilityOne_Cooldown();
+    public long AbilityOne_Cooldown(Object given);
     //Active Passive - A passive that requires a condition to activate
     public void ActivePassive(Player player);
     default long effective_cooldown(long base_cooldown, java.util.UUID playerUUID) {
@@ -131,7 +131,7 @@ public interface Base_Soul {
         if (!holder.isSneaking()) return false;
 
         long now = System.currentTimeMillis();
-        long liteCooldown = Math.max(2000L, (long) (AbilityOne_Cooldown() * 1.5));
+        long liteCooldown = Math.max(2000L, (long) (AbilityOne_Cooldown(null) * 1.5));
         Long lastUsed = abilityOneCooldowns.get(soulOwner.getUniqueId());
         if (lastUsed != null && lastUsed + liteCooldown > now) return false;
 
