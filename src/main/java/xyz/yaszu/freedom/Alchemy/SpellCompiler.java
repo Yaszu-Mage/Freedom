@@ -12,6 +12,8 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
+import static xyz.yaszu.freedom.Subsystems.CurrencyManager.*;
+
 public class SpellCompiler extends Util {
 
     /* ================= ENUMS ================= */
@@ -550,6 +552,13 @@ public class SpellCompiler extends Util {
     private static void consumeFromInventory(Player player, int powerRequired) {
         int debt = powerRequired;
         ItemStack[] contents = player.getInventory().getContents();
+        if (debt > getCurrency(player)) {
+            debt = debt-getCurrency(player);
+            setCurrency(0,player);
+        } else {
+            debt = 0;
+            removeCurrency(debt,player);
+        }
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
             if (item == null || item.getType() == Material.AIR) continue;

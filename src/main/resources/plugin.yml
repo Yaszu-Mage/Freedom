@@ -70,4 +70,9 @@ commands:
     description: "Deny imbue request"
   forceunimbue:
     description: "Force unimbue slot"
+  sell:
+    description: "Sell"
+  pay:
+    description: "pay"
 softdepend: [ "SkinsRestorer", "packetevents" ]
+load: POSTWORLD

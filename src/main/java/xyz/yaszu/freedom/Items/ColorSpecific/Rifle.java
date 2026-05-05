@@ -17,6 +17,7 @@ import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Purple;
+import xyz.yaszu.freedom.Util.BulletSystem;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -38,10 +39,20 @@ public class Rifle implements BaseItem {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,1,10);
         if (soul != SoulTypes.Purple && soul != SoulTypes.BasePurple) {
             //do stuff
-            handleSnipe(player,15).runTaskTimer(Freedom.get_plugin(),0,1);
+            BulletSystem.fireBullet(player,new BulletSystem.BulletConfig()
+                    .damage(15.0)
+                    .speed(1.0)
+                    .maxRange(50.0)
+                    .collisionRadius(0.25)
+                    .particle(Particle.CRIT));
             event.setCancelled(true);
         } else {
-            handleSnipe(player,11).runTaskTimer(Freedom.get_plugin(),0,1);
+            BulletSystem.fireBullet(player,new BulletSystem.BulletConfig()
+                    .damage(11.0)
+                    .speed(1.0)
+                    .maxRange(50.0)
+                    .collisionRadius(0.25)
+                    .particle(Particle.CRIT));
         }
         if (!xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(player)) {
             player.setCooldown(item, 100);
@@ -62,49 +73,5 @@ public class Rifle implements BaseItem {
         return CustomItemType.COLOR_SPECIFIC;
     }
 
-    public BukkitRunnable handleSnipe(Player player,int damage) {
-        return new BukkitRunnable() {
-            Vector direction = player.getLocation().getDirection();
-            World world = player.getWorld();
-            @Override
-            public void run() {
-                if (snipeLocation == null) {
-                    snipeLocation = player.getLocation().add(0,1,0);
-                }
-                if (snipeLocation != player.getLocation()) {
-                    world.spawnParticle(Particle.CRIT,snipeLocation,30);
-                } else {
-                    createVerticleMinMagicCircle(snipeLocation.clone().add(player.getLocation().getDirection()),15, SoulTypes.Purple,player.getLocation().getYaw(),player.getLocation(),100,0.25);
-                }
 
-                snipeLocation.add(direction);
-                for (Entity inst : snipeLocation.getNearbyEntities(4,4,4)) {
-                    if (inst instanceof Player) {
-                        if (inst != player) {
-                            if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
-                                LivingEntity entity = (LivingEntity) inst;
-                                entity.damage(damage, player);
-                                this.cancel();
-                            }
-                        }
-                    } else {
-                        if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
-                            LivingEntity entity = (LivingEntity) inst;
-                            entity.damage(damage, player);
-                            this.cancel();
-                        }
-                    }
-                }
-
-                if (snipeLocation.isBlock()) {
-                    snipeLocation.getBlock().setType(Material.AIR);
-                    this.cancel();
-                }
-            }
-
-            public Location snipeLocation;
-
-
-        };
-    }
 }

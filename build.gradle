@@ -89,9 +89,6 @@ tasks.withType(JavaCompile).configureEach {
         options.release.set(targetJavaVersion)
     }
 }
-shadowJar {
-    relocate 'de.bsommerfeld.pathetic', 'xyz.yaszu.freedom.pathetic'
-}
 
 processResources {
     def props = [version: version]

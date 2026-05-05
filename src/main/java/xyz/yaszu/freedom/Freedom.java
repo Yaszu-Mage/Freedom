@@ -10,7 +10,6 @@ import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
-import de.bsommerfeld.pathetic.bukkit.PatheticBukkit;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -50,6 +49,7 @@ import xyz.yaszu.freedom.GUI.SettingsGui.TrustMenu;
 import xyz.yaszu.freedom.Information.Information_Handler;
 import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
 import xyz.yaszu.freedom.Items.ItemListener;
+import xyz.yaszu.freedom.Items.Parts.ScythePhighting;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
 import xyz.yaszu.freedom.Soul.Base.BaseOrange;
@@ -249,7 +249,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     public long start_time = 0;
     @Override
     public void onEnable() {
-        PatheticBukkit.initialize(this);
+
         PacketEvents.getAPI().init();
         PacketEvents.getAPI().getEventManager().registerListener(new PacketManager());
 
@@ -257,7 +257,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         for (Player player : Bukkit.getOnlinePlayers()) {
             AdminManager.handleJoin(player);
         }
-
         // Plugin startup logic
         this.saveDefaultConfig();
         ItemListener.registerItems();
@@ -295,7 +294,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
         Bukkit.getPluginManager().registerEvents(new AlcoholManager(), this);
         Bukkit.getPluginManager().registerEvents(new VoidManager(),this);
-
+        Bukkit.getPluginManager().registerEvents(new ScythePhighting(),this);
         soulImbueManager = new SoulImbueManager();
         Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();
@@ -345,6 +344,8 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(soulImbueManager.acceptImbue());
             commands.registrar().register(soulImbueManager.denyImbue());
             commands.registrar().register(soulImbueManager.forceUnimbue());
+            commands.registrar().register(Trust.sell());
+            commands.registrar().register(Trust.pay());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
@@ -381,6 +382,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     public void onDisable() {
         PacketEvents.getAPI().terminate();
         xyz.yaszu.freedom.Subsystems.ProvinceManager.saveProvinces();
+
         if (soulImbueManager != null) {
             soulImbueManager.saveVisits();
             // End all visits visually before shutting down to avoid floating mannequins if persistence fails

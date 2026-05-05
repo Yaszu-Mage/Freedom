@@ -38,6 +38,7 @@ import xyz.yaszu.freedom.Subsystems.TrustManager;
 import java.util.*;
 
 import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
+import static xyz.yaszu.freedom.Subsystems.CurrencyManager.getCurrency;
 
 public class Util {
     public static SkinsRestorer skinsRestorerAPI;
@@ -159,6 +160,7 @@ public class Util {
         }
 
         if (score.getObjective(scoreboardName) != null) {
+            int Money = getCurrency(player);
             Objective objective = score.getObjective(scoreboardName);
             objective.getScore("line1").customName(dess("<shadow:#000000FF><b><yellow>----------------</yellow></b>"));
             objective.getScore("line1").numberFormat(NumberFormat.blank());
@@ -166,7 +168,10 @@ public class Util {
             objective.getScore("ZLives").numberFormat(NumberFormat.blank());
             objective.getScore("SoulPoints").customName(dess("<shadow:#000000FF><b><aqua>SoulPoints</aqua>: ").append(loadingBar(soulvalue,10,0)));
             objective.getScore("SoulPoints").numberFormat(NumberFormat.blank());
+            objective.getScore("ZZMoney").numberFormat(NumberFormat.blank());
+            objective.getScore("ZZMoney").customName(dess("  <shadow:#000000FF><b><gradient:gold:gold:#a64000>Groschen:   " + Money));
         } else {
+            int Money = getCurrency(player);
             Objective objective = score.registerNewObjective(scoreboardName, "dummy",dess("<shadow:#000000FF><b>Details:"));
             objective.getScore("line1").customName(dess("<shadow:#000000FF><b><yellow>----------------</yellow></b>"));
             objective.getScore("line1").numberFormat(NumberFormat.blank());
@@ -174,6 +179,8 @@ public class Util {
             objective.getScore("ZLives").numberFormat(NumberFormat.blank());
             objective.getScore("SoulPoints").customName(dess("<shadow:#000000FF><b><aqua>SoulPoints</aqua>: ").append(loadingBar(soulvalue,10,0)));
             objective.getScore("SoulPoints").numberFormat(NumberFormat.blank());
+            objective.getScore("ZZMoney").customName(dess("  <shadow:#000000FF><b><gradient:gold:gold:#a64000>Groschen:   " + Money));
+            objective.getScore("ZZMoney").numberFormat(NumberFormat.blank());
             objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         }
         Objective objective = score.getObjective(scoreboardName);

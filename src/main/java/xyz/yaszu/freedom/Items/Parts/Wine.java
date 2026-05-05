@@ -22,7 +22,7 @@ public class Wine extends Util implements BaseItem {
     public ItemStack item() {
         ItemStack itemStack = ItemStack.of(Material.RECOVERY_COMPASS);
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setItemModel(NamespacedKey.minecraft("Wine"));
+        meta.setItemModel(NamespacedKey.minecraft("wine"));
         meta.displayName(Util.dess("<shadow:#000000FF><b><Red>Wine</Red></b>"));
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"wine");
         itemStack.setItemMeta(meta);

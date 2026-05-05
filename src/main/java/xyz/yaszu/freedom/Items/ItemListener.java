@@ -52,6 +52,7 @@ public class ItemListener extends Util implements Listener {
         register(new SpellFocus.Orb(), "orb");
         register(new SpellFocus.Staff(), "staff");
         register(new SpellFocus.Grimoire(), "grimoire");
+        register(new ScythePhighting(), "scythephighting");
         ArtifactManager.registerArtifacts();
 //        for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
 //            register(artifact, artifact.getID());

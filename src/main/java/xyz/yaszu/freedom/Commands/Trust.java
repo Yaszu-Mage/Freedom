@@ -33,6 +33,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Commands.Arguments.CustomItemArgument;
+import xyz.yaszu.freedom.Commands.Arguments.SellArguments;
 import xyz.yaszu.freedom.Commands.Arguments.SoulArguments;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Information.BaseInformation;
@@ -42,12 +43,8 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.SoulTypes;
-import xyz.yaszu.freedom.Subsystems.PacketManager;
-import xyz.yaszu.freedom.Subsystems.TrustManager;
+import xyz.yaszu.freedom.Subsystems.*;
 import xyz.yaszu.freedom.Soul.soulListener;
-import xyz.yaszu.freedom.Subsystems.ChunkLootManager;
-import xyz.yaszu.freedom.Subsystems.Life_and_Death;
-import xyz.yaszu.freedom.Subsystems.AdminManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
@@ -176,7 +173,6 @@ public class Trust {
                             return Command.SINGLE_SUCCESS;
                         };
                         Location loc = target.getLocation();
-                        removeAlcohol(target,0);
 
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
@@ -196,7 +192,40 @@ public class Trust {
         ).build();
     }
 
+    public static LiteralCommandNode<CommandSourceStack> sell() {
+        return Commands.literal("sell")
+                .then(Commands.argument("flavor", new SellArguments())
+                        .executes(ctx -> {
+                            final CurrencyManager.SellType sellType = ctx.getArgument("flavor", CurrencyManager.SellType.class);
+                            if (ctx.getSource().getSender() instanceof Player sender) {
+                                if (sender.isOp()) {
+                                    CurrencyManager.sell(sender,sellType);
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .build();
 
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> pay() {
+        return Commands.literal("pay")
+                .then(Commands.argument("player",ArgumentTypes.player()).then(Commands.argument("amount",IntegerArgumentType.integer()).executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        try {
+                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                            final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+                            CurrencyManager.pay(player,target,ctx.getArgument("amount",Integer.class));
+                        } catch (Exception e) {
+                            player.sendMessage(e.getMessage());
+                        }
+
+                    }
+
+                    return Command.SINGLE_SUCCESS;
+                }))).build();
+    }
 
 
     public static LiteralCommandNode<CommandSourceStack> playerArgument() {

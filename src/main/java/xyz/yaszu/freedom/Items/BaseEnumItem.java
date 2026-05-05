@@ -12,4 +12,5 @@ public enum BaseEnumItem {
     ale,
     rifle,
     timepiece,
+    ScythePhighting
 }
