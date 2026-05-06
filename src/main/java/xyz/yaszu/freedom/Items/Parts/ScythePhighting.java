@@ -40,63 +40,24 @@ public class ScythePhighting extends Util implements BaseItem, Listener {
         if (item.getPersistentDataContainer().has(keygen("scythephighting"))) {
             Boolean isScytheMode = item.getPersistentDataContainer().get(keygen("scythephighting"), PersistentDataType.BOOLEAN);
             if (isScytheMode != null && !isScytheMode) {
-                // Gun mode
+                // Gun mode - initialize ammo system on first use
+                BulletSystem.initializeAmmo(player, 30);
 
-                // Get current ammo (0-30)
-                Integer currentAmmo = item.getPersistentDataContainer().get(keygen("scythephighting_ammo"), PersistentDataType.INTEGER);
-                if (currentAmmo == null) {
-                    currentAmmo = 0;
-                }
-
-                // Check if in reload cooldown
-                Long lastReloadTime = item.getPersistentDataContainer().get(keygen("scythephighting_reload_time"), PersistentDataType.LONG);
-                if (lastReloadTime != null && System.currentTimeMillis() - lastReloadTime < 2000) {
-                    // Still in cooldown
-                    player.sendActionBar(dess("Reloading... " + (2000 - (System.currentTimeMillis() - lastReloadTime)) / 1000 + "s"));
-                    return;
-                } else if (lastReloadTime != null && System.currentTimeMillis() - lastReloadTime >= 2000) {
-                    // Reload cooldown completed, reset ammo
-                    ItemMeta meta = item.getItemMeta();
-                    if (meta != null) {
-                        meta.getPersistentDataContainer().set(keygen("scythephighting_ammo"), PersistentDataType.INTEGER, 0);
-                        meta.getPersistentDataContainer().remove(keygen("scythephighting_reload_time"));
-                        item.setItemMeta(meta);
-                    }
-                    currentAmmo = 0;
-                }
-
-                // Check if ammo is depleted
-                if (currentAmmo >= 30) {
-                    // Out of ammo, start reload cooldown
-                    player.sendActionBar(dess("<color:#ff0000>Out of ammo! Reloading..."));
-                    ItemMeta meta = item.getItemMeta();
-                    if (meta != null) {
-                        meta.getPersistentDataContainer().set(keygen("scythephighting_reload_time"), PersistentDataType.LONG, System.currentTimeMillis());
-                        item.setItemMeta(meta);
-                    }
-                    return;
-                }
-
-                // Fire the bullet
+                // Fire the bullet using BulletSystem's ammo management
                 BulletSystem.fireBullet(player, new BulletSystem.BulletConfig()
+                        .maxAmmo(30)
+                        .reloadTimeTicks(40)
                         .shootSound(Sound.ENTITY_GENERIC_EXPLODE, 0.1f, 1.9f)
                         .hitSound(org.bukkit.Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f)
-                        .damage(3.0)
+                        .charge(0)
+                        .damage(0.5)
                         .speed(1)
                         .maxRange(60.0)
-                        .collisionRadius(0.35)
+                        .collisionRadius(1.78)
                         .particle(Particle.SMOKE));
 
-                // Increment ammo counter and update item meta
-                currentAmmo++;
-                ItemMeta meta = item.getItemMeta();
-                if (meta != null) {
-                    meta.getPersistentDataContainer().set(keygen("scythephighting_ammo"), PersistentDataType.INTEGER, currentAmmo);
-                    item.setItemMeta(meta);
-                }
-
                 // Send ammo status to player
-                player.sendActionBar(dess("<color:#ffff00>Ammo: " + currentAmmo + "/30"));
+                player.sendActionBar(dess("<color:#ffff00>Ammo: " + BulletSystem.getAmmo(player) + "/30"));
             }
             // Scythe mode: handled elsewhere or add logic here
         }

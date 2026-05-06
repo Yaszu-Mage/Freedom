@@ -3,6 +3,7 @@ import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.resource.ResourcePackRequest;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.entity.Player;
@@ -16,7 +17,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
@@ -24,6 +24,7 @@ import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.net.URI;
 import java.util.*;
 
 public class soulListener extends Util implements Listener {
@@ -72,7 +73,45 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        player.setResourcePack("https://files.yaszu.xyz/rp/?zip");
+        // Send resource pack after a delay to ensure player network is ready
+        new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline()) return;
+
+                try {
+                    // Resource pack URL - must be a direct link to a valid ZIP file
+                    String packUrl = "https://www.dropbox.com/scl/fo/63c5re1q0w4kbcwvvr3bl/AJbxupF06JxGuMzFtThxKgQ?rlkey=32b306bpu8x7bw10kr8gd4yah&st=ubfy0ket&dl=1";
+                    String baller = "https://www.dropbox.com/scl/fi/d0qlu1bcbn1slsluqizlb/build.zip?rlkey=80ko5ytz9xsndtosj49g2v0ap&st=ssmpa746&dl=1";
+                    // Using the newer Paper API with ResourcePackRequest
+                    try {
+                        ResourcePackRequest resourcePackRequest = ResourcePackRequest.resourcePackRequest()
+                                .packs(net.kyori.adventure.resource.ResourcePackInfo.resourcePackInfo()
+                                        .uri(java.net.URI.create(packUrl))
+                                        .hash("")  // Empty hash - server won't validate hash on client
+                                        .build()
+                                        ,net.kyori.adventure.resource.ResourcePackInfo.resourcePackInfo()
+                                                .uri(URI.create(baller)).hash("")
+                                                .build()
+                                )
+                                .required(false)  // Don't force - let client accept/decline
+                                .prompt(net.kyori.adventure.text.Component.text("This server uses a custom resource pack"))
+                                .build();
+                        player.sendResourcePacks(resourcePackRequest);
+                        Freedom.get_plugin().getLogger().info("Resource pack request sent to " + player.getName() + " from " + packUrl);
+                    } catch (NoSuchMethodError e) {
+                        // Fallback for older Paper versions
+                        player.setResourcePack(packUrl, "");
+                        Freedom.get_plugin().getLogger().info("Resource pack (legacy method) sent to " + player.getName());
+                    }
+
+                } catch (Exception e) {
+                    Freedom.get_plugin().getLogger().warning("Failed to send resource pack to " + player.getName() + ": " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskLater(Freedom.get_plugin(), 10L); // 0.5 second delay
+
         if (!player.getPersistentDataContainer().has(keygen("ComorAction"))) {
             player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, true);
         }
@@ -80,7 +119,8 @@ public class soulListener extends Util implements Listener {
             player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, 0.0);
             return;
         }
-        if (player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE) > 10) {
+        Double soulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+        if (soulPoints != null && soulPoints > 10) {
             player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, 10.0);
         }
         Base_Soul soul = getSoul(player);
@@ -91,8 +131,20 @@ public class soulListener extends Util implements Listener {
         if (!abilityTwoCooldowns.containsKey(player.getUniqueId())) {
             abilityTwoCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         }
+    }
 
-
+    @EventHandler
+    public void onResourcePackResponse(PlayerResourcePackStatusEvent event) {
+        Player player = event.getPlayer();
+        if (event.getStatus() == PlayerResourcePackStatusEvent.Status.ACCEPTED) {
+            Freedom.get_plugin().getLogger().info(player.getName() + " accepted the resource pack");
+        } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.DECLINED) {
+            Freedom.get_plugin().getLogger().warning(player.getName() + " declined the resource pack");
+        } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
+            Freedom.get_plugin().getLogger().warning(player.getName() + " failed to download the resource pack - check URL and file");
+        } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
+            Freedom.get_plugin().getLogger().info(player.getName() + " successfully loaded the resource pack");
+        }
     }
 
     @EventHandler
@@ -127,7 +179,16 @@ public class soulListener extends Util implements Listener {
             player.setWalkSpeed(0.2f);
             player.setFlySpeed(0.1f);
         } else {
-            selectionUi.open_UI(player,SOULS.get(SoulTypes.Red));
+            // Open the starting GUI after a small delay to ensure resource pack is sent first
+            new org.bukkit.scheduler.BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (player.isOnline()) {
+                        selectionUi.open_UI(player, SOULS.get(SoulTypes.Red));
+                    }
+                }
+            }.runTaskLater(Freedom.get_plugin(), 20L);  // 1 second delay
+
             player.setWalkSpeed(0);
             player.setFlySpeed(0);
         }

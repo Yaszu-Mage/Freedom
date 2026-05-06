@@ -21,6 +21,7 @@ import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
 import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
+import xyz.yaszu.freedom.Items.ColorSpecific.Railgun;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
 import xyz.yaszu.freedom.Items.Parts.*;
@@ -53,6 +54,7 @@ public class ItemListener extends Util implements Listener {
         register(new SpellFocus.Staff(), "staff");
         register(new SpellFocus.Grimoire(), "grimoire");
         register(new ScythePhighting(), "scythephighting");
+        register(new Railgun(), "railgun");
         ArtifactManager.registerArtifacts();
 //        for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
 //            register(artifact, artifact.getID());

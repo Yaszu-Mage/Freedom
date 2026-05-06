@@ -124,9 +124,8 @@ public class BasePurple extends Util implements Base_Soul {
         drawIsoscelesTriangle(player.getLocation(), 1.5, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.PURPLE, 4));
             drawIsoscelesTriangle(player.getLocation(), 2.3, player.getWorld(), 16, Particle.DUST, new Particle.DustOptions(Color.YELLOW, 3));
         abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
-    } else {
-            player.sendActionBar(dess("You can't use this ability yet"));
-            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(null), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
+        } else {
+            double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(player), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
             player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
@@ -254,7 +253,6 @@ public class BasePurple extends Util implements Base_Soul {
     public long AbilityTwo_Cooldown() {
         return 30000;
     }
-    public HashMap<UUID, Long> abilityOneCooldowns = new HashMap<>();
 
     @Override
     public long AbilityOne_Cooldown(Object obj) {
