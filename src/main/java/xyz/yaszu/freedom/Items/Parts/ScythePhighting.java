@@ -4,6 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,7 +27,7 @@ import xyz.yaszu.freedom.Util.Util;
 public class ScythePhighting extends Util implements BaseItem, Listener {
     @Override
     public ItemStack item() {
-        ItemStack item = ItemStack.of(Material.RECOVERY_COMPASS);
+        ItemStack item = ItemStack.of(Material.NETHERITE_SWORD);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Util.dess("<shadow:#000000FF><b>Scythe</b>"));
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"scythephighting");
@@ -41,8 +43,7 @@ public class ScythePhighting extends Util implements BaseItem, Listener {
             Boolean isScytheMode = item.getPersistentDataContainer().get(keygen("scythephighting"), PersistentDataType.BOOLEAN);
             if (isScytheMode != null && !isScytheMode) {
                 // Gun mode - initialize ammo system on first use
-                BulletSystem.initializeAmmo(player, 30);
-
+                BulletSystem.initializeAmmo(player, item, 30);
                 // Fire the bullet using BulletSystem's ammo management
                 BulletSystem.fireBullet(player, new BulletSystem.BulletConfig()
                         .maxAmmo(30)
@@ -57,12 +58,14 @@ public class ScythePhighting extends Util implements BaseItem, Listener {
                         .particle(Particle.SMOKE));
 
                 // Send ammo status to player
-                player.sendActionBar(dess("<color:#ffff00>Ammo: " + BulletSystem.getAmmo(player) + "/30"));
+                player.sendActionBar(dess("<color:#ffff00>Ammo: " + BulletSystem.getAmmo(player, item) + "/30"));
             }
             // Scythe mode: handled elsewhere or add logic here
         }
     }
-
+    AttributeModifier gunModeAttack = new AttributeModifier(keygen("scythephighting"),-15, AttributeModifier.Operation.ADD_NUMBER);
+    AttributeModifier scytheModeAttack = new AttributeModifier(keygen("scythephighting"),-2, AttributeModifier.Operation.ADD_NUMBER);
+    AttributeModifier SPEED = new AttributeModifier(keygen("scythephighting"),2, AttributeModifier.Operation.ADD_NUMBER);
     public void swap(ItemStack item) {
         if (item.getPersistentDataContainer().has(keygen("scythephighting"))) {
             Boolean isScytheMode = item.getPersistentDataContainer().get(keygen("scythephighting"), PersistentDataType.BOOLEAN);
@@ -71,18 +74,23 @@ public class ScythePhighting extends Util implements BaseItem, Listener {
             Freedom.get_plugin().getLogger().info("BEFORE: " + isScytheMode);
             ItemMeta meta = item.getItemMeta();
             if (meta == null) return;
-
             if (isScytheMode) {
                 // Currently in scythe mode, switch to gun mode
                 meta.getPersistentDataContainer().set(keygen("scythephighting"), PersistentDataType.BOOLEAN, false);
                 Freedom.get_plugin().getLogger().info("SWITCHED TO GUNMODE");
                 meta.setItemModel(NamespacedKey.minecraft("scythephightinga"));
+                meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE,scytheModeAttack);
+                meta.addAttributeModifier(Attribute.ATTACK_DAMAGE,gunModeAttack);
             } else {
                 // Currently in gun mode, switch to scythe mode
                 meta.getPersistentDataContainer().set(keygen("scythephighting"), PersistentDataType.BOOLEAN, true);
                 Freedom.get_plugin().getLogger().info("SWITCHED TO SCYTHEMODE");
                 meta.setItemModel(NamespacedKey.minecraft("scythephightingb"));
+                meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE,gunModeAttack);
+                meta.addAttributeModifier(Attribute.ATTACK_DAMAGE,scytheModeAttack);
             }
+            meta.removeAttributeModifier(Attribute.ATTACK_SPEED,SPEED);
+            meta.addAttributeModifier(Attribute.ATTACK_SPEED,SPEED);
             item.setItemMeta(meta);
         }
     }

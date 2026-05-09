@@ -10,6 +10,8 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -24,14 +26,24 @@ import java.util.function.Consumer;
 /**
  * A flexible and efficient bullet system for all types of guns.
  * Supports configurable particles, damage, speed, charge mechanics, and callbacks.
+ *
+ * AMMO SYSTEM:
+ * - By default, all weapons share a single "base_ammo" pool per player (backwards compatible)
+ * - Call allocateWeaponId() or initializeAmmoPersistent() to give a weapon its own separate ammo pool
+ * - Weapons with their own IDs don't interfere with other weapons' ammo counts
+ *
+ * USAGE:
+ * 1. Basic (shared ammo): initializeAmmo(player, weapon, 30)
+ * 2. Persistent (unique ammo): initializeAmmoPersistent(player, weapon, 30)
  */
 public class BulletSystem implements Listener {
 
     // Track charging players
     private static final Map<UUID, ChargeData> CHARGING_PLAYERS = new HashMap<>();
 
-    // Track ammo and reload state per player
-    private static final Map<UUID, ReloadData> RELOAD_PLAYERS = new HashMap<>();
+    // Track ammo and reload state per player per weapon
+    // Structure: Map<PlayerUUID, Map<WeaponID, ReloadData>>
+    private static final Map<UUID, Map<String, ReloadData>> RELOAD_PLAYERS = new HashMap<>();
 
     /**
      * Internal class to track charge state per player
@@ -167,7 +179,9 @@ public class BulletSystem implements Listener {
 
         // Check ammo system
         UUID playerId = player.getUniqueId();
-        ReloadData reloadData = getOrCreateReloadData(playerId, config.maxAmmo);
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        String weaponId = getWeaponId(mainHand);
+        ReloadData reloadData = getOrCreateReloadData(playerId, weaponId, config.maxAmmo);
 
         // Check if reloading
         if (reloadData.isReloading) {
@@ -187,7 +201,7 @@ public class BulletSystem implements Listener {
 
         // Check if out of ammo
         if (reloadData.currentAmmo <= 0) {
-            startReload(player, config);
+            startReload(player, weaponId, config);
             player.sendActionBar(Util.dess("<color:#ff0000>Out of ammo! Reloading..."));
             return new BukkitRunnable() { @Override public void run() {} };
         }
@@ -332,8 +346,8 @@ public class BulletSystem implements Listener {
                 // Play shoot sound on first run
                 if (firstRun) {
                     firstRun = false;
-                    Bukkit.getLogger().info("[BulletSystem] Firing bullet from " + firer.getName() +
-                            " with collision radius: " + config.collisionRadius + "m, damage: " + config.damage);
+//                    Bukkit.getLogger().info("[BulletSystem] Firing bullet from " + firer.getName() +
+//                            " with collision radius: " + config.collisionRadius + "m, damage: " + config.damage);
                     if (config.shootSound != null) {
                         firer.getWorld().playSound(bulletLocation, config.shootSound, config.shootSoundVolume, config.shootSoundPitch);
                     }
@@ -356,10 +370,10 @@ public class BulletSystem implements Listener {
 
                 // Check for entity collisions
                 java.util.Collection<Entity> nearbyEntities = bulletLocation.getNearbyEntities(config.collisionRadius, config.collisionRadius, config.collisionRadius);
-                if (!nearbyEntities.isEmpty()) {
-                    Bukkit.getLogger().info("[BulletSystem] Found " + nearbyEntities.size() + " nearby entities at " +
-                            bulletLocation.getBlockX() + "," + bulletLocation.getBlockY() + "," + bulletLocation.getBlockZ());
-                }
+//                if (!nearbyEntities.isEmpty()) {
+////                    Bukkit.getLogger().info("[BulletSystem] Found " + nearbyEntities.size() + " nearby entities at " +
+////                            bulletLocation.getBlockX() + "," + bulletLocation.getBlockY() + "," + bulletLocation.getBlockZ());
+//                }
                 for (Entity entity : nearbyEntities) {
 
                     if (entity instanceof LivingEntity && entity != firer) {
@@ -370,20 +384,20 @@ public class BulletSystem implements Listener {
                         double maxDistanceSquared = config.collisionRadius * config.collisionRadius;
 
                         // Verbose logging
-                        Bukkit.getLogger().info("[BulletSystem] Hit detection for " + entity.getName() +
-                                " | Distance: " + String.format("%.2f", Math.sqrt(distanceSquared)) + "m | " +
-                                "Max Distance: " + config.collisionRadius + "m | " +
-                                "Bullet Loc: " + bulletLocation.getBlockX() + "," + bulletLocation.getBlockY() + "," + bulletLocation.getBlockZ() + " | " +
-                                "Entity Loc: " + entity.getLocation().getBlockX() + "," + entity.getLocation().getBlockY() + "," + entity.getLocation().getBlockZ());
+//                        Bukkit.getLogger().info("[BulletSystem] Hit detection for " + entity.getName() +
+//                                " | Distance: " + String.format("%.2f", Math.sqrt(distanceSquared)) + "m | " +
+//                                "Max Distance: " + config.collisionRadius + "m | " +
+//                                "Bullet Loc: " + bulletLocation.getBlockX() + "," + bulletLocation.getBlockY() + "," + bulletLocation.getBlockZ() + " | " +
+//                                "Entity Loc: " + entity.getLocation().getBlockX() + "," + entity.getLocation().getBlockY() + "," + entity.getLocation().getBlockZ());
 
                         if (distanceSquared > maxDistanceSquared) {
-                            Bukkit.getLogger().info("[BulletSystem] MISSED - Distance too far: " + String.format("%.2f", Math.sqrt(distanceSquared)) + "m > " + config.collisionRadius + "m");
+//                            Bukkit.getLogger().info("[BulletSystem] MISSED - Distance too far: " + String.format("%.2f", Math.sqrt(distanceSquared)) + "m > " + config.collisionRadius + "m");
                             continue;
                         }
 
                         // Apply damage
                         target.damage(config.damage, firer);
-                        Bukkit.getLogger().info("[BulletSystem] HIT! Dealt " + config.damage + " damage to " + target.getName());
+//                        Bukkit.getLogger().info("[BulletSystem] HIT! Dealt " + config.damage + " damage to " + target.getName());
 
                         // Play sound
                         if (config.hitSound != null) {
@@ -462,91 +476,194 @@ public class BulletSystem implements Listener {
     }
 
     // ========== AMMO & RELOAD SYSTEM ==========
+    //
+    // BACKWARDS COMPATIBILITY:
+    // - All weapons without a weapon_id share the "base_ammo" pool (backwards compatible with v1)
+    // - To give a weapon its own unique ammo pool, call allocateWeaponId() or initializeAmmoPersistent()
+    // - This allows gradual migration: some weapons can use shared ammo, others can have dedicated pools
+    //
 
     /**
-     * Gets or creates reload data for a player
+     * Gets or creates a unique weapon ID for an item
+     * If the item doesn't have a weapon_id, returns "base_ammo" for backwards compatibility
+     * This allows all weapons without IDs to share a common base ammo pool
      */
-    private static ReloadData getOrCreateReloadData(UUID playerId, int maxAmmo) {
-        if (!RELOAD_PLAYERS.containsKey(playerId)) {
-            RELOAD_PLAYERS.put(playerId, new ReloadData(playerId, maxAmmo));
+    private static String getWeaponId(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return "base_ammo";
         }
-        return RELOAD_PLAYERS.get(playerId);
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null && meta.getPersistentDataContainer().has(NamespacedKey.minecraft("weapon_id"), PersistentDataType.STRING)) {
+            return meta.getPersistentDataContainer().get(NamespacedKey.minecraft("weapon_id"), PersistentDataType.STRING);
+        }
+
+        // Return base_ammo for backwards compatibility - weapons share this until they get their own ID
+        return "base_ammo";
     }
 
     /**
-     * Initializes the ammo system for a player
+     * Gets or creates a unique persistent weapon ID for an item
+     * This is used when you want the item to have its own separate ammo pool
+     */
+    private static String getOrCreatePersistentWeaponId(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return "base_ammo";
+        }
+        
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null && meta.getPersistentDataContainer().has(NamespacedKey.minecraft("weapon_id"), PersistentDataType.STRING)) {
+            return meta.getPersistentDataContainer().get(NamespacedKey.minecraft("weapon_id"), PersistentDataType.STRING);
+        }
+        
+        // Generate and store a new weapon ID
+        String weaponId = "weapon_" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        if (meta != null) {
+            meta.getPersistentDataContainer().set(NamespacedKey.minecraft("weapon_id"), PersistentDataType.STRING, weaponId);
+            item.setItemMeta(meta);
+        }
+        return weaponId;
+    }
+
+    /**
+     * Gets or creates reload data for a player and weapon
+     */
+    private static ReloadData getOrCreateReloadData(UUID playerId, String weaponId, int maxAmmo) {
+        Map<String, ReloadData> playerWeapons = RELOAD_PLAYERS.computeIfAbsent(playerId, k -> new HashMap<>());
+        return playerWeapons.computeIfAbsent(weaponId, k -> new ReloadData(playerId, maxAmmo));
+    }
+
+    /**
+     * Allocates a unique persistent weapon ID for an item
+     * Call this if you want a weapon to have its own dedicated ammo pool
+     * without sharing the base ammo pool
+     * @param weapon The weapon item to allocate an ID for
+     */
+    public static void allocateWeaponId(ItemStack weapon) {
+        getOrCreatePersistentWeaponId(weapon);
+    }
+
+    /**
+     * Checks if a weapon has a persistent weapon ID
+     * @param weapon The weapon item
+     * @return true if the weapon has its own ID, false if using base ammo pool
+     */
+    public static boolean hasWeaponId(ItemStack weapon) {
+        if (weapon == null || weapon.getType() == Material.AIR) return false;
+        ItemMeta meta = weapon.getItemMeta();
+        return meta != null && meta.getPersistentDataContainer().has(NamespacedKey.minecraft("weapon_id"), PersistentDataType.STRING);
+    }
+
+    /**
+     * Gets the base ammo pool key (all weapons without IDs share this)
+     */
+    public static String getBaseAmmoKey() {
+        return "base_ammo";
+    }
+
+    /**
+     * Initializes the ammo system for a player's weapon
+     * If the weapon doesn't have a weapon_id, it will use the base ammo pool
      * @param player The player
+     * @param weapon The weapon item
      * @param maxAmmo The maximum ammo capacity
      */
-    public static void initializeAmmo(Player player, int maxAmmo) {
-        getOrCreateReloadData(player.getUniqueId(), maxAmmo);
+    public static void initializeAmmo(Player player, ItemStack weapon, int maxAmmo) {
+        String weaponId = getWeaponId(weapon);
+        getOrCreateReloadData(player.getUniqueId(), weaponId, maxAmmo);
     }
 
     /**
-     * Gets the current ammo for a player
+     * Initializes the ammo system with a persistent weapon ID
+     * This allocates a unique ID for the weapon and gives it its own ammo pool
      * @param player The player
+     * @param weapon The weapon item
+     * @param maxAmmo The maximum ammo capacity
+     */
+    public static void initializeAmmoPersistent(Player player, ItemStack weapon, int maxAmmo) {
+        String weaponId = getOrCreatePersistentWeaponId(weapon);
+        getOrCreateReloadData(player.getUniqueId(), weaponId, maxAmmo);
+    }
+
+    /**
+     * Gets the current ammo for a player's weapon
+     * @param player The player
+     * @param weapon The weapon item
      * @return Current ammo count
      */
-    public static int getAmmo(Player player) {
-        ReloadData data = RELOAD_PLAYERS.get(player.getUniqueId());
+    public static int getAmmo(Player player, ItemStack weapon) {
+        String weaponId = getWeaponId(weapon);
+        Map<String, ReloadData> playerWeapons = RELOAD_PLAYERS.get(player.getUniqueId());
+        if (playerWeapons == null) return 0;
+        ReloadData data = playerWeapons.get(weaponId);
         return data != null ? data.currentAmmo : 0;
     }
 
     /**
-     * Sets the ammo for a player
+     * Sets the ammo for a player's weapon
      * @param player The player
+     * @param weapon The weapon item
      * @param ammo The new ammo count
      */
-    public static void setAmmo(Player player, int ammo) {
-        ReloadData data = RELOAD_PLAYERS.get(player.getUniqueId());
-        if (data != null) {
-            data.currentAmmo = Math.min(ammo, data.maxAmmo);
+    public static void setAmmo(Player player, ItemStack weapon, int ammo) {
+        String weaponId = getWeaponId(weapon);
+        Map<String, ReloadData> playerWeapons = RELOAD_PLAYERS.get(player.getUniqueId());
+        if (playerWeapons != null) {
+            ReloadData data = playerWeapons.get(weaponId);
+            if (data != null) {
+                data.currentAmmo = Math.min(ammo, data.maxAmmo);
+            }
         }
     }
 
     /**
-     * Resets ammo to max for a player
+     * Resets ammo to max for a player's weapon
      * @param player The player
+     * @param weapon The weapon item
      */
-    public static void resetAmmo(Player player) {
-        ReloadData data = RELOAD_PLAYERS.get(player.getUniqueId());
-        if (data != null) {
-            data.currentAmmo = data.maxAmmo;
+    public static void resetAmmo(Player player, ItemStack weapon) {
+        String weaponId = getWeaponId(weapon);
+        Map<String, ReloadData> playerWeapons = RELOAD_PLAYERS.get(player.getUniqueId());
+        if (playerWeapons != null) {
+            ReloadData data = playerWeapons.get(weaponId);
+            if (data != null) {
+                data.currentAmmo = data.maxAmmo;
+            }
         }
     }
 
     /**
-     * Checks if a player is currently reloading
+     * Checks if a player is currently reloading a weapon
      * @param player The player
+     * @param weapon The weapon item
      * @return true if reloading, false otherwise
      */
-    public static boolean isReloading(Player player) {
-        ReloadData data = RELOAD_PLAYERS.get(player.getUniqueId());
+    public static boolean isReloading(Player player, ItemStack weapon) {
+        String weaponId = getWeaponId(weapon);
+        Map<String, ReloadData> playerWeapons = RELOAD_PLAYERS.get(player.getUniqueId());
+        if (playerWeapons == null) return false;
+        ReloadData data = playerWeapons.get(weaponId);
         return data != null && data.isReloading;
     }
 
     /**
-     * Starts a manual reload for a player
+     * Starts a manual reload for a player's weapon
      * @param player The player
+     * @param weapon The weapon item
      * @param reloadTickDuration Duration of reload in ticks
      */
-    public static void startReload(Player player, int reloadTickDuration) {
+    public static void startReload(Player player, ItemStack weapon, int reloadTickDuration) {
         BulletSystem.BulletConfig config = new BulletSystem.BulletConfig();
         config.reloadTimeTicks = reloadTickDuration;
-        startReload(player, config);
+        startReload(player, weapon, config);
     }
 
     /**
-     * Starts a reload based on config
+     * Starts a reload for a specific weapon based on config
      */
-    private static void startReload(Player player, BulletConfig config) {
+    private static void startReload(Player player, String weaponId, BulletConfig config) {
         UUID playerId = player.getUniqueId();
-        ReloadData data = RELOAD_PLAYERS.get(playerId);
-
-        if (data == null) {
-            data = new ReloadData(playerId, config.maxAmmo);
-            RELOAD_PLAYERS.put(playerId, data);
-        }
+        ReloadData data = getOrCreateReloadData(playerId, weaponId, config.maxAmmo);
 
         data.isReloading = true;
         data.reloadStartTime = System.currentTimeMillis();
@@ -555,22 +672,38 @@ public class BulletSystem implements Listener {
     }
 
     /**
-     * Gets the max ammo for a player
+     * Starts a reload for a specific weapon based on config
+     */
+    private static void startReload(Player player, ItemStack weapon, BulletConfig config) {
+        String weaponId = getWeaponId(weapon);
+        startReload(player, weaponId, config);
+    }
+
+    /**
+     * Gets the max ammo for a player's weapon
      * @param player The player
+     * @param weapon The weapon item
      * @return Maximum ammo capacity
      */
-    public static int getMaxAmmo(Player player) {
-        ReloadData data = RELOAD_PLAYERS.get(player.getUniqueId());
+    public static int getMaxAmmo(Player player, ItemStack weapon) {
+        String weaponId = getWeaponId(weapon);
+        Map<String, ReloadData> playerWeapons = RELOAD_PLAYERS.get(player.getUniqueId());
+        if (playerWeapons == null) return 0;
+        ReloadData data = playerWeapons.get(weaponId);
         return data != null ? data.maxAmmo : 0;
     }
 
     /**
-     * Checks if player can fire (has ammo and not reloading)
+     * Checks if player can fire a specific weapon (has ammo and not reloading)
      * @param player The player
+     * @param weapon The weapon item
      * @return true if can fire, false otherwise
      */
-    public static boolean canFire(Player player) {
-        ReloadData data = RELOAD_PLAYERS.get(player.getUniqueId());
+    public static boolean canFire(Player player, ItemStack weapon) {
+        String weaponId = getWeaponId(weapon);
+        Map<String, ReloadData> playerWeapons = RELOAD_PLAYERS.get(player.getUniqueId());
+        if (playerWeapons == null) return false;
+        ReloadData data = playerWeapons.get(weaponId);
         return data != null && data.currentAmmo > 0 && !data.isReloading;
     }
 

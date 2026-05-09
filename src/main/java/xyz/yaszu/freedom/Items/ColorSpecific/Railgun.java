@@ -31,6 +31,7 @@ public class Railgun extends Util implements BaseItem {
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"railgun");
         meta.getPersistentDataContainer().set(keygen("railgun"), PersistentDataType.BOOLEAN, false);
         meta.setItemModel(NamespacedKey.minecraft("railgun"));
+
         item.setItemMeta(meta);
         return item;
     }
@@ -39,9 +40,6 @@ public class Railgun extends Util implements BaseItem {
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
         // Initialize reload system on first use
-        if (BulletSystem.getAmmo(player) == 0 && BulletSystem.getMaxAmmo(player) == 0) {
-            BulletSystem.initializeAmmo(player, 1); // 1 round magazine
-        }
 
         // Prevent firing while charging
         if (BulletSystem.isCharging(player)) {
@@ -49,10 +47,10 @@ public class Railgun extends Util implements BaseItem {
         }
 
         // Display ammo to player
-        int currentAmmo = BulletSystem.getAmmo(player);
-        int maxAmmo = BulletSystem.getMaxAmmo(player);
+        int currentAmmo = BulletSystem.getAmmo(player,item);
+        int maxAmmo = BulletSystem.getMaxAmmo(player,item);
         player.sendActionBar(Util.dess("<color:#ffff00>Ammo: " + currentAmmo + "/" + maxAmmo));
-
+        BulletSystem.initializeAmmo(player, item,1); // 1 round magazine
         // Fire the railgun with charge mechanics and reload
         BulletSystem.fireBullet(player, new BulletSystem.BulletConfig()
                 .damage(25.0)

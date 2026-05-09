@@ -56,9 +56,9 @@ public class ItemListener extends Util implements Listener {
         register(new ScythePhighting(), "scythephighting");
         register(new Railgun(), "railgun");
         ArtifactManager.registerArtifacts();
-//        for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
-//            register(artifact, artifact.getID());
-//        }
+        for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
+            register(artifact, artifact.getID());
+        }
     }
 
     private static void register(BaseItem item, String id) {
