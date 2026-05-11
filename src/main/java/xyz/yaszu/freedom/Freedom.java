@@ -38,6 +38,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Alchemy.Alchemy;
+import xyz.yaszu.freedom.Alchemy.MazeManager;
 import xyz.yaszu.freedom.Alchemy.voidGenerator;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
@@ -58,6 +59,7 @@ import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.Ultra.Mocha;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
 import xyz.yaszu.freedom.Subsystems.*;
+import xyz.yaszu.freedom.Subsystems.WorldManager;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Util.BulletSystem;
 import xyz.yaszu.freedom.Util.FreedomKeys;
@@ -75,17 +77,6 @@ import static xyz.yaszu.freedom.Util.Util.keygen;
 public final class Freedom extends JavaPlugin implements Listener {
 
     public static int version = 6942067;
-    public record StructureInfo(float weight, List<String> worlds) {}
-
-    public static final Map<String, StructureInfo> STRUCTURES = Map.of(
-            "ritual.schem", new StructureInfo(1.0f, List.of("world")),
-            "voidisland.schem", new StructureInfo(10.0f, List.of("void")),
-            "voidisland2.schem", new StructureInfo(10.0f, List.of("void")),
-            "voidisland3.schem", new StructureInfo(10.0f, List.of("void")),
-            "voidisland4.schem", new StructureInfo(10.0f, List.of("void")),
-            "kfc.schematic", new StructureInfo(0.01f, List.of("world")),
-            "evilcampfire.schem", new StructureInfo(1f,List.of("world"))
-    );
 
     public void reapplyCurseWeakness(Player player) {
         if (player == null || !player.isOnline()) return;
@@ -296,6 +287,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
         Bukkit.getPluginManager().registerEvents(new AlcoholManager(), this);
         Bukkit.getPluginManager().registerEvents(new VoidManager(),this);
+        Bukkit.getPluginManager().registerEvents(new WorldManager(), this);
         Bukkit.getPluginManager().registerEvents(new ScythePhighting(),this);
         Bukkit.getPluginManager().registerEvents(new BulletSystem(),this);
         soulImbueManager = new SoulImbueManager();
@@ -349,11 +341,13 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(soulImbueManager.forceUnimbue());
             commands.registrar().register(Trust.sell());
             commands.registrar().register(Trust.pay());
+            commands.registrar().register(Trust.backrooms());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
         createVoid();
         createDoubleVoid();
+        Bukkit.getPluginManager().registerEvents(new BackroomsManager(this), this);
 
         new BukkitRunnable() {
             @Override
@@ -363,6 +357,7 @@ public final class Freedom extends JavaPlugin implements Listener {
                 }
             }
         }.runTaskTimer(this, 0, 20);
+        MazeManager.createMazeWorld("backrooms");
     }
 
 
@@ -398,44 +393,12 @@ public final class Freedom extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) throws IOException, WorldEditException {
-        if (event.getWorld() == Bukkit.getWorld("void") && !event.getChunk().getPersistentDataContainer().has(FreedomKeys.key("void"))) {
-            event.getChunk().getPersistentDataContainer().set(FreedomKeys.key("void"),PersistentDataType.BOOLEAN,true);
-            int currentrand = random.nextInt(1000);
-            if (currentrand <= 10) {
-                String resourceName;
-                int rand = random.nextInt(0, 4);
-                switch (rand) {
-                    case 1 -> resourceName = "voidisland2.schem";
-                    case 2 -> resourceName = "voidisland3.schem";
-                    case 3 -> resourceName = "voidisland4.schem";
-                    default -> resourceName = "voidisland.schem";
-                }
-                Freedom.get_plugin().getLogger().info("Loading structure: " + resourceName);
-                int x = (event.getChunk().getX() + random.nextInt(0, 16)) * 16;
-                int z = (event.getChunk().getZ() + random.nextInt(0, 16)) * 16;
-                int y = 60 + random.nextInt(-5, 20);
-                if (y < 0) y = 60;
-                Freedom.get_plugin().getLogger().info("Placing structure at " + x + ", " + y + ", " + z);
-                Clipboard load = StructureUtil.loadSchematicFromResource(resourceName);
-                if (load != null) {
-                    World adapter = BukkitAdapter.adapt(Bukkit.getWorld("void"));
-                    try (EditSession editSession = WorldEdit.getInstance().newEditSession(adapter)) {
-                        Operation operation = new ClipboardHolder(load)
-                                .createPaste(editSession)
-                                .to(BlockVector3.at(x, y, z))
-                                .build();
-                        Operations.complete(operation);
-                    }
-                }
-            }
-        }
+        // Handled by WorldManager
     }
 
 
     public void createVoid() {
-        WorldCreator worldCreator = new WorldCreator("void");
-        worldCreator.generator(new voidGenerator());
-        worldCreator.createWorld();
+        WorldManager.createInfiniteWorld("void");
         Objects.requireNonNull(Bukkit.getWorld("void")).setTime(17000);
         Objects.requireNonNull(Bukkit.getWorld("void")).setStorm(false);
         new BukkitRunnable() {
@@ -447,10 +410,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         }.runTaskTimer(this,0,1);
     }
     public void createDoubleVoid() {
-        WorldCreator worldCreator = new WorldCreator("doublevoid");
-        worldCreator.generator(new voidGenerator());
-        worldCreator.createWorld();
-        Objects.requireNonNull(Bukkit.getWorld("doublevoid")).setTime(17000);
+        WorldManager.createInfiniteWorld("doublevoid");
+        Objects.requireNonNull(Bukkit.getWorld("doublevoid")).setTime(18000);
         Objects.requireNonNull(Bukkit.getWorld("doublevoid")).setStorm(false);
         new BukkitRunnable() {
 
@@ -464,4 +425,5 @@ public final class Freedom extends JavaPlugin implements Listener {
             }
         }.runTaskTimer(this,0,1);
     }
+
 }

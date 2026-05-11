@@ -130,7 +130,12 @@ public class Trust {
                                                     if (type == CustomItemType.BOOK) {
                                                         stack = Information_Handler.ITEMS.get(itemId).information();
                                                     } else {
-                                                        stack = ItemListener.ITEMS.get(itemId).item();
+                                                        BaseItem baseItem = ItemListener.ITEMS.get(itemId);
+                                                        if (baseItem == null) {
+                                                            sender.sendRichMessage("<red>Item " + itemId + " not found!</red>");
+                                                            return Command.SINGLE_SUCCESS;
+                                                        }
+                                                        stack = baseItem.item();
                                                     }
                                                     stack.setAmount(amount);
                                                     target.getInventory().addItem(stack);
@@ -149,7 +154,12 @@ public class Trust {
                                             if (type == CustomItemType.BOOK) {
                                                 stack = Information_Handler.ITEMS.get(itemId).information();
                                             } else {
-                                                stack = ItemListener.ITEMS.get(itemId).item();
+                                                BaseItem baseItem = ItemListener.ITEMS.get(itemId);
+                                                if (baseItem == null) {
+                                                    sender.sendRichMessage("<red>Item " + itemId + " not found!</red>");
+                                                    return Command.SINGLE_SUCCESS;
+                                                }
+                                                stack = baseItem.item();
                                             }
                                             target.getInventory().addItem(stack);
                                             sender.sendRichMessage("<green>Bestowed " + itemId + " upon " + target.getName() + ".</green>");
@@ -418,6 +428,53 @@ public class Trust {
                             Life_and_Death.revive_player(target,sender.getLocation());
                             return Command.SINGLE_SUCCESS;
                         }))
+                .build();
+    }
+
+    public static LiteralCommandNode<CommandSourceStack> backrooms() {
+        return Commands.literal("backrooms")
+                .then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            if (ctx.getSource().getSender() instanceof Player sender) {
+                                if (!sender.isOp()) {
+                                    sender.sendMessage(util.dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                final Player target = targetResolver.resolve(ctx.getSource()).getFirst();
+
+                                org.bukkit.World backrooms = org.bukkit.Bukkit.getWorld("backrooms");
+                                if (backrooms == null) {
+                                    sender.sendRichMessage("<red>Backrooms world not found!</red>");
+                                    return Command.SINGLE_SUCCESS;
+                                }
+
+                                target.teleport(backrooms.getSpawnLocation());
+                                target.setRespawnLocation(backrooms.getSpawnLocation());
+                                sender.sendRichMessage("<green>Teleported " + target.getName() + " to the backrooms.</green>");
+                                target.sendRichMessage("<red>You have been sent to the backrooms.</red>");
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player sender) {
+                        if (!sender.isOp()) {
+                            sender.sendMessage(util.dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                            return Command.SINGLE_SUCCESS;
+                        }
+
+                        org.bukkit.World backrooms = org.bukkit.Bukkit.getWorld("backrooms");
+                        if (backrooms == null) {
+                            sender.sendRichMessage("<red>Backrooms world not found!</red>");
+                            return Command.SINGLE_SUCCESS;
+                        }
+
+                        sender.teleport(backrooms.getSpawnLocation());
+                        sender.sendRichMessage("<green>Welcome to the backrooms.</green>");
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
                 .build();
     }
 

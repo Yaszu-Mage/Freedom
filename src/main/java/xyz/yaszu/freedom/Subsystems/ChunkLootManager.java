@@ -40,23 +40,18 @@ public class ChunkLootManager implements Listener {
         } else {
             if (structureChanceBool) { // 10% chance for structure
                 String worldName = event.getWorld().getName();
-                Map<String, Freedom.StructureInfo> allStructures = Freedom.STRUCTURES;
+                Map<String, WorldManager.StructureInfo> applicableStructures = WorldManager.getStructuresForWorld(worldName);
 
-                // Filter structures by world and calculate total weight
-                float totalWeight = 0;
-                List<Map.Entry<String, Freedom.StructureInfo>> validStructures = new ArrayList<>();
-                for (Map.Entry<String, Freedom.StructureInfo> entry : allStructures.entrySet()) {
-                    if (entry.getValue().worlds().contains(worldName)) {
-                        validStructures.add(entry);
-                        totalWeight += entry.getValue().weight();
+                if (applicableStructures != null && !applicableStructures.isEmpty()) {
+                    float totalWeight = 0;
+                    for (WorldManager.StructureInfo info : applicableStructures.values()) {
+                        totalWeight += info.weight();
                     }
-                }
 
-                if (!validStructures.isEmpty()) {
                     float rand = random.nextFloat() * totalWeight;
                     float currentWeight = 0;
                     String structureName = null;
-                    for (Map.Entry<String, Freedom.StructureInfo> entry : validStructures) {
+                    for (Map.Entry<String, WorldManager.StructureInfo> entry : applicableStructures.entrySet()) {
                         currentWeight += entry.getValue().weight();
                         if (rand < currentWeight) {
                             structureName = entry.getKey();
