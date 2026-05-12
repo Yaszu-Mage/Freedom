@@ -143,12 +143,12 @@ public class SpellFocus implements Listener {
         }
     }
 
-    private static void castFromOffhand(Player player) {
+    public static void castFromOffhand(Player player, int max) {
         ItemStack offhand = player.getInventory().getItemInOffHand();
         if (offhand.getType() == Material.WRITTEN_BOOK || offhand.getType() == Material.WRITABLE_BOOK) {
             BookMeta meta = (BookMeta) offhand.getItemMeta();
             String text = String.join(" ", meta.getPages());
-            SpellCompiler.castMobileSpell(text, player);
+            SpellCompiler.castMobileSpell(text, player, max);
         } else {
             player.sendMessage("§cYou must hold a spell book in your off-hand to use this focus!");
         }

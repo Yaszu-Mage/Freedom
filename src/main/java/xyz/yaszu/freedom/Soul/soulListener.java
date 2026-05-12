@@ -18,6 +18,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
+import xyz.yaszu.freedom.Soul.Alchemy.Arcanus;
+import xyz.yaszu.freedom.Soul.Alchemy.Astral;
+import xyz.yaszu.freedom.Soul.Alchemy.Leaf;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
@@ -49,8 +52,18 @@ public class soulListener extends Util implements Listener {
         SOULS.put(SoulTypes.BaseYellow, new BaseYellow());
         SOULS.put(SoulTypes.BaseBlue, new BaseBlue());
         SOULS.put(SoulTypes.Blue, new Blue());
+        SOULS.put(SoulTypes.Arcanus, new Arcanus());
+        SOULS.put(SoulTypes.Leaf, new Leaf());
+        SOULS.put(SoulTypes.Astral, new Astral());
     }
-
+    //by by
+    // I was thinking more custom mobs bc that shit would be cool as balls
+    // what if there is a mob that uses a moveset?
+    //like a shadow
+    //I think it would be funny if they walk into the red castle and be like, excuse me, what the fuck why can they cast FUCKING FIREBALL
+    // oh I just came up with something I am so stupid... why use mannequins when every npc can be a fucking cow or smtn
+    //ugh wtv I'll work on npc system and give them abilities and combat AI
+    //MAHORAGA HELPPPP HELP ME HELPPPPPPPPPPPPP
     public static Base_Soul getSoul(Player player) {
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
         if (soulName == null) return null;

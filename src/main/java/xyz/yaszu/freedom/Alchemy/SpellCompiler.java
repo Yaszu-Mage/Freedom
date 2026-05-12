@@ -202,7 +202,7 @@ public class SpellCompiler extends Util {
         public String toString() { return type + ":" + value; }
     }
 
-    static List<Token> tokenize(String input) {
+    public static List<Token> tokenize(String input) {
         List<Token> tokens = new ArrayList<>();
         for (String word : input.toLowerCase().split(" ")) {
             if (word.matches("-?\\d+")) {
@@ -239,7 +239,7 @@ public class SpellCompiler extends Util {
 
     /* ================= PARSER ================= */
 
-    static SpellNode parse(List<Token> tokens, Location base) {
+    public static SpellNode parse(List<Token> tokens, Location base) {
         SpellNode spell = new SpellNode();
         StatementNode current = null;
 
@@ -312,7 +312,7 @@ public class SpellCompiler extends Util {
 
     /* ================= VALIDATION ================= */
 
-    static List<String> validate(SpellNode spell) {
+    public static List<String> validate(SpellNode spell) {
         Set<String> errors = new LinkedHashSet<>();
         if (spell.statements.isEmpty()) errors.add("No valid statements found. Did you start with an action keyword?");
         for (Token t : spell.unusedTokens) errors.add("Unrecognized or misplaced token: " + t.value);
@@ -505,7 +505,7 @@ public class SpellCompiler extends Util {
         return powerRequired > 0 ? powerRequired : 1;
     }
 
-    public static int castMobileSpell(String text, Player caster) {
+    public static int castMobileSpell(String text, Player caster, int max) {
         var tokens = tokenize(text);
         var ast = parse(tokens, caster.getLocation());
 
@@ -516,7 +516,7 @@ public class SpellCompiler extends Util {
         }
 
         int powerRequired = calculateTotalPowerCost(ast);
-        if (powerRequired > 1000) {
+        if (powerRequired > 1000 + max) {
             caster.sendMessage("§cThis spell is too powerful for a mobile focus! (Limit: 1000, Required: " + powerRequired + ")");
             return 0;
         }

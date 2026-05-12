@@ -11,6 +11,8 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Alchemy.Arcanus;
+import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -21,11 +23,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatManager extends Util implements Listener {
 
     private static final Map<UUID, UUID> echoMap = new ConcurrentHashMap<>();
+    public Arcanus arcanus = new Arcanus();
 
     @EventHandler
     public void PlayerChatEvent(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        
+        if (getSoulType(player) == SoulTypes.Arcanus) {
+            arcanus.Passive(player,event);
+        }
         // Check for echo
         UUID sourceUUID = echoMap.remove(player.getUniqueId());
         Player sourcePlayer = (sourceUUID != null) ? Bukkit.getPlayer(sourceUUID) : null;

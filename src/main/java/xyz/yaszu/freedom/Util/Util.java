@@ -1115,6 +1115,28 @@ public class Util {
         skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player, skinProperty);
     }
 
+    public static void drawSphere(Location center, double radius, int points,Particle particle, Particle.DustOptions options) {
+        //x coordinate = cos(a)*cos(b)
+        //y coordinate = sin(a)*cos(b)
+        //z coordinate = sin(b)
+        for (int i = 0; i < points; i++) {
+            double a = Math.toRadians(i * 360.0 / points);
+            for (int j = 0; j < points; j++) {
+                double b = Math.toRadians(j * 180.0 / points - 90);
+                double x = center.getX() + radius * Math.cos(a) * Math.cos(b);
+                double y = center.getY() + radius * Math.sin(a) * Math.cos(b);
+                double z = center.getZ() + radius * Math.sin(b);
+                Location pointLocation = new Location(center.getWorld(), x, y, z);
+                if (particle == Particle.DUST) {
+                    center.getWorld().spawnParticle(particle, pointLocation, 1, 0, 0, 0, 1, options);
+                } else {
+                    center.getWorld().spawnParticle(particle, pointLocation, 1, 0, 0, 0, 0);
+                }
+            }
+        }
+
+    }
+
 
 
     public static void drawLine(Location start, Location end, World world, int points, Particle particle, Particle.DustOptions options) {
@@ -1125,6 +1147,17 @@ public class Util {
         for (int i = 0; i <= points; i++) {
             Location point = start.clone().add(dx * i, dy * i, dz * i);
             spawn(world, point, particle, options);
+        }
+    }
+
+    public static void drawLine(Location start, Location end, World world, int points, Particle particle,int offsetX, int offsetY, int offsetZ, int extra, Color color) {
+        double dx = (end.getX() - start.getX()) / points;
+        double dy = (end.getY() - start.getY()) / points;
+        double dz = (end.getZ() - start.getZ()) / points;
+
+        for (int i = 0; i <= points; i++) {
+            Location point = start.clone().add(dx * i, dy * i, dz * i);
+            world.spawnParticle(particle, point, 1,offsetX, offsetY, offsetZ, extra, color);
         }
     }
 

@@ -11,7 +11,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDropItemEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -37,34 +40,37 @@ import java.util.*;
 
 public class ItemListener extends Util implements Listener {
     public static final Map<String, BaseItem> ITEMS = new HashMap<>();
-
+    public static final Map<String, BaseItem> RELICS = new HashMap<>();
     public static void registerItems() {
-        register(new Ale(),"ale");
-        register(new Beer(),"beer");
-        register(new Wine(),"wine");
-        register(new Evolve(), "evolutionstone");
-        register(new Revival(), "revival");
-        register(new Rifle(), "rifle");
-        register(new TimePiece(), "timepiece");
-        register(new Reset(), "resetstone");
-        register(new Burger(),"burger");
-        register(new PainScythe(),"painscythe");
-        register(new Glock(), "glock");
-        register(new SpellFocus.Orb(), "orb");
-        register(new SpellFocus.Staff(), "staff");
-        register(new SpellFocus.Grimoire(), "grimoire");
-        register(new ScythePhighting(), "scythephighting");
-        register(new Railgun(), "railgun");
+        register(new Ale(),"ale",false);
+        register(new Beer(),"beer",false);
+        register(new Wine(),"wine",false);
+        register(new Evolve(), "evolutionstone",false);
+        register(new Revival(), "revival",false);
+        register(new Rifle(), "rifle",false);
+        register(new TimePiece(), "timepiece",false);
+        register(new Reset(), "resetstone",false);
+        register(new Burger(),"burger",false);
+        register(new PainScythe(),"painscythe",true);
+        register(new Glock(), "glock",true);
+        register(new SpellFocus.Orb(), "orb",false);
+        register(new SpellFocus.Staff(), "staff",false);
+        register(new SpellFocus.Grimoire(), "grimoire",false);
+        register(new ScythePhighting(), "scythephighting",false);
+        register(new Railgun(), "railgun",true);
         ArtifactManager.registerArtifacts();
         for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
-            register(artifact, artifact.getID());
+            register(artifact, artifact.getID(),false);
         }
     }
 
-    private static void register(BaseItem item, String id) {
+    private static void register(BaseItem item, String id,Boolean relic) {
         ITEMS.put(id, item);
         if (item.recipe() != null) {
             Bukkit.addRecipe(item.recipe());
+        }
+        if (relic) {
+            RELICS.put(id, item);
         }
     }
 
@@ -194,6 +200,61 @@ public class ItemListener extends Util implements Listener {
                 }
                 event.getProjectile().remove();
                 event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void ItemDespawnEvent(ItemDespawnEvent event) {
+        if (event.getEntity() instanceof Item item) {
+            ItemStack stack = item.getItemStack();
+            if (stack != null) {
+                RELICS.forEach((id, item1) -> {
+                    if (stack.equals(item1.item())) {
+                        Bukkit.getWorld("world").getPersistentDataContainer().remove(keygen(id));
+                    }
+                });
+            }
+        }
+    }
+
+    // no, you can prolly just add a random value to a clone of current location and store that location within a list to make sure that it isn't too close to another
+    @EventHandler
+    public void ItemDestruction(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Item item) {
+            ItemStack stack = item.getItemStack();
+            if (stack != null) {
+                RELICS.forEach((id, item1) -> {
+                    if (stack.equals(item1.item())) {
+                        Bukkit.getWorld("world").getPersistentDataContainer().remove(keygen(id));
+                    }
+                });
+            }
+        }
+    }
+
+
+    // what if you did a thing where it creates a bunch of stars in a radius,
+// and if they step into one of the stars they all blow up, also each star individually floats around
+    //
+    @EventHandler
+    public void PlayerCraftEvent(CraftItemEvent event) {
+        if (event.getRecipe() != null) {
+            if (event.getRecipe().getResult() != null) {
+                RELICS.forEach((id, item) -> {
+                    if (event.getRecipe().getResult().isSimilar(item.item())) {
+                        if (!Bukkit.getWorld("world").getPersistentDataContainer().has(keygen(id))) {
+                            Bukkit.getWorld("world").getPersistentDataContainer().set(keygen(id), PersistentDataType.INTEGER, 0);
+                        } else {
+                            if (event.getWhoClicked() instanceof Player player) {
+                                player.sendMessage(dess("YOU CANNOT CRAFT THIS. ONE OF A KIND"));
+                            }
+                            // no they do not have ultras, and SHOULD NOT have ultras, they will be op in their own right
+
+                            event.setCancelled(true);
+                        }
+                    }
+                });
             }
         }
     }
