@@ -28,6 +28,28 @@ import java.util.Random;
 public class StructureUtil {
 
     /**
+     * Calculates the offset needed to center a clipboard within a chunk.
+     * Assumes the target is a 16x16 area centered at (8.0, 8.0) relative to the paste location.
+     *
+     * @param clipboard The clipboard to evaluate.
+     * @return A vector representing the X and Z translation needed.
+     */
+    public static com.sk89q.worldedit.math.Vector3 getCenteringOffset(Clipboard clipboard) {
+        if (clipboard == null) return com.sk89q.worldedit.math.Vector3.ZERO;
+
+        BlockVector3 dimensions = clipboard.getDimensions();
+        // The minimum point relative to the origin
+        BlockVector3 min = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
+
+        // The center of the schematic relative to its origin
+        double centerX = min.x() + (dimensions.x() / 2.0);
+        double centerZ = min.z() + (dimensions.z() / 2.0);
+
+        // We want this center to be at (8.0, 8.0) relative to the paste location (chunk origin)
+        return com.sk89q.worldedit.math.Vector3.at(8.0 - centerX, 0, 8.0 - centerZ);
+    }
+
+    /**
      * Gets the dimensions (width, height, length) of a WorldEdit clipboard.
      *
      * @param clipboard The clipboard.

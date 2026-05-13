@@ -23,7 +23,7 @@ public class Arcanus extends Util implements Base_Soul {
     //based off azuri here https://www.youtube.com/watch?v=mpt5UPAUEw4
     @Override
     public String Name_For_Container() {
-        return "arcanus";
+        return "Arcanus";
     }
 
     @Override

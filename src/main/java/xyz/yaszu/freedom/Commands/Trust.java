@@ -609,4 +609,30 @@ public class Trust {
     }
 
 
+    public static LiteralCommandNode<CommandSourceStack> redcastle() {
+        return Commands.literal("redcastle")
+                .then(Commands.literal("verbose")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getSender() instanceof Player player) {
+                                if (player.isOp()) {
+                                    RedCastleManager.verbose = !RedCastleManager.verbose;
+                                    player.sendRichMessage("<red>[RedCastle]</red> Verbose telemetry: " + (RedCastleManager.verbose ? "<green>ON</green>" : "<red>OFF</red>"));
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .executes(ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        if (player.isOp()) {
+                            org.bukkit.World world = RedCastleManager.createRedCastleWorld("redcastle");
+                            player.teleport(world.getSpawnLocation());
+                            player.sendRichMessage("<red>Welcome to the Red Castle.</red>");
+                        }
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+                .build();
+    }
+
 }

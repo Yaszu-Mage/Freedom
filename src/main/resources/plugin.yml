@@ -74,5 +74,7 @@ commands:
     description: "Sell"
   pay:
     description: "pay"
+  redcastle:
+    description: "Red Castle"
 softdepend: [ "SkinsRestorer", "packetevents" ]
 load: POSTWORLD

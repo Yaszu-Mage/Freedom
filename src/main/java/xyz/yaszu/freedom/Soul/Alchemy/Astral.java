@@ -4,16 +4,25 @@ import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+import java.util.List;
+
+
 public class Astral extends Util implements Base_Soul {
+    public enum Constilation {
+        Sirius, Polaris, Vega, Rigal, Capella, Crux, none
+    }
+
     @Override
     public String Name_For_Container() {
         return "Astral";
@@ -48,20 +57,14 @@ public class Astral extends Util implements Base_Soul {
     public void AbilityOne(Player player) {
 
     }
-
     @Override
     public ItemStack Related_Item() {
-        ItemStack AternaStella = ItemStack.of(Material.WOODEN_SWORD);
-        ItemMeta swordMeta = AternaStella.getItemMeta();
+        ItemStack Stella = ItemStack.of(Material.WOODEN_SWORD);
+        ItemMeta swordMeta = Stella.getItemMeta();
 
         swordMeta.displayName(dess("<color:#3700ff>My</color> rifle"));
-        return AternaStella;
+        return Stella;
     }
-    //tbh if we try and ally with Zane we should be fine
-    // I'm thinking of living close enough to burger city (Syl's planned town) but far enough to run if shit hits the fan
-    //bc I'm guessing it will hit the fan as soon as the EnderDragon is beat, or (if) someone gets enough cost for a nuke
-    // no immediete end access, it should be a week after server start
-    //hard maybe
 
     //
     @Override
@@ -76,6 +79,58 @@ public class Astral extends Util implements Base_Soul {
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
+
+        Constilation nova = Constilation.valueOf(ability_item.getItemMeta().getPersistentDataContainer().get(keygen("const"), PersistentDataType.STRING));
+
+        ItemMeta workingmeta = ability_item.getItemMeta();
+        switch (nova) {
+            case none -> {
+                workingmeta.displayName(dess("Stella: empty"));
+                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Crux.name());
+                //workingmeta.setItemModel();
+            }
+            case Crux -> {
+                workingmeta.displayName(dess("Stella: Crux"));
+                workingmeta.lore(List.of(dess("A blade made of the light of the stars")));
+                workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Sirius.name());
+                //workingmeta.setItemModel();
+            }
+            case Sirius -> {
+                workingmeta.displayName(dess("Stella: Sirius"));
+                workingmeta.lore(List.of(dess("EXPLOSHION")));
+                workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Polaris.name());
+                //workingmeta.setItemModel();
+            }
+            case Polaris -> {
+                workingmeta.displayName(dess("Stella: Polaris"));
+                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Vega.name());
+                //workingmeta.setItemModel();
+            }
+            case Vega -> {
+                workingmeta.displayName(dess("Stella: Vega"));
+                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Rigal.name());
+                //workingmeta.setItemModel();
+            }
+            case Rigal -> {
+                workingmeta.displayName(dess("Stella: Rigal"));
+                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Capella.name());
+                //workingmeta.setItemModel();
+            }
+            case Capella -> {
+                workingmeta.displayName(dess("Stella: Capella"));
+                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Crux.name());
+                //workingmeta.setItemModel();
+            }
+        }
+
+
+
+        ability_item.setItemMeta(workingmeta);
 
     }
 

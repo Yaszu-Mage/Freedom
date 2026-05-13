@@ -98,6 +98,11 @@ public class WorldManager implements Listener {
         World world = event.getWorld();
         String worldName = world.getName();
 
+        if (worldName.startsWith("redcastle")) {
+            RedCastleManager.generateCastle(world, event.getChunk().getX(), event.getChunk().getZ());
+            return;
+        }
+
         // Get structures specifically for this world
         Map<String, StructureInfo> applicableStructures = WORLD_STRUCTURE_REGISTRY.get(worldName);
 
@@ -110,8 +115,10 @@ public class WorldManager implements Listener {
         event.getChunk().getPersistentDataContainer().set(FreedomKeys.key("generated_structures"), PersistentDataType.BOOLEAN, true);
 
         // Randomly decide which structure to spawn based on weight
-        // Base chance of spawning ANY structure in this chunk is 10/1000 (1%)
-        if (random.nextInt(1000) >= 10 && isOnWater(world,event.getChunk().getX(),event.getChunk().getZ())) return;
+        if (random.nextInt(1000) != 0) return;
+
+        // Validation: skip if on water (for specific worlds like "world")
+        if (worldName.equals("world") && isOnWater(world, event.getChunk().getX() * 16, event.getChunk().getZ() * 16)) return;
 
         // Normalize weights for relative selection among applicable structures
         float totalWeight = 0;
@@ -128,6 +135,66 @@ public class WorldManager implements Listener {
             if (current >= target) {
                 spawnStructure(world, event.getChunk().getX(), event.getChunk().getZ(), entry.getKey());
                 break;
+            }
+        }
+    }
+
+    public static void spawnStructureStatic(World world, int chunkX, int chunkZ, int y, String resourceName, int rotation) {
+        try {
+            long startTime = System.currentTimeMillis();
+            int x = (chunkX * 16);
+            int z = (chunkZ * 16);
+
+            performSpawnStatic(world, x, y, z, resourceName, rotation);
+
+            if (RedCastleManager.verbose) {
+                Freedom.get_plugin().getLogger().info(String.format("[RedCastle] Pasted %s at [%d, %d, %d] in %dms",
+                        resourceName, x, y, z, System.currentTimeMillis() - startTime));
+            }
+        } catch (Exception e) {
+            Freedom.get_plugin().getLogger().severe("Failed to spawn structure " + resourceName + ": " + e.getMessage());
+        }
+    }
+
+    private static void performSpawnStatic(World world, int x, int y, int z, String resourceName, int rotation) throws WorldEditException {
+        Clipboard load = StructureUtil.loadSchematicFromResource(resourceName);
+        if (load != null) {
+            com.sk89q.worldedit.world.World adapter = BukkitAdapter.adapt(world);
+            try (EditSession editSession = WorldEdit.getInstance().newEditSession(adapter)) {
+                // Calculate centering adjustment
+                com.sk89q.worldedit.math.Vector3 adjust = StructureUtil.getCenteringOffset(load);
+
+                // The center of the schematic relative to its origin (for rotation)
+                BlockVector3 dimensions = load.getDimensions();
+                BlockVector3 min = load.getRegion().getMinimumPoint().subtract(load.getOrigin());
+                double centerX = min.x() + (dimensions.x() / 2.0);
+                double centerZ = min.z() + (dimensions.z() / 2.0);
+
+                ClipboardHolder holder = new ClipboardHolder(load);
+                com.sk89q.worldedit.math.transform.AffineTransform transform = new com.sk89q.worldedit.math.transform.AffineTransform();
+
+                // Apply the translation to center it in the chunk BEFORE rotation
+                // This ensures rotation happens around the chunk's geometric center (8, 8)
+                transform = transform.translate(adjust.x(), 0, adjust.z());
+
+                // Apply rotation around the target chunk center (8, 0, 8)
+                if (rotation != 0) {
+                    transform = transform
+                            .translate(8.0, 0, 8.0)
+                            .rotateY(-rotation)
+                            .translate(-8.0, 0, -8.0);
+                }
+
+                holder.setTransform(transform);
+
+                Operation operation = holder
+                        .createPaste(editSession)
+                        .to(BlockVector3.at(x, y, z))
+                        .ignoreAirBlocks(false)
+                        .copyEntities(true)
+                        .copyBiomes(false)
+                        .build();
+                Operations.complete(operation);
             }
         }
     }

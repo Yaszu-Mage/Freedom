@@ -46,7 +46,7 @@ public class SpellFocus implements Listener {
 
         @Override
         public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-            castFromOffhand(player);
+            castFromOffhand(player,0);
         }
 
         @Override
@@ -85,7 +85,7 @@ public class SpellFocus implements Listener {
 
         @Override
         public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-            castFromOffhand(player);
+            castFromOffhand(player,0);
         }
 
         @Override
@@ -124,7 +124,7 @@ public class SpellFocus implements Listener {
 
         @Override
         public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-            castFromOffhand(player);
+            castFromOffhand(player,0);
         }
 
         @Override

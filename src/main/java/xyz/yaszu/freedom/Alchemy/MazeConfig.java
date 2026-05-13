@@ -13,21 +13,25 @@ public class MazeConfig {
     private Material wallMaterial;
     private Material floorMaterial;
     private Material roofMaterial;
+    private Material doorMaterial;
     private int baseHeight;
     private int lightLevel;
     private boolean fillWithLight;
+    private double doorChance;
     private long seedOffset;
 
     public MazeConfig() {
-        this.cellSize = 16;
+        this.cellSize = 8;
         this.wallHeight = 4;
         this.roofOffset = 5;
         this.wallMaterial = Material.SMOOTH_SANDSTONE;
         this.floorMaterial = Material.SMOOTH_SANDSTONE;
         this.roofMaterial = Material.SMOOTH_STONE;
+        this.doorMaterial = Material.SMOOTH_SANDSTONE_STAIRS;
         this.baseHeight = 64;
         this.lightLevel = 15;
         this.fillWithLight = true;
+        this.doorChance = 0.2;
         this.seedOffset = 12345L;
     }
 
@@ -49,6 +53,9 @@ public class MazeConfig {
     public Material getRoofMaterial() { return roofMaterial; }
     public void setRoofMaterial(Material material) { this.roofMaterial = material; }
 
+    public Material getDoorMaterial() { return doorMaterial; }
+    public void setDoorMaterial(Material material) { this.doorMaterial = material; }
+
     public int getBaseHeight() { return baseHeight; }
     public void setBaseHeight(int baseHeight) { this.baseHeight = baseHeight; }
 
@@ -57,6 +64,9 @@ public class MazeConfig {
 
     public boolean isFillWithLight() { return fillWithLight; }
     public void setFillWithLight(boolean fill) { this.fillWithLight = fill; }
+
+    public double getDoorChance() { return doorChance; }
+    public void setDoorChance(double chance) { this.doorChance = chance; }
 
     public long getSeedOffset() { return seedOffset; }
     public void setSeedOffset(long offset) { this.seedOffset = offset; }
@@ -104,6 +114,11 @@ public class MazeConfig {
             return this;
         }
 
+        public Builder doorMaterial(Material material) {
+            config.doorMaterial = material;
+            return this;
+        }
+
         public Builder baseHeight(int height) {
             config.baseHeight = height;
             return this;
@@ -116,6 +131,11 @@ public class MazeConfig {
 
         public Builder fillWithLight(boolean fill) {
             config.fillWithLight = fill;
+            return this;
+        }
+
+        public Builder doorChance(double chance) {
+            config.doorChance = chance;
             return this;
         }
 
