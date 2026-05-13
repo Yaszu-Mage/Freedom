@@ -20,3 +20,4 @@ and a couple more!
 There is a miriad of different recipes for you to find! 
 (Admins use /bestow to give yourself items)
 There is a /sudo command to seperate admin profiles HARDCODED, you will be deoped on restart.
+This is compatabile with paper 1.21.11
