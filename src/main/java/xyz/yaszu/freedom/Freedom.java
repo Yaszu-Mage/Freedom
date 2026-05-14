@@ -290,6 +290,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new WorldManager(), this);
         Bukkit.getPluginManager().registerEvents(new ScythePhighting(),this);
         Bukkit.getPluginManager().registerEvents(new BulletSystem(),this);
+        Bukkit.getPluginManager().registerEvents(new NpcManager(), this);
         soulImbueManager = new SoulImbueManager();
         Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();

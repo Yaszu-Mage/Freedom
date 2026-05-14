@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Subsystems;
 
+import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.destroystokyo.paper.event.entity.EntityPathfindEvent;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
@@ -7,16 +8,27 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import me.libraryaddict.disguise.disguisetypes.DisguiseType;
+import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
 import org.bukkit.Bukkit;
+import org.bukkit.HeightMap;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Cow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.units.qual.N;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -25,8 +37,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.UUID;
-import java.util.Random;
+import java.util.*;
 
 
 public class NpcManager extends Util implements Listener {
@@ -39,51 +50,255 @@ public class NpcManager extends Util implements Listener {
         Harvest,
         Think
     }
+
+
+
+
+    public BukkitRunnable update() {
+        return new BukkitRunnable() {
+         @Override
+         public void run() {
+             for (UUID key : NPCs.keySet()) {
+                 NPC npc = NPCs.get(key);
+                 if (npc.BaseEntity.isDead()) {
+                     NPCs.remove(key);
+                     npc.BaseEntity.remove();
+                     return;
+                 }
+                 npc.hunger--;
+                 if (npc.hunger <= 10) {
+                     if (!npc.data.has(keygen("home"))) {
+                        if (npc.BaseEntity.getWorld() == Bukkit.getWorld("world")) {
+                            //hey lets find somewhere habitable
+                            // is where I am habitable?
+                            Location currentLocation = npc.BaseEntity.getLocation();
+                            if (npc.isStandable(currentLocation)) {
+                                //eh it's good enough
+                                npc.move(currentLocation);
+                                makeTent(npc, currentLocation);
+                                // next let's build a farm
+                                //look for grass to get seeds
+                                //TODO make function for settling
+                            } else {
+                                new BukkitRunnable() {
+
+                                    @Override
+                                    public void run() {
+                                        if (npc.BaseEntity.isDead()) {
+                                            this.cancel();
+                                            return;
+                                        }
+                                        if (npc.BaseEntity.getPathfinder().hasPath()) {
+                                            return;
+                                        }
+                                        Location nextLocation = npc.BaseEntity.getLocation();
+                                        if (!npc.isStandable(nextLocation)) {
+                                            // we find the nearest standable block then walk to it
+                                            nextLocation = nextLocation.clone().add(random.nextInt(10), 0, random.nextInt(10));
+                                            nextLocation = nextLocation.clone().add(0, getGroundLocation(nextLocation), 0);
+                                            npc.move(nextLocation);
+                                        } else {
+                                            //MAKE YOUR FUCKING TENT LITTLE BRO
+                                            makeTent(npc, currentLocation);
+                                            this.cancel();
+                                        }
+                                    }
+                                }.runTaskTimer(Freedom.get_plugin(), 0, 0);
+                            }
+                        }
+                     } else {
+                         //go home
+
+
+                     }
+                 }
+
+             }
+         }
+        };
+    }
+
+
+    void createFarm(NPC npc) {
+        //so let's offset all npc fucking farming by 20 blocks
+        //lets make an organic looking sequence where the person actually builds farm, but wait there a problem
+    }
+
+    void GatherResources(List<ItemStack> resources, NPC npc) {
+        //so we need to find the nearest resource of the type we want, then path to it and break it
+        //if there isn't any nearby we wander, not as far as 100 blocks though
+
+    }
+
+    void goHomeBitch(NPC npc) {
+            //so we need to get the home location from the npc's data, then path to it
+        boolean err = false;
+        double homeX = 0;
+        double homeY = 0;
+        double homeZ = 0;
+        World homeworld = npc.BaseEntity.getWorld();
+        try {
+            homeX = npc.data.get(keygen("homeX"), PersistentDataType.DOUBLE);
+            homeY = npc.data.get(keygen("homeY"), PersistentDataType.DOUBLE);
+            homeZ = npc.data.get(keygen("homeZ"), PersistentDataType.DOUBLE);
+            homeworld = Bukkit.getWorld(npc.data.get(keygen("homeworld"), PersistentDataType.STRING));
+        } catch (Exception e) {
+            err = true;
+        }
+        if (err) {
+            //SALVAGE HOME
+            boolean homeXValid = false;
+            boolean homeYValid = false;
+            boolean homeZValid = false;
+            boolean homeworldValid = false;
+            if (homeX != 0) {
+                homeXValid = true;
+            }
+            if (homeY != 0) {
+                homeYValid = true;
+            }
+            if (homeZ != 0) {
+                homeZValid = true;
+            }
+            if (homeworld != null) {
+                homeworldValid = true;
+            }
+            if (homeXValid && homeYValid && homeZValid && homeworldValid) {
+                //fuhh I musta been tripping
+                try {
+                    Location home = new Location(homeworld, homeX, homeY, homeZ);
+                    npc.move(home);
+                } catch (Exception e) {
+                    //welp guess not
+                }
+
+            }
+        } else if (!err && npc.BaseEntity.getWorld().equals(homeworld)) {
+            Location home = new Location(homeworld, homeX, homeY, homeZ);
+            npc.move(home);
+        }
+    }
+
+    boolean hasHome(NPC npc) {
+        boolean validHome = false;
+        if (npc.data.has(keygen("home"), PersistentDataType.BOOLEAN)) {
+            validHome = true;
+        }
+        return validHome;
+    }
+
+    //Sets Home location
+    private void makeTent(NPC npc, Location currentLocation) {
+        npc.data.set(keygen("homeX"), PersistentDataType.DOUBLE, currentLocation.getX());
+        npc.data.set(keygen("homeY"), PersistentDataType.DOUBLE, currentLocation.getY());
+        npc.data.set(keygen("homeZ"), PersistentDataType.DOUBLE, currentLocation.getZ());
+        npc.data.set(keygen("homeworld"), PersistentDataType.STRING, currentLocation.getWorld().getName());
+    }
+
+    public static HashMap<UUID,NPC> NPCs = new HashMap<>();
+
+    public static void createNPC(Location location) {
+        NPC npc = new NPC((Cow) location.getWorld().spawn(location, Cow.class), 20d, NpcGoal.Wander);
+    }
+
+
+    public static void recompileNPC(Entity entity){
+        if (entity.getPersistentDataContainer().has(keygen("isNpc"))) {
+            Cow npcEntity = (Cow) entity;
+            String NPCID = npcEntity.getPersistentDataContainer().get(keygen("NPCID"), PersistentDataType.STRING);
+            UUID uuid = UUID.fromString(NPCID);
+            Freedom.get_plugin().getLogger().info("NPCID: " + NPCID);
+            Freedom.get_plugin().getLogger().info("UUID: " + uuid);
+            Freedom.get_plugin().getLogger().info("NPCs: " + NPCs.toString());
+            Freedom.get_plugin().getLogger().info("NPCs.containsKey(UUID.fromString(NPCID)): " + NPCs.containsKey(UUID.fromString(NPCID)));
+            if (NPCs.containsKey(UUID.fromString(NPCID))) return;
+            NpcGoal goal = NpcGoal.valueOf(npcEntity.getPersistentDataContainer().get(keygen("goal"), PersistentDataType.STRING));
+            Double hunger = npcEntity.getPersistentDataContainer().get(keygen("hunger"), PersistentDataType.DOUBLE);
+            String skin = npcEntity.getPersistentDataContainer().get(keygen("skin"), PersistentDataType.STRING);
+
+            //recompile npc based on goal and other factors
+            PlayerDisguise disguise = new PlayerDisguise("SweetVikki"
+);
+            PlayerWatcher playerwatcher = (PlayerWatcher) disguise.getWatcher();
+            playerwatcher.setSkin("SweetVikki"
+);
+            playerwatcher.setName("ZeepZorp"
+);
+            disguise.setEntity(entity);
+            playerwatcher.setSkin("SweetVikki"
+);
+            npcEntity.getAttribute(Attribute.TEMPT_RANGE).setBaseValue(0);
+            disguise.startDisguise();
+            Freedom.get_plugin().getLogger().info("Recompiled NPC with goal: " + goal.toString() + " and hunger: " + hunger);
+            NPCs.put(uuid, new NPC(npcEntity, hunger, goal));
+            Bukkit.getServer().getMobGoals().removeGoal(npcEntity, VanillaGoal.TEMPT);
+        }
+    }
+
+
+
     @EventHandler
     public void onEntityPathfind(EntityPathfindEvent event) {
         if (event.getEntity().getPersistentDataContainer().has(keygen("isNpc"))) {
-            try {
-                if (event.getEntity().getPersistentDataContainer().get(keygen("isallowedtomove"), PersistentDataType.BOOLEAN) != null &&
-                        !event.getEntity().getPersistentDataContainer().get(keygen("isallowedtomove"), PersistentDataType.BOOLEAN)) {
-                    event.setCancelled(true);
-                }
-            } catch (Exception ignored) {}
+            String NPCID = event.getEntity().getPersistentDataContainer().get(keygen("NPCID"), PersistentDataType.STRING);
+            if (NPCs.getOrDefault(UUID.fromString(NPCID), null) == null) {
+                recompileNPC(event.getEntity());
+            }
+            Cow npcEntity = (Cow) event.getEntity();
+            NpcGoal goal = NpcGoal.valueOf(npcEntity.getPersistentDataContainer().get(keygen("goal"), PersistentDataType.STRING));
+
+            if (goal == NpcGoal.Wander) {
+                // Allow pathfinding to continue
+            } else {
+                event.setCancelled(true);
+            }
 
         }
     }
 
-    public class NPC {
-        public static Cow BaseEntity;
-        public static Double hunger = 20d;
-        public static NpcGoal goal = NpcGoal.Think;
-
-        public NPC(Cow givenBaseEntity, Double GivenHunger, String givengoal){
-            NpcGoal goalInstance = NpcGoal.valueOf(givengoal);
-            if (goalInstance != null) goal = goalInstance;
+    public static class NPC {
+        public Cow BaseEntity;
+        public Double hunger = 20d;
+        public NpcGoal goal = NpcGoal.Think;
+        public PersistentDataContainer data;
+        public NPC(Cow givenBaseEntity, Double GivenHunger, NpcGoal givengoal){
+            if (givengoal != null) goal = givengoal;
+            if (givenBaseEntity == null) return;
             BaseEntity = givenBaseEntity;
             hunger = GivenHunger;
-            BaseEntity.getPersistentDataContainer().set(keygen("isNpc"), PersistentDataType.BOOLEAN, true);
-            BaseEntity.getPersistentDataContainer().set(keygen("isallowedtomove"), PersistentDataType.BOOLEAN, false);
+            goal = givengoal;
+            if (!BaseEntity.getPersistentDataContainer().has(keygen("NPCID"))) {
+                givenBaseEntity.getPersistentDataContainer().set(keygen("goal"), PersistentDataType.STRING, goal.toString());
+
+                BaseEntity.getPersistentDataContainer().set(keygen("NPCID"), PersistentDataType.STRING, UUID.randomUUID().toString());
+                BaseEntity.getPersistentDataContainer().set(keygen("isNpc"), PersistentDataType.BOOLEAN, true);
+                BaseEntity.getPersistentDataContainer().set(keygen("hunger"), PersistentDataType.DOUBLE, hunger);
+                BaseEntity.getPersistentDataContainer().set(keygen("skin"), PersistentDataType.STRING, "SweetVikki");
+                data = BaseEntity.getPersistentDataContainer();
+                //create new disguise and put it on them
+                PlayerDisguise disguise = new PlayerDisguise("SweetVikki"
+                );
+                PlayerWatcher playerwatcher = (PlayerWatcher) disguise.getWatcher();
+
+                disguise.setEntity(BaseEntity);
+                playerwatcher.setSkin("SweetVikki"
+                );
+                disguise.startDisguise();
+                NpcManager.NPCs.put(UUID.fromString(BaseEntity.getPersistentDataContainer().get(keygen("NPCID"),PersistentDataType.STRING)), this);
+                playerwatcher.setSkin("SweetVikki");
+                playerwatcher.setName("ZeepZorp");
+                BaseEntity.getAttribute(Attribute.TEMPT_RANGE).setBaseValue(0);
+                Bukkit.getServer().getMobGoals().removeGoal(BaseEntity, VanillaGoal.TEMPT);
+            }
+
+
+
         }
 
         public void move(Location targetLocation) {
             BaseEntity.getPersistentDataContainer().set(keygen("isallowedtomove"), PersistentDataType.BOOLEAN, true);
             BaseEntity.getPathfinder().moveTo(targetLocation, 1);
             //when path is finished change isallowedtomove to false
-             new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (BaseEntity.getPersistentDataContainer().get(keygen("isallowedtomove"), PersistentDataType.BOOLEAN) != null &&
-                            BaseEntity.getPersistentDataContainer().get(keygen("isallowedtomove"), PersistentDataType.BOOLEAN)) {
-                        if (BaseEntity.getLocation().distanceSquared(targetLocation) < 1) {
-                            BaseEntity.getPersistentDataContainer().set(keygen("isallowedtomove"), PersistentDataType.BOOLEAN, false);
-                            this.cancel();
-                        }
-                    } else {
-                        this.cancel();
-                    }
-                }
-            }.runTaskTimer(Freedom.get_plugin(), 0, 20);
         }
 
         private boolean isStandable(Location location) {
@@ -94,21 +309,18 @@ public class NpcManager extends Util implements Listener {
 
     }
 
-    public class PathNode {
-        public double Hcost = 0d;
-        public double Gcost = 0d;
-        public Location location;
-        public PathNode(Location givenLocation) {
-            location = givenLocation;
-        }
 
 
-        public void calculateCost(Location startingLocation, Location targetLocation) {
-            Hcost = startingLocation.distanceSquared(location);
-            Gcost = targetLocation.distanceSquared(location);
-        }
-        public double Fcost() {
-            return Hcost + Gcost;
-        }
+    public static double getGroundLocation(Location loc) {
+        if (loc == null || loc.getWorld() == null) return 0d;
+
+        World world = loc.getWorld();
+        int x = loc.getBlockX();
+        int z = loc.getBlockZ();
+
+        // Paper-specific: ignores leaves, finds solid ground
+        int y = world.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES);
+
+        return y;
     }
 }

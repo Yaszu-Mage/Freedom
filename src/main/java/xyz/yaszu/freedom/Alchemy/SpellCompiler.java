@@ -22,9 +22,11 @@ public class SpellCompiler extends Util {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
         rain, sun, thundering, day, night, shock, delay, goon, sixtyseven,nothing,
-        fire,water,earth,air,soul,blast,moveset,province,up,down,look
+        fire,water,earth,air,soul,blast,moveset,province,up,down,look,
     }
 
+
+    public List<ritualkeywords> blockedTypesforMobile = List.of(ritualkeywords.destruction,ritualkeywords.teleport,ritualkeywords.location);
 
 
     public enum ritualtype {
@@ -524,10 +526,11 @@ public class SpellCompiler extends Util {
         boolean isSudo = AdminManager.isSudo(caster);
 
         if (!isSudo) {
-            if (!hasResources(caster, powerRequired)) {
+            if (!hasResources(caster, powerRequired) || powerRequired > getCurrency(caster)) {
                 caster.sendMessage("§cInsufficient materials in inventory for this mobile spell!");
                 return 0;
             }
+            //FIXME fuckass consumeFromInventory doesn't work
             consumeFromInventory(caster, powerRequired);
             execute(ast, caster);
             caster.sendMessage("§aMobile spell cast successfully! (" + powerRequired + " material consumed from inventory)");

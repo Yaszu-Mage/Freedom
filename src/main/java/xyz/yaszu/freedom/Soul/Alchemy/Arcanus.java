@@ -172,6 +172,8 @@ public class Arcanus extends Util implements Base_Soul {
             var errors = validate(ast);
             if (errors.isEmpty()) {
                 //actually cast
+
+                //FIXME FIX MOBILE CASTING
                 castMobileSpell(msg, player, 0);
             }
         }
