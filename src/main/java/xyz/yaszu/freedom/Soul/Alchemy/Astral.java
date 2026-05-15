@@ -98,31 +98,31 @@ public class Astral extends Util implements Base_Soul {
             }
             case Sirius -> {
                 workingmeta.displayName(dess("Stella: Sirius"));
-                workingmeta.lore(List.of(dess("EXPLOSHION")));
+                workingmeta.lore(List.of(dess("SUPER NOVA-")));
                 workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Polaris.name());
                 //workingmeta.setItemModel();
             }
             case Polaris -> {
                 workingmeta.displayName(dess("Stella: Polaris"));
-                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.lore(List.of(dess("A beam of light that can pierce the very heavens")));
                 workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Vega.name());
                 //workingmeta.setItemModel();
             }
             case Vega -> {
                 workingmeta.displayName(dess("Stella: Vega"));
-                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.lore(List.of(dess("The CRUSHING gravity of the universe")));
                 workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Rigal.name());
                 //workingmeta.setItemModel();
             }
             case Rigal -> {
                 workingmeta.displayName(dess("Stella: Rigal"));
-                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.lore(List.of(dess("The stars follow your will")));
                 workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Capella.name());
                 //workingmeta.setItemModel();
             }
             case Capella -> {
                 workingmeta.displayName(dess("Stella: Capella"));
-                workingmeta.lore(List.of(dess("the stars are left un-tapped")));
+                workingmeta.lore(List.of(dess("the slashing force of a comet in your hand")));
                 workingmeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Crux.name());
                 //workingmeta.setItemModel();
             }

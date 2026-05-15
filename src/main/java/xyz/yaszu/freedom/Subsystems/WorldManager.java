@@ -161,29 +161,52 @@ public class WorldManager implements Listener {
         if (load != null) {
             com.sk89q.worldedit.world.World adapter = BukkitAdapter.adapt(world);
             try (EditSession editSession = WorldEdit.getInstance().newEditSession(adapter)) {
-                // Calculate centering adjustment
-                com.sk89q.worldedit.math.Vector3 adjust = StructureUtil.getCenteringOffset(load);
-
                 // The center of the schematic relative to its origin (for rotation)
                 BlockVector3 dimensions = load.getDimensions();
                 BlockVector3 min = load.getRegion().getMinimumPoint().subtract(load.getOrigin());
-                double centerX = min.x() + (dimensions.x() / 2.0);
-                double centerZ = min.z() + (dimensions.z() / 2.0);
+
+                double width = dimensions.x();
+                double length = dimensions.z();
+                if (rotation == 90 || rotation == 270 || rotation == -90 || rotation == -270) {
+                    double temp = width;
+                    width = length;
+                    length = temp;
+                }
+
+                // CHECK FOR BLEED: If the dimensions (after rotation) are > 16, it WILL bleed.
+                if (width > 16 || length > 16) {
+                    Freedom.get_plugin().getLogger().warning(String.format(
+                            "[RedCastle] Bleed detected for %s: Dimensions %.1fx%.1f exceed 16x16 chunk boundary. Skipping or clamping might be needed.",
+                            resourceName, width, length));
+                    // Depending on preference, we could return here to PREVENT bleed.
+                    // For now, let's just warn as per "add checks" request.
+                }
 
                 ClipboardHolder holder = new ClipboardHolder(load);
                 com.sk89q.worldedit.math.transform.AffineTransform transform = new com.sk89q.worldedit.math.transform.AffineTransform();
 
-                // Apply the translation to center it in the chunk BEFORE rotation
-                // This ensures rotation happens around the chunk's geometric center (8, 8)
-                transform = transform.translate(adjust.x(), 0, adjust.z());
+                // 1. First, move the schematic so its internal min point is at (0,0,0)
+                transform = transform.translate(-min.x(), 0, -min.z());
 
-                // Apply rotation around the target chunk center (8, 0, 8)
+                // 2. Apply rotation around its own center (width/2, length/2)
+                // Wait, it's easier to rotate around (8,8) if we know it's meant to fit in 16x16.
+                
+                // If we want it to NOT bleed, we align it to (0,0) first.
+                // Then rotate.
                 if (rotation != 0) {
+                    // Rotate around the center of the 16x16 area to keep it aligned if it's 16x16
                     transform = transform
                             .translate(8.0, 0, 8.0)
                             .rotateY(-rotation)
                             .translate(-8.0, 0, -8.0);
                 }
+
+                // Finally, align to bottom-right (16,16) using the helper
+                com.sk89q.worldedit.math.Vector3 adjust = StructureUtil.getBottomRightOffset(load, rotation);
+                
+                // Ensure no negative shift if we want to stay within [0, 16]
+                // but if it's > 16, it will bleed anyway.
+                transform = transform.translate(Math.max(0, adjust.x()), 0, Math.max(0, adjust.z()));
 
                 holder.setTransform(transform);
 

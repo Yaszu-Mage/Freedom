@@ -12,20 +12,53 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.world.block.BlockState;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.structure.Structure;
 import xyz.yaszu.freedom.Freedom;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class StructureUtil {
+
+    /**
+     * Calculates the offset needed to align a clipboard to the bottom-right corner of a chunk (16x16).
+     * Bottom-right is considered (+X, +Z) / South-East corner.
+     *
+     * @param clipboard The clipboard to evaluate.
+     * @param rotation  The rotation that will be applied (0, 90, 180, 270).
+     * @return A vector representing the X and Z translation needed.
+     */
+    public static com.sk89q.worldedit.math.Vector3 getBottomRightOffset(Clipboard clipboard, int rotation) {
+        if (clipboard == null) return com.sk89q.worldedit.math.Vector3.ZERO;
+
+        BlockVector3 dimensions = clipboard.getDimensions();
+        double width = dimensions.x();
+        double length = dimensions.z();
+
+        // Swap dimensions if rotated 90 or 270 degrees
+        if (rotation == 90 || rotation == 270 || rotation == -90 || rotation == -270) {
+            double temp = width;
+            width = length;
+            length = temp;
+        }
+
+        // We want (maxX, maxZ) to be at (16.0, 16.0) relative to the paste location (chunk origin)
+        // If we align to (0,0) first, then the max point is at (width, length).
+        // To move (width, length) to (16, 16), we need to shift by (16-width, 16-length).
+        return com.sk89q.worldedit.math.Vector3.at(16.0 - width, 0, 16.0 - length);
+    }
 
     /**
      * Calculates the offset needed to center a clipboard within a chunk.
@@ -222,5 +255,124 @@ public class StructureUtil {
         if (structure != null) {
             structure.place(location, true, StructureRotation.NONE, Mirror.NONE, 0, 1.0f, new Random());
         }
+    }
+
+    /**
+     * Reads a schematic file and extracts all materials/blocks as an ItemStack list.
+     * ItemStacks are ordered by material type name alphabetically.
+     *
+     * @param schemFile The .schem file to read.
+     * @return A list of ItemStacks representing all unique materials in the schematic,
+     *         ordered by material type. Returns an empty list if the file cannot be read.
+     */
+    public static List<ItemStack> getSchemMaterials(File schemFile) {
+        if (!schemFile.exists()) {
+            Freedom.get_plugin().getLogger().warning("Schematic file not found: " + schemFile.getAbsolutePath());
+            return new ArrayList<>();
+        }
+
+        try (FileInputStream fis = new FileInputStream(schemFile)) {
+            return getSchemMaterialsFromStream(fis);
+        } catch (IOException e) {
+            Freedom.get_plugin().getLogger().severe("Error reading schematic file: " + schemFile.getAbsolutePath());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Reads a schematic from a resource in the JAR and extracts all materials as ItemStacks.
+     * ItemStacks are ordered by material type name alphabetically.
+     *
+     * @param resourcePath Path to the resource (e.g., "ritual.schem")
+     * @return A list of ItemStacks representing all unique materials in the schematic,
+     *         ordered by material type. Returns an empty list if loading fails.
+     */
+    public static List<ItemStack> getSchemMaterialsFromResource(String resourcePath) {
+        try (InputStream is = Freedom.get_plugin().getResource(resourcePath)) {
+            if (is == null) {
+                Freedom.get_plugin().getLogger().warning("Could not find resource: " + resourcePath);
+                return new ArrayList<>();
+            }
+            return getSchemMaterialsFromStream(is);
+        } catch (IOException e) {
+            Freedom.get_plugin().getLogger().severe("Error reading schematic resource: " + resourcePath);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Helper method to extract materials from a schematic input stream.
+     *
+     * @param inputStream The input stream of the schematic file.
+     * @return A list of ItemStacks ordered by material type name.
+     * @throws IOException If there's an error reading the stream.
+     */
+    private static List<ItemStack> getSchemMaterialsFromStream(InputStream inputStream) throws IOException {
+        // Determine format - assume schem format
+        ClipboardFormat format = ClipboardFormats.findByAlias("schem");
+        if (format == null) {
+            // Fallback to other common formats
+            format = ClipboardFormats.findByAlias("schematic");
+        }
+
+        if (format == null) {
+            Freedom.get_plugin().getLogger().warning("Unknown schematic format");
+            return new ArrayList<>();
+        }
+
+        try (ClipboardReader reader = format.getReader(inputStream)) {
+            Clipboard clipboard = reader.read();
+            return extractMaterialsFromClipboard(clipboard);
+        }
+    }
+
+    /**
+     * Extracts all materials from a clipboard and returns them as ItemStacks ordered by type.
+     *
+     * @param clipboard The clipboard to extract materials from.
+     * @return A list of ItemStacks representing all unique materials, ordered by material type name.
+     */
+    private static List<ItemStack> extractMaterialsFromClipboard(Clipboard clipboard) {
+        if (clipboard == null) {
+            return new ArrayList<>();
+        }
+
+        // Count each unique block material
+        Map<String, Integer> materialCounts = new HashMap<>();
+
+        // Iterate through all blocks in the clipboard
+        BlockVector3 min = clipboard.getMinimumPoint();
+        BlockVector3 max = clipboard.getMaximumPoint();
+
+        for (int x = min.x(); x <= max.x(); x++) {
+            for (int y = min.y(); y <= max.y(); y++) {
+                for (int z = min.z(); z <= max.z(); z++) {
+                    BlockState block = clipboard.getBlock(BlockVector3.at(x, y, z));
+                    if (block != null && !block.getBlockType().getMaterial().isAir()) {
+                        String materialName = block.getAsString();
+                        // Extract just the block type name without properties
+                        if (materialName.contains("[")) {
+                            materialName = materialName.substring(0, materialName.indexOf("["));
+                        }
+                        materialCounts.merge(materialName, 1, Integer::sum);
+                    }
+                }
+            }
+        }
+
+        // Convert to ItemStacks ordered by material type name
+        return materialCounts.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    Material material = Material.matchMaterial(entry.getKey());
+                    if (material != null && !material.isAir()) {
+                        return new ItemStack(material, entry.getValue());
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

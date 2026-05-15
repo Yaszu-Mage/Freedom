@@ -360,6 +360,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             }
         }.runTaskTimer(this, 0, 20);
         MazeManager.createMazeWorld("backrooms");
+        NpcManager.update().runTaskTimer(this, 0, 20);
     }
 
 

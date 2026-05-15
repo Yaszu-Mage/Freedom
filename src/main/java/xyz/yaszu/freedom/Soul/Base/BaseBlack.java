@@ -86,121 +86,124 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
     }
 
     public void load(Player player) {
+
         //VFX
-        new BukkitRunnable() {
+        try {
+            new BukkitRunnable() {
 
-            @Override
-            public void run() {
-                if (!player.getPersistentDataContainer().has(keygen("blacksave"))) {
-                    this.cancel();
-                }
-                Location loadingLocation = new Location(
-                        Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),
-                        player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),
-                        player.getPersistentDataContainer().get(keygen("blacksaveY"),PersistentDataType.DOUBLE),
-                        player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE)
-
-                );
-                if (loadingLocation != null) {
-                    if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
-                        player.sendMessage(dess("Too Far! (100 blocks)"));
-                        player.getPersistentDataContainer().remove(keygen("black_save"));
-                        player.getPersistentDataContainer().remove(keygen("blacksaveX"));
-                        player.getPersistentDataContainer().remove(keygen("blacksaveY"));
-                        player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
-                        player.getPersistentDataContainer().remove(keygen("blackworld"));
+                @Override
+                public void run() {
+                    if (!player.getPersistentDataContainer().has(keygen("blacksave"))) {
                         this.cancel();
-                        return;
                     }
-                }
-                drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.SMOKE);
-                drawCircle(player.getLocation(),0.5,player.getWorld(),8,Particle.LARGE_SMOKE);
-                drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
-                drawCircle(loadingLocation,0.5,player.getWorld(),8,Particle.DRAGON_BREATH);
-            }
-        }.runTaskTimer(Freedom.get_plugin(),20,20);
-        new BukkitRunnable() {
-            public int tick = 0;
-            public double last_health = player.getHealth();
-            Location loadingLocation = player.getLocation();
-            @Override
-            public void run() {
-                if (loadingLocation != null) {
-                    if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
-                        player.sendMessage(dess("Too Far! (100 blocks)"));
-                        player.getPersistentDataContainer().remove(keygen("black_save"));
-                        player.getPersistentDataContainer().remove(keygen("blacksaveX"));
-                        player.getPersistentDataContainer().remove(keygen("blacksaveY"));
-                        player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
-                        player.getPersistentDataContainer().remove(keygen("blackworld"));
-                        this.cancel();
-                        return;
-                    }
-                }
-                if (player.getPersistentDataContainer().has(keygen("blackworld"),PersistentDataType.STRING)) {
                     Location loadingLocation = new Location(
                             Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),
                             player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),
                             player.getPersistentDataContainer().get(keygen("blacksaveY"),PersistentDataType.DOUBLE),
                             player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE)
+
                     );
-                }
-
-                if (player.getHealth() > last_health || !player.isSneaking() || player.isDead()) {
-                    this.cancel();
-                    player.sendActionBar(dess("Teleport Cancelled."));
-                }
-                if (tick >= 4) {
-                    drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.GUST);
-                    player.playSound(player.getLocation(),Sound.ENTITY_WIND_CHARGE_WIND_BURST,1,1);
-                    List<Entity> entities = player.getNearbyEntities(2,2,2);
-                    for (Entity entity : entities) {
-                        if (entity instanceof Player trustcheck) {
-                            if (player.getPersistentDataContainer().has(keygen("trustedby"))) {
-                                String trustedby = trustcheck.getPersistentDataContainer().get(keygen("trustedby"),PersistentDataType.STRING);
-                                if (trustedby.contains(player.getName())) {
-                                    drawCircle(trustcheck.getLocation(),1,player.getWorld(),32,Particle.REVERSE_PORTAL);
-                                    trustcheck.teleport(loadingLocation);
-                                    drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
-                                    player.getWorld().playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);
-                                }
-
-                            }
+                    if (loadingLocation != null) {
+                        if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
+                            player.sendMessage(dess("Too Far! (100 blocks)"));
+                            player.getPersistentDataContainer().remove(keygen("black_save"));
+                            player.getPersistentDataContainer().remove(keygen("blacksaveX"));
+                            player.getPersistentDataContainer().remove(keygen("blacksaveY"));
+                            player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
+                            player.getPersistentDataContainer().remove(keygen("blackworld"));
+                            this.cancel();
+                            return;
                         }
                     }
-                    player.teleport(loadingLocation);
-                    drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
-                    player.playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);
-                    this.cancel();
-                } else {
-                    if (threes(tick) == 3) {
-                        player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds..."));
-                    } else if (threes(tick) == 2) {
-                        player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds.."));
-                    } else {
-                        player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds."));
-                    }
-                    drawCircle(player.getLocation(),1.5,player.getWorld(),32,Particle.SOUL_FIRE_FLAME);
-                    drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.VAULT_CONNECTION);
-                    drawCircle(loadingLocation,1,player.getWorld(),32,Particle.VAULT_CONNECTION);
-                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BANJO,SoundCategory.PLAYERS,1,tick);
-                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,SoundCategory.PLAYERS,1,tick-1);
-                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 1.0f, 0.5f);
+                    drawCircle(player.getLocation(),1,player.getWorld(),16,Particle.SMOKE);
+                    drawCircle(player.getLocation(),0.5,player.getWorld(),8,Particle.LARGE_SMOKE);
+                    drawCircle(loadingLocation,1,player.getWorld(),16,Particle.SMOKE);
+                    drawCircle(loadingLocation,0.5,player.getWorld(),8,Particle.DRAGON_BREATH);
                 }
-                tick = tick + 1;
-            }
-            @Override
-            public synchronized void cancel() throws IllegalStateException {
-                player.getPersistentDataContainer().remove(keygen("black_save"));
-                player.getPersistentDataContainer().remove(keygen("blacksaveX"));
-                player.getPersistentDataContainer().remove(keygen("blacksaveY"));
-                player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
-                player.getPersistentDataContainer().remove(keygen("blackworld"));
-                Bukkit.getScheduler().cancelTask(getTaskId());
-            }
-        }.runTaskTimer(Freedom.get_plugin(),0,20);
+            }.runTaskTimer(Freedom.get_plugin(),20,20);
+        } catch (Exception ignored) {}
+        try {
+            new BukkitRunnable() {
+                public int tick = 0;
+                public double last_health = player.getHealth();
+                Location loadingLocation = player.getLocation();
+                @Override
+                public void run() {
+                    if (loadingLocation != null) {
+                        if (loadingLocation.distanceSquared(player.getLocation()) >= 10000) {
+                            player.sendMessage(dess("Too Far! (100 blocks)"));
+                            player.getPersistentDataContainer().remove(keygen("black_save"));
+                            player.getPersistentDataContainer().remove(keygen("blacksaveX"));
+                            player.getPersistentDataContainer().remove(keygen("blacksaveY"));
+                            player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
+                            player.getPersistentDataContainer().remove(keygen("blackworld"));
+                            this.cancel();
+                            return;
+                        }
+                    }
+                    if (player.getPersistentDataContainer().has(keygen("blackworld"),PersistentDataType.STRING)) {
+                        Location loadingLocation = new Location(
+                                Bukkit.getWorld(player.getPersistentDataContainer().get(keygen("blackworld"),PersistentDataType.STRING)),
+                                player.getPersistentDataContainer().get(keygen("blacksaveX"),PersistentDataType.DOUBLE),
+                                player.getPersistentDataContainer().get(keygen("blacksaveY"),PersistentDataType.DOUBLE),
+                                player.getPersistentDataContainer().get(keygen("blacksaveZ"),PersistentDataType.DOUBLE)
+                        );
+                    }
 
+                    if (player.getHealth() > last_health || !player.isSneaking() || player.isDead()) {
+                        this.cancel();
+                        player.sendActionBar(dess("Teleport Cancelled."));
+                    }
+                    if (tick >= 4) {
+                        drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.GUST);
+                        player.playSound(player.getLocation(),Sound.ENTITY_WIND_CHARGE_WIND_BURST,1,1);
+                        List<Entity> entities = player.getNearbyEntities(2,2,2);
+                        for (Entity entity : entities) {
+                            if (entity instanceof Player trustcheck) {
+                                if (player.getPersistentDataContainer().has(keygen("trustedby"))) {
+                                    String trustedby = trustcheck.getPersistentDataContainer().get(keygen("trustedby"),PersistentDataType.STRING);
+                                    if (trustedby.contains(player.getName())) {
+                                        drawCircle(trustcheck.getLocation(),1,player.getWorld(),32,Particle.REVERSE_PORTAL);
+                                        trustcheck.teleport(loadingLocation);
+                                        drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
+                                        player.getWorld().playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);
+                                    }
 
+                                }
+                            }
+                        }
+                        player.teleport(loadingLocation);
+                        drawCircle(loadingLocation,1,loadingLocation.getWorld(),32,Particle.REVERSE_PORTAL);
+                        player.playSound(player.getLocation(),Sound.ENTITY_ENDERMAN_TELEPORT,1,1);
+                        this.cancel();
+                    } else {
+                        if (threes(tick) == 3) {
+                            player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds..."));
+                        } else if (threes(tick) == 2) {
+                            player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds.."));
+                        } else {
+                            player.sendActionBar(dess("Teleporting in " + (4-tick) + " seconds."));
+                        }
+                        drawCircle(player.getLocation(),1.5,player.getWorld(),32,Particle.SOUL_FIRE_FLAME);
+                        drawCircle(player.getLocation(),1,player.getWorld(),32,Particle.VAULT_CONNECTION);
+                        drawCircle(loadingLocation,1,player.getWorld(),32,Particle.VAULT_CONNECTION);
+                        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BANJO,SoundCategory.PLAYERS,1,tick);
+                        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,SoundCategory.PLAYERS,1,tick-1);
+                        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 1.0f, 0.5f);
+                    }
+                    tick = tick + 1;
+                }
+                @Override
+                public synchronized void cancel() throws IllegalStateException {
+                    player.getPersistentDataContainer().remove(keygen("black_save"));
+                    player.getPersistentDataContainer().remove(keygen("blacksaveX"));
+                    player.getPersistentDataContainer().remove(keygen("blacksaveY"));
+                    player.getPersistentDataContainer().remove(keygen("blacksaveZ"));
+                    player.getPersistentDataContainer().remove(keygen("blackworld"));
+                    Bukkit.getScheduler().cancelTask(getTaskId());
+                }
+            }.runTaskTimer(Freedom.get_plugin(),0,20);
+        } catch (Exception ignored) {}
     }
     public static double threes(int num) {
         if (num % 3 == 0) {

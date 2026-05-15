@@ -12,17 +12,16 @@ import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
-import org.bukkit.Bukkit;
-import org.bukkit.HeightMap;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -30,6 +29,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.units.qual.N;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Util.InventoryPersistentDataType;
+import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class NpcManager extends Util implements Listener {
 
 
 
-    public BukkitRunnable update() {
+    public static BukkitRunnable update() {
         return new BukkitRunnable() {
          @Override
          public void run() {
@@ -121,17 +122,92 @@ public class NpcManager extends Util implements Listener {
 
     void createFarm(NPC npc) {
         //so let's offset all npc fucking farming by 20 blocks
-        //lets make an organic looking sequence where the person actually builds farm, but wait there a problem
+        //lets make an organic looking sequence where the person actually builds farm, but wait there a problem we need fucking resources
+        StructureUtil.getSchemMaterialsFromResource("farm.schem");
     }
+
+
 
     void GatherResources(List<ItemStack> resources, NPC npc) {
         //so we need to find the nearest resource of the type we want, then path to it and break it
         //if there isn't any nearby we wander, not as far as 100 blocks though
+        //how the fuck we gonna do this
+        Location currentLocation = npc.BaseEntity.getLocation();
+        for (ItemStack resource : resources) {
+            Material lookingMaterial = resource.getType();
+            Block block = findNearestBlock(currentLocation,lookingMaterial, 100);
+            if (block == null) {
+                if (resource.getType().toString().toUpperCase().contains("LOG")) {
+                    //look for other log types bitch
+
+                }
+            }
+            if (block.getY() < getGroundLocation(block.getLocation())) {
+                //THIS SHIT IS UNDERGROUND
+                // I should prolly add a thing to ensure we got a fucking pickaxe...
+            } else {
+
+            }
+        }
+    }
+
+    public Block findMyWood(Location center, Material target, int radius) {
+        Block block = findNearestBlock(center,target, 100);
+        if (block == null) {
+            block = findNearestBlock(center,Material.OAK_LOG, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.SPRUCE_LOG, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.BIRCH_LOG, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.JUNGLE_LOG, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.ACACIA_LOG, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.DARK_OAK_LOG, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.MANGROVE_LOG, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.CRIMSON_STEM, 100);
+        }
+        if (block == null) {
+            block = findNearestBlock(center,Material.WARPED_STEM, 100);
+        }
+        return block;
 
     }
 
+    public Block findNearestBlock(Location center, Material target, int radius) {
+        Block closestBlock = null;
+        double closestDistanceSq = Double.MAX_VALUE;
+
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    Block block = center.clone().add(x, y, z).getBlock();
+
+                    if (block.getType() == target) {
+                        double distanceSq = center.distanceSquared(block.getLocation());
+                        if (distanceSq < closestDistanceSq) {
+                            closestDistanceSq = distanceSq;
+                            closestBlock = block;
+                        }
+                    }
+                }
+            }
+        }
+        return closestBlock;
+    }
+
     void goHomeBitch(NPC npc) {
-            //so we need to get the home location from the npc's data, then path to it
+        //so we need to get the home location from the npc's data, then path to it
         boolean err = false;
         double homeX = 0;
         double homeY = 0;
@@ -188,7 +264,7 @@ public class NpcManager extends Util implements Listener {
     }
 
     //Sets Home location
-    private void makeTent(NPC npc, Location currentLocation) {
+    private static void makeTent(NPC npc, Location currentLocation) {
         npc.data.set(keygen("homeX"), PersistentDataType.DOUBLE, currentLocation.getX());
         npc.data.set(keygen("homeY"), PersistentDataType.DOUBLE, currentLocation.getY());
         npc.data.set(keygen("homeZ"), PersistentDataType.DOUBLE, currentLocation.getZ());
@@ -261,6 +337,8 @@ public class NpcManager extends Util implements Listener {
         public Double hunger = 20d;
         public NpcGoal goal = NpcGoal.Think;
         public PersistentDataContainer data;
+        private Inventory inventory;
+        //so we need to figure out how to make a fucking ass fucking ass inventory
         public NPC(Cow givenBaseEntity, Double GivenHunger, NpcGoal givengoal){
             if (givengoal != null) goal = givengoal;
             if (givenBaseEntity == null) return;
@@ -269,7 +347,7 @@ public class NpcManager extends Util implements Listener {
             goal = givengoal;
             if (!BaseEntity.getPersistentDataContainer().has(keygen("NPCID"))) {
                 givenBaseEntity.getPersistentDataContainer().set(keygen("goal"), PersistentDataType.STRING, goal.toString());
-
+                BaseEntity.getPersistentDataContainer().set(keygen("inventory"), InventoryPersistentDataType.get(), Bukkit.createInventory(null, 27, dess("NPC Inventory")));
                 BaseEntity.getPersistentDataContainer().set(keygen("NPCID"), PersistentDataType.STRING, UUID.randomUUID().toString());
                 BaseEntity.getPersistentDataContainer().set(keygen("isNpc"), PersistentDataType.BOOLEAN, true);
                 BaseEntity.getPersistentDataContainer().set(keygen("hunger"), PersistentDataType.DOUBLE, hunger);
@@ -294,7 +372,12 @@ public class NpcManager extends Util implements Listener {
 
 
         }
-
+        public Inventory getInventory() {
+            if (inventory == null) {
+                inventory = BaseEntity.getPersistentDataContainer().get(keygen("inventory"), InventoryPersistentDataType.get());
+            }
+            return inventory;
+        }
         public void move(Location targetLocation) {
             BaseEntity.getPersistentDataContainer().set(keygen("isallowedtomove"), PersistentDataType.BOOLEAN, true);
             BaseEntity.getPathfinder().moveTo(targetLocation, 1);
