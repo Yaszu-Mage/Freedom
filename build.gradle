@@ -61,6 +61,7 @@ dependencies {
     testRuntimeOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
         exclude group: "org.yaml", module: "snakeyaml"
     }
+    compileOnly('com.arakelian:faker:4.0.1')
 }
 
 tasks {

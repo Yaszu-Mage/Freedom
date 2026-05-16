@@ -2,14 +2,14 @@ package xyz.yaszu.freedom.Subsystems;
 
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.destroystokyo.paper.event.entity.EntityPathfindEvent;
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
+import com.github.javafaker.Faker;
+import com.github.retrooper.packetevents.protocol.player.TextureProperty;
+import com.github.retrooper.packetevents.protocol.player.User;
+import com.github.retrooper.packetevents.protocol.player.UserProfile;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import io.papermc.paper.datacomponent.item.ResolvableProfile;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import com.ibm.icu.impl.Pair;
+import io.papermc.paper.event.entity.EntityMoveEvent;
+import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
 import org.bukkit.*;
@@ -17,8 +17,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mannequin;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
@@ -26,22 +25,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
-import org.checkerframework.checker.units.qual.N;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.InventoryPersistentDataType;
 import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class NpcManager extends Util implements Listener {
+    public static Faker faker = new Faker();
     public static enum NpcGoal {
         Socialize,
         Mine,
@@ -66,7 +65,7 @@ public class NpcManager extends Util implements Listener {
                      npc.BaseEntity.remove();
                      return;
                  }
-                 npc.hunger--;
+                 NPCPickup(npc);
                  if (npc.hunger <= 10) {
                      if (!npc.data.has(keygen("home"))) {
                         if (npc.BaseEntity.getWorld() == Bukkit.getWorld("world")) {
@@ -109,7 +108,7 @@ public class NpcManager extends Util implements Listener {
                         }
                      } else {
                          //go home
-
+                        goHomeBitch(npc);
 
                      }
                  }
@@ -120,13 +119,39 @@ public class NpcManager extends Util implements Listener {
     }
 
 
+    void StructoInstructions(NPC npc, String struc){
+        //mahoraga help
+        //npc actually constructing it
+        //so first get resources
+        List<ItemStack> list = StructureUtil.getSchemMaterialsFromResource(struc);
+        //then let's check if we have the resources
+
+    }
+
     void createFarm(NPC npc) {
         //so let's offset all npc fucking farming by 20 blocks
         //lets make an organic looking sequence where the person actually builds farm, but wait there a problem we need fucking resources
         StructureUtil.getSchemMaterialsFromResource("farm.schem");
     }
-
-
+    int moveTicks = 120;
+    // this is how many move runs need to happen until hunger goes down
+    @EventHandler
+    public void EntityMoveEvent(EntityMoveEvent event) {
+        Entity entity = event.getEntity();
+        if (entity.getPersistentDataContainer().has(keygen("isNpc"))) {
+            //we gotta do ticks or this will be awful
+            // so every
+            if (!entity.getPersistentDataContainer().has(keygen("moveTicks"))) {
+                entity.getPersistentDataContainer().set(keygen("moveTicks"), PersistentDataType.INTEGER, 1);
+            } else {
+                if (entity.getPersistentDataContainer().get(keygen("moveTicks"), PersistentDataType.INTEGER) >= moveTicks) {
+                    NPC npc = NPCs.getOrDefault(UUID.fromString(entity.getPersistentDataContainer().get(keygen("NPCID"), PersistentDataType.STRING)), null);
+                    npc.hunger--;
+                    npc.BaseEntity.getPersistentDataContainer().set(keygen("hunger"), PersistentDataType.DOUBLE, npc.hunger);
+                }
+            }
+        }
+    }
 
     void GatherResources(List<ItemStack> resources, NPC npc) {
         //so we need to find the nearest resource of the type we want, then path to it and break it
@@ -139,18 +164,113 @@ public class NpcManager extends Util implements Listener {
             if (block == null) {
                 if (resource.getType().toString().toUpperCase().contains("LOG")) {
                     //look for other log types bitch
-
+                    block = findMyWood(currentLocation,lookingMaterial, 100);
+                    for (ItemStack otherResource : resources) {
+                        if (otherResource.getType() == block.getType()) {
+                            resources.set(resources.indexOf(otherResource),ItemStack.of(block.getType(), 1));
+                        }
+                        // literally replace the all fucking WRONG wood types with the right one
+                    }
                 }
             }
             if (block.getY() < getGroundLocation(block.getLocation())) {
                 //THIS SHIT IS UNDERGROUND
                 // I should prolly add a thing to ensure we got a fucking pickaxe...
+                if (getPreferredTool(block, npc) == -1) {
+                    //GET A FUCKING TOOL
+
+                }
             } else {
 
             }
         }
     }
 
+
+
+    public Location pathtoBlock(Block block, NPC npc){
+        //our goal is to get into the general radius of the block, within a one block range, if we can't we will need to break blocks
+        Location nextLocation = block.getLocation();
+        if (block.getWorld().getBlockAt(block.getLocation().clone().add(1,0,0)).getType() == Material.AIR) {
+            nextLocation = new Location(block.getWorld(),block.getLocation().getBlockX() + 1,getGroundLocation(block.getLocation()),block.getLocation().getBlockZ());
+        }
+        if (block.getWorld().getBlockAt(block.getLocation().clone().add(1,0,0)).getType() == Material.AIR) {
+            nextLocation = new Location(block.getWorld(),block.getLocation().getBlockX(),getGroundLocation(block.getLocation()),block.getLocation().getBlockZ() + 1);
+        }
+        return nextLocation;
+    }
+    public int getPreferredTool(Block block, NPC npc) {
+        AtomicReference<ItemStack> tool = new AtomicReference<>();
+        npc.inventory.forEach(item -> {
+            if (block.isPreferredTool(item)) {
+                tool.set(item);
+            }
+        });
+        if (tool.get() == null) {
+            return -1;
+        }
+        return npc.inventory.first(tool.get());
+    }
+    public boolean NPCBreakBlock(NPC npc, Block block) {
+        boolean output = false;
+        // so we gonna make sure FUCKASS is actually near the block
+        if (npc.BaseEntity.getLocation().distanceSquared(block.getLocation()) > 10) {
+            npc.move(pathtoBlock(block, npc));
+        }
+        new BukkitRunnable() {
+            int ticks = 0;
+            float tickstobreak = 0;
+            @Override
+            public void run() {
+                if (npc.BaseEntity.isDead()) {
+                    this.cancel();
+                    return;
+                }
+                if (ticks == 0) {
+                    // we need to find the base speed at which including potion effects, water, and tool, that it would take to break the block
+                    if (getPreferredTool(block, npc) == -1) {
+                        //uhh construct a tool
+                        if (block.getType().toString().toUpperCase().contains("LOG")) {
+                            //just break it bro
+                            tickstobreak = block.getDestroySpeed(ItemStack.of(block.getType(), 1));
+                            // we are just gonna assume the type bc that's equal to hand
+                        }
+                    }
+                }
+                if (ticks >= tickstobreak) {
+                    this.cancel();
+                    block.breakNaturally();
+                    return;
+                }
+                ticks++;
+            }
+        }.runTaskTimer(Freedom.get_plugin(), 0, 0);
+        return output;
+    }
+    public static boolean NPCPickup(NPC npc) {
+        AtomicBoolean output = new AtomicBoolean(false);
+        if (npc.getInventory().getContents().length >= 27) {
+            return false;
+        }
+        npc.BaseEntity.getLocation().getNearbyEntitiesByType(Item.class,2).forEach(entity -> {
+            if (npc.getInventory().getContents().length >= 27) {
+                output.set(false);
+            } else {
+                npc.getInventory().addItem(entity.getItemStack());
+                entity.remove();
+                output.set(true);
+            }
+        });
+        return output.get();
+    }
+
+    public void sortNpcInventory(NPC npc) {
+        //combine like stacks until max stack size
+        Inventory inventory = npc.getInventory();
+        inventory.forEach(itemStack -> {
+
+        });
+    }
     public Block findMyWood(Location center, Material target, int radius) {
         Block block = findNearestBlock(center,target, 100);
         if (block == null) {
@@ -206,7 +326,7 @@ public class NpcManager extends Util implements Listener {
         return closestBlock;
     }
 
-    void goHomeBitch(NPC npc) {
+    static void goHomeBitch(NPC npc) {
         //so we need to get the home location from the npc's data, then path to it
         boolean err = false;
         double homeX = 0;
@@ -273,8 +393,9 @@ public class NpcManager extends Util implements Listener {
 
     public static HashMap<UUID,NPC> NPCs = new HashMap<>();
 
-    public static void createNPC(Location location) {
+    public static NPC createNPC(Location location) {
         NPC npc = new NPC((Cow) location.getWorld().spawn(location, Cow.class), 20d, NpcGoal.Wander);
+        return npc;
     }
 
 
@@ -282,6 +403,7 @@ public class NpcManager extends Util implements Listener {
         if (entity.getPersistentDataContainer().has(keygen("isNpc"))) {
             Cow npcEntity = (Cow) entity;
             String NPCID = npcEntity.getPersistentDataContainer().get(keygen("NPCID"), PersistentDataType.STRING);
+            String Name = npcEntity.getPersistentDataContainer().get(keygen("name"), PersistentDataType.STRING);
             UUID uuid = UUID.fromString(NPCID);
             Freedom.get_plugin().getLogger().info("NPCID: " + NPCID);
             Freedom.get_plugin().getLogger().info("UUID: " + uuid);
@@ -291,22 +413,25 @@ public class NpcManager extends Util implements Listener {
             NpcGoal goal = NpcGoal.valueOf(npcEntity.getPersistentDataContainer().get(keygen("goal"), PersistentDataType.STRING));
             Double hunger = npcEntity.getPersistentDataContainer().get(keygen("hunger"), PersistentDataType.DOUBLE);
             String skin = npcEntity.getPersistentDataContainer().get(keygen("skin"), PersistentDataType.STRING);
+            boolean isPopular = npcEntity.getPersistentDataContainer().get(keygen("popular"), PersistentDataType.BOOLEAN);
+            UserProfile profile;
+            if (isPopular) {
+                profile = new UserProfile(uuid,Name,SkinLoader.actuallyConstruct(skin));
+            } else {
+                profile = new UserProfile(uuid,Name);
+            }
 
             //recompile npc based on goal and other factors
-            PlayerDisguise disguise = new PlayerDisguise("SweetVikki"
-);
+            PlayerDisguise disguise = new PlayerDisguise("Yaszu");
             PlayerWatcher playerwatcher = (PlayerWatcher) disguise.getWatcher();
-            playerwatcher.setSkin("SweetVikki"
-);
-            playerwatcher.setName("ZeepZorp"
-);
+            playerwatcher.setSkin(profile);
+            playerwatcher.setName(Name);
             disguise.setEntity(entity);
-            playerwatcher.setSkin("SweetVikki"
-);
-            npcEntity.getAttribute(Attribute.TEMPT_RANGE).setBaseValue(0);
             disguise.startDisguise();
             Freedom.get_plugin().getLogger().info("Recompiled NPC with goal: " + goal.toString() + " and hunger: " + hunger);
-            NPCs.put(uuid, new NPC(npcEntity, hunger, goal));
+            NPC npc = new NPC(npcEntity, hunger, goal);
+            npc.disguise = disguise;
+            NPCs.put(uuid, npc);
             Bukkit.getServer().getMobGoals().removeGoal(npcEntity, VanillaGoal.TEMPT);
         }
     }
@@ -338,7 +463,13 @@ public class NpcManager extends Util implements Listener {
         public NpcGoal goal = NpcGoal.Think;
         public PersistentDataContainer data;
         private Inventory inventory;
-        //so we need to figure out how to make a fucking ass fucking ass inventory
+        public Disguise disguise;
+
+        public List<String> randomPopularNames = List.of(
+                "d3rlord3",
+                "TheMostMayo"
+        );
+        //so we need to figure out how to make a fucking ass inventory
         public NPC(Cow givenBaseEntity, Double GivenHunger, NpcGoal givengoal){
             if (givengoal != null) goal = givengoal;
             if (givenBaseEntity == null) return;
@@ -351,21 +482,41 @@ public class NpcManager extends Util implements Listener {
                 BaseEntity.getPersistentDataContainer().set(keygen("NPCID"), PersistentDataType.STRING, UUID.randomUUID().toString());
                 BaseEntity.getPersistentDataContainer().set(keygen("isNpc"), PersistentDataType.BOOLEAN, true);
                 BaseEntity.getPersistentDataContainer().set(keygen("hunger"), PersistentDataType.DOUBLE, hunger);
+                BaseEntity.getPersistentDataContainer().set(keygen("name"),PersistentDataType.STRING, "ZeepZorp");
                 BaseEntity.getPersistentDataContainer().set(keygen("skin"), PersistentDataType.STRING, "SweetVikki");
                 data = BaseEntity.getPersistentDataContainer();
+                UUID npcid = UUID.fromString(BaseEntity.getPersistentDataContainer().get(keygen("NPCID"), PersistentDataType.STRING));
                 //create new disguise and put it on them
-                PlayerDisguise disguise = new PlayerDisguise("SweetVikki"
-                );
+                String name = "";
+                Random random = new Random();
+                boolean popular = false;
+                if (random.nextInt(0,1000) == 0) {
+                    popular = true;
+                    name = randomPopularNames.get(random.nextInt(randomPopularNames.size()));
+                }
+                PlayerDisguise disguise = new PlayerDisguise("Yaszu");
                 PlayerWatcher playerwatcher = (PlayerWatcher) disguise.getWatcher();
-
+                Pair<List<TextureProperty>,String> pair;
+                if (!popular) {
+                    name = faker.name().firstName();
+                    //lets find a random skin
+                    pair = SkinLoader.loadRandomSkin();
+                    List<TextureProperty> textures = pair.first;
+                    UserProfile profile = new UserProfile(npcid, name,textures);
+                    playerwatcher.setSkin(profile);
+                    BaseEntity.getPersistentDataContainer().set(keygen("skin"),PersistentDataType.STRING,pair.second);
+                } else {
+                    playerwatcher.setSkin(name);
+                }
+                playerwatcher.setName(name);
                 disguise.setEntity(BaseEntity);
-                playerwatcher.setSkin("SweetVikki"
-                );
                 disguise.startDisguise();
                 NpcManager.NPCs.put(UUID.fromString(BaseEntity.getPersistentDataContainer().get(keygen("NPCID"),PersistentDataType.STRING)), this);
-                playerwatcher.setSkin("SweetVikki");
-                playerwatcher.setName("ZeepZorp");
+                this.disguise = disguise;
                 BaseEntity.getAttribute(Attribute.TEMPT_RANGE).setBaseValue(0);
+                BaseEntity.getPersistentDataContainer().set(keygen("name"),PersistentDataType.STRING, name);
+                BaseEntity.getPersistentDataContainer().set(keygen("isPopular"),PersistentDataType.BOOLEAN, popular);
+
                 Bukkit.getServer().getMobGoals().removeGoal(BaseEntity, VanillaGoal.TEMPT);
             }
 

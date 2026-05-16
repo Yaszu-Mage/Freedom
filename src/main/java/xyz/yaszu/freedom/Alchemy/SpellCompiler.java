@@ -18,6 +18,8 @@ public class SpellCompiler extends Util {
 
     /* ================= ENUMS ================= */
 
+
+
     public enum ritualkeywords {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
