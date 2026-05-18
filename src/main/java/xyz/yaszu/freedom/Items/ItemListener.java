@@ -30,6 +30,7 @@ import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
 import xyz.yaszu.freedom.Items.Parts.*;
 import xyz.yaszu.freedom.Items.Relics.Glock;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
+import xyz.yaszu.freedom.Items.Upgrades.AstralItem;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
 import xyz.yaszu.freedom.Items.Upgrades.Reset;
 import xyz.yaszu.freedom.Items.Upgrades.Revival;
@@ -51,12 +52,15 @@ public class ItemListener extends Util implements Listener {
         register(new TimePiece(), "timepiece",false);
         register(new Reset(), "resetstone",false);
         register(new Burger(),"burger",false);
+        register(new Pizza(),"pizza",false);
+        register(new AstralItem(),"astral",false);
         register(new PainScythe(),"painscythe",true);
         register(new Glock(), "glock",true);
         register(new SpellFocus.Orb(), "orb",false);
         register(new SpellFocus.Staff(), "staff",false);
         register(new SpellFocus.Grimoire(), "grimoire",false);
         register(new ScythePhighting(), "scythephighting",false);
+        register(new Grapple_Hook(), "grapplehook",false);
         register(new Railgun(), "railgun",true);
         ArtifactManager.registerArtifacts();
         for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {

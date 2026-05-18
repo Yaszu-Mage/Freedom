@@ -53,6 +53,7 @@ import xyz.yaszu.freedom.Information.Information_Handler;
 import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
 import xyz.yaszu.freedom.Items.ColorSpecific.Railgun;
 import xyz.yaszu.freedom.Items.ItemListener;
+import xyz.yaszu.freedom.Items.Parts.Grapple_Hook;
 import xyz.yaszu.freedom.Items.Parts.ScythePhighting;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
@@ -294,6 +295,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new BulletSystem(),this);
         Bukkit.getPluginManager().registerEvents(new NpcManager(), this);
         Bukkit.getPluginManager().registerEvents(new NpcDebugGui.NpcDebugGuiListener(), this);
+        Bukkit.getPluginManager().registerEvents(new CustomSongHandler(), this);
+        Bukkit.getPluginManager().registerEvents(new Grapple_Hook(), this);
         soulImbueManager = new SoulImbueManager();
         Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();

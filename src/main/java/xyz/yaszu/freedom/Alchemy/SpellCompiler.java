@@ -150,6 +150,7 @@ public class SpellCompiler extends Util {
                     switch (element) {
                         case fire -> {
                             //todo flamethrower
+
                         }
                         case air -> {
                             //fling up
@@ -233,6 +234,7 @@ public class SpellCompiler extends Util {
     static class StatementNode {
         ritualkeywords direction = ritualkeywords.down;
         Set<ritualkeywords> elements = new HashSet<>();
+        Player caster;
         ritualtype action;
         Location location;
         int range = 0;
@@ -243,7 +245,7 @@ public class SpellCompiler extends Util {
 
     /* ================= PARSER ================= */
 
-    public static SpellNode parse(List<Token> tokens, Location base) {
+    public static SpellNode parse(List<Token> tokens, Location base,Player caster) {
         SpellNode spell = new SpellNode();
         StatementNode current = null;
 
@@ -259,6 +261,7 @@ public class SpellCompiler extends Util {
                     current.action = ritualtype.valueOf(key.name());
                     current.location = base.clone();
                     spell.statements.add(current);
+                    current.caster = caster;
                     used = true;
                 } else if (current != null) {
                     switch (key) {
@@ -480,7 +483,7 @@ public class SpellCompiler extends Util {
 
     public static int castSpell(String text, Location center, Player caster, boolean b) {
         var tokens = tokenize(text);
-        var ast = parse(tokens, center);
+        var ast = parse(tokens, center,caster);
 
         var errors = validate(ast);
         if (!errors.isEmpty()) {
@@ -511,7 +514,7 @@ public class SpellCompiler extends Util {
 
     public static int castMobileSpell(String text, Player caster, int max) {
         var tokens = tokenize(text);
-        var ast = parse(tokens, caster.getLocation());
+        var ast = parse(tokens, caster.getLocation(), caster);
 
         var errors = validate(ast);
         if (!errors.isEmpty()) {
@@ -586,7 +589,7 @@ public class SpellCompiler extends Util {
 
     public static int cost(String text, Player caster) {
         var tokens = tokenize(text);
-        var ast = parse(tokens, caster.getLocation());
+        var ast = parse(tokens, caster.getLocation(),caster);
 
         var errors = validate(ast);
         if (!errors.isEmpty()) {

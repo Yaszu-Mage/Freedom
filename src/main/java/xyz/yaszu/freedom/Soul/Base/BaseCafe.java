@@ -120,7 +120,7 @@ public class BaseCafe extends Util implements Base_Soul {
 
             abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
-            // TODO no no ability + time
+
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
             if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
                 double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;

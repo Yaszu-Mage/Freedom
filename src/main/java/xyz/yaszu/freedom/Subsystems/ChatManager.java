@@ -38,7 +38,7 @@ public class ChatManager extends Util implements Listener {
         
         Player realTypist = isEcho ? sourcePlayer : player;
         String message = event.getMessage();
-
+        message = AlcoholManager.handleChat(realTypist, message);
         // If not an echo, process message and check for disguise
         if (!isEcho) {
             // Apply CurseManager modifications

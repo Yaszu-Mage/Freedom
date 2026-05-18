@@ -40,7 +40,6 @@ public class Mocha extends Util implements Base_Soul, Listener {
 
     @Override
     public ItemStack Icon() {
-        //TODO replace with blue clock
         return ItemStack.of(Material.CLOCK);
     }
 
@@ -63,7 +62,6 @@ public class Mocha extends Util implements Base_Soul, Listener {
         player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, !player.getPersistentDataContainer().get(keygen("tpyes"),PersistentDataType.BOOLEAN));
         if (can_ability(AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())) {
             //Do ability
-            //TODO implement VFX
             if (player.getPersistentDataContainer().has(keygen("doubleclock"))) {
 
                 Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"), PersistentDataType.STRING));
@@ -112,7 +110,7 @@ public class Mocha extends Util implements Base_Soul, Listener {
                     doubleclock.sendMessage(dess("YOU ARE TOO FAR TO SWAP!"));
                 }
         } else {
-            //TODO send message
+            player.sendMessage(dess("PLEASE WAIT TO USE THIS ABILITY!"));
         }
     }}}}
     public static void init(Player player) {
@@ -204,7 +202,11 @@ public class Mocha extends Util implements Base_Soul, Listener {
 
             abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
-            // TODO no no ability + time
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+            if (abilityTwoCooldowns.get(player.getUniqueId()) != null) {
+                double seconds = (double) (effective_cooldown(AbilityTwo_Cooldown(), player.getUniqueId()) - (System.currentTimeMillis() - abilityTwoCooldowns.get(player.getUniqueId()))) / 1000;
+                player.sendActionBar(dess("You can't use this ability yet, wait " + Math.round(seconds) + " seconds"));
+            }
         }
     }
 

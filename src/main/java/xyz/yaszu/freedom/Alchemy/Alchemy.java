@@ -95,7 +95,7 @@ public class Alchemy implements Listener {
                     // Extract range from text or re-parse?
                     // For now, let's just re-parse range from the first statement that is province
                     var tokens = SpellCompiler.tokenize(text);
-                    var ast = SpellCompiler.parse(tokens, centerLocation);
+                    var ast = SpellCompiler.parse(tokens, centerLocation,player);
                     int range = 0;
                     for (var stmt : ast.statements) {
                         if (stmt.action == SpellCompiler.ritualtype.province) {

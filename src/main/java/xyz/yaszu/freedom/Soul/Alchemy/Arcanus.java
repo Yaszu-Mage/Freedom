@@ -8,6 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Alchemy.SpellCompiler;
@@ -168,7 +169,7 @@ public class Arcanus extends Util implements Base_Soul {
             //actually kinda sick
             String msg = chatEvent.getMessage();
             var tokens = tokenize(msg);
-            var ast = parse(tokens, player.getLocation());
+            var ast = parse(tokens, player.getLocation(),player);
             var errors = validate(ast);
             if (errors.isEmpty()) {
                 //actually cast
@@ -196,6 +197,9 @@ public class Arcanus extends Util implements Base_Soul {
 
     @Override
     public void ActivePassive(Player player) {
+        double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+        if (SoulPoints < 5) return;
         CurrencyManager.addCurrency(50, player);
+        player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, SoulPoints - 5);
     }
 }

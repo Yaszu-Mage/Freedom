@@ -13,5 +13,8 @@ public enum BaseEnumItem {
     rifle,
     timepiece,
     ScythePhighting,
-    railgun
+    railgun,
+    pizza,
+    astral,
+    Grapple_Hook
 }

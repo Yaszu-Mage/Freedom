@@ -16,11 +16,10 @@ import static org.bukkit.Bukkit.createChunkData;
 
 public class RedCastleManager extends Util {
 
-
     public static List<castlePiece> redCastlePieces = List.of(
             new castlePiece(
                     "dungeon1",
-                    List.of(Directions.South, Directions.North,Directions.West),
+                    List.of(Directions.South, Directions.North, Directions.West),
                     List.of(),
                     false
             ),
@@ -41,11 +40,10 @@ public class RedCastleManager extends Util {
                     List.of(Directions.South, Directions.North),
                     List.of(),
                     false
-
             ),
             new castlePiece(
                     "Stair1",
-                    List.of(Directions.South, Directions.Up,Directions.Down),
+                    List.of(Directions.South, Directions.Up, Directions.Down),
                     List.of(),
                     true
             ),
@@ -57,17 +55,16 @@ public class RedCastleManager extends Util {
             ),
             new castlePiece(
                     "hallwayEastWest2",
-                    List.of(Directions.East,Directions.West),
+                    List.of(Directions.East, Directions.West),
                     List.of(),
                     false
             ),
             new castlePiece(
                     "Tree1",
-                    List.of(Directions.East,Directions.West),
+                    List.of(Directions.East, Directions.West),
                     List.of(),
                     false
             )
-
     );
 
     public enum Directions {
@@ -78,19 +75,21 @@ public class RedCastleManager extends Util {
         Up,
         Down
     }
+
     static int maxLevels = 2;
     public static boolean verbose = true;
     public static final String KEY_PIECE_ROTATION = "redcastle_rotation";
     public static final String KEY_PIECE_CONNECTIONS = "redcastle_connections";
 
-    public static class CastleGenerator extends ChunkGenerator {
-        private final long seedOffset = 98765L;
+    // PDC key used to mark a chunk as having been processed (attempted)
+    private static final String KEY_GENERATED = "redcastle_generated";
+    // PDC key used to mark a chunk as having a valid piece placed
+    private static final String KEY_HAS_PIECE = "redcastle_has_piece";
 
+    public static class CastleGenerator extends ChunkGenerator {
         @Override
         public ChunkData generateChunkData(World world, Random random, int chunkX, int chunkZ, BiomeGrid biome) {
             ChunkData chunk = createChunkData(world);
-            // The actual generation of structures (schematics) happens on chunk load via WorldManager
-            // This generator just provides the empty void world for it.
             return chunk;
         }
 
@@ -112,9 +111,6 @@ public class RedCastleManager extends Util {
 
     private record CastleNode(World world, int chunkX, int chunkZ, int level) {}
 
-    /**
-     * Stores information about a generated chunk node including connections and adjacencies.
-     */
     private static class ChunkNodeInfo {
         public final int chunkX, chunkZ, level;
         public castlePiece piece;
@@ -137,60 +133,90 @@ public class RedCastleManager extends Util {
         return chunkNodeMap.computeIfAbsent(key, k -> new ChunkNodeInfo(chunkX, chunkZ, level));
     }
 
+    // -------------------------------------------------------------------------
+    // EDGE-BASED CONNECTIVITY (symmetric — both sides of an edge use same seed)
+    // -------------------------------------------------------------------------
+
     /**
-     * Gets the context of nearest 5 chunks around the given position at the same level.
-     * Returns information about all nearby chunks for contextual decision-making.
+     * Returns true if there is an open passage on the horizontal edge between
+     * chunk (cx,cz) and its neighbor in direction {@code dir} at the given level.
+     *
+     * The key fix: both sides of an edge compute the SAME boolean because we
+     * always hash the edge endpoints in a canonical (sorted) order.
      */
-    private static Map<String, ChunkNodeInfo> getNearby5ChunksContext(int chunkX, int chunkZ, int level) {
-        Map<String, ChunkNodeInfo> context = new HashMap<>();
-
-        // 5-chunk radius: center + 4 cardinal neighbors
-        int[][] offsets = {
-            {0, 0},      // Center
-            {1, 0},      // East
-            {-1, 0},     // West
-            {0, 1},      // South
-            {0, -1}      // North
-        };
-
-        for (int[] offset : offsets) {
-            int nx = chunkX + offset[0];
-            int nz = chunkZ + offset[1];
-            String key = getChunkKey(nx, nz, level);
-            ChunkNodeInfo node = chunkNodeMap.get(key);
-            if (node != null) {
-                context.put(key, node);
-            }
+    private static boolean edgeIsOpen(long worldSeed, int cx, int cz, int level, Directions dir) {
+        // Derive the neighbor coordinates
+        int nx = cx, nz = cz;
+        switch (dir) {
+            case North -> nz--;
+            case South -> nz++;
+            case East  -> nx++;
+            case West  -> nx--;
+            default    -> { return false; } // Up/Down handled separately
         }
 
-        return context;
+        // Canonical ordering so (cx,cz)->East gives the same seed as (nx,nz)->West
+        int ax = Math.min(cx, nx), az = Math.min(cz, nz);
+        int bx = Math.max(cx, nx), bz = Math.max(cz, nz);
+
+        long edgeSeed = worldSeed
+                ^ ((long) ax * 0x5DEECE66DL)
+                ^ ((long) az * 0xBL)
+                ^ ((long) bx * 0x285A1234L)
+                ^ ((long) bz * 0x1F3A5C7BL)
+                ^ ((long) level * 0xCAFEBABEL);
+
+        Random rand = new Random(edgeSeed);
+        // ~65 % of edges open → keeps corridors well-connected without being all-open
+        return rand.nextInt(100) < 65;
     }
 
-    public static void generateCastle(World world, int chunkX, int chunkZ) {
-        // Only start generation from a "root" or if explicitly triggered.
-        // For now, let's say chunk 0,0 level 0 is a root.
-        // Or better: any chunk that load and is NOT generated yet can be a seed if it's the first one.
-        
-        if (isGenerating) return;
+    /**
+     * Returns true if the vertical connection (stair) at (cx,cz,level)->Up exists.
+     * The Down direction at (cx,cz,level+1) returns the same value.
+     */
+    private static boolean verticalEdgeIsOpen(long worldSeed, int cx, int cz, int level) {
+        if (level < 0 || level >= maxLevels - 1) return false;
+        Random r = new Random(worldSeed ^ ((long) cx * 0x1234567L) ^ ((long) cz * 0x7654321L) ^ ((long) level * 0x999L));
+        return r.nextInt(8) == 0; // ~12 % → sparse stairs
+    }
 
-        // If nothing is generating, and this chunk isn't generated, start the process
+    /**
+     * Returns whether the edge between this chunk and its neighbor in {@code dir}
+     * is open.  Replaces the old asymmetric doesNeighborWantToConnect.
+     */
+    private static boolean connectionOpen(World world, int cx, int cz, int level, Directions dir) {
+        long seed = world.getSeed();
+        return switch (dir) {
+            case North, South, East, West -> edgeIsOpen(seed, cx, cz, level, dir);
+            case Up   -> verticalEdgeIsOpen(seed, cx, cz, level);
+            case Down -> verticalEdgeIsOpen(seed, cx, cz, level - 1);
+        };
+    }
+
+    // -------------------------------------------------------------------------
+    // GENERATION ENTRY POINT
+    // -------------------------------------------------------------------------
+
+    public static void generateCastle(World world, int chunkX, int chunkZ) {
         Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-        if (!chunk.getPersistentDataContainer().has(xyz.yaszu.freedom.Util.FreedomKeys.key("redcastle_generated"), org.bukkit.persistence.PersistentDataType.BOOLEAN)) {
-            addToQueue(world, chunkX, chunkZ, 0);
-            startGenerationTask();
+        if (chunk.getPersistentDataContainer().has(
+                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_GENERATED),
+                org.bukkit.persistence.PersistentDataType.BOOLEAN)) {
+            return;
         }
+        addToQueue(world, chunkX, chunkZ, 0);
+        startGenerationTask();
     }
 
     private static void addToQueue(World world, int x, int z, int level) {
         if (level < 0 || level >= maxLevels) return;
-        
-        // Check if already generated or already in queue (simplified check with PDC)
-        Chunk chunk = world.getChunkAt(x, z);
-        if (chunk.getPersistentDataContainer().has(xyz.yaszu.freedom.Util.FreedomKeys.key("redcastle_generated"), org.bukkit.persistence.PersistentDataType.BOOLEAN)) {
-            return;
-        }
 
-        // Avoid duplicates in queue
+        // Do NOT skip if the chunk PDC already has KEY_GENERATED — that is now only
+        // written AFTER a piece is successfully placed so this check is safe.
+        String key = getChunkKey(x, z, level);
+        if (generatedChunks.contains(key)) return;
+
         for (CastleNode node : generationQueue) {
             if (node.chunkX == x && node.chunkZ == z && node.level == level) return;
         }
@@ -208,373 +234,345 @@ public class RedCastleManager extends Util {
                 if (generationQueue.isEmpty()) {
                     isGenerating = false;
                     this.cancel();
+                    // Run a final connectivity pass after everything is placed
+                    World lastWorld = getLastWorld();
+                    if (lastWorld != null) {
+                        finalizeGenerationWithConnectivityCheck(lastWorld);
+                    }
                     return;
                 }
 
                 CastleNode node = generationQueue.poll();
                 if (node == null) return;
-
                 processNode(node);
             }
-        }.runTaskTimer(Freedom.get_plugin(), 2, 10); // Run every 10 ticks (0.5s) to be safe and sequential
+        }.runTaskTimer(Freedom.get_plugin(), 2, 10);
     }
+
+    /** Utility: retrieve any world reference from the node map for finalization. */
+    private static World lastWorldRef = null;
+    private static World getLastWorld() { return lastWorldRef; }
+
+    // -------------------------------------------------------------------------
+    // CORE NODE PROCESSING
+    // -------------------------------------------------------------------------
 
     private static void processNode(CastleNode node) {
         World world = node.world;
+        lastWorldRef = world;
         int chunkX = node.chunkX;
         int chunkZ = node.chunkZ;
-        int level = node.level;
+        int level  = node.level;
         String chunkKey = getChunkKey(chunkX, chunkZ, level);
 
-        Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-        if (chunk.getPersistentDataContainer().has(xyz.yaszu.freedom.Util.FreedomKeys.key("redcastle_generated"), org.bukkit.persistence.PersistentDataType.BOOLEAN)) {
+        // Prevent double-processing
+        if (generatedChunks.contains(chunkKey)) return;
+
+        // Compute which directions this chunk should open based on the symmetric edge function
+        List<Directions> requiredConnections = new ArrayList<>();
+        List<Directions> forbiddenConnections = new ArrayList<>();
+
+        for (Directions dir : Directions.values()) {
+            if (connectionOpen(world, chunkX, chunkZ, level, dir)) {
+                // Only open toward a valid neighbor
+                int nl = level;
+                if (dir == Directions.Up)   nl++;
+                if (dir == Directions.Down) nl--;
+                if (nl >= 0 && nl < maxLevels) {
+                    requiredConnections.add(dir);
+                }
+            } else {
+                forbiddenConnections.add(dir);
+            }
+        }
+
+        if (verbose) {
+            Freedom.get_plugin().getLogger().info(String.format(
+                    "[RedCastle] Processing [%d, %d] L%d | Required=%s | Forbidden=%s",
+                    chunkX, chunkZ, level, requiredConnections, forbiddenConnections));
+        }
+
+        // Select a piece
+        castlePiece piece = selectBestPiece(world, chunkX, chunkZ, level, requiredConnections, forbiddenConnections);
+
+        // Mark chunk as attempted regardless so we never re-queue it
+        generatedChunks.add(chunkKey);
+
+        if (piece == null) {
+            if (verbose) {
+                Freedom.get_plugin().getLogger().warning(String.format(
+                        "[RedCastle] No piece found for [%d, %d] L%d — branch stops.", chunkX, chunkZ, level));
+            }
             return;
         }
-        chunk.getPersistentDataContainer().set(xyz.yaszu.freedom.Util.FreedomKeys.key("redcastle_generated"), org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
 
-        // Get contextual information from nearby 5 chunks
-        Map<String, ChunkNodeInfo> context = getNearby5ChunksContext(chunkX, chunkZ, level);
+        // Store metadata
+        ChunkNodeInfo nodeInfo = getOrCreateNode(chunkX, chunkZ, level);
+        nodeInfo.piece = piece;
+        chunkPieces.put(chunkKey, piece);
 
-        castlePiece piece = selectPieceForChunkWithContext(world, chunkX, chunkZ, level, context);
-        if (piece != null) {
-            // Create and store node information
-            ChunkNodeInfo nodeInfo = getOrCreateNode(chunkX, chunkZ, level);
-            nodeInfo.piece = piece;
-            chunkPieces.put(chunkKey, piece);
-            generatedChunks.add(chunkKey);
+        Chunk chunk = world.getChunkAt(chunkX, chunkZ);
+        chunk.getPersistentDataContainer().set(
+                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_GENERATED),
+                org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
+        chunk.getPersistentDataContainer().set(
+                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_HAS_PIECE),
+                org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
+        chunk.getPersistentDataContainer().set(
+                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_PIECE_ROTATION),
+                org.bukkit.persistence.PersistentDataType.INTEGER, piece.rotation);
+        String connectionsStr = piece.connections.stream().map(Enum::name).collect(Collectors.joining(","));
+        chunk.getPersistentDataContainer().set(
+                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_PIECE_CONNECTIONS),
+                org.bukkit.persistence.PersistentDataType.STRING, connectionsStr);
 
-            // Store rotation and connections in PDC for later post-processing
-            chunk.getPersistentDataContainer().set(xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_PIECE_ROTATION), org.bukkit.persistence.PersistentDataType.INTEGER, piece.rotation);
-            String connectionsStr = piece.connections.stream().map(Enum::name).collect(Collectors.joining(","));
-            chunk.getPersistentDataContainer().set(xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_PIECE_CONNECTIONS), org.bukkit.persistence.PersistentDataType.STRING, connectionsStr);
+        int y = 64 + (level * 15);
 
-            int y = 64 + (level * 15);
-            if (verbose) {
-                Freedom.get_plugin().getLogger().info(String.format("[RedCastle] Spawning %s at [%d, %d] Level %d (Y=%d) Rot=%d Connections=%s",
-                        piece.schematicName, chunkX, chunkZ, level, y, piece.rotation, piece.connections));
+        if (verbose) {
+            Freedom.get_plugin().getLogger().info(String.format(
+                    "[RedCastle] Spawning %s at [%d, %d] L%d (Y=%d) Rot=%d Connections=%s",
+                    piece.schematicName, chunkX, chunkZ, level, y, piece.rotation, piece.connections));
+        }
+
+        WorldManager.spawnStructureStatic(world, chunkX, chunkZ, y, "newredCastle_" + piece.schematicName + ".schem", piece.rotation);
+
+        // Enqueue neighbors for every connection the piece actually has
+        for (Directions dir : piece.connections) {
+            int nx = chunkX, nz = chunkZ, nl = level;
+            switch (dir) {
+                case North -> nz--;
+                case South -> nz++;
+                case East  -> nx++;
+                case West  -> nx--;
+                case Up    -> nl++;
+                case Down  -> nl--;
             }
-            WorldManager.spawnStructureStatic(world, chunkX, chunkZ, y, "newredCastle_" + piece.schematicName + ".schem", piece.rotation);
+            nodeInfo.neighbors.put(dir, getChunkKey(nx, nz, nl));
+            nodeInfo.connections.add(dir.name());
+            addToQueue(world, nx, nz, nl);
+        }
+    }
 
-            // Register connections and add neighbors to queue
-            for (Directions dir : piece.connections) {
-                nodeInfo.connections.add(dir.name());
+    // -------------------------------------------------------------------------
+    // PIECE SELECTION
+    // -------------------------------------------------------------------------
+
+    /**
+     * Selects the best matching castlePiece (with rotation) for the given constraints.
+     *
+     * Priority:
+     *  1. Exact match: has ALL required, has NONE of forbidden
+     *  2. Superset match: has ALL required, may have some forbidden (extra openings
+     *     will be sealed in the finalization pass)
+     *  3. Subset match: has SOME required (last resort — means a corridor dead-ends here)
+     */
+    private static castlePiece selectBestPiece(World world, int chunkX, int chunkZ, int level,
+                                               List<Directions> required, List<Directions> forbidden) {
+
+        Random random = new Random(world.getSeed()
+                + (long) chunkX * 31213L
+                + (long) chunkZ * 43241L
+                + (long) level  * 777L);
+
+        List<castlePiece> exactMatches    = new ArrayList<>();
+        List<castlePiece> supersetMatches = new ArrayList<>();
+        List<castlePiece> subsetMatches   = new ArrayList<>();
+
+        for (castlePiece base : redCastlePieces) {
+            for (int rot : List.of(0, 90, 180, 270)) {
+                castlePiece rotated = base.rotated(rot);
+
+                boolean hasAllRequired = required.stream().allMatch(r -> rotated.connections.contains(r));
+                boolean hasAnyForbidden = forbidden.stream().anyMatch(f -> rotated.connections.contains(f));
+                boolean hasAnyRequired = required.isEmpty() || required.stream().anyMatch(r -> rotated.connections.contains(r));
+
+                if (hasAllRequired && !hasAnyForbidden) {
+                    exactMatches.add(rotated);
+                } else if (hasAllRequired) {
+                    supersetMatches.add(rotated); // has extra connections toward forbidden sides
+                } else if (hasAnyRequired) {
+                    subsetMatches.add(rotated);   // covers only some required
+                }
+            }
+        }
+
+        if (!exactMatches.isEmpty()) {
+            // Among exact matches prefer those with the fewest connections (tidier corridors)
+            int minConn = exactMatches.stream().mapToInt(p -> p.connections.size()).min().orElse(0);
+            List<castlePiece> tight = exactMatches.stream()
+                    .filter(p -> p.connections.size() == minConn).collect(Collectors.toList());
+            return tight.get(random.nextInt(tight.size()));
+        }
+        if (!supersetMatches.isEmpty()) {
+            return supersetMatches.get(random.nextInt(supersetMatches.size()));
+        }
+        if (!subsetMatches.isEmpty()) {
+            return subsetMatches.get(random.nextInt(subsetMatches.size()));
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // DOOR / WALL PLACEMENT  (fully rewritten — no double-offset bugs)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Seals the face of chunk (chunkX, chunkZ) in the given direction with a wall
+     * of RED_NETHER_BRICKS.  All coordinates are computed from scratch here —
+     * no pre-multiplied values are passed in.
+     *
+     * Face centres (relative to chunk origin in world coords):
+     *   North  → x+8,  z+0
+     *   South  → x+8,  z+15
+     *   East   → x+15, z+8
+     *   West   → x+0,  z+8
+     *   Up     → x+8,  y+14, z+8  (ceiling)
+     *   Down   → x+8,  y+0,  z+8  (floor)
+     */
+    private static void sealFace(World world, int chunkX, int chunkZ, int level, Directions dir) {
+        int originX = chunkX * 16;
+        int originZ = chunkZ * 16;
+        int yBase   = 64 + (level * 15);
+        Material mat = Material.RED_NETHER_BRICKS;
+
+        if (dir == Directions.Up || dir == Directions.Down) {
+            int y = (dir == Directions.Up) ? (yBase + 14) : yBase;
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    setBlockSafe(world, originX + 8 + dx, y, originZ + 8 + dz, mat);
+                }
+            }
+            return;
+        }
+
+        // Horizontal face: determine the fixed axis coordinate and the "spread" axis
+        int faceX, faceZ;
+        boolean spreadAlongX;
+
+        switch (dir) {
+            case North -> { faceX = originX + 8; faceZ = originZ;      spreadAlongX = true;  }
+            case South -> { faceX = originX + 8; faceZ = originZ + 15; spreadAlongX = true;  }
+            case East  -> { faceX = originX + 15; faceZ = originZ + 8; spreadAlongX = false; }
+            case West  -> { faceX = originX;      faceZ = originZ + 8; spreadAlongX = false; }
+            default    -> { return; }
+        }
+
+        // 3 blocks wide, 3 blocks tall (Y+1 to Y+3) to cover doorway openings
+        for (int dy = 1; dy <= 3; dy++) {
+            for (int spread = -1; spread <= 1; spread++) {
+                int wx = spreadAlongX ? (faceX + spread) : faceX;
+                int wz = spreadAlongX ? faceZ : (faceZ + spread);
+                setBlockSafe(world, wx, yBase + dy, wz, mat);
+            }
+        }
+    }
+
+    /** Safely sets a block and optionally logs failures. */
+    private static void setBlockSafe(World world, int x, int y, int z, Material mat) {
+        Block block = world.getBlockAt(x, y, z);
+        block.setType(mat);
+        if (verbose && block.getType() != mat) {
+            Freedom.get_plugin().getLogger().warning(String.format(
+                    "[RedCastle] Failed to set block %s at %d,%d,%d (got %s)",
+                    mat, x, y, z, block.getType()));
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // POST-GENERATION VALIDATION & FINALIZATION
+    // -------------------------------------------------------------------------
+
+    /**
+     * After all chunks have been generated:
+     *  1. For every connection that points to a chunk that was never generated,
+     *     seal the opening.
+     *  2. For every direction a piece does NOT open toward, ensure the face is sealed
+     *     (catches anything the schematic leaves open by default).
+     *  3. Where two neighboring pieces both have an open connection toward each other,
+     *     leave the passage open (no sealing needed there).
+     */
+    public static void finalizeGenerationWithConnectivityCheck(World world) {
+        if (verbose) {
+            Freedom.get_plugin().getLogger().info("[RedCastle] ===== FINALIZATION PASS =====");
+        }
+
+        int sealed = 0;
+
+        for (String chunkKey : new HashSet<>(generatedChunks)) {
+            castlePiece piece = chunkPieces.get(chunkKey);
+            if (piece == null) continue;
+
+            String[] parts = chunkKey.split(":");
+            if (parts.length != 3) continue;
+            int level  = Integer.parseInt(parts[0]);
+            int chunkX = Integer.parseInt(parts[1]);
+            int chunkZ = Integer.parseInt(parts[2]);
+
+            for (Directions dir : Directions.values()) {
+                boolean pieceOpens = piece.connections.contains(dir);
+
                 int nx = chunkX, nz = chunkZ, nl = level;
                 switch (dir) {
-                    case North -> {
-                        nz--;
-                        nodeInfo.neighbors.put(Directions.North, getChunkKey(nx, nz, nl));
-                    }
-                    case South -> {
-                        nz++;
-                        nodeInfo.neighbors.put(Directions.South, getChunkKey(nx, nz, nl));
-                    }
-                    case East -> {
-                        nx++;
-                        nodeInfo.neighbors.put(Directions.East, getChunkKey(nx, nz, nl));
-                    }
-                    case West -> {
-                        nx--;
-                        nodeInfo.neighbors.put(Directions.West, getChunkKey(nx, nz, nl));
-                    }
-                    case Up -> {
-                        nl++;
-                        nodeInfo.neighbors.put(Directions.Up, getChunkKey(nx, nz, nl));
-                    }
-                    case Down -> {
-                        nl--;
-                        nodeInfo.neighbors.put(Directions.Down, getChunkKey(nx, nz, nl));
-                    }
-                }
-                addToQueue(world, nx, nz, nl);
-            }
-            
-            // Place all doors with validation
-            placeAllDoorsForChunk(world, chunkX, chunkZ, level, piece, nodeInfo);
-        } else {
-            if (verbose) {
-                Freedom.get_plugin().getLogger().info(String.format("[RedCastle] No piece for [%d, %d] Level %d, stopping this branch.", chunkX, chunkZ, level));
-            }
-        }
-    }
-
-    /**
-     * Places doors for all unused directions with validation.
-     * Ensures doors are actually placed in the world.
-     */
-    private static void placeAllDoorsForChunk(World world, int chunkX, int chunkZ, int level, castlePiece piece, ChunkNodeInfo nodeInfo) {
-        int yBase = 64 + (level * 15);
-        int x = chunkX * 16;
-        int z = chunkZ * 16;
-
-        // Check all six directions
-        for (Directions dir : Directions.values()) {
-            // Skip if this piece has this connection
-            if (piece.connections.contains(dir)) continue;
-
-            // Place door for unused direction
-            validateAndPlaceDoor(world, x, z, yBase, dir, piece.rotation);
-        }
-    }
-
-    /**
-     * Places a door at a connection point with validation that blocks are actually set.
-     */
-    private static void validateAndPlaceDoor(World world, int x, int z, int yBase, Directions dir, int rotation) {
-        // Determine position based on direction
-        int lx = 8, lz = 8;
-        int height = 3;
-
-        switch (dir) {
-            case North -> lz = 0;
-            case South -> lz = 15;
-            case East -> lx = 15;
-            case West -> lx = 0;
-            case Up -> {
-                // Vertical up - place at ceiling
-                int y = yBase + 15;
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        Block block = world.getBlockAt(x + 8 + dx, y, z + 8 + dz);
-                        block.setType(Material.RED_NETHER_BRICKS);
-                    }
-                }
-                return;
-            }
-            case Down -> {
-                // Vertical down - place at floor
-                int y = yBase;
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        Block block = world.getBlockAt(x + 8 + dx, y, z + 8 + dz);
-                        block.setType(Material.RED_NETHER_BRICKS);
-                    }
-                }
-                return;
-            }
-        }
-
-        // Horizontal door placement with validation
-        Material wallMat = Material.RED_NETHER_BRICKS;
-        for (int dy = 0; dy < height; dy++) {
-            for (int doff = -1; doff <= 1; doff++) {
-                int wx = x + lx;
-                int wz = z + lz;
-
-                if (dir == Directions.North || dir == Directions.South) {
-                    wx += doff;
-                } else {
-                    wz += doff;
+                    case North -> nz--;
+                    case South -> nz++;
+                    case East  -> nx++;
+                    case West  -> nx--;
+                    case Up    -> nl++;
+                    case Down  -> nl--;
                 }
 
-                Block block = world.getBlockAt(wx, yBase + 1 + dy, wz);
-                block.setType(wallMat);
+                String neighborKey = getChunkKey(nx, nz, nl);
+                boolean neighborExists = generatedChunks.contains(neighborKey);
+                castlePiece neighborPiece = neighborExists ? chunkPieces.get(neighborKey) : null;
+                boolean neighborOpens = (neighborPiece != null) && neighborPiece.connections.contains(getOpposite(dir));
 
-                // Verify the block was set
-                if (block.getType() != wallMat && verbose) {
-                    Freedom.get_plugin().getLogger().warning(
-                        String.format("[RedCastle] Failed to place door block at %d,%d,%d for %s",
-                            wx, yBase + 1 + dy, wz, dir)
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * Places a door/wall at a connection point to seal off unused pathways.
-     * Creates a 3x3 wall of RED_NETHER_BRICKS at the specified direction.
-     */
-    private static void placeDoorAtConnection(World world, int cx, int cz, int yBase, Directions dir, int rotation) {
-        int x = cx * 16;
-        int z = cz * 16;
-
-        // Horizontal centers of faces relative to chunk origin
-        int lx = 8, lz = 8;
-        switch (dir) {
-            case North -> lz = 0;
-            case South -> lz = 15;
-            case East -> lx = 15;
-            case West -> lx = 0;
-            case Up, Down -> {
-                // For vertical connections, place a 3x3 barrier at the appropriate Y level
-                int y = yBase + (dir == Directions.Up ? 15 : 0);
-                Material wallMat = Material.RED_NETHER_BRICKS;
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        world.getBlockAt(x + 8 + dx, y, z + 8 + dz).setType(wallMat);
+                if (pieceOpens && (!neighborExists || !neighborOpens)) {
+                    // Seal: we open toward a missing or mis-matched neighbor
+                    if (verbose) {
+                        Freedom.get_plugin().getLogger().warning(String.format(
+                                "[RedCastle] Sealing orphaned opening %s at [%d,%d] L%d (neighbor=%s, neighborOpens=%b)",
+                                dir, chunkX, chunkZ, level, neighborExists ? neighborKey : "none", neighborOpens));
                     }
+                    sealFace(world, chunkX, chunkZ, level, dir);
+                    sealed++;
+                } else if (!pieceOpens) {
+                    // Seal any faces the piece does NOT open (ensures no schematic-leaked gaps)
+                    sealFace(world, chunkX, chunkZ, level, dir);
+                    sealed++;
                 }
-                return;
+                // If pieceOpens && neighborOpens → leave open (valid corridor)
             }
         }
 
-        // Place a 3x3 wall of RED_NETHER_BRICKS at the connection face
-        Material wallMat = Material.RED_NETHER_BRICKS;
-        for (int dy = 0; dy <= 2; dy++) {
-            for (int doff = -1; doff <= 1; doff++) {
-                int wx = x + lx;
-                int wz = z + lz;
-                if (dir == Directions.North || dir == Directions.South) wx += doff;
-                else wz += doff;
-
-                world.getBlockAt(wx, yBase + 1 + dy, wz).setType(wallMat);
-            }
+        if (verbose) {
+            Freedom.get_plugin().getLogger().info(String.format(
+                    "[RedCastle] Finalization done. Chunks=%d, Faces sealed=%d",
+                    generatedChunks.size(), sealed));
         }
     }
 
-    /**
-     * Checks if a chunk location is valid for the castle structure.
-     */
-    private static boolean isValidChunkLocation(World world, int chunkX, int chunkZ, int level) {
-        // Level bounds check
-        return level >= 0 && level < maxLevels;
+    // -------------------------------------------------------------------------
+    // WORLD CREATION
+    // -------------------------------------------------------------------------
+
+    public static World createRedCastleWorld(String worldName) {
+        WorldCreator creator = new WorldCreator(worldName);
+        creator.generator(new CastleGenerator());
+        return creator.createWorld();
     }
 
-    private static boolean doesNeighborWantToConnect(World world, int cx, int cz, int level, Directions dir) {
-        long worldSeed = world.getSeed();
-        
-        // Handle vertical connectivity first
-        if (dir == Directions.Up) return isStair(worldSeed, cx, cz, level);
-        if (dir == Directions.Down) {
-            int nx = cx;
-            int nz = cz;
-            int nl = level - 1;
-            if (nl < 0) return false;
-            return isStair(worldSeed, nx, nz, nl);
-        }
-
-        // Horizontal connectivity using MazeGenerator-style deterministic logic
-        // We use a modified Binary Tree / Randomized Prim-like approach for infinite grid
-        
-        int nx = cx;
-        int nz = cz;
-        switch (dir) {
-            case North -> nz--;
-            case South -> nz++;
-            case East -> nx++;
-            case West -> nx--;
-        }
-
-        // Use a stable seed for the connection between (cx, cz) and (nx, nz)
-        // Ensure (x1,z1) is always the "smaller" coordinate for consistency
-        int x1 = Math.min(cx, nx);
-        int z1 = Math.min(cz, nz);
-        int x2 = Math.max(cx, nx);
-        int z2 = Math.max(cz, nz);
-        
-        long connectionSeed = worldSeed ^ ((long) x1 * 312151189L) ^ ((long) z1 * 850327465L) 
-                                      ^ ((long) x2 * 668265261L) ^ ((long) z2 * 511891231L) ^ (level * 1234567L);
-        Random rand = new Random(connectionSeed);
-        
-        // Every chunk has at least one connection to either East or South (Binary Tree algorithm)
-        // This guarantees global connectivity from any point to any other point in an infinite grid.
-        
-        if (dir == Directions.East) {
-            // Check if (cx, cz) wants to connect East
-            long cellSeed = worldSeed ^ ((long) cx * 312151189L) ^ ((long) cz * 850327465L) ^ (level * 777L);
-            Random cellRand = new Random(cellSeed);
-            double choice = cellRand.nextDouble();
-            return choice < 0.55 || choice > 0.9; // 55% chance + 10% bonus for loops
-        }
-        
-        if (dir == Directions.West) {
-            // Check if (nx, nz) (neighbor to the west) wants to connect East
-            long cellSeed = worldSeed ^ ((long) nx * 312151189L) ^ ((long) nz * 850327465L) ^ (level * 777L);
-            Random cellRand = new Random(cellSeed);
-            double choice = cellRand.nextDouble();
-            return choice < 0.55 || choice > 0.9;
-        }
-        
-        if (dir == Directions.South) {
-            // Check if (cx, cz) wants to connect South
-            long cellSeed = worldSeed ^ ((long) cx * 312151189L) ^ ((long) cz * 850327465L) ^ (level * 777L);
-            Random cellRand = new Random(cellSeed);
-            double choice = cellRand.nextDouble();
-            return choice >= 0.55; // Complement of East choice
-        }
-        
-        if (dir == Directions.North) {
-            // Check if (nx, nz) (neighbor to the north) wants to connect South
-            long cellSeed = worldSeed ^ ((long) nx * 312151189L) ^ ((long) nz * 850327465L) ^ (level * 777L);
-            Random cellRand = new Random(cellSeed);
-            double choice = cellRand.nextDouble();
-            return choice >= 0.55;
-        }
-
-        return false;
-    }
-
-    private static boolean isStair(long seed, int x, int z, int level) {
-        if (level < 0 || level >= maxLevels - 1) return false;
-        // Deterministic stair placement (approx 1 in 8 chunks for more verticality in 2 levels)
-        Random r = new Random(seed + (long) x * 1234567L + (long) z * 7654321L + level * 999L);
-        return r.nextInt(8) == 0;
-    }
-
-    private static int[] findNearestRoot(long seed, int x, int z, int level) {
-        if (level <= 0) return new int[]{0, 0};
-        
-        // Search for a stair at level-1 in a spiral
-        for (int r = 0; r <= 32; r++) { // Expanded search for Binary Tree maze
-            for (int dx = -r; dx <= r; dx++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    if (Math.abs(dx) != r && Math.abs(dz) != r) continue;
-                    if (isStair(seed, x + dx, z + dz, level - 1)) {
-                        return new int[]{x + dx, z + dz};
-                    }
-                }
-            }
-        }
-        // Fallback to (0,0) if no stair found nearby (rare with r=32)
-        return new int[]{0, 0};
-    }
-
-    private static boolean isChunkActive(World world, int cx, int cz, int level) {
-        if (level == 0) return true;
-        
-        long seed = world.getSeed();
-        int[] root = findNearestRoot(seed, cx, cz, level);
-        int rx = root[0];
-        int rz = root[1];
-        
-        // This is a simplified "active" check: 
-        // A chunk is active if it's within a reasonable distance of its vertical root
-        // or if it's part of the connected path from that root.
-        // For the Binary Tree maze, we just check if it's reachable.
-        // Since Binary Tree is globally connected, we just need to bound the "castle" size if desired.
-        // For now, let's say chunks within 64 chunks of origin or their vertical root are active.
-        
-        int distToRoot = Math.abs(cx - rx) + Math.abs(cz - rz);
-        return distToRoot < 50; // Arbitrary radius for each "castle" cluster on upper levels
-    }
-
-
-    private static long getEdgeHash(long seed, int x1, int y1, int l1, int x2, int y2, int l2) {
-        // Ensure order for consistency
-        if (x1 < x2 || (x1 == x2 && y1 < y2) || (x1 == x2 && y1 == y2 && l1 < l2)) {
-            return hash(seed, x1, y1, x2, y2, l1) + l2 * 7L;
-        } else {
-            return hash(seed, x2, y2, x1, y1, l2) + l1 * 7L;
-        }
-    }
-
-    private static long hash(long seed, int x1, int y1, int x2, int y2, int level) {
-        long h = seed + level * 31L;
-        h ^= (long) x1 * 31213L;
-        h ^= (long) y1 * 43241L;
-        h ^= (long) x2 * 123457L;
-        h ^= (long) y2 * 9876543L;
-        return h;
-    }
+    // -------------------------------------------------------------------------
+    // HELPERS
+    // -------------------------------------------------------------------------
 
     private static Directions getOpposite(Directions dir) {
         return switch (dir) {
             case North -> Directions.South;
             case South -> Directions.North;
-            case East -> Directions.West;
-            case West -> Directions.East;
-            case Up -> Directions.Down;
-            case Down -> Directions.Up;
+            case East  -> Directions.West;
+            case West  -> Directions.East;
+            case Up    -> Directions.Down;
+            case Down  -> Directions.Up;
         };
     }
 
@@ -595,279 +593,51 @@ public class RedCastleManager extends Util {
         return true;
     }
 
-    public static World createRedCastleWorld(String worldName) {
-        WorldCreator creator = new WorldCreator(worldName);
-        creator.generator(new CastleGenerator());
-        return creator.createWorld();
+    // -------------------------------------------------------------------------
+    // LEGACY / UNUSED — kept for API compatibility but no longer called internally
+    // -------------------------------------------------------------------------
+
+    /** @deprecated Use {@link #connectionOpen} instead. */
+    @Deprecated
+    private static boolean doesNeighborWantToConnect(World world, int nx, int nz, int level, Directions dir) {
+        return connectionOpen(world, nx, nz, level, dir);
     }
 
-    /**
-     * Validates that all generated structures are properly connected.
-     * Checks that every opened connection has a corresponding neighbor.
-     * Closes any doors that lead to non-existent neighbors.
-     */
+    /** @deprecated Use {@link #sealFace} instead. */
+    @Deprecated
+    private static void placeDoorAtConnection(World world, int cx, int cz, int yBase, Directions dir, int rotation) {
+        sealFace(world, cx, cz, (yBase - 64) / 15, dir);
+    }
+
+    /** @deprecated No longer used — sealing handled in finalizeGenerationWithConnectivityCheck. */
+    @Deprecated
     public static void validateAllConnectivity(World world) {
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info("[RedCastle] Starting full connectivity validation...");
-        }
-
-        Set<String> processedChunks = new HashSet<>();
-        int doorsPlaced = 0;
-
-        for (String chunkKey : generatedChunks) {
-            if (processedChunks.contains(chunkKey)) continue;
-            processedChunks.add(chunkKey);
-
-            // Parse chunk key
-            String[] parts = chunkKey.split(":");
-            if (parts.length != 3) continue;
-
-            int level = Integer.parseInt(parts[0]);
-            int chunkX = Integer.parseInt(parts[1]);
-            int chunkZ = Integer.parseInt(parts[2]);
-
-            castlePiece piece = chunkPieces.get(chunkKey);
-            if (piece == null) continue;
-
-            int yBase = 64 + (level * 15);
-
-            // Check each connection in this piece
-            for (Directions dir : piece.connections) {
-                int nx = chunkX, nz = chunkZ, nl = level;
-                switch (dir) {
-                    case North -> nz--;
-                    case South -> nz++;
-                    case East -> nx++;
-                    case West -> nx--;
-                    case Up -> nl++;
-                    case Down -> nl--;
-                }
-
-                String neighborKey = getChunkKey(nx, nz, nl);
-
-                // If neighbor was supposed to generate but didn't, close the door
-                if (!generatedChunks.contains(neighborKey)) {
-                    if (verbose) {
-                        Freedom.get_plugin().getLogger().warning(
-                            String.format("[RedCastle] Orphaned connection %s at [%d, %d] L%d -> no neighbor at [%d, %d] L%d. Sealing door.",
-                                dir, chunkX, chunkZ, level, nx, nz, nl)
-                        );
-                    }
-                    placeDoorAtConnection(world, chunkX, chunkZ, yBase, dir, piece.rotation);
-                    doorsPlaced++;
-                } else {
-                    // Neighbor exists, verify it also has a matching connection
-                    castlePiece neighborPiece = chunkPieces.get(neighborKey);
-                    if (neighborPiece != null) {
-                        Directions oppositeDir = getOpposite(dir);
-                        if (!neighborPiece.connections.contains(oppositeDir)) {
-                            if (verbose) {
-                                Freedom.get_plugin().getLogger().warning(
-                                    String.format("[RedCastle] Mismatched connection: [%d, %d] L%d opens %s but [%d, %d] L%d doesn't open %s. Sealing door.",
-                                        chunkX, chunkZ, level, dir, nx, nz, nl, oppositeDir)
-                                );
-                            }
-                            placeDoorAtConnection(world, chunkX, chunkZ, yBase, dir, piece.rotation);
-                            doorsPlaced++;
-                        } else if (verbose) {
-                            Freedom.get_plugin().getLogger().info(
-                                String.format("[RedCastle] ✓ Connected: [%d, %d] L%d <%s> [%d, %d] L%d",
-                                    chunkX, chunkZ, level, dir, nx, nz, nl)
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info(String.format("[RedCastle] Validation complete. Doors sealed: %d", doorsPlaced));
-        }
+        finalizeGenerationWithConnectivityCheck(world);
     }
 
-    /**
-     * Ensures that all directions on a piece that are NOT in its connections list have sealed doors.
-     * This prevents unforeseen openings in structures.
-     */
+    /** @deprecated No longer used — sealing handled in finalizeGenerationWithConnectivityCheck. */
+    @Deprecated
     public static void ensureAllUnusedConnectionsClosed(World world) {
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info("[RedCastle] Ensuring all unused connections are sealed...");
-        }
-
-        int doorsPlaced = 0;
-
-        for (String chunkKey : generatedChunks) {
-            String[] parts = chunkKey.split(":");
-            if (parts.length != 3) continue;
-
-            int level = Integer.parseInt(parts[0]);
-            int chunkX = Integer.parseInt(parts[1]);
-            int chunkZ = Integer.parseInt(parts[2]);
-
-            castlePiece piece = chunkPieces.get(chunkKey);
-            if (piece == null) continue;
-
-            int yBase = 64 + (level * 15);
-
-            // Check all six possible directions
-            Directions[] allDirections = Directions.values();
-            for (Directions dir : allDirections) {
-                // Skip if this piece has this connection
-                if (piece.connections.contains(dir)) continue;
-
-                // This direction should be sealed
-                int nx = chunkX, nz = chunkZ, nl = level;
-                switch (dir) {
-                    case North -> nz--;
-                    case South -> nz++;
-                    case East -> nx++;
-                    case West -> nx--;
-                    case Up -> nl++;
-                    case Down -> nl--;
-                }
-
-                // Skip invalid locations
-                if (!isValidChunkLocation(world, nx, nz, nl)) continue;
-
-                // Place door
-                if (verbose) {
-                    Freedom.get_plugin().getLogger().info(
-                        String.format("[RedCastle] Sealing unused direction %s at [%d, %d] L%d",
-                            dir, chunkX, chunkZ, level)
-                    );
-                }
-                placeDoorAtConnection(world, chunkX, chunkZ, yBase, dir, piece.rotation);
-                doorsPlaced++;
-            }
-        }
-
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info(String.format("[RedCastle] Sealed %d unused connections.", doorsPlaced));
-        }
+        // Subsumed by finalizeGenerationWithConnectivityCheck
     }
 
-    /**
-     * Post-generation pass that performs final connectivity checks and seals all orphaned pathways.
-     * Call this after the generation queue is empty.
-     */
-    public static void finalizeGenerationWithConnectivityCheck(World world) {
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info("[RedCastle] ========== STARTING FINALIZATION PASS ==========");
-        }
-
-        // First pass: ensure all openings are reciprocal
-        validateAllConnectivity(world);
-
-        // Second pass: ensure no unexpected openings
-        ensureAllUnusedConnectionsClosed(world);
-
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info(String.format("[RedCastle] ========== FINALIZATION COMPLETE =========="));
-            Freedom.get_plugin().getLogger().info(String.format("[RedCastle] Total structures generated: %d", generatedChunks.size()));
-        }
+    private static boolean isValidChunkLocation(World world, int chunkX, int chunkZ, int level) {
+        return level >= 0 && level < maxLevels;
     }
 
-    /**
-     * Selects a piece for the chunk based on full context of nearby 5 chunks.
-     * This ensures proper connectivity by considering the entire local topology.
-     */
-    private static castlePiece selectPieceForChunkWithContext(World world, int chunkX, int chunkZ, int level, Map<String, ChunkNodeInfo> context) {
-        Random random = new Random(world.getSeed() + (long) chunkX * 31213L + (long) chunkZ * 43241L + level * 777L);
-
-        // Required and forbidden connections based on neighbors
-        List<Directions> required = new ArrayList<>();
-        List<Directions> forbidden = new ArrayList<>();
-
-        // Check all neighbor positions
-        checkNeighbor(world, chunkX + 1, chunkZ, level, Directions.East, required, forbidden);
-        checkNeighbor(world, chunkX - 1, chunkZ, level, Directions.West, required, forbidden);
-        checkNeighbor(world, chunkX, chunkZ + 1, level, Directions.South, required, forbidden);
-        checkNeighbor(world, chunkX, chunkZ - 1, level, Directions.North, required, forbidden);
-        checkNeighbor(world, chunkX, chunkZ, level + 1, Directions.Up, required, forbidden);
-        checkNeighbor(world, chunkX, chunkZ, level - 1, Directions.Down, required, forbidden);
-
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info(String.format("[RedCastle] Context Selection for [%d, %d] L%d: Generated in context: %d, Required=%s, Forbidden=%s",
-                    chunkX, chunkZ, level, context.size(), required, forbidden));
-        }
-
-        // If no required connections and chunk isn't active, skip it
-        if (required.isEmpty() && !isChunkActive(world, chunkX, chunkZ, level)) {
-            return null;
-        }
-
-        // Find all possible pieces that match requirements
-        List<castlePiece> possible = new ArrayList<>();
-
-        for (castlePiece basePiece : redCastlePieces) {
-            for (int rot : List.of(0, 90, 180, 270)) {
-                castlePiece rotated = basePiece.rotated(rot);
-
-                // Check if piece matches exactly
-                if (matches(rotated, required, forbidden)) {
-                    possible.add(rotated);
-                }
-            }
-        }
-
-        // Fallback 1: Find pieces with all required connections (ignore forbidden if no exact match)
-        if (possible.isEmpty()) {
-            for (castlePiece basePiece : redCastlePieces) {
-                for (int rot : List.of(0, 90, 180, 270)) {
-                    castlePiece rotated = basePiece.rotated(rot);
-                    if (matchesRequired(rotated, required)) {
-                        boolean hasForbidden = false;
-                        for (Directions forb : forbidden) {
-                            if (rotated.connections.contains(forb)) {
-                                hasForbidden = true;
-                                break;
-                            }
-                        }
-                        if (!hasForbidden) {
-                            possible.add(rotated);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Fallback 2: Accept any piece that has required connections
-        if (possible.isEmpty()) {
-            for (castlePiece basePiece : redCastlePieces) {
-                for (int rot : List.of(0, 90, 180, 270)) {
-                    castlePiece rotated = basePiece.rotated(rot);
-                    if (matchesRequired(rotated, required)) {
-                        possible.add(rotated);
-                    }
-                }
-            }
-        }
-
-        if (possible.isEmpty()) {
-            return null;
-        }
-
-        // Weight: prefer pieces that EXACTLY match required (no extra connections)
-        List<castlePiece> perfectMatches = possible.stream()
-                .filter(p -> p.connections.size() == required.size())
-                .collect(Collectors.toList());
-
-        if (!perfectMatches.isEmpty()) {
-            return perfectMatches.get(random.nextInt(perfectMatches.size()));
-        }
-
-        return possible.get(random.nextInt(possible.size()));
+    private static boolean isChunkActive(World world, int cx, int cz, int level) {
+        return level == 0 || Math.abs(cx) + Math.abs(cz) < 100;
     }
 
-    /**
-     * Checks if a neighbor chunk wants to connect in the specified direction.
-     * Updates required and forbidden connection lists.
-     */
-    private static void checkNeighbor(World world, int nx, int nz, int level, Directions dirToNeighbor, List<Directions> required, List<Directions> forbidden) {
-        if (doesNeighborWantToConnect(world, nx, nz, level, getOpposite(dirToNeighbor))) {
-            required.add(dirToNeighbor);
-        } else {
-            forbidden.add(dirToNeighbor);
+    // Context helper — kept for reference but selectBestPiece no longer needs it
+    private static Map<String, ChunkNodeInfo> getNearby5ChunksContext(int chunkX, int chunkZ, int level) {
+        Map<String, ChunkNodeInfo> context = new HashMap<>();
+        int[][] offsets = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] offset : offsets) {
+            String key = getChunkKey(chunkX + offset[0], chunkZ + offset[1], level);
+            ChunkNodeInfo node = chunkNodeMap.get(key);
+            if (node != null) context.put(key, node);
         }
+        return context;
     }
 }

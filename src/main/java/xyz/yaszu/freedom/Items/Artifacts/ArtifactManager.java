@@ -18,6 +18,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Subsystems.CustomSongHandler;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -137,12 +138,26 @@ public class ArtifactManager extends Util implements Listener {
         if (event.getEntity().getKiller() == null) return;
         Random random = new Random();
         if (random.nextFloat() < 0.05) {
-            List<String> ids = new ArrayList<>(ARTIFACTS.keySet());
-            String chosen = ids.get(random.nextInt(ids.size()));
-            Base_Artifact artifact = ARTIFACTS.get(chosen);
-            if (artifact != null) {
-                event.getDrops().add(artifact.item());
+            boolean DiskArtifact = random.nextBoolean();
+            if (DiskArtifact) {
+                List<String> ids = new ArrayList<>(ARTIFACTS.keySet());
+                String chosen = ids.get(random.nextInt(ids.size()));
+                Base_Artifact artifact = ARTIFACTS.get(chosen);
+                if (artifact != null) {
+                    event.getDrops().add(artifact.item());
+                }
+            } else {
+                CustomSongHandler.CustomSong[] ids = CustomSongHandler.CustomSong.values();
+                CustomSongHandler.CustomSong chosen;
+                try {
+                    chosen = ids[random.nextInt(ids.length)];
+                } catch (Exception e) {
+                    chosen = CustomSongHandler.CustomSong.Third_Sanctuary;
+                }
+                CustomSongHandler.constructSong(chosen);
+                event.getDrops().add(CustomSongHandler.constructSong(chosen));
             }
+
         }
     }
 

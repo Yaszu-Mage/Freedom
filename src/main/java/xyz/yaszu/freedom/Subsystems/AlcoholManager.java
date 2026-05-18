@@ -213,7 +213,6 @@ public class AlcoholManager extends Util implements Listener {
 
 
 
-    //TODO finish drunk chat
     public static String handleChat(Player player, String message) {
         if (!isDrunk(player)) return message;
 
