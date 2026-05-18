@@ -76,5 +76,5 @@ commands:
     description: "pay"
   redcastle:
     description: "Red Castle"
-softdepend: [ "SkinsRestorer", "packetevents" ]
+softdepend: [ "SkinsRestorer", "PacketEvents", "LibsDisguises" ]
 load: POSTWORLD

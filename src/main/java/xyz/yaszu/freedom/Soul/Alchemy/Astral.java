@@ -62,26 +62,24 @@ public class Astral extends Util implements Base_Soul {
         ItemStack Stella = ItemStack.of(Material.WOODEN_SWORD);
         ItemMeta swordMeta = Stella.getItemMeta();
 
-        swordMeta.displayName(dess("<color:#3700ff>My</color> rifle"));
+        swordMeta.displayName(dess("Astral Blade"));
         return Stella;
     }
 
     //
     @Override
     public Component AbilityTwoName() {
-        return null;
+        return dess("Stella");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return null;
+        return dess("Constellation of the stars");
     }
 
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
-
         Constilation nova = Constilation.valueOf(ability_item.getItemMeta().getPersistentDataContainer().get(keygen("const"), PersistentDataType.STRING));
-
         ItemMeta workingmeta = ability_item.getItemMeta();
         switch (nova) {
             case none -> {

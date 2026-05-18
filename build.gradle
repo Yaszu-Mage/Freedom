@@ -7,6 +7,12 @@ plugins {
 group = 'xyz.yaszu'
 version = '1.0-SNAPSHOT'
 
+// Shadow Jar Output Directory - can be overridden via -PshadowJarPath="path/to/output"
+ext {
+    shadowJarOutputPath = project.hasProperty('shadowJarPath') ? project.property('shadowJarPath') :
+            "/home/yaszu/Downloads/Test_Server/plugins/"
+}
+
 repositories {
     mavenCentral {
         metadataSources {
@@ -18,39 +24,47 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
-    maven{
-            name = "Bettermodel1"
-            url = "https://maven.blamejared.com/"
+    maven {
+        name = "Bettermodel1"
+        url = "https://maven.blamejared.com/"
     } // For transitive dependency in bettermodel-fabric
-    maven{
+    maven {
         name = "Bettermodel2"
         url = "https://maven.nucleoid.xyz/"
     } // For transitive dependency in bettermodel-fabric
-
     maven {
         url = "https://mvn.lib.co.nz/public"
         content {
             includeGroup("me.libraryaddict.disguises")
         }
     }
-    maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
-    maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
-    maven { url = "https://maven.enginehub.org/repo/"}
-
-    maven { url = 'https://jitpack.io' }
+    maven {
+        url = uri("https://repo.codemc.io/repository/maven-releases/")
+    }
+    maven {
+        url = uri("https://repo.codemc.io/repository/maven-snapshots/")
+    }
+    maven {
+        url = "https://maven.enginehub.org/repo/"
+    }
+    maven {
+        url = 'https://jitpack.io'
+    }
 }
 
 dependencies {
-    implementation("com.github.retrooper:packetevents-spigot:2.11.2")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.11.2")
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
         exclude group: "org.yaml", module: "snakeyaml"
     }
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.0.1")
     compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.15")
-    compileOnly ('net.skinsrestorer:skinsrestorer-api:15.11.0')
-    compileOnly ('com.sk89q.worldedit:worldedit-bukkit:7.4.0')
+    compileOnly('net.skinsrestorer:skinsrestorer-api:15.11.0')
+    compileOnly('com.sk89q.worldedit:worldedit-bukkit:7.4.0')
     implementation 'com.github.bsommerfeld.pathetic-bukkit:core:5.4.7-a'
     implementation 'com.github.javafaker:javafaker:1.0.2'
+    implementation('com.arakelian:faker:4.0.1')
+    implementation("com.ibm.icu:icu4j:76.1")
 
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -60,16 +74,6 @@ dependencies {
     }
     testRuntimeOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
         exclude group: "org.yaml", module: "snakeyaml"
-    }
-    compileOnly('com.arakelian:faker:4.0.1')
-}
-
-tasks {
-    runServer {
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.21")
     }
 }
 
@@ -91,6 +95,25 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
+tasks {
+    // Configure the Minecraft version for the runServer task
+    runServer {
+        minecraftVersion("1.21")
+    }
+}
+
+// Configure shadowJar output directory and classifier
+shadowJar {
+    destinationDirectory = file(shadowJarOutputPath)
+    archiveClassifier = ''
+
+    println "Shadow JAR will be built to: ${shadowJarOutputPath}"
+
+    dependencies {
+        exclude(dependency("com.github.retrooper:packetevents-spigot:2.11.2"))
+    }
+}
+
 processResources {
     def props = [version: version]
     inputs.properties props
@@ -98,9 +121,7 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
-
-
-    }
+}
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()

@@ -40,8 +40,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Alchemy.Alchemy;
 import xyz.yaszu.freedom.Alchemy.MazeManager;
 import xyz.yaszu.freedom.Alchemy.voidGenerator;
+import xyz.yaszu.freedom.Commands.DevTools.NpcDebugCommand;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
+import xyz.yaszu.freedom.GUI.NpcDebugGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
@@ -291,6 +293,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new ScythePhighting(),this);
         Bukkit.getPluginManager().registerEvents(new BulletSystem(),this);
         Bukkit.getPluginManager().registerEvents(new NpcManager(), this);
+        Bukkit.getPluginManager().registerEvents(new NpcDebugGui.NpcDebugGuiListener(), this);
         soulImbueManager = new SoulImbueManager();
         Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();
@@ -304,9 +307,12 @@ public final class Freedom extends JavaPlugin implements Listener {
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
+        NpcDebugCommand npcDebugCommand = new NpcDebugCommand();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register("openGui", openGui);
             commands.registrar().register("opengui", openGui);
+            commands.registrar().register("npcdebug", npcDebugCommand);
+            commands.registrar().register("npcdbg", npcDebugCommand);
             commands.registrar().register(Trust.reviveArgument());
             commands.registrar().register(Trust.uncurseArgument());
             commands.registrar().register(Trust.trustArgument());

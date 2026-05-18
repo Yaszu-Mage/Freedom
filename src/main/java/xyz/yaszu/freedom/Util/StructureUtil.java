@@ -367,7 +367,8 @@ public class StructureUtil {
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> {
                     Material material = Material.matchMaterial(entry.getKey());
-                    if (material != null && !material.isAir()) {
+
+                    if (material != null && !material.isAir() && material.isSolid()) {
                         return new ItemStack(material, entry.getValue());
                     }
                     return null;

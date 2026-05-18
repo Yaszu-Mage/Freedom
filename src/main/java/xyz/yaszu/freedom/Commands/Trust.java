@@ -183,7 +183,10 @@ public class Trust {
                             return Command.SINGLE_SUCCESS;
                         };
                         Location loc = target.getLocation();
-                        NpcManager.createNPC(loc);
+                        NpcManager.NPC npc = NpcManager.createNPC(loc);
+                        if (npc != null && npc.data != null) {
+                            target.sendMessage(dess("<green>Spawned NPC: <white>" + npc.data.get(keygen("name"), PersistentDataType.STRING) + "</white></green>"));
+                        }
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
 //                        Double soulpoints = target.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE);
