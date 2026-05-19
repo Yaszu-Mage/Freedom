@@ -274,18 +274,17 @@ public class soulListener extends Util implements Listener {
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
         if (soulName != null) {
             if (soulName.contains("Red") || soulName.contains("Green")) {
-                if (soulPoints >= 5 && !player.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE)) {
+                if (soulPoints >= 5) {
                     soul.ActivePassive(player);
                 }
                 return;
-            } else if (soulName.contains("Black")) {
+            } else if (soulName.toLowerCase().contains("black")) {
                 if (soulPoints >= 5 && player.isSneaking()) {
                     soul.playerSneakEvent(player);
                 }
                 return;
             }
         }
-
         // Default behavior for other souls
         soul.ActivePassive(player);
     }

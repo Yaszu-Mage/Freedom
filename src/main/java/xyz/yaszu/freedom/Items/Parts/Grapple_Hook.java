@@ -154,25 +154,6 @@ public class Grapple_Hook extends Util implements Listener, BaseItem {
                                 /*
                                  * INITIAL SWING IMPULSE
                                  */
-                                if (!launched) {
-
-                                    launched = true;
-
-                                    Vector tangent = new Vector(
-                                            -ropeDir.getZ(),
-                                            0,
-                                            ropeDir.getX()
-                                    ).normalize();
-
-                                    tangent.add(
-                                            player.getLocation()
-                                                    .getDirection()
-                                                    .multiply(0.8)
-                                    ).normalize();
-
-                                    velocity.add(tangent.multiply(1.3));
-                                    velocity.setY(0.4);
-                                }
 
                                 /*
                                  * REMOVE OUTWARD VELOCITY

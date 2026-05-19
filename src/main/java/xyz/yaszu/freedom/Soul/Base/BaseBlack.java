@@ -489,6 +489,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             }
         }
     }
+
     public void playerSneakEvent(Player player) {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
