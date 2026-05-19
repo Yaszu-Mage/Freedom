@@ -104,6 +104,7 @@ public class ItemListener extends Util implements Listener {
         // Cancel book opening if a spell focus is being used in either hand
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemStack item = event.getItem();
+
             if (item != null && (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.WRITABLE_BOOK)) {
                 ItemStack otherHand = event.getHand() == EquipmentSlot.HAND ?
                         event.getPlayer().getInventory().getItemInOffHand() :
@@ -119,6 +120,11 @@ public class ItemListener extends Util implements Listener {
 
         ItemStack item = event.getItem();
         if (item != null && item.hasItemMeta()) {
+            if (item.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+                if (item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING).equals("grapplehook")) {
+                    return;
+                }
+            }
             if (item.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
                 if (event.getPlayer().getInventory().getItemInMainHand().getItemMeta() != null) {
                     if (xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(event.getPlayer()) || !event.getPlayer().hasCooldown(ITEMS.get("rifle").item())) {

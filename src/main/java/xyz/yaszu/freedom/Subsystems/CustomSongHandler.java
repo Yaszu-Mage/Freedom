@@ -11,41 +11,44 @@ import org.bukkit.block.Jukebox;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
 
 public class CustomSongHandler extends Util implements Listener {
     public static enum CustomSong {
-        Sarajinae_Gregor("Project Moon", "A song sung by gregor"),
-        Sarajinae_DonQuixote("Project Moon", "A song sung by Don Quixote"),
-        Sarajinae_Heathcliff("Project Moon", "A song sung by Heathcliff"),
-        Sarajinae_Ishmael("Project Moon", "A song sung by Ishmael"),
-        Sarajinae_Rodion("Project Moon", "A song sung by Rodion"),
-        Sarajinae_Sinclair("Project Moon", "A song sung by Sinclair"),
-        Sarajinae_HongLu("Project Moon", "A song sung by Hong Lu"),
-        Sarajinae_Ryoshu("Project Moon", "A song sung by Ryoshu"),
-        Sarajinae_YiSang("Project Moon", "A song sung by Yi Sang"),
-        Noli("Luca", "The world is bound to know Noli."),
-        How_Many_More_Now("Luca","Song sun by Postman for Nostalgic Hangout Game"),
-        Broken("Luca", "Deltarune Fan Song") /* FIXME UNABLE TO ACCESS ON SCHOOL WIFI*/,
-        Getting_Pwned("Luca","Going out's not a good decision.")  /* FIXME UNABLE TO ACCESS ON SCHOOL WIFI*/,
-        Koppen_as_fuck("Chris’s chrisotodoulou","--Find the TELEPORTER--")  /*FIXME UNABLE TO ACCESS ON SCHOOL WIFI*/,
-        The_Rain_Formerly_Known_as_purple("Chris’s chrisotodoulou","--ESCAPE THE MOON--"),
-        Overworld_Day("Terraria","Is it day?"),
-        Third_Sanctuary("Toby Fox", "Third Sanctuary; but Minecraft"),
-        Nine_Thrumamind("Phighting",""),
-        To_You("Dreamcatcher",""),
-        The_HouseBuilding_Song("David Ferguson",""),
-        THE_MOST_WANTED("Phighting",""),
-        Final_Duet("Omori",""),
-        Bitter_And_Blunt("Yonkagor",""),
-        Kill_This_Love("Blackpink",""),
-        Raise_Up_Your_Bat("Toby Fox", "Raise up your bat and start a fight!");
+        sarajinae_gregor("Project Moon", "A song sung by gregor"),
+        sarajinae_donquixote("Project Moon", "A song sung by Don Quixote"),
+        sarajinae_heathcliff("Project Moon", "A song sung by Heathcliff"),
+        sarajinae_ishmael("Project Moon", "A song sung by Ishmael"),
+        sarajinae_rodion("Project Moon", "A song sung by Rodion"),
+        sarajinae_sinclair("Project Moon", "A song sung by Sinclair"),
+        sarajinae_hongLu("Project Moon", "A song sung by Hong Lu"),
+        sarajinae_ryoshu("Project Moon", "A song sung by Ryoshu"),
+        sarajinae_yisang("Project Moon", "A song sung by Yi Sang"),
+        noli("Luca", "The world is bound to know Noli."),
+        how_many_more_now("Luca","Song sun by Postman for Nostalgic Hangout Game"),
+        broken("Luca", "Deltarune Fan Song") /* FIXME UNABLE TO ACCESS ON SCHOOL WIFI*/,
+        getting_pwned("Luca","Going out's not a good decision.")  /* FIXME UNABLE TO ACCESS ON SCHOOL WIFI*/,
+        koppen_as_fuck("Chris’s chrisotodoulou","--Find the TELEPORTER--")  /*FIXME UNABLE TO ACCESS ON SCHOOL WIFI*/,
+        the_rain_formerly_known_as_purple("Chris’s chrisotodoulou","--ESCAPE THE MOON--"),
+        overworld_day("Terraria","Is it day?"),
+        third_sanctuary("Toby Fox", "Third Sanctuary; but Minecraft"),
+        nine_Thrumamind("Phighting",""),
+        to_you("Dreamcatcher",""),
+        the_houseBuilding_song("David Ferguson",""),
+        the_most_wanted("Phighting",""),
+        final_duet("Omori",""),
+        bitter_and_blunt("Yonkagor",""),
+        kill_this_love("Blackpink",""),
+        raise_up_your_bat("Toby Fox", "Raise up your bat and start a fight!");
         private final String author;
         private final String description;
         CustomSong(String author, String description) {
@@ -56,40 +59,99 @@ public class CustomSongHandler extends Util implements Listener {
     public static HashMap<Location,CustomSong> jukes = new HashMap<>();
     @EventHandler
     public void onPlayerInputJukebox(PlayerInteractEvent event) {
+
+        if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
         Block clickedBlock = event.getClickedBlock();
+
         if (clickedBlock == null || clickedBlock.getType() != Material.JUKEBOX) return;
-        Jukebox jukebox = (Jukebox) clickedBlock.getState();
-        if (jukes.containsKey(clickedBlock.getLocation())) {
-            //eject
-            CustomSong disc = jukes.get(clickedBlock.getLocation());
-            ItemStack discs = constructSong(disc);
-            clickedBlock.getWorld().dropItemNaturally(clickedBlock.getLocation(), discs);
-            //STOP MUSIC FROM PLAYING
+
+        Location loc = clickedBlock.getLocation();
+
+        // =========================
+        // EJECT CUSTOM DISC
+        // =========================
+        if (jukes.containsKey(loc)) {
+
+            CustomSong disc = jukes.remove(loc);
+
+            // Stop sound
             clickedBlock.getWorld().stopSound(Sound.sound(NamespacedKey.minecraft("custom." + disc.name()), SoundCategory.MASTER, 1.0F, 1.0F));
+
+            // Give disc back
+            clickedBlock.getWorld().dropItemNaturally(
+                    loc.clone().add(0.5, 1, 0.5),
+                    constructSong(disc)
+            );
+
             event.setCancelled(true);
             return;
         }
-        if (jukebox.isPlaying() || event.getPlayer().getInventory().getItemInMainHand() == null) return;
-        if (event.getPlayer().getInventory().getItemInMainHand().getType() != Material.CARROT_ON_A_STICK) return;
-        ItemStack itemInHand = event.getPlayer().getInventory().getItemInMainHand();
-        if (!itemInHand.getItemMeta().getPersistentDataContainer().has(keygen("customsong"))) return;
-        String songID = itemInHand.getItemMeta().getPersistentDataContainer().get(keygen("customsong"), PersistentDataType.STRING);
-        CustomSong song = CustomSong.valueOf(songID);
-        // Play the custom song on the jukebox using a resource pack disc
-        // Send feedback to player
-        event.getPlayer().sendMessage(dess("<green>Now playing:</green> <white>" + song.name().replace("_", " ") + " by " + song.author));
-        clickedBlock.getWorld().playSound(clickedBlock.getLocation(),"custom." + song.name(), SoundCategory.MASTER, 1.0F, 1.0F);
-        jukes.put(clickedBlock.getLocation(), song);
-        // Cancel the event to prevent default behavior
-        event.getPlayer().getInventory().getItemInMainHand().setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
+
+        // =========================
+        // INSERT CUSTOM DISC
+        // =========================
+
+        ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+
+        if (item.getType() == Material.AIR) return;
+
+        if (item.getType() != Material.CARROT_ON_A_STICK) return;
+
+        if (!item.hasItemMeta()) return;
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (!meta.getPersistentDataContainer().has(
+                keygen("customsong"),
+                PersistentDataType.STRING
+        )) return;
+
+        String songID = meta.getPersistentDataContainer().get(
+                keygen("customsong"),
+                PersistentDataType.STRING
+        );
+
+        if (songID == null) return;
+
+        CustomSong song;
+
+        try {
+            song = CustomSong.valueOf(songID);
+        } catch (IllegalArgumentException ex) {
+            return;
+        }
+
+        // Play custom sound
+        clickedBlock.getWorld().playSound(
+                loc,
+                "custom." + song.name(),
+                SoundCategory.RECORDS,
+                1.0F,
+                1.0F
+        );
+
+        // Store active jukebox
+        jukes.put(loc, song);
+
+        // Remove one disc
+        item.setAmount(item.getAmount() - 1);
+
+        // Message
+        event.getPlayer().sendMessage(
+                dess("<green>Now playing:</green> <white>"
+                        + song.name().replace("_", " ")
+                        + " by " + song.author)
+        );
+
         event.setCancelled(true);
     }
-
 
     public static ItemStack constructSong(CustomSong song){
         ItemStack stack = ItemStack.of(Material.CARROT_ON_A_STICK);
         ItemMeta meta = stack.getItemMeta();
+        meta.displayName(dess(song.name().replace("_", " ").toUpperCase()));
         meta.getPersistentDataContainer().set(keygen("customsong"), PersistentDataType.STRING, song.name());
         meta.setItemModel(NamespacedKey.minecraft(song.name()));
         stack.setItemMeta(meta);

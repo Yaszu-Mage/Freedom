@@ -14,6 +14,7 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.BaseItem;
@@ -22,6 +23,10 @@ import xyz.yaszu.freedom.Soul.Alchemy.Astral;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Util.Util;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Grapple_Hook extends Util implements Listener, BaseItem {
 
@@ -61,47 +66,192 @@ public class Grapple_Hook extends Util implements Listener, BaseItem {
     }
 
 
+    private final Map<UUID, BukkitTask> grappleTasks = new HashMap<>();
+
     @EventHandler
     public void onFish(PlayerFishEvent event) {
+
         Player player = event.getPlayer();
         FishHook hook = event.getHook();
-        // Check if the bobber has successfully latched onto a block or landed
-        if (
-                event.getPlayer().getInventory().getItemInMainHand().isSimilar(item()) ||
-                event.getPlayer().getInventory().getItemInOffHand().isSimilar(item()) ||
-                event.getPlayer().getInventory().getItemInMainHand().isSimilar(Astral.GrappleItem())
-        ){
 
+        ItemStack main = player.getInventory().getItemInMainHand();
+        ItemStack off = player.getInventory().getItemInOffHand();
 
-        if (event.getState() == PlayerFishEvent.State.IN_GROUND ||
-                event.getState() == PlayerFishEvent.State.CAUGHT_ENTITY) {
+        boolean usingGrapple =
+                main.isSimilar(item()) ||
+                        off.isSimilar(item()) ||
+                        main.isSimilar(Astral.GrappleItem());
 
-            // Start the physics pulling task
+        if (!usingGrapple) return;
+        Freedom.get_plugin().getLogger().info("Grapple hooked");
+        PlayerFishEvent.State state = event.getState();
+
+        /*
+         * Stop grapple
+         */
+        if (state == PlayerFishEvent.State.REEL_IN
+                || state == PlayerFishEvent.State.FAILED_ATTEMPT) {
+
+            BukkitTask old = grappleTasks.remove(player.getUniqueId());
+
+            if (old != null) {
+                old.cancel();
+            }
+
+            return;
+        }
+
+        /*
+         * Grapple connected
+         */
+        if (state == PlayerFishEvent.State.FISHING
+                || state == PlayerFishEvent.State.CAUGHT_ENTITY) {
+
+            BukkitTask old = grappleTasks.remove(player.getUniqueId());
+
+            if (old != null) {
+                old.cancel();
+            }
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (!player.isOnline() || !hook.isValid() || hook.isOnGround()) {
-                        cancel();
-                        return;
-                    }
+                    BukkitTask task = new BukkitRunnable() {
 
-                    // Physics: Calculate pull vector
-                    Location playerLoc = player.getLocation();
-                    Location hookLoc = hook.getLocation();
 
-                    Vector direction = hookLoc.toVector().subtract(playerLoc.toVector());
-                    double distance = direction.length();
+                        final double ropeLength =
+                                player.getLocation().distance(hook.getLocation());
 
-                    if (distance > 0.5) {
-                        // Normalize the vector to get the direction and multiply by pull speed (e.g., 0.5)
-                        Vector velocity = direction.normalize().multiply(0.5);
-                        player.setVelocity(velocity);
-                    } else {
-                        cancel(); // Stop pulling when close to the hook
-                    }
+                        boolean launched = false;
+
+                        @Override
+                        public void run() {
+                            if (hook.isOnGround()) {
+
+
+                                if (!player.isOnline()
+                                        || player.isDead()
+                                        || !hook.isValid()
+                                        || hook.isDead()) {
+
+                                    cancel();
+                                    return;
+                                }
+
+                                Location playerLoc = player.getLocation();
+                                Location hookLoc = hook.getLocation();
+
+                                Vector rope =
+                                        playerLoc.toVector().subtract(hookLoc.toVector());
+
+                                double distance = rope.length();
+
+                                if (distance <= 0.001) return;
+
+                                Vector ropeDir = rope.normalize();
+
+                                Vector velocity = player.getVelocity();
+
+                                /*
+                                 * INITIAL SWING IMPULSE
+                                 */
+                                if (!launched) {
+
+                                    launched = true;
+
+                                    Vector tangent = new Vector(
+                                            -ropeDir.getZ(),
+                                            0,
+                                            ropeDir.getX()
+                                    ).normalize();
+
+                                    tangent.add(
+                                            player.getLocation()
+                                                    .getDirection()
+                                                    .multiply(0.8)
+                                    ).normalize();
+
+                                    velocity.add(tangent.multiply(1.3));
+                                    velocity.setY(0.4);
+                                }
+
+                                /*
+                                 * REMOVE OUTWARD VELOCITY
+                                 */
+                                double outwardSpeed = velocity.dot(ropeDir);
+
+                                if (outwardSpeed > 0) {
+
+                                    Vector outward =
+                                            ropeDir.clone().multiply(outwardSpeed);
+
+                                    velocity.subtract(outward);
+                                }
+
+                                /*
+                                 * HARD POSITION CONSTRAINT
+                                 *
+                                 * THIS IS WHAT MAKES HANGING WORK
+                                 */
+                                if (distance > ropeLength) {
+
+                                    double excess = distance - ropeLength;
+
+                                    /*
+                                     * Move player back onto rope sphere
+                                     */
+                                    Vector correction =
+                                            ropeDir.multiply(excess);
+
+                                    Location corrected =
+                                            playerLoc.clone().subtract(correction);
+
+
+                                    /*
+                                     * Remove velocity away from hook
+                                     */
+                                    double radial =
+                                            velocity.dot(ropeDir);
+
+                                    if (radial > 0) {
+
+                                        velocity.subtract(
+                                                ropeDir.clone().multiply(radial)
+                                        );
+                                    }
+                                }
+
+                                /*
+                                 * Small inward tension
+                                 */
+                                velocity.subtract(
+                                        ropeDir.clone().multiply(0.015)
+                                );
+
+                                /*
+                                 * Air resistance
+                                 */
+                                velocity.multiply(0.995);
+
+                                /*
+                                 * Clamp speed
+                                 */
+                                double maxSpeed = 5;
+
+                                if (velocity.length() > maxSpeed) {
+                                    velocity = velocity.normalize().multiply(maxSpeed);
+                                }
+                                Freedom.get_plugin().getLogger().info("Grapple speed: " + velocity.length());
+                                player.setVelocity(velocity);
+                            }
+                        }
+
+                    }.runTaskTimer(Freedom.get_plugin(), 0L, 1L);
+                    grappleTasks.put(player.getUniqueId(), task);
                 }
-            }.runTaskTimer(Freedom.get_plugin(), 0L, 1L); // Run every 1 tick
+            }.runTaskLater(Freedom.get_plugin(), 1);
+
+
+
         }
     }
-  }
 }

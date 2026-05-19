@@ -152,7 +152,7 @@ public class ArtifactManager extends Util implements Listener {
                 try {
                     chosen = ids[random.nextInt(ids.length)];
                 } catch (Exception e) {
-                    chosen = CustomSongHandler.CustomSong.Third_Sanctuary;
+                    chosen = CustomSongHandler.CustomSong.third_sanctuary;
                 }
                 CustomSongHandler.constructSong(chosen);
                 event.getDrops().add(CustomSongHandler.constructSong(chosen));

@@ -184,6 +184,7 @@ public class Trust {
                         };
                         Location loc = target.getLocation();
                         NpcManager.NPC npc = NpcManager.createNPC(loc);
+                        target.give(CustomSongHandler.constructSong(CustomSongHandler.CustomSong.third_sanctuary));
                         if (npc != null && npc.data != null) {
                             target.sendMessage(dess("<green>Spawned NPC: <white>" + npc.data.get(keygen("name"), PersistentDataType.STRING) + "</white></green>"));
                         }

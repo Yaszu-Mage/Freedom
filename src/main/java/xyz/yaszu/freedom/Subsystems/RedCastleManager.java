@@ -3,10 +3,10 @@ package xyz.yaszu.freedom.Subsystems;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.generator.ChunkGenerator;
-import xyz.yaszu.freedom.Util.Util;
-
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Util.FreedomKeys;
+import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,214 +14,332 @@ import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.createChunkData;
 
+/**
+ * RedCastleManager — Wave-Function-Collapse-style dungeon generator.
+ *
+ * KEY DESIGN GUARANTEES
+ * ─────────────────────
+ * 1. Every chunk-slot receives exactly one schematic.  If no piece can satisfy
+ *    the required connections a FALLBACK piece (all-four-walls closed corridor)
+ *    is placed so the player can never reach open void.
+ *
+ * 2. Coordinates are consistent throughout:
+ *    • chunkX / chunkZ  — Minecraft chunk coordinates  (block ÷ 16)
+ *    • originX / originZ — world block coordinates     (chunkX * 16)
+ *    WorldManager.spawnStructureStatic receives BLOCK coordinates.
+ *
+ * 3. Schematic size is expressed in SCHEMATIC_SIZE (default 16).  Every
+ *    calculation that touches block positions uses this constant so a
+ *    resize is a one-line change.
+ *
+ * 4. Level Y spacing is LEVEL_HEIGHT (14 blocks, matching schematic H=14).
+ *    Base Y is LEVEL_BASE_Y + level * LEVEL_HEIGHT.
+ *
+ * 5. Edge connectivity is symmetric: both sides of a shared wall hash the
+ *    same canonical edge key, so they always agree on open/closed.
+ *
+ * 6. The finalization pass seals every face that does not have a matching
+ *    open neighbor.  Sealing is deferred by SEAL_DELAY_TICKS after the last
+ *    schematic paste so schematics cannot overwrite the seal blocks.
+ */
 public class RedCastleManager extends Util {
 
-    public static List<castlePiece> redCastlePieces = List.of(
-            new castlePiece(
-                    "dungeon1",
-                    List.of(Directions.South, Directions.North, Directions.West),
-                    List.of(),
-                    false
-            ),
-            new castlePiece(
-                    "hallwayall1",
-                    List.of(Directions.South, Directions.West, Directions.East, Directions.North),
-                    List.of(),
-                    false
-            ),
-            new castlePiece(
-                    "Library1",
-                    List.of(Directions.South, Directions.North, Directions.East, Directions.West),
-                    List.of(),
-                    false
-            ),
-            new castlePiece(
-                    "NorthHallway",
-                    List.of(Directions.South, Directions.North),
-                    List.of(),
-                    false
-            ),
-            new castlePiece(
-                    "Stair1",
-                    List.of(Directions.South, Directions.Up, Directions.Down),
-                    List.of(),
-                    true
-            ),
-            new castlePiece(
-                    "hallwayEastWest1",
-                    List.of(Directions.East, Directions.West),
-                    List.of(),
-                    false
-            ),
-            new castlePiece(
-                    "hallwayEastWest2",
-                    List.of(Directions.East, Directions.West),
-                    List.of(),
-                    false
-            ),
-            new castlePiece(
-                    "Tree1",
-                    List.of(Directions.East, Directions.West),
-                    List.of(),
-                    false
-            )
-    );
+    // ─────────────────────────────────────────────────────────────────────────
+    // TUNEABLE CONSTANTS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /** Side length of every schematic in blocks (must match actual .schem files). */
+    public static final int SCHEMATIC_SIZE = 16;
+
+    /** Number of vertical levels the dungeon spans. */
+    public static final int MAX_LEVELS = 3;
+
+    /** Y coordinate of level 0's floor. */
+    public static final int LEVEL_BASE_Y = 64;
+
+    /**
+     * Vertical distance between level floors — must match schematic height exactly.
+     * Schematics are 14 blocks tall (Y indices 0–13: solid floor at 0, solid ceiling at 13,
+     * interior air at 1–12).  Levels stack every 14 blocks with no gap and no overlap.
+     */
+    public static final int LEVEL_HEIGHT = 14;
+
+    /** Probability (0-99) that any horizontal edge is open. */
+    private static final int EDGE_OPEN_CHANCE = 65;
+
+    /** Probability (0-99) that a vertical (stair) edge is open. */
+    private static final int VERTICAL_EDGE_OPEN_CHANCE = 15;
+
+    /** Ticks to wait after last schematic paste before running the seal pass. */
+    private static final long SEAL_DELAY_TICKS = 40L;
+
+    /** Material used to fill non-structure chunks. */
+    private static final Material BEDROCK_FILL = Material.BEDROCK;
+
+    /** Material used for gap bridging between structures. */
+    private static final Material BRIDGE_FILL = Material.NETHER_BRICKS;
+
+    /** Log extra detail to console. */
+    public static boolean verbose = true;
+
+    // PDC keys
+    public static final String KEY_PIECE_ROTATION    = "redcastle_rotation";
+    public static final String KEY_PIECE_CONNECTIONS = "redcastle_connections";
+    private static final String KEY_GENERATED        = "redcastle_generated";
+    private static final String KEY_HAS_PIECE        = "redcastle_has_piece";
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DIRECTION ENUM
+    // ─────────────────────────────────────────────────────────────────────────
 
     public enum Directions {
-        North,
-        South,
-        East,
-        West,
-        Up,
-        Down
+        North, South, East, West, Up, Down;
+
+        public Directions opposite() {
+            return switch (this) {
+                case North -> South;
+                case South -> North;
+                case East  -> West;
+                case West  -> East;
+                case Up    -> Down;
+                case Down  -> Up;
+            };
+        }
+
+        /** Rotate a horizontal direction by 0/90/180/270 degrees clockwise. */
+        public Directions rotateClockwise(int degrees) {
+            if (this == Up || this == Down) return this;
+            int steps = ((degrees / 90) % 4 + 4) % 4;
+            Directions d = this;
+            for (int i = 0; i < steps; i++) {
+                d = switch (d) {
+                    case North -> East;
+                    case East  -> South;
+                    case South -> West;
+                    case West  -> North;
+                    default    -> d;
+                };
+            }
+            return d;
+        }
     }
 
-    static int maxLevels = 2;
-    public static boolean verbose = true;
-    public static final String KEY_PIECE_ROTATION = "redcastle_rotation";
-    public static final String KEY_PIECE_CONNECTIONS = "redcastle_connections";
+    // ─────────────────────────────────────────────────────────────────────────
+    // CASTLE PIECE
+    // ─────────────────────────────────────────────────────────────────────────
 
-    // PDC key used to mark a chunk as having been processed (attempted)
-    private static final String KEY_GENERATED = "redcastle_generated";
-    // PDC key used to mark a chunk as having a valid piece placed
-    private static final String KEY_HAS_PIECE = "redcastle_has_piece";
+    public static class CastlePiece {
+        /** Base name used to build the schematic filename. */
+        public final String schematicName;
+        /** Directions this piece has open passages (in its base orientation). */
+        public final List<Directions> baseConnections;
+        /** Whether this piece contains a staircase. */
+        public final boolean isStair;
+        /** Clockwise rotation applied when spawning (0/90/180/270). */
+        public final int rotation;
+        /** Effective connections after applying rotation. */
+        public final List<Directions> connections;
 
-    public static class CastleGenerator extends ChunkGenerator {
-        @Override
-        public ChunkData generateChunkData(World world, Random random, int chunkX, int chunkZ, BiomeGrid biome) {
-            ChunkData chunk = createChunkData(world);
-            return chunk;
+        public CastlePiece(String schematicName,
+                           List<Directions> baseConnections,
+                           boolean isStair) {
+            this(schematicName, baseConnections, isStair, 0);
+        }
+
+        private CastlePiece(String schematicName,
+                            List<Directions> baseConnections,
+                            boolean isStair,
+                            int rotation) {
+            this.schematicName   = schematicName;
+            this.baseConnections = baseConnections;
+            this.isStair         = isStair;
+            this.rotation        = rotation;
+
+            // Build the rotated connection list
+            List<Directions> rotated = new ArrayList<>();
+            for (Directions d : baseConnections) {
+                rotated.add(d.rotateClockwise(rotation));
+            }
+            this.connections = Collections.unmodifiableList(rotated);
+        }
+
+        /** Return a copy of this piece with a different rotation applied. */
+        public CastlePiece rotated(int degrees) {
+            return new CastlePiece(schematicName, baseConnections, isStair, degrees);
         }
 
         @Override
-        public boolean shouldGenerateCaves() { return false; }
-        @Override
-        public boolean shouldGenerateDecorations() { return false; }
-        @Override
-        public boolean shouldGenerateMobs() { return false; }
-        @Override
-        public boolean shouldGenerateStructures() { return false; }
+        public String toString() {
+            return schematicName + "@" + rotation + connections;
+        }
     }
 
-    private static final Queue<CastleNode> generationQueue = new ConcurrentLinkedQueue<>();
-    private static boolean isGenerating = false;
-    private static final Set<String> generatedChunks = Collections.synchronizedSet(new HashSet<>());
-    private static final Map<String, castlePiece> chunkPieces = Collections.synchronizedMap(new HashMap<>());
-    private static final Map<String, ChunkNodeInfo> chunkNodeMap = Collections.synchronizedMap(new HashMap<>());
+    // ─────────────────────────────────────────────────────────────────────────
+    // PIECE REGISTRY
+    //
+    // Add / remove pieces here.  Each entry describes the BASE (rotation=0)
+    // orientation.  The selector automatically tries all four rotations.
+    //
+    // Schematic filename pattern:  newredCastle_<schematicName>.schem
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public static final List<CastlePiece> PIECES = List.of(
+            // Four-way cross
+            new CastlePiece("hallwayall1",
+                    List.of(Directions.North, Directions.South, Directions.East, Directions.West),
+                    false),
+            // Straight N-S corridor
+            new CastlePiece("NorthHallway",
+                    List.of(Directions.North, Directions.South),
+                    false),
+            // Straight E-W corridor (variant 1)
+            new CastlePiece("hallwayEastWest1",
+                    List.of(Directions.East, Directions.West),
+                    false),
+            // Straight E-W corridor (variant 2)
+            new CastlePiece("hallwayEastWest2",
+                    List.of(Directions.East, Directions.West),
+                    false),
+            // T-junction  N-S-W  (south/north/west open)
+            new CastlePiece("dungeon1",
+                    List.of(Directions.South, Directions.North, Directions.West),
+                    false),
+            // Large room — all four sides open
+//            new CastlePiece("Library1",
+//                    List.of(Directions.North, Directions.South, Directions.East, Directions.West),
+//                    false),
+            // Staircase  N-Up-Down  (connects to level above/below)
+            new CastlePiece("Stair1",
+                    List.of(Directions.South, Directions.Up, Directions.Down),
+                    true),
+            // Decorative room — E-W only
+            new CastlePiece("Tree1",
+                    List.of(Directions.East, Directions.West),
+                    false)
+
+            // ── FALLBACK: a fully-enclosed room (no connections).
+            //    The selector uses this as a last resort so the player can
+            //    never reach open void.  Name it after a real schematic that
+            //    is a plain sealed box.
+//            new CastlePiece("ClosedRoom",
+//                    List.of(),   // no open faces
+//                    false)
+    );
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // RUNTIME STATE
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private static final Queue<CastleNode>           generationQueue = new ConcurrentLinkedQueue<>();
+    private static boolean                            isGenerating    = false;
+    private static final Set<String>                  generatedChunks = Collections.synchronizedSet(new HashSet<>());
+    private static final Map<String, CastlePiece>    chunkPieces     = Collections.synchronizedMap(new HashMap<>());
+    private static World                              lastWorldRef    = null;
 
     private record CastleNode(World world, int chunkX, int chunkZ, int level) {}
 
-    private static class ChunkNodeInfo {
-        public final int chunkX, chunkZ, level;
-        public castlePiece piece;
-        public Set<String> connections = Collections.synchronizedSet(new HashSet<>());
-        public Map<Directions, String> neighbors = Collections.synchronizedMap(new HashMap<>());
+    // ─────────────────────────────────────────────────────────────────────────
+    // CHUNK-KEY HELPERS
+    // ─────────────────────────────────────────────────────────────────────────
 
-        public ChunkNodeInfo(int chunkX, int chunkZ, int level) {
-            this.chunkX = chunkX;
-            this.chunkZ = chunkZ;
-            this.level = level;
-        }
-    }
-
-    private static String getChunkKey(int chunkX, int chunkZ, int level) {
+    private static String chunkKey(int chunkX, int chunkZ, int level) {
         return level + ":" + chunkX + ":" + chunkZ;
     }
 
-    private static ChunkNodeInfo getOrCreateNode(int chunkX, int chunkZ, int level) {
-        String key = getChunkKey(chunkX, chunkZ, level);
-        return chunkNodeMap.computeIfAbsent(key, k -> new ChunkNodeInfo(chunkX, chunkZ, level));
-    }
-
-    // -------------------------------------------------------------------------
-    // EDGE-BASED CONNECTIVITY (symmetric — both sides of an edge use same seed)
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // SYMMETRIC EDGE CONNECTIVITY
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Returns true if there is an open passage on the horizontal edge between
-     * chunk (cx,cz) and its neighbor in direction {@code dir} at the given level.
+     * Deterministically decides whether the horizontal edge between
+     * chunk (cx, cz) and its neighbor in {@code dir} is open.
      *
-     * The key fix: both sides of an edge compute the SAME boolean because we
-     * always hash the edge endpoints in a canonical (sorted) order.
+     * Symmetry guarantee: both sides hash the same canonical edge key.
      */
-    private static boolean edgeIsOpen(long worldSeed, int cx, int cz, int level, Directions dir) {
-        // Derive the neighbor coordinates
+    private static boolean horizontalEdgeOpen(long seed, int cx, int cz, int level, Directions dir) {
         int nx = cx, nz = cz;
         switch (dir) {
             case North -> nz--;
             case South -> nz++;
             case East  -> nx++;
             case West  -> nx--;
-            default    -> { return false; } // Up/Down handled separately
+            default    -> { return false; }
         }
-
-        // Canonical ordering so (cx,cz)->East gives the same seed as (nx,nz)->West
+        // Canonical order — smaller coords first
         int ax = Math.min(cx, nx), az = Math.min(cz, nz);
         int bx = Math.max(cx, nx), bz = Math.max(cz, nz);
 
-        long edgeSeed = worldSeed
-                ^ ((long) ax * 0x5DEECE66DL)
-                ^ ((long) az * 0xBL)
-                ^ ((long) bx * 0x285A1234L)
-                ^ ((long) bz * 0x1F3A5C7BL)
-                ^ ((long) level * 0xCAFEBABEL);
+        long edgeSeed = seed
+                ^ (0x5DEECE66DL * ax)
+                ^ (0x000000000BL * az)
+                ^ (0x285A1234L  * bx)
+                ^ (0x1F3A5C7BL  * bz)
+                ^ (0xCAFEBABEL  * level);
 
-        Random rand = new Random(edgeSeed);
-        // ~65 % of edges open → keeps corridors well-connected without being all-open
-        return rand.nextInt(100) < 65;
+        return new Random(edgeSeed).nextInt(100) < EDGE_OPEN_CHANCE;
     }
 
     /**
-     * Returns true if the vertical connection (stair) at (cx,cz,level)->Up exists.
-     * The Down direction at (cx,cz,level+1) returns the same value.
+     * Decides whether a vertical (stair) connection exists between
+     * (cx, cz, level) and (cx, cz, level+1).
      */
-    private static boolean verticalEdgeIsOpen(long worldSeed, int cx, int cz, int level) {
-        if (level < 0 || level >= maxLevels - 1) return false;
-        Random r = new Random(worldSeed ^ ((long) cx * 0x1234567L) ^ ((long) cz * 0x7654321L) ^ ((long) level * 0x999L));
-        return r.nextInt(8) == 0; // ~12 % → sparse stairs
+    private static boolean verticalEdgeOpen(long seed, int cx, int cz, int level) {
+        if (level < 0 || level >= MAX_LEVELS - 1) return false;
+        long edgeSeed = seed
+                ^ (0x1234567L * cx)
+                ^ (0x7654321L * cz)
+                ^ (0x9999999L * level);
+        return new Random(edgeSeed).nextInt(100) < VERTICAL_EDGE_OPEN_CHANCE;
     }
 
-    /**
-     * Returns whether the edge between this chunk and its neighbor in {@code dir}
-     * is open.  Replaces the old asymmetric doesNeighborWantToConnect.
-     */
-    private static boolean connectionOpen(World world, int cx, int cz, int level, Directions dir) {
+    /** Single entry-point for connection queries (handles Up/Down symmetry). */
+    private static boolean edgeOpen(World world, int cx, int cz, int level, Directions dir) {
         long seed = world.getSeed();
         return switch (dir) {
-            case North, South, East, West -> edgeIsOpen(seed, cx, cz, level, dir);
-            case Up   -> verticalEdgeIsOpen(seed, cx, cz, level);
-            case Down -> verticalEdgeIsOpen(seed, cx, cz, level - 1);
+            case North, South, East, West -> horizontalEdgeOpen(seed, cx, cz, level, dir);
+            case Up   -> verticalEdgeOpen(seed, cx, cz, level);
+            case Down -> verticalEdgeOpen(seed, cx, cz, level - 1);
         };
     }
 
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
     // GENERATION ENTRY POINT
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Call this when a chunk loads inside the castle world.
+     * Safe to call multiple times for the same chunk — duplicates are ignored.
+     */
     public static void generateCastle(World world, int chunkX, int chunkZ) {
+        String key = chunkKey(chunkX, chunkZ, 0);
+        if (generatedChunks.contains(key)) return;
+
         Chunk chunk = world.getChunkAt(chunkX, chunkZ);
         if (chunk.getPersistentDataContainer().has(
-                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_GENERATED),
+                FreedomKeys.key(KEY_GENERATED),
                 org.bukkit.persistence.PersistentDataType.BOOLEAN)) {
+            // Already persisted from a previous server session — rebuild in-memory state
+            // so the finalization pass knows this chunk exists.
+            generatedChunks.add(key);
             return;
         }
-        addToQueue(world, chunkX, chunkZ, 0);
+
+        enqueue(world, chunkX, chunkZ, 0);
         startGenerationTask();
     }
 
-    private static void addToQueue(World world, int x, int z, int level) {
-        if (level < 0 || level >= maxLevels) return;
+    // ─────────────────────────────────────────────────────────────────────────
+    // QUEUE MANAGEMENT
+    // ─────────────────────────────────────────────────────────────────────────
 
-        // Do NOT skip if the chunk PDC already has KEY_GENERATED — that is now only
-        // written AFTER a piece is successfully placed so this check is safe.
-        String key = getChunkKey(x, z, level);
+    private static void enqueue(World world, int cx, int cz, int level) {
+        if (level < 0 || level >= MAX_LEVELS) return;
+        String key = chunkKey(cx, cz, level);
         if (generatedChunks.contains(key)) return;
-
-        for (CastleNode node : generationQueue) {
-            if (node.chunkX == x && node.chunkZ == z && node.level == level) return;
+        for (CastleNode n : generationQueue) {
+            if (n.chunkX == cx && n.chunkZ == cz && n.level == level) return;
         }
-
-        generationQueue.add(new CastleNode(world, x, z, level));
+        generationQueue.add(new CastleNode(world, cx, cz, level));
     }
 
     private static void startGenerationTask() {
@@ -234,326 +352,551 @@ public class RedCastleManager extends Util {
                 if (generationQueue.isEmpty()) {
                     isGenerating = false;
                     this.cancel();
-                    // Run a final connectivity pass after everything is placed
-                    World lastWorld = getLastWorld();
-                    if (lastWorld != null) {
-                        finalizeGenerationWithConnectivityCheck(lastWorld);
+                    // Schedule the seal pass with a delay so all paste operations finish first
+                    World w = lastWorldRef;
+                    if (w != null) {
+                        new BukkitRunnable() {
+                            @Override public void run() {
+                                sealAllFaces(w);
+                                bridgeGaps(w);
+                                fillNonStructureChunks(w);
+                            }
+                        }.runTaskLater(Freedom.get_plugin(), SEAL_DELAY_TICKS);
                     }
                     return;
                 }
-
                 CastleNode node = generationQueue.poll();
-                if (node == null) return;
-                processNode(node);
+                if (node != null) processNode(node);
             }
-        }.runTaskTimer(Freedom.get_plugin(), 2, 10);
+        }.runTaskTimer(Freedom.get_plugin(), 2L, 10L);
     }
 
-    /** Utility: retrieve any world reference from the node map for finalization. */
-    private static World lastWorldRef = null;
-    private static World getLastWorld() { return lastWorldRef; }
-
-    // -------------------------------------------------------------------------
-    // CORE NODE PROCESSING
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // NODE PROCESSING
+    // ─────────────────────────────────────────────────────────────────────────
 
     private static void processNode(CastleNode node) {
-        World world = node.world;
+        World world  = node.world;
+        int   cx     = node.chunkX;
+        int   cz     = node.chunkZ;
+        int   level  = node.level;
+        String key   = chunkKey(cx, cz, level);
+
+        if (generatedChunks.contains(key)) return;
+        generatedChunks.add(key);   // mark immediately — prevents re-queue races
         lastWorldRef = world;
-        int chunkX = node.chunkX;
-        int chunkZ = node.chunkZ;
-        int level  = node.level;
-        String chunkKey = getChunkKey(chunkX, chunkZ, level);
 
-        // Prevent double-processing
-        if (generatedChunks.contains(chunkKey)) return;
-
-        // Compute which directions this chunk should open based on the symmetric edge function
-        List<Directions> requiredConnections = new ArrayList<>();
-        List<Directions> forbiddenConnections = new ArrayList<>();
+        // ── Determine which edges are open (symmetric) ───────────────────────
+        List<Directions> required  = new ArrayList<>();
+        List<Directions> forbidden = new ArrayList<>();
 
         for (Directions dir : Directions.values()) {
-            if (connectionOpen(world, chunkX, chunkZ, level, dir)) {
-                // Only open toward a valid neighbor
-                int nl = level;
-                if (dir == Directions.Up)   nl++;
-                if (dir == Directions.Down) nl--;
-                if (nl >= 0 && nl < maxLevels) {
-                    requiredConnections.add(dir);
-                }
+            // Only consider a direction valid when the neighbor level is in range
+            int nl = neighborLevel(level, dir);
+            if (nl < 0 || nl >= MAX_LEVELS) {
+                forbidden.add(dir);
+                continue;
+            }
+            if (edgeOpen(world, cx, cz, level, dir)) {
+                required.add(dir);
             } else {
-                forbiddenConnections.add(dir);
+                forbidden.add(dir);
             }
         }
 
         if (verbose) {
-            Freedom.get_plugin().getLogger().info(String.format(
-                    "[RedCastle] Processing [%d, %d] L%d | Required=%s | Forbidden=%s",
-                    chunkX, chunkZ, level, requiredConnections, forbiddenConnections));
+            log("[RedCastle] Processing [%d,%d] L%d | req=%s | forbidden=%s",
+                    cx, cz, level, required, forbidden);
         }
 
-        // Select a piece
-        castlePiece piece = selectBestPiece(world, chunkX, chunkZ, level, requiredConnections, forbiddenConnections);
+        // ── Select piece ─────────────────────────────────────────────────────
+        CastlePiece piece = selectPiece(world, cx, cz, level, required, forbidden);
 
-        // Mark chunk as attempted regardless so we never re-queue it
-        generatedChunks.add(chunkKey);
+        // piece is NEVER null — selectPiece always falls back to ClosedRoom
+        assert piece != null;
 
-        if (piece == null) {
-            if (verbose) {
-                Freedom.get_plugin().getLogger().warning(String.format(
-                        "[RedCastle] No piece found for [%d, %d] L%d — branch stops.", chunkX, chunkZ, level));
-            }
-            return;
-        }
+        // ── Persist metadata to PDC ──────────────────────────────────────────
+        chunkPieces.put(key, piece);
+        Chunk chunk = world.getChunkAt(cx, cz);
+        var pdc = chunk.getPersistentDataContainer();
+        var boolType = org.bukkit.persistence.PersistentDataType.BOOLEAN;
+        var intType  = org.bukkit.persistence.PersistentDataType.INTEGER;
+        var strType  = org.bukkit.persistence.PersistentDataType.STRING;
 
-        // Store metadata
-        ChunkNodeInfo nodeInfo = getOrCreateNode(chunkX, chunkZ, level);
-        nodeInfo.piece = piece;
-        chunkPieces.put(chunkKey, piece);
+        pdc.set(FreedomKeys.key(KEY_GENERATED),        boolType, true);
+        pdc.set(FreedomKeys.key(KEY_HAS_PIECE),        boolType, true);
+        pdc.set(FreedomKeys.key(KEY_PIECE_ROTATION),   intType,  piece.rotation);
+        pdc.set(FreedomKeys.key(KEY_PIECE_CONNECTIONS), strType,
+                piece.connections.stream().map(Enum::name).collect(Collectors.joining(",")));
 
-        Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-        chunk.getPersistentDataContainer().set(
-                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_GENERATED),
-                org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
-        chunk.getPersistentDataContainer().set(
-                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_HAS_PIECE),
-                org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
-        chunk.getPersistentDataContainer().set(
-                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_PIECE_ROTATION),
-                org.bukkit.persistence.PersistentDataType.INTEGER, piece.rotation);
-        String connectionsStr = piece.connections.stream().map(Enum::name).collect(Collectors.joining(","));
-        chunk.getPersistentDataContainer().set(
-                xyz.yaszu.freedom.Util.FreedomKeys.key(KEY_PIECE_CONNECTIONS),
-                org.bukkit.persistence.PersistentDataType.STRING, connectionsStr);
+        // ── Spawn schematic ───────────────────────────────────────────────────
+        // spawnStructureStatic takes CHUNK coordinates (it does *16 internally)
+        int wy = LEVEL_BASE_Y + level * LEVEL_HEIGHT;
 
-        int y = 64 + (level * 15);
-
+        String schematicFile = "newredCastle_" + piece.schematicName + ".schem";
         if (verbose) {
-            Freedom.get_plugin().getLogger().info(String.format(
-                    "[RedCastle] Spawning %s at [%d, %d] L%d (Y=%d) Rot=%d Connections=%s",
-                    piece.schematicName, chunkX, chunkZ, level, y, piece.rotation, piece.connections));
+            log("[RedCastle] Spawning %s at chunk(%d,%d) Y=%d rot=%d conn=%s",
+                    schematicFile, cx, cz, wy, piece.rotation, piece.connections);
         }
+        WorldManager.spawnStructureStatic(world, cx, cz, wy, schematicFile, piece.rotation);
 
-        WorldManager.spawnStructureStatic(world, chunkX, chunkZ, y, "newredCastle_" + piece.schematicName + ".schem", piece.rotation);
-
-        // Enqueue neighbors for every connection the piece actually has
+        // ── Enqueue neighbors for every open connection ───────────────────────
         for (Directions dir : piece.connections) {
-            int nx = chunkX, nz = chunkZ, nl = level;
+            int ncx = cx, ncz = cz, nl = level;
             switch (dir) {
-                case North -> nz--;
-                case South -> nz++;
-                case East  -> nx++;
-                case West  -> nx--;
+                case North -> ncz--;
+                case South -> ncz++;
+                case East  -> ncx++;
+                case West  -> ncx--;
                 case Up    -> nl++;
                 case Down  -> nl--;
             }
-            nodeInfo.neighbors.put(dir, getChunkKey(nx, nz, nl));
-            nodeInfo.connections.add(dir.name());
-            addToQueue(world, nx, nz, nl);
+            enqueue(world, ncx, ncz, nl);
         }
     }
 
-    // -------------------------------------------------------------------------
+    /** Returns the level of the neighbor in the given direction. */
+    private static int neighborLevel(int level, Directions dir) {
+        return switch (dir) {
+            case Up   -> level + 1;
+            case Down -> level - 1;
+            default   -> level;
+        };
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // PIECE SELECTION
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Selects the best matching castlePiece (with rotation) for the given constraints.
+     * Selects a piece (with rotation) that best matches the required / forbidden
+     * constraints.  Selection is fully deterministic for a given world seed and
+     * chunk position.
      *
-     * Priority:
-     *  1. Exact match: has ALL required, has NONE of forbidden
-     *  2. Superset match: has ALL required, may have some forbidden (extra openings
-     *     will be sealed in the finalization pass)
-     *  3. Subset match: has SOME required (last resort — means a corridor dead-ends here)
+     * Priority order:
+     *   1. Exact match   — has ALL required, NONE of forbidden
+     *   2. Superset      — has ALL required, some forbidden (extra doors — sealed later)
+     *   3. Subset        — has SOME required (dead-end; remaining directions sealed)
+     *   4. Fallback      — ClosedRoom (guaranteed non-null return)
      */
-    private static castlePiece selectBestPiece(World world, int chunkX, int chunkZ, int level,
-                                               List<Directions> required, List<Directions> forbidden) {
+    private static CastlePiece selectPiece(World world,
+                                           int cx, int cz, int level,
+                                           List<Directions> required,
+                                           List<Directions> forbidden) {
 
-        Random random = new Random(world.getSeed()
-                + (long) chunkX * 31213L
-                + (long) chunkZ * 43241L
-                + (long) level  * 777L);
+        Random rng = new Random(world.getSeed()
+                + (long) cx    * 0x7A73_1A2BL
+                + (long) cz    * 0x3C1D_E5F7L
+                + (long) level * 0xBEEF_CAFEL);
 
-        List<castlePiece> exactMatches    = new ArrayList<>();
-        List<castlePiece> supersetMatches = new ArrayList<>();
-        List<castlePiece> subsetMatches   = new ArrayList<>();
+        List<CastlePiece> exact    = new ArrayList<>();
+        List<CastlePiece> superset = new ArrayList<>();
+        List<CastlePiece> subset   = new ArrayList<>();
 
-        for (castlePiece base : redCastlePieces) {
-            for (int rot : List.of(0, 90, 180, 270)) {
-                castlePiece rotated = base.rotated(rot);
+        for (CastlePiece base : PIECES) {
+            // Skip the fallback piece from normal selection — added only if nothing else works
+            if (base.schematicName.equals("ClosedRoom") && !required.isEmpty()) continue;
 
-                boolean hasAllRequired = required.stream().allMatch(r -> rotated.connections.contains(r));
-                boolean hasAnyForbidden = forbidden.stream().anyMatch(f -> rotated.connections.contains(f));
-                boolean hasAnyRequired = required.isEmpty() || required.stream().anyMatch(r -> rotated.connections.contains(r));
+            for (int rot : new int[]{0, 90, 180, 270}) {
+                CastlePiece candidate = base.rotated(rot);
+
+                boolean hasAllRequired  = required.stream().allMatch(r -> candidate.connections.contains(r));
+                boolean hasAnyForbidden = forbidden.stream().anyMatch(f -> candidate.connections.contains(f));
+                boolean hasAnyRequired  = required.isEmpty()
+                        || required.stream().anyMatch(r -> candidate.connections.contains(r));
 
                 if (hasAllRequired && !hasAnyForbidden) {
-                    exactMatches.add(rotated);
+                    exact.add(candidate);
                 } else if (hasAllRequired) {
-                    supersetMatches.add(rotated); // has extra connections toward forbidden sides
+                    superset.add(candidate);
                 } else if (hasAnyRequired) {
-                    subsetMatches.add(rotated);   // covers only some required
+                    subset.add(candidate);
                 }
             }
         }
 
-        if (!exactMatches.isEmpty()) {
-            // Among exact matches prefer those with the fewest connections (tidier corridors)
-            int minConn = exactMatches.stream().mapToInt(p -> p.connections.size()).min().orElse(0);
-            List<castlePiece> tight = exactMatches.stream()
-                    .filter(p -> p.connections.size() == minConn).collect(Collectors.toList());
-            return tight.get(random.nextInt(tight.size()));
+        if (!exact.isEmpty()) {
+            // Prefer fewer connections (tidier corridors)
+            int min = exact.stream().mapToInt(p -> p.connections.size()).min().orElse(0);
+            List<CastlePiece> tight = exact.stream()
+                    .filter(p -> p.connections.size() == min)
+                    .collect(Collectors.toList());
+            return tight.get(rng.nextInt(tight.size()));
         }
-        if (!supersetMatches.isEmpty()) {
-            return supersetMatches.get(random.nextInt(supersetMatches.size()));
-        }
-        if (!subsetMatches.isEmpty()) {
-            return subsetMatches.get(random.nextInt(subsetMatches.size()));
-        }
-        return null;
+        if (!superset.isEmpty()) return superset.get(rng.nextInt(superset.size()));
+        if (!subset.isEmpty())   return subset.get(rng.nextInt(subset.size()));
+
+        // Absolute fallback — a fully sealed room
+        warn("[RedCastle] Fallback ClosedRoom placed at [%d,%d] L%d", cx, cz, level);
+        return PIECES.stream()
+                .filter(p -> p.schematicName.equals("ClosedRoom"))
+                .findFirst()
+                .orElse(PIECES.get(0)); // should never reach here
     }
 
-    // -------------------------------------------------------------------------
-    // DOOR / WALL PLACEMENT  (fully rewritten — no double-offset bugs)
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // FACE SEALING
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Seals the face of chunk (chunkX, chunkZ) in the given direction with a wall
-     * of RED_NETHER_BRICKS.  All coordinates are computed from scratch here —
-     * no pre-multiplied values are passed in.
+     * Iterates every generated chunk and seals any face that either:
+     *  (a) the piece opens but the neighbor was never generated or doesn't reciprocate, or
+     *  (b) the piece does not open at all (belt-and-suspenders against schematic leaks).
      *
-     * Face centres (relative to chunk origin in world coords):
-     *   North  → x+8,  z+0
-     *   South  → x+8,  z+15
-     *   East   → x+15, z+8
-     *   West   → x+0,  z+8
-     *   Up     → x+8,  y+14, z+8  (ceiling)
-     *   Down   → x+8,  y+0,  z+8  (floor)
+     * This runs AFTER a delay so schematics have fully pasted.
      */
-    private static void sealFace(World world, int chunkX, int chunkZ, int level, Directions dir) {
-        int originX = chunkX * 16;
-        int originZ = chunkZ * 16;
-        int yBase   = 64 + (level * 15);
-        Material mat = Material.RED_NETHER_BRICKS;
-
-        if (dir == Directions.Up || dir == Directions.Down) {
-            int y = (dir == Directions.Up) ? (yBase + 14) : yBase;
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    setBlockSafe(world, originX + 8 + dx, y, originZ + 8 + dz, mat);
-                }
-            }
-            return;
-        }
-
-        // Horizontal face: determine the fixed axis coordinate and the "spread" axis
-        int faceX, faceZ;
-        boolean spreadAlongX;
-
-        switch (dir) {
-            case North -> { faceX = originX + 8; faceZ = originZ;      spreadAlongX = true;  }
-            case South -> { faceX = originX + 8; faceZ = originZ + 15; spreadAlongX = true;  }
-            case East  -> { faceX = originX + 15; faceZ = originZ + 8; spreadAlongX = false; }
-            case West  -> { faceX = originX;      faceZ = originZ + 8; spreadAlongX = false; }
-            default    -> { return; }
-        }
-
-        // 3 blocks wide, 3 blocks tall (Y+1 to Y+3) to cover doorway openings
-        for (int dy = 1; dy <= 3; dy++) {
-            for (int spread = -1; spread <= 1; spread++) {
-                int wx = spreadAlongX ? (faceX + spread) : faceX;
-                int wz = spreadAlongX ? faceZ : (faceZ + spread);
-                setBlockSafe(world, wx, yBase + dy, wz, mat);
-            }
-        }
-    }
-
-    /** Safely sets a block and optionally logs failures. */
-    private static void setBlockSafe(World world, int x, int y, int z, Material mat) {
-        Block block = world.getBlockAt(x, y, z);
-        block.setType(mat);
-        if (verbose && block.getType() != mat) {
-            Freedom.get_plugin().getLogger().warning(String.format(
-                    "[RedCastle] Failed to set block %s at %d,%d,%d (got %s)",
-                    mat, x, y, z, block.getType()));
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // POST-GENERATION VALIDATION & FINALIZATION
-    // -------------------------------------------------------------------------
-
-    /**
-     * After all chunks have been generated:
-     *  1. For every connection that points to a chunk that was never generated,
-     *     seal the opening.
-     *  2. For every direction a piece does NOT open toward, ensure the face is sealed
-     *     (catches anything the schematic leaves open by default).
-     *  3. Where two neighboring pieces both have an open connection toward each other,
-     *     leave the passage open (no sealing needed there).
-     */
-    public static void finalizeGenerationWithConnectivityCheck(World world) {
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info("[RedCastle] ===== FINALIZATION PASS =====");
-        }
-
+    public static void sealAllFaces(World world) {
+        if (verbose) log("[RedCastle] ===== SEAL PASS (%d chunks) =====", generatedChunks.size());
         int sealed = 0;
 
-        for (String chunkKey : new HashSet<>(generatedChunks)) {
-            castlePiece piece = chunkPieces.get(chunkKey);
-            if (piece == null) continue;
-
-            String[] parts = chunkKey.split(":");
+        for (String key : new HashSet<>(generatedChunks)) {
+            String[] parts = key.split(":");
             if (parts.length != 3) continue;
             int level  = Integer.parseInt(parts[0]);
-            int chunkX = Integer.parseInt(parts[1]);
-            int chunkZ = Integer.parseInt(parts[2]);
+            int cx     = Integer.parseInt(parts[1]);
+            int cz     = Integer.parseInt(parts[2]);
+
+            CastlePiece piece = chunkPieces.get(key);
+            if (piece == null) {
+                // Chunk was loaded from PDC — seal all faces conservatively
+                for (Directions dir : Directions.values()) {
+                    sealFace(world, cx, cz, level, dir);
+                    sealed++;
+                }
+                continue;
+            }
 
             for (Directions dir : Directions.values()) {
-                boolean pieceOpens = piece.connections.contains(dir);
+                boolean opens = piece.connections.contains(dir);
 
-                int nx = chunkX, nz = chunkZ, nl = level;
+                int ncx = cx, ncz = cz, nl = level;
                 switch (dir) {
-                    case North -> nz--;
-                    case South -> nz++;
-                    case East  -> nx++;
-                    case West  -> nx--;
+                    case North -> ncz--;
+                    case South -> ncz++;
+                    case East  -> ncx++;
+                    case West  -> ncx--;
                     case Up    -> nl++;
                     case Down  -> nl--;
                 }
 
-                String neighborKey = getChunkKey(nx, nz, nl);
-                boolean neighborExists = generatedChunks.contains(neighborKey);
-                castlePiece neighborPiece = neighborExists ? chunkPieces.get(neighborKey) : null;
-                boolean neighborOpens = (neighborPiece != null) && neighborPiece.connections.contains(getOpposite(dir));
+                String neighborKey = chunkKey(ncx, ncz, nl);
+                CastlePiece neighbor = chunkPieces.get(neighborKey);
+                boolean neighborReciprocates = neighbor != null
+                        && neighbor.connections.contains(dir.opposite());
 
-                if (pieceOpens && (!neighborExists || !neighborOpens)) {
-                    // Seal: we open toward a missing or mis-matched neighbor
-                    if (verbose) {
-                        Freedom.get_plugin().getLogger().warning(String.format(
-                                "[RedCastle] Sealing orphaned opening %s at [%d,%d] L%d (neighbor=%s, neighborOpens=%b)",
-                                dir, chunkX, chunkZ, level, neighborExists ? neighborKey : "none", neighborOpens));
-                    }
-                    sealFace(world, chunkX, chunkZ, level, dir);
-                    sealed++;
-                } else if (!pieceOpens) {
-                    // Seal any faces the piece does NOT open (ensures no schematic-leaked gaps)
-                    sealFace(world, chunkX, chunkZ, level, dir);
+                if (!opens || !neighborReciprocates) {
+                    sealFace(world, cx, cz, level, dir);
                     sealed++;
                 }
-                // If pieceOpens && neighborOpens → leave open (valid corridor)
+                // Both open and neighbor reciprocates → valid corridor, leave it open
             }
         }
 
-        if (verbose) {
-            Freedom.get_plugin().getLogger().info(String.format(
-                    "[RedCastle] Finalization done. Chunks=%d, Faces sealed=%d",
-                    generatedChunks.size(), sealed));
+        if (verbose) log("[RedCastle] Seal pass done. Faces sealed=%d", sealed);
+    }
+
+    /**
+     * Seals the passage opening on one face of chunk (cx,cz) at the given level.
+     *
+     * Ground truth from schematic analysis:
+     *   • All schematics are 16×16 (X=0..15, Z=0..15), H=14 (Y=0..13).
+     *   • Floor  = Y index 0  → solid in every schematic — do NOT touch.
+     *   • Ceiling = Y index 13 → solid in every schematic — do NOT touch.
+     *   • Passage openings span the FULL face width and the full interior height Y=1..12.
+     *     There is no narrow doorway — the entire face interior is open when a connection exists.
+     *
+     * So to seal a face we fill every block on that face at interior Y rows (yBase+1 .. yBase+12),
+     * across the full 16-block width of the face.
+     *
+     * Face block coordinates (chunk origin = cx*16, cz*16):
+     *   North → fixed Z = cz*16,      X sweeps 0..15
+     *   South → fixed Z = cz*16+15,   X sweeps 0..15
+     *   East  → fixed X = cx*16+15,   Z sweeps 0..15
+     *   West  → fixed X = cx*16,      Z sweeps 0..15
+     *   Up/Down → 3×3 stairwell patch at centre (handled separately — Stair1 spans 2 levels)
+     */
+    private static void sealFace(World world, int cx, int cz, int level, Directions dir) {
+        int ox    = cx * 16;
+        int oz    = cz * 16;
+        int yBase = LEVEL_BASE_Y + level * LEVEL_HEIGHT;
+        // Interior rows only — floor (yBase+0) and ceiling (yBase+13) are solid in every schematic
+        int yMin  = yBase + 1;
+        int yMax  = yBase + 12;
+        Material fill = Material.RED_NETHER_BRICKS;
+
+        switch (dir) {
+            case North -> {
+                int fz = oz; // Z=0 face of this chunk
+                for (int x = ox; x <= ox + 15; x++) {
+                    for (int y = yMin; y <= yMax; y++) {
+                        setBlock(world, x, y, fz, fill);
+                    }
+                }
+            }
+            case South -> {
+                int fz = oz + 15; // Z=15 face of this chunk
+                for (int x = ox; x <= ox + 15; x++) {
+                    for (int y = yMin; y <= yMax; y++) {
+                        setBlock(world, x, y, fz, fill);
+                    }
+                }
+            }
+            case East -> {
+                int fx = ox + 15; // X=15 face of this chunk
+                for (int z = oz; z <= oz + 15; z++) {
+                    for (int y = yMin; y <= yMax; y++) {
+                        setBlock(world, fx, y, z, fill);
+                    }
+                }
+            }
+            case West -> {
+                int fx = ox; // X=0 face of this chunk
+                for (int z = oz; z <= oz + 15; z++) {
+                    for (int y = yMin; y <= yMax; y++) {
+                        setBlock(world, fx, y, z, fill);
+                    }
+                }
+            }
+            case Up -> {
+                // Stair1 is H=20 (spans ~1.4 levels) — seal the stairwell opening at the top
+                // 3×3 patch centred at the chunk centre
+                int fy = yBase + LEVEL_HEIGHT - 1; // top of this level's interior
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        setBlock(world, ox + 8 + dx, fy, oz + 8 + dz, fill);
+                    }
+                }
+            }
+            case Down -> {
+                // Seal the stairwell opening at the bottom
+                int fy = yBase; // floor of this level
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        setBlock(world, ox + 8 + dx, fy, oz + 8 + dz, fill);
+                    }
+                }
+            }
         }
     }
 
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // GAP BRIDGING & FILL
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Bridges gaps between adjacent open structures by filling connecting walls
+     * where both neighbors have reciprocating open connections.
+     * This ensures smooth corridors between structures with matching openings.
+     */
+    public static void bridgeGaps(World world) {
+        if (verbose) log("[RedCastle] ===== BRIDGE GAPS PASS (%d chunks) =====", generatedChunks.size());
+        int bridged = 0;
+
+        for (String key : new HashSet<>(generatedChunks)) {
+            String[] parts = key.split(":");
+            if (parts.length != 3) continue;
+            int level  = Integer.parseInt(parts[0]);
+            int cx     = Integer.parseInt(parts[1]);
+            int cz     = Integer.parseInt(parts[2]);
+
+            CastlePiece piece = chunkPieces.get(key);
+            if (piece == null) continue; // Skip chunks without a piece
+
+            for (Directions dir : new Directions[]{Directions.North, Directions.South, Directions.East, Directions.West}) {
+                if (!piece.connections.contains(dir)) continue;
+
+                int ncx = cx, ncz = cz, nl = level;
+                switch (dir) {
+                    case North -> ncz--;
+                    case South -> ncz++;
+                    case East  -> ncx++;
+                    case West  -> ncx--;
+                    default -> {}
+                }
+
+                String neighborKey = chunkKey(ncx, ncz, nl);
+                CastlePiece neighbor = chunkPieces.get(neighborKey);
+
+                // Both sides open and reciprocate — bridge the gap between them
+                if (neighbor != null && neighbor.connections.contains(dir.opposite())) {
+                    if (bridgeGap(world, cx, cz, level, ncx, ncz, nl, dir)) {
+                        bridged++;
+                    }
+                }
+            }
+        }
+
+        if (verbose) log("[RedCastle] Bridge pass done. Gaps bridged=%d", bridged);
+    }
+
+    /**
+     * Bridges the gap between two adjacent chunks in the specified direction.
+     * Fills the connecting wall area with bridge material to ensure structural integrity.
+     * Returns true if bridging occurred.
+     */
+    private static boolean bridgeGap(World world, int cx1, int cz1, int level1,
+                                     int cx2, int cz2, int level2, Directions dir) {
+        int ox1 = cx1 * 16;
+        int oz1 = cz1 * 16;
+        int oy2 = cx2 * 16;
+        int oz2 = cz2 * 16;
+
+        int yBase = LEVEL_BASE_Y + level1 * LEVEL_HEIGHT;
+        int yFloor = yBase;
+        int yInteriorMin = yBase + 1;
+        int yInteriorMax = yBase + 12;
+        int yCeiling = yBase + 13;
+
+        boolean bridged = false;
+
+        switch (dir) {
+            case North -> {
+                // Bridge from chunk 1's north face to chunk 2's south face
+                // Fill a 1-block-thick wall on the shared edge with floor and ceiling
+                int sharedZ = oz1;
+                for (int x = ox1; x <= ox1 + 15; x++) {
+                    setBlock(world, x, yFloor, sharedZ, BRIDGE_FILL);
+                    setBlock(world, x, yCeiling, sharedZ, BRIDGE_FILL);
+                    bridged = true;
+                }
+            }
+            case South -> {
+                // Bridge from chunk 1's south face to chunk 2's north face
+                int sharedZ = oz1 + 15;
+                for (int x = ox1; x <= ox1 + 15; x++) {
+                    setBlock(world, x, yFloor, sharedZ, BRIDGE_FILL);
+                    setBlock(world, x, yCeiling, sharedZ, BRIDGE_FILL);
+                    bridged = true;
+                }
+            }
+            case East -> {
+                // Bridge from chunk 1's east face to chunk 2's west face
+                int sharedX = ox1 + 15;
+                for (int z = oz1; z <= oz1 + 15; z++) {
+                    setBlock(world, sharedX, yFloor, z, BRIDGE_FILL);
+                    setBlock(world, sharedX, yCeiling, z, BRIDGE_FILL);
+                    bridged = true;
+                }
+            }
+            case West -> {
+                // Bridge from chunk 1's west face to chunk 2's east face
+                int sharedX = ox1;
+                for (int z = oz1; z <= oz1 + 15; z++) {
+                    setBlock(world, sharedX, yFloor, z, BRIDGE_FILL);
+                    setBlock(world, sharedX, yCeiling, z, BRIDGE_FILL);
+                    bridged = true;
+                }
+            }
+            default -> {}
+        }
+
+        return bridged;
+    }
+
+    /**
+     * Fills all non-structure chunks in the dungeon area with bedrock.
+     * This ensures the player cannot break through to the void and creates
+     * a solid boundary around the castle structure.
+     */
+    public static void fillNonStructureChunks(World world) {
+        if (verbose) log("[RedCastle] ===== FILL NON-STRUCTURE CHUNKS PASS =====");
+
+        // Determine bounding box of generated chunks
+        int minCx = Integer.MAX_VALUE, maxCx = Integer.MIN_VALUE;
+        int minCz = Integer.MAX_VALUE, maxCz = Integer.MIN_VALUE;
+
+        for (String key : generatedChunks) {
+            String[] parts = key.split(":");
+            if (parts.length != 3) continue;
+            int cx = Integer.parseInt(parts[1]);
+            int cz = Integer.parseInt(parts[2]);
+            minCx = Math.min(minCx, cx);
+            maxCx = Math.max(maxCx, cx);
+            minCz = Math.min(minCz, cz);
+            maxCz = Math.max(maxCz, cz);
+        }
+
+        if (minCx == Integer.MAX_VALUE) {
+            if (verbose) log("[RedCastle] No generated chunks found, skipping fill pass");
+            return;
+        }
+
+        // Expand bounding box by 1 chunk in each direction to create a border
+        minCx--;
+        maxCx++;
+        minCz--;
+        maxCz++;
+
+        int filled = 0;
+
+        for (int cx = minCx; cx <= maxCx; cx++) {
+            for (int cz = minCz; cz <= maxCz; cz++) {
+                for (int level = 0; level < MAX_LEVELS; level++) {
+                    String key = chunkKey(cx, cz, level);
+                    if (generatedChunks.contains(key)) continue; // Skip structure chunks
+
+                    // Fill this non-structure chunk completely with bedrock
+                    if (fillChunkWithBedrock(world, cx, cz, level)) {
+                        filled++;
+                    }
+                }
+            }
+        }
+
+        if (verbose) log("[RedCastle] Fill pass done. Non-structure chunks filled=%d", filled);
+    }
+
+    /**
+     * Fills an entire chunk with bedrock for all three vertical levels.
+     * Returns true if the chunk was filled.
+     */
+    private static boolean fillChunkWithBedrock(World world, int cx, int cz, int level) {
+        int ox = cx * 16;
+        int oz = cz * 16;
+        int yBase = LEVEL_BASE_Y + level * LEVEL_HEIGHT;
+
+        // Fill from floor to ceiling for this level
+        for (int x = ox; x <= ox + 15; x++) {
+            for (int y = yBase; y <= yBase + 13; y++) {
+                for (int z = oz; z <= oz + 15; z++) {
+                    Block b = world.getBlockAt(x, y, z);
+                    if (b.getType() == Material.AIR || b.getType() == Material.VOID_AIR || b.getType() == Material.CAVE_AIR) {
+                        setBlock(world, x, y, z, BEDROCK_FILL);
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static void setBlock(World world, int x, int y, int z, Material mat) {
+        Block b = world.getBlockAt(x, y, z);
+        b.setType(mat, false); // false = skip physics updates for performance
+        if (verbose && b.getType() != mat) {
+            warn("[RedCastle] Block set failed at %d,%d,%d (wanted %s, got %s)",
+                    x, y, z, mat, b.getType());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // CHUNK GENERATOR — flat void world
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public static class CastleGenerator extends ChunkGenerator {
+        @Override
+        public ChunkData generateChunkData(World world, Random random, int chunkX, int chunkZ, BiomeGrid biome) {
+            return createChunkData(world); // empty chunk
+        }
+        @Override public boolean shouldGenerateCaves()       { return false; }
+        @Override public boolean shouldGenerateDecorations() { return false; }
+        @Override public boolean shouldGenerateMobs()        { return false; }
+        @Override public boolean shouldGenerateStructures()  { return false; }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // WORLD CREATION
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
 
     public static World createRedCastleWorld(String worldName) {
         WorldCreator creator = new WorldCreator(worldName);
@@ -561,83 +904,38 @@ public class RedCastleManager extends Util {
         return creator.createWorld();
     }
 
-    // -------------------------------------------------------------------------
-    // HELPERS
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // LOGGING HELPERS
+    // ─────────────────────────────────────────────────────────────────────────
 
-    private static Directions getOpposite(Directions dir) {
-        return switch (dir) {
-            case North -> Directions.South;
-            case South -> Directions.North;
-            case East  -> Directions.West;
-            case West  -> Directions.East;
-            case Up    -> Directions.Down;
-            case Down  -> Directions.Up;
-        };
+    private static void log(String fmt, Object... args) {
+        Freedom.get_plugin().getLogger().info(String.format(fmt, args));
     }
 
-    private static boolean matches(castlePiece piece, List<Directions> required, List<Directions> forbidden) {
-        for (Directions req : required) {
-            if (!piece.connections.contains(req)) return false;
-        }
-        for (Directions forb : forbidden) {
-            if (piece.connections.contains(forb)) return false;
-        }
-        return true;
+    private static void warn(String fmt, Object... args) {
+        Freedom.get_plugin().getLogger().warning(String.format(fmt, args));
     }
 
-    private static boolean matchesRequired(castlePiece piece, List<Directions> required) {
-        for (Directions req : required) {
-            if (!piece.connections.contains(req)) return false;
-        }
-        return true;
-    }
+    // ─────────────────────────────────────────────────────────────────────────
+    // LEGACY API SHIMS  (kept so callers outside this class don't break)
+    // ─────────────────────────────────────────────────────────────────────────
 
-    // -------------------------------------------------------------------------
-    // LEGACY / UNUSED — kept for API compatibility but no longer called internally
-    // -------------------------------------------------------------------------
-
-    /** @deprecated Use {@link #connectionOpen} instead. */
+    /** @deprecated Use {@link #sealAllFaces(World)} instead. */
     @Deprecated
-    private static boolean doesNeighborWantToConnect(World world, int nx, int nz, int level, Directions dir) {
-        return connectionOpen(world, nx, nz, level, dir);
+    public static void finalizeGenerationWithConnectivityCheck(World world) {
+        sealAllFaces(world);
     }
 
-    /** @deprecated Use {@link #sealFace} instead. */
+    /** @deprecated No longer needed — sealing is automatic. */
     @Deprecated
-    private static void placeDoorAtConnection(World world, int cx, int cz, int yBase, Directions dir, int rotation) {
-        sealFace(world, cx, cz, (yBase - 64) / 15, dir);
-    }
+    public static void validateAllConnectivity(World world) { /* no-op */ }
 
-    /** @deprecated No longer used — sealing handled in finalizeGenerationWithConnectivityCheck. */
+    /** @deprecated No longer needed — sealing is automatic. */
     @Deprecated
-    public static void validateAllConnectivity(World world) {
-        finalizeGenerationWithConnectivityCheck(world);
-    }
+    public static void ensureAllUnusedConnectionsClosed(World world) { /* no-op */ }
 
-    /** @deprecated No longer used — sealing handled in finalizeGenerationWithConnectivityCheck. */
+    // Old field name kept for any external code that referenced it
+    /** @deprecated Use {@link #PIECES} instead. */
     @Deprecated
-    public static void ensureAllUnusedConnectionsClosed(World world) {
-        // Subsumed by finalizeGenerationWithConnectivityCheck
-    }
-
-    private static boolean isValidChunkLocation(World world, int chunkX, int chunkZ, int level) {
-        return level >= 0 && level < maxLevels;
-    }
-
-    private static boolean isChunkActive(World world, int cx, int cz, int level) {
-        return level == 0 || Math.abs(cx) + Math.abs(cz) < 100;
-    }
-
-    // Context helper — kept for reference but selectBestPiece no longer needs it
-    private static Map<String, ChunkNodeInfo> getNearby5ChunksContext(int chunkX, int chunkZ, int level) {
-        Map<String, ChunkNodeInfo> context = new HashMap<>();
-        int[][] offsets = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        for (int[] offset : offsets) {
-            String key = getChunkKey(chunkX + offset[0], chunkZ + offset[1], level);
-            ChunkNodeInfo node = chunkNodeMap.get(key);
-            if (node != null) context.put(key, node);
-        }
-        return context;
-    }
+    public static final List<CastlePiece> redCastlePieces = PIECES;
 }

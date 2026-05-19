@@ -50,7 +50,7 @@ public class Pizza extends Util implements BaseItem {
 
     @Override
     public Recipe recipe() {
-        ShapelessRecipe recipe = new ShapelessRecipe(FreedomKeys.itemId(),item());
+        ShapelessRecipe recipe = new ShapelessRecipe(keygen("pizza"),item());
         recipe.addIngredient(ItemStack.of(Material.MILK_BUCKET));
         recipe.addIngredient(ItemStack.of(Material.BREAD));
         recipe.addIngredient(ItemStack.of(Material.PORKCHOP));
