@@ -279,7 +279,9 @@ public class soulListener extends Util implements Listener {
                 }
                 return;
             } else if (soulName.toLowerCase().contains("black")) {
+                Freedom.get_plugin().getLogger().info(soulPoints + " " +player.isSneaking());
                 if (soulPoints >= 5 && player.isSneaking()) {
+                    Freedom.get_plugin().getLogger().info("Checking");
                     soul.playerSneakEvent(player);
                 }
                 return;
@@ -401,7 +403,7 @@ public class soulListener extends Util implements Listener {
         double soulPoints = player.getPersistentDataContainer().getOrDefault(FreedomKeys.soulPoint(), PersistentDataType.DOUBLE, 0.0);
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
 
-        if (soulName != null && soulName.contains("Black")) {
+        if (soulName != null && soulName.toLowerCase().contains("black")) {
             if (soulPoints >= 5 && player.isSneaking()) {
                 soul.playerSneakEvent(player);
             }

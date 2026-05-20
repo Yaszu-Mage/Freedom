@@ -5,6 +5,7 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.*;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Subsystems.AdminManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
@@ -149,25 +150,76 @@ public class SpellCompiler extends Util {
                     ritualkeywords element = stmt.elements.isEmpty() ? ritualkeywords.air : stmt.elements.iterator().next();
                     switch (element) {
                         case fire -> {
-                            //todo flamethrower
-
+                            //flamethrower - launch fireballs in direction
+                            Vector direction = loc.getDirection();
+                            for (int i = 0; i < power; i++) {
+                                Fireball fireball = loc.getWorld().spawn(loc.clone().add(direction.clone().multiply(2)), Fireball.class);
+                                fireball.setVelocity(direction.multiply(1.5 + (power / 10.0)));
+                                fireball.setYield(Math.min(4.0f, power / 10.0f));
+                            }
+                            loc.getWorld().playSound(loc, Sound.ITEM_FIRECHARGE_USE, 1, 0.8f);
                         }
                         case air -> {
                             //fling up
-                            Lift(caster);
+                            caster.setVelocity(caster.getVelocity().add(new Vector(0, 1 + (power / 10.0), 0)));
                             caster.setVelocity(loc.getDirection().multiply(-(2 + (power / 2))));
+                            loc.getWorld().playSound(loc, Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 1.2f);
                         }
                         case water -> {
-                            //ig water blast?
+                            //water blast - push entities in direction
+                            Vector direction = loc.getDirection();
+                            for (Entity e : loc.getWorld().getNearbyEntities(loc, power, power, power)) {
+                                if (e instanceof LivingEntity le && e != caster) {
+                                    le.setVelocity(direction.multiply(1 + (power / 5.0)));
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100 + (power * 10), 1));
+                                }
+                            }
+                            loc.getWorld().playSound(loc, Sound.BLOCK_WATER_AMBIENT, 1, 0.9f);
                         }
                         case earth -> {
-                            //todo throw rock or raise range
+                            //throw rocks - summon falling blocks in direction
+                            Vector direction = loc.getDirection();
+                            for (int i = 0; i < Math.max(1, power / 5); i++) {
+                                Location rockLoc = loc.clone().add(direction.clone().multiply(2 + i));
+                                FallingBlock rock = loc.getWorld().spawnFallingBlock(rockLoc, Material.STONE.createBlockData());
+                                rock.setVelocity(direction.multiply(1.2 + (power / 15.0)));
+                                rock.setDropItem(false);
+                            }
+                            loc.getWorld().playSound(loc, Sound.BLOCK_STONE_BREAK, 1, 0.8f);
                         }
                         case poison -> {
-                            //todo green gas
+                            //green gas - apply poison effect to nearby entities
+                            for (Entity e : loc.getWorld().getNearbyEntities(loc, power, power, power)) {
+                                if (e instanceof LivingEntity le && e != caster) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100 + (power * 5), Math.min(4, power / 5)));
+                                }
+                            }
+                            for (int i = 0; i < 20 + power; i++) {
+                                Location particleLoc = loc.clone().add(
+                                    (Math.random() - 0.5) * power,
+                                    (Math.random() - 0.5) * power / 2,
+                                    (Math.random() - 0.5) * power
+                                );
+                                loc.getWorld().spawnParticle(Particle.DUST, particleLoc, 3, 0, 0, 0, new Particle.DustOptions(Color.GREEN, 1.5f));
+                            }
+                            loc.getWorld().playSound(loc, Sound.ENTITY_WITCH_DRINK, 1, 0.8f);
                         }
                         case wither -> {
-                            //todo black gas
+                            //black gas - apply wither effect to nearby entities
+                            for (Entity e : loc.getWorld().getNearbyEntities(loc, power, power, power)) {
+                                if (e instanceof LivingEntity le && e != caster) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100 + (power * 5), Math.min(4, power / 5)));
+                                }
+                            }
+                            for (int i = 0; i < 20 + power; i++) {
+                                Location particleLoc = loc.clone().add(
+                                    (Math.random() - 0.5) * power,
+                                    (Math.random() - 0.5) * power / 2,
+                                    (Math.random() - 0.5) * power
+                                );
+                                loc.getWorld().spawnParticle(Particle.DUST, particleLoc, 3, 0, 0, 0, new Particle.DustOptions(Color.BLACK, 1.5f));
+                            }
+                            loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_SPAWN, 1, 0.9f);
                         }
                     }
                 }
@@ -560,12 +612,17 @@ public class SpellCompiler extends Util {
     private static void consumeFromInventory(Player player, int powerRequired) {
         int debt = powerRequired;
         ItemStack[] contents = player.getInventory().getContents();
-        if (debt > getCurrency(player)) {
-            debt = debt-getCurrency(player);
-            setCurrency(0,player);
+
+        // First, try to use currency to pay off debt
+        int currencyAvailable = getCurrency(player);
+        if (debt <= currencyAvailable) {
+            // Currency is enough to cover the entire debt
+            removeCurrency(debt, player);
+            return;
         } else {
-            debt = 0;
-            removeCurrency(debt,player);
+            // Use all available currency and reduce debt
+            debt -= currencyAvailable;
+            setCurrency(0, player);
         }
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];

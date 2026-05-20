@@ -297,6 +297,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new NpcDebugGui.NpcDebugGuiListener(), this);
         Bukkit.getPluginManager().registerEvents(new CustomSongHandler(), this);
         Bukkit.getPluginManager().registerEvents(new Grapple_Hook(), this);
+        Bukkit.getPluginManager().registerEvents(new GatewayListener(), this);
         soulImbueManager = new SoulImbueManager();
         Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();
@@ -304,6 +305,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         ArtifactManager artifactManager = new ArtifactManager();
         Bukkit.getPluginManager().registerEvents(artifactManager, this);
         artifactManager.startTask();
+        Bukkit.getPluginManager().registerEvents(new BackpackManager(), this);
         xyz.yaszu.freedom.Subsystems.ProvinceManager.loadProvinces();
         TradeManager tradeManager = new TradeManager();
         Bukkit.getPluginManager().registerEvents(tradeManager, this);

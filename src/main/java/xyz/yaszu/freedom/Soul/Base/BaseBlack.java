@@ -491,10 +491,11 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
     }
 
     public void playerSneakEvent(Player player) {
+        Freedom.get_plugin().getLogger().info("RAN");
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
         player.getPersistentDataContainer().set(keygen("SoulPoint"),PersistentDataType.DOUBLE,SoulPoints - 5);
-        if (soulType == SoulTypes.Black) {
+        if (soulType == SoulTypes.Black || soulType == SoulTypes.BaseBlack) {
             new BukkitRunnable() {
                 @Override
                 public void run() {

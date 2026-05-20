@@ -15,6 +15,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -62,6 +63,11 @@ public class ItemListener extends Util implements Listener {
         register(new ScythePhighting(), "scythephighting",false);
         register(new Grapple_Hook(), "grapplehook",false);
         register(new Railgun(), "railgun",true);
+        register(new Shawarma(), "shawarma", false);
+        register(new Alfajores(), "alfajores", false);
+        register(new Lollipop(), "lollipop", false);
+        register(new BaseBackpack(), "basebackpack", false);
+        register(new DoubleBackpack(), "doublebackpack", false);
         ArtifactManager.registerArtifacts();
         for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
             register(artifact, artifact.getID(),false);
@@ -102,8 +108,11 @@ public class ItemListener extends Util implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         // Cancel book opening if a spell focus is being used in either hand
+
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+
             ItemStack item = event.getItem();
+
 
             if (item != null && (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.WRITABLE_BOOK)) {
                 ItemStack otherHand = event.getHand() == EquipmentSlot.HAND ?
@@ -116,30 +125,49 @@ public class ItemListener extends Util implements Listener {
                     return;
                 }
             }
-        }
 
-        ItemStack item = event.getItem();
-        if (item != null && item.hasItemMeta()) {
-            if (item.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
-                if (item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING).equals("grapplehook")) {
-                    return;
-                }
-            }
-            if (item.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
-                if (event.getPlayer().getInventory().getItemInMainHand().getItemMeta() != null) {
-                    if (xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(event.getPlayer()) || !event.getPlayer().hasCooldown(ITEMS.get("rifle").item())) {
-                        ITEMS.get("rifle").effect(event.getPlayer(), event, item);
+
+            item = event.getItem();
+            // Verify the item is actually being held (not just in cursor or being dropped)
+            // Make sure the clicked hand actually contains the item
+            ItemStack handItem = event.getHand() == EquipmentSlot.HAND ?
+                    event.getPlayer().getInventory().getItemInMainHand() :
+                    event.getPlayer().getInventory().getItemInOffHand();
+
+            if (item != null && !item.getType().isAir() && item.hasItemMeta() && item.equals(handItem)) {
+                if (item.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+                    if (item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING).equals("grapplehook")) {
+                        return;
                     }
                 }
-                event.setCancelled(true);
-            }
-            String itemId = item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING);
-            if (itemId != null) {
-                BaseItem baseItem = ITEMS.get(itemId);
-                if (baseItem != null) {
-                    baseItem.effect(event.getPlayer(), event, item);
+                if (item.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+                    if (event.getPlayer().getInventory().getItemInMainHand().getItemMeta() != null) {
+                        if (xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(event.getPlayer()) || !event.getPlayer().hasCooldown(ITEMS.get("rifle").item())) {
+                            ITEMS.get("rifle").effect(event.getPlayer(), event, item);
+                        }
+                    }
                     event.setCancelled(true);
                 }
+                String itemId = item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING);
+                if (itemId != null) {
+                    BaseItem baseItem = ITEMS.get(itemId);
+                    if (baseItem != null) {
+                        baseItem.effect(event.getPlayer(), event, item);
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        // Prevent any custom item from triggering its effect when dropped
+        ItemStack droppedItem = event.getItemDrop().getItemStack();
+        if (droppedItem != null && droppedItem.hasItemMeta()) {
+            if (droppedItem.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
+                // This is a custom item - don't allow any effects to trigger
+                // The item will just drop normally without opening inventories or triggering abilities
             }
         }
     }

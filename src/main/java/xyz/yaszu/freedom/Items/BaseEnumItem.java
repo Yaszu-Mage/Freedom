@@ -12,9 +12,14 @@ public enum BaseEnumItem {
     ale,
     rifle,
     timepiece,
-    ScythePhighting,
+    scythephighting,
     railgun,
     pizza,
     astral,
-    Grapple_Hook
+    Grapple_Hook,
+    shawarma,
+    alfajores,
+    lollipop,
+    basebackpack,
+    doublebackpack
 }
