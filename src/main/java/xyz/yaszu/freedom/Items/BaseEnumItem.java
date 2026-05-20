@@ -16,10 +16,13 @@ public enum BaseEnumItem {
     railgun,
     pizza,
     astral,
-    Grapple_Hook,
+    grapple_hook,
     shawarma,
     alfajores,
     lollipop,
     basebackpack,
-    doublebackpack
+    doublebackpack,
+    crunchwrapsupreme,
+    falafel,
+    bajablast
 }

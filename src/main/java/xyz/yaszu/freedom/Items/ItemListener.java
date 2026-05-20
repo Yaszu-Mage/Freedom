@@ -68,6 +68,9 @@ public class ItemListener extends Util implements Listener {
         register(new Lollipop(), "lollipop", false);
         register(new BaseBackpack(), "basebackpack", false);
         register(new DoubleBackpack(), "doublebackpack", false);
+        register(new CrunchwrapSupreme(),"crunchwrapsupreme",false);
+        register(new Falafel(),"falafel",false);
+        register(new BajaBlast(),"bajablast",false);
         ArtifactManager.registerArtifacts();
         for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
             register(artifact, artifact.getID(),false);
