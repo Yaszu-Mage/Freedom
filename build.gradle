@@ -10,7 +10,7 @@ version = '1.0-SNAPSHOT'
 // Shadow Jar Output Directory - can be overridden via -PshadowJarPath="path/to/output"
 ext {
     shadowJarOutputPath = project.hasProperty('shadowJarPath') ? project.property('shadowJarPath') :
-            "/home/yaszu/Downloads/Test_Server/plugins/"
+            "${projectDir}/testServer"
 }
 
 repositories {
