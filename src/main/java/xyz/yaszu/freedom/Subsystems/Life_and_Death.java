@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,6 +14,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Objective;
 import xyz.yaszu.freedom.Freedom;
@@ -102,13 +104,13 @@ public class Life_and_Death implements org.bukkit.event.Listener{
 
             if (isGhost) {
                 if (targetInDoubleVoid || viewer.getWorld().getName().equals("doublevoid") || player_util.does_player_have_tag(viewer, "ghost")) {
-                    viewer.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), target);
+                    viewer.showPlayer(Freedom.get_plugin(), target);
                 } else {
                     Freedom.get_plugin().getLogger().info("Ghost: " + viewer.getName() + " hidden: " + target.getName() + "");
-                    viewer.hidePlayer(Bukkit.getPluginManager().getPlugin("Freedom"), target);
+                    viewer.hidePlayer(Freedom.get_plugin(), target);
                 }
             } else {
-                viewer.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), target);
+                viewer.showPlayer(Freedom.get_plugin(), target);
             }
             updateAllVisibility(viewer);
         }
@@ -118,18 +120,38 @@ public class Life_and_Death implements org.bukkit.event.Listener{
         Freedom.get_plugin().getLogger().info("Updating all visibility for " + viewer.getName());
         boolean viewerInDoubleVoid = viewer.getWorld().getName().equals("doublevoid");
         boolean viewerCanSeeGhosts = viewerInDoubleVoid || player_util.does_player_have_tag(viewer, "ghost");
+        Entity display = (Freedom.soulAuras.getOrDefault(viewer.getUniqueId(),null) != null) ? Freedom.soulAuras.get(viewer.getUniqueId()) : (Entity) viewer;
+        ItemStack item = (viewer.getInventory().getItemInMainHand() == null) ? viewer.getInventory().getItemInMainHand() : ItemStack.of(Material.BEDROCK);
+        if (!item.getType().equals(Material.BEDROCK) && item.getPersistentDataContainer().has(keygen("soulglass"))) {
+            try {
+                if (item.getPersistentDataContainer().get(keygen("soulglass"), PersistentDataType.BOOLEAN)) {
+                    viewerCanSeeGhosts = true;
+                }
+            } catch (Exception e) {
+                Freedom.get_plugin().getLogger().info("ERR " + e +" updateAllVisibility");
+            }
+
+        }
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (viewer.equals(target)) continue;
 
             boolean targetIsGhost = target.getPersistentDataContainer().has(keygen("ghost"));
             if (targetIsGhost) {
                 if (viewerCanSeeGhosts || target.getWorld().getName().equals("doublevoid") || viewerInDoubleVoid) {
-                    viewer.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), target);
+                    viewer.showPlayer(Freedom.get_plugin(), target);
+                    viewer.showEntity(Freedom.get_plugin(), display);
                 } else {
-                    viewer.hidePlayer(Bukkit.getPluginManager().getPlugin("Freedom"), target);
+                    viewer.hidePlayer(Freedom.get_plugin(), target);
+                    viewer.hideEntity(Freedom.get_plugin(), display);
                 }
             } else {
-                viewer.showPlayer(Bukkit.getPluginManager().getPlugin("Freedom"), target);
+                viewer.showPlayer(Freedom.get_plugin(), target);
+                if (viewerCanSeeGhosts) {
+                    viewer.showEntity(Freedom.get_plugin(), display);
+                } else {
+                    viewer.hideEntity(Freedom.get_plugin(), display);
+                }
+
             }
         }
     }
@@ -140,12 +162,13 @@ public class Life_and_Death implements org.bukkit.event.Listener{
         updateAllVisibility(event.getPlayer());
     }
 
-    ConfigManager config = new ConfigManager(Bukkit.getPluginManager().getPlugin("Freedom").getConfig());
+    ConfigManager config = new ConfigManager(Freedom.get_plugin().getConfig());
     @EventHandler
     public void Can_See_Ghost(PlayerMoveEvent event) {
         if (event.getTo().getBlockX() == event.getFrom().getBlockX() && event.getTo().getBlockY() == event.getFrom().getBlockY() && event.getTo().getBlockZ() == event.getFrom().getBlockZ()) {
             return;
         }
+
         if (event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER) <= 0) {
             if (!event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
                 event.getPlayer().getPersistentDataContainer().set(keygen("ghost"), PersistentDataType.BOOLEAN,true);

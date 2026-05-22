@@ -20,6 +20,7 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import net.kyori.adventure.title.Title;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.*;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,6 +31,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -58,6 +61,7 @@ import xyz.yaszu.freedom.Items.Parts.ScythePhighting;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
 import xyz.yaszu.freedom.Soul.Base.BaseOrange;
+import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.Ultra.Mocha;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
@@ -74,8 +78,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static xyz.yaszu.freedom.Soul.Ultra.Green.removeOldFollowers;
-import static xyz.yaszu.freedom.Util.Util.dess;
-import static xyz.yaszu.freedom.Util.Util.keygen;
+import static xyz.yaszu.freedom.Util.Util.*;
 
 public final class Freedom extends JavaPlugin implements Listener {
 
@@ -183,6 +186,43 @@ public final class Freedom extends JavaPlugin implements Listener {
         removeOldFollowers();
         event.getPlayer().performCommand("rules");
         event.getPlayer().getPersistentDataContainer().set(FreedomKeys.spriteActive(),PersistentDataType.BOOLEAN,false);
+        Player player = event.getPlayer();
+        SoulTypes type = getSoulType(player);
+        ItemDisplay display = player.getLocation().getWorld().spawn(player.getLocation(), ItemDisplay.class);
+        display.setItemStack(auraItem(type));
+        display.setPersistent(false);
+        soulAuras.put(player, display);
+        aura(player).runTaskTimer(Freedom.get_plugin(), 0, 1);
+    }
+
+    public static ItemStack auraItem(SoulTypes type) {
+        ItemStack item = new ItemStack(Material.STICK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setItemModel(NamespacedKey.minecraft("soul_aura-" + type.toBaseVariant()));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static HashMap<Player, ItemDisplay> soulAuras = new HashMap<>();
+
+
+
+
+    public static BukkitRunnable aura(Player player) {
+        ItemDisplay display = soulAuras.get(player);
+        display.setTeleportDuration(10);
+        return new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline() || !player.isValid()) {
+                    display.remove();
+                    soulAuras.remove(player);
+                    this.cancel();
+                }
+                display.teleport(player.getLocation());
+            }
+        };
+
     }
 
     @EventHandler
@@ -390,6 +430,8 @@ public final class Freedom extends JavaPlugin implements Listener {
             container.remove(key);
         }
     }
+
+
     @Override
     public void onDisable() {
         PacketEvents.getAPI().terminate();
