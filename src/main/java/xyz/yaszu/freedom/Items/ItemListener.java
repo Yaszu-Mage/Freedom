@@ -82,7 +82,7 @@ public class ItemListener extends Util implements Listener {
         if (item.recipe() != null) {
             Bukkit.addRecipe(item.recipe());
         }
-        if (relic) {
+        if (relic || item.getType() == CustomItemType.SWORD) {
             RELICS.put(id, item);
         }
     }

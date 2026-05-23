@@ -77,6 +77,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static xyz.yaszu.freedom.Items.Swords.VisionHandler.randomVisions;
 import static xyz.yaszu.freedom.Soul.Ultra.Green.removeOldFollowers;
 import static xyz.yaszu.freedom.Util.Util.*;
 
@@ -412,6 +413,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         }.runTaskTimer(this, 0, 20);
         MazeManager.createMazeWorld("backrooms");
         NpcManager.update().runTaskTimer(this, 0, 20);
+        randomVisions();
     }
 
 

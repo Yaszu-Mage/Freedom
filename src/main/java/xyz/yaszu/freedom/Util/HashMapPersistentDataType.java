@@ -9,6 +9,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import xyz.yaszu.freedom.Blocks.BaseBlock;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,6 +34,7 @@ import java.util.UUID;
  *   <li>{@link Boolean}</li>
  *   <li>{@link Location} (world by UUID; pitch/yaw included)</li>
  *   <li>{@link ItemStack} (via {@code serializeAsBytes} / {@code deserializeBytes})</li>
+ *   <li>{@link BaseBlock} (by fully-qualified class name; reconstructed via no-arg constructor)</li>
  * </ul>
  *
  * <p>Uses the same v1/v2 dual-format detection as {@code InventoryPersistentDataType}:
@@ -45,6 +47,7 @@ import java.util.UUID;
  *   data.put("home",    someLocation);
  *   data.put("kills",   42);
  *   data.put("weapon",  someItemStack);
+ *   data.put("block",   someBaseBlock);
  *
  *   SaveContext ctx = new SaveContext(playerUUID, "player-data");
  *   pdc.set(key, HashMapPersistentDataType.get(ctx), data);
@@ -58,11 +61,18 @@ import java.util.UUID;
  *       UUID                owner = result.holderUUID(); // may be null
  *       String              label = result.label();      // may be null
  *
- *       Location home  = (Location)  map.get("home");
- *       int      kills = (Integer)   map.get("kills");
- *       ItemStack w    = (ItemStack) map.get("weapon");
+ *       Location  home  = (Location)  map.get("home");
+ *       int       kills = (Integer)   map.get("kills");
+ *       ItemStack w     = (ItemStack) map.get("weapon");
+ *       BaseBlock block = (BaseBlock) map.get("block");
  *   }
  * }</pre>
+ *
+ * <h3>BaseBlock contract:</h3>
+ * <p>Every concrete {@link BaseBlock} implementation <strong>must</strong> expose a
+ * public no-arg constructor so it can be reconstructed during deserialization.
+ * The class is identified by its fully-qualified name; renaming or moving the
+ * class will break existing stored data.</p>
  */
 public final class HashMapPersistentDataType
         implements PersistentDataType<byte[], Map<String, Object>> {
@@ -78,6 +88,8 @@ public final class HashMapPersistentDataType
     private static final byte TAG_BOOLEAN   = 5;
     private static final byte TAG_LOCATION  = 6;
     private static final byte TAG_ITEMSTACK = 7;
+    /** Concrete {@link BaseBlock} instance, stored by fully-qualified class name. */
+    private static final byte TAG_BASEBLOCK = 8;
 
     // -------------------------------------------------------------------------
     // Public API types
@@ -242,11 +254,15 @@ public final class HashMapPersistentDataType
             dos.writeInt(itemData.length);
             dos.write(itemData);
 
+        } else if (value instanceof BaseBlock v) {
+            dos.writeByte(TAG_BASEBLOCK);
+            writeBaseBlock(dos, v);
+
         } else {
             throw new IllegalArgumentException(
                     "Unsupported map value type: " +
                             (value == null ? "null" : value.getClass().getName()) +
-                            ". Supported: String, Integer, Long, Double, Boolean, Location, ItemStack");
+                            ". Supported: String, Integer, Long, Double, Boolean, Location, ItemStack, BaseBlock");
         }
     }
 
@@ -284,6 +300,45 @@ public final class HashMapPersistentDataType
         float  yaw   = dis.readFloat();
         float  pitch = dis.readFloat();
         return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    /**
+     * Writes a {@link BaseBlock} by its fully-qualified class name.
+     *
+     * <p>Format: {@code UTF className}. No additional fields are stored —
+     * state is fully restored by calling the no-arg constructor on load.</p>
+     */
+    private static void writeBaseBlock(DataOutputStream dos, BaseBlock block) throws IOException {
+        dos.writeUTF(block.getClass().getName());
+    }
+
+    /**
+     * Reads a {@link BaseBlock} written by {@link #writeBaseBlock}.
+     *
+     * <p>Reconstructs the instance via {@link Class#forName(String)} and its
+     * public no-arg constructor. Throws {@link IOException} (wrapping the root
+     * cause) if the class cannot be found or instantiated.</p>
+     */
+    private static BaseBlock readBaseBlock(DataInputStream dis) throws IOException {
+        String className = dis.readUTF();
+        try {
+            Class<?> clazz = Class.forName(className);
+            if (!BaseBlock.class.isAssignableFrom(clazz)) {
+                throw new IOException(
+                        "Class '" + className + "' does not implement BaseBlock");
+            }
+            return (BaseBlock) clazz.getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException e) {
+            throw new IOException(
+                    "BaseBlock class not found: '" + className + "'. " +
+                            "Was the class renamed or moved?", e);
+        } catch (NoSuchMethodException e) {
+            throw new IOException(
+                    "BaseBlock class '" + className + "' has no public no-arg constructor.", e);
+        } catch (Exception e) {
+            throw new IOException(
+                    "Failed to instantiate BaseBlock class '" + className + "': " + e.getMessage(), e);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -381,6 +436,7 @@ public final class HashMapPersistentDataType
                 dis.readFully(data);
                 yield ItemStack.deserializeBytes(data);
             }
+            case TAG_BASEBLOCK -> readBaseBlock(dis);
             default -> throw new IOException("Unknown value type tag: " + tag);
         };
     }
@@ -405,6 +461,9 @@ public final class HashMapPersistentDataType
      *     byte  typeTag
      *     ...   value bytes (same layout as v2)
      * </pre>
+     *
+     * <p>Note: TAG_BASEBLOCK (8) is supported in v1 reads as well — the same
+     * class-name UTF approach is used.</p>
      *
      * <p>If your original format differed, adjust the read order here to match.</p>
      */
@@ -455,6 +514,29 @@ public final class HashMapPersistentDataType
                         byte[] data = new byte[len];
                         ois.readFully(data);
                         yield ItemStack.deserializeBytes(data);
+                    }
+                    case TAG_BASEBLOCK -> {
+                        // Reconstruct via class name, same logic as v2
+                        String className = ois.readUTF();
+                        try {
+                            Class<?> clazz = Class.forName(className);
+                            if (!BaseBlock.class.isAssignableFrom(clazz)) {
+                                throw new IOException(
+                                        "Class '" + className + "' does not implement BaseBlock");
+                            }
+                            yield (BaseBlock) clazz.getDeclaredConstructor().newInstance();
+                        } catch (ClassNotFoundException e) {
+                            throw new IOException(
+                                    "BaseBlock class not found: '" + className + "'. " +
+                                            "Was the class renamed or moved?", e);
+                        } catch (NoSuchMethodException e) {
+                            throw new IOException(
+                                    "BaseBlock class '" + className + "' has no public no-arg constructor.", e);
+                        } catch (Exception e) {
+                            throw new IOException(
+                                    "Failed to instantiate BaseBlock class '" + className +
+                                            "': " + e.getMessage(), e);
+                        }
                     }
                     default -> throw new IOException("Unknown value type tag in v1 data: " + tag);
                 };

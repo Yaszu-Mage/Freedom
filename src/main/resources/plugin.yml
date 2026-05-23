@@ -76,5 +76,21 @@ commands:
     description: "pay"
   redcastle:
     description: "Red Castle"
-softdepend: [ "SkinsRestorer", "PacketEvents", "LibsDisguises" ]
+dependencies:
+  bootstrap:
+    PacketEvents:
+      load: AFTER
+      required: true
+    BetterModel:
+      load: AFTER
+      required: true
+    WorldEdit:
+      load: AFTER
+      required: true
+    SkinsRestorer:
+      load: AFTER
+      required: true
+    LibsDisguises:
+      load: AFTER
+      required: true
 load: POSTWORLD

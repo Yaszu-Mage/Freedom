@@ -6,5 +6,6 @@ public enum CustomItemType {
     COLOR_SPECIFIC,
     PART,
     ARTIFACT,
-    BOOK
+    BOOK,
+    SWORD
 }

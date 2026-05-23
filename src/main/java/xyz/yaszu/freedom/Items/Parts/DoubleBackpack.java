@@ -38,7 +38,6 @@ public class DoubleBackpack extends Util implements BaseItem {
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
-
         if (!item.getItemMeta().getPersistentDataContainer().has(keygen("backpack"))) {
             ItemMeta meta = item.getItemMeta();
             meta.getPersistentDataContainer().set(keygen("backpack"), InventoryPersistentDataType.get(), BackpackManager.BackpackGui.create(54));
