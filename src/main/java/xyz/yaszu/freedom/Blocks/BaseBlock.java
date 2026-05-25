@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Blocks;
 
+import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 
 public interface BaseBlock {
@@ -8,6 +9,7 @@ public interface BaseBlock {
     public Behavior behavior();
     public int toolValue();
     public boolean waterNeeded();
+    public double scale();
     public enum Behavior {
         Farm,
         Building,
@@ -16,7 +18,10 @@ public interface BaseBlock {
     public enum CollisionSize {
         Small,
         Medium,
-        Large
+        Large,
+        Teeny,
+        Itsy
     }
+    public Object placeSound();
 
 }

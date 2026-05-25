@@ -10,7 +10,8 @@ version = '1.0-SNAPSHOT'
 // Shadow Jar Output Directory - can be overridden via -PshadowJarPath="path/to/output"
 ext {
     shadowJarOutputPath = project.hasProperty('shadowJarPath') ? project.property('shadowJarPath') :
-            "${projectDir}/testServer"
+            "/home/yaszu/Downloads/Test_Server/plugins"
+            //"${projectDir}/testServer"
 }
 
 repositories {
@@ -54,7 +55,7 @@ repositories {
 
 dependencies {
     compileOnly("com.github.retrooper:packetevents-spigot:2.11.2")
-    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+") {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
         exclude group: "org.yaml", module: "snakeyaml"
     }
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.0.1")
@@ -65,7 +66,7 @@ dependencies {
     implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation('com.arakelian:faker:4.0.1')
     implementation("com.ibm.icu:icu4j:76.1")
-
+    compileOnly 'net.dmulloy2:ProtocolLib:5.4.0'
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -82,16 +83,13 @@ java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release.set(targetJavaVersion)
+        options.release.set(25)
     }
 }
 

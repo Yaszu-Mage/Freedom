@@ -30,13 +30,16 @@ public class Windforce extends Util implements BaseItem, Sword {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-
+        if (Sword.canUse(player,this)) {
+            // do Windforce
+        }
     }
 
     @Override
     public Recipe recipe() {
         return null;
     }
+
 
     @Override
     public CustomItemType getType() {
@@ -46,5 +49,15 @@ public class Windforce extends Util implements BaseItem, Sword {
     @Override
     public List<Component> visions() {
         return List.of();
+    }
+
+    @Override
+    public int Cooldown() {
+        return 0;
+    }
+
+    @Override
+    public SwordType SwordType() {
+        return SwordType.Windforce;
     }
 }

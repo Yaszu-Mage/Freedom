@@ -24,5 +24,6 @@ public enum BaseEnumItem {
     doublebackpack,
     crunchwrapsupreme,
     falafel,
-    bajablast
+    bajablast,
+    illumina
 }

@@ -1,5 +1,11 @@
 package xyz.yaszu.freedom;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
@@ -20,6 +26,7 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import net.kyori.adventure.title.Title;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,9 +47,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Transformation;
+import org.joml.Vector3f;
 import xyz.yaszu.freedom.Alchemy.Alchemy;
 import xyz.yaszu.freedom.Alchemy.MazeManager;
 import xyz.yaszu.freedom.Alchemy.voidGenerator;
+import xyz.yaszu.freedom.Blocks.BlockHandler;
 import xyz.yaszu.freedom.Commands.DevTools.NpcDebugCommand;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
@@ -128,30 +138,10 @@ public final class Freedom extends JavaPlugin implements Listener {
             if (profile != null) {
                 event.quitMessage(Component.text(profile.sudoName() + " has left", NamedTextColor.YELLOW));
             }
-            if (event.getPlayer().getUniqueId() == UUID.fromString("83849cc9-677d-4599-8a2d-09d1c0469038") || event.getPlayer().getUniqueId() == UUID.fromString("7b39a2df-ead1-4f91-910e-f1542fa8c333")) {
-                event.getPlayer().getLocation().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
-            } else {
-                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
-                type.forEach(player -> {
-                    
-                    
-                    
-                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
-                    new BukkitRunnable() {
-                        int tick = 0;
-                        @Override
-                        public void run() {
-                            PacketManager.setSky(player, PacketManager.SkyType.END);
-                            tick++;
-                            if (tick >= 40) {
-                                this.cancel();
-                            }
-                        }
-                    }.runTaskLater(Freedom.get_plugin(), 1);
-                });
-            }
+            AdminEffects(!event.getPlayer().getName().equals("TheAntiClock"), event.getPlayer().getLocation().getWorld(), event.getPlayer().getLocation(), event.getPlayer());
         }
         AdminManager.handleQuit(event.getPlayer());
+        clearAura(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -162,65 +152,115 @@ public final class Freedom extends JavaPlugin implements Listener {
             if (profile != null) {
                 event.joinMessage(Component.text(profile.sudoName() + " has joined", NamedTextColor.YELLOW));
             }
-            if (!event.getPlayer().getName().equals("TheAntiClock")) {
-                event.getPlayer().getLocation().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
-            } else {
-                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
-                type.forEach(player -> {
-                    
-                    
-                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
-                    new BukkitRunnable() {
-                        int tick = 0;
-                        @Override
-                        public void run() {
-                            PacketManager.setSky(player, PacketManager.SkyType.END);
-                            tick++;
-                            if (tick >= 40) {
-                                this.cancel();
-                            }
-                        }
-                    }.runTaskLater(Freedom.get_plugin(), 1);
-                });
-            }
+            AdminEffects(!event.getPlayer().getName().equals("TheAntiClock"), event.getPlayer().getLocation().getWorld(), event.getPlayer().getLocation(), event.getPlayer());
         }
         removeOldFollowers();
         event.getPlayer().performCommand("rules");
         event.getPlayer().getPersistentDataContainer().set(FreedomKeys.spriteActive(),PersistentDataType.BOOLEAN,false);
-        Player player = event.getPlayer();
-        SoulTypes type = getSoulType(player);
-        ItemDisplay display = player.getLocation().getWorld().spawn(player.getLocation(), ItemDisplay.class);
-        display.setItemStack(auraItem(type));
-        display.setPersistent(false);
-        soulAuras.put(player, display);
-        aura(player).runTaskTimer(Freedom.get_plugin(), 0, 1);
+        ensureAura(event.getPlayer());
+    }
+
+    private static void AdminEffects(boolean event, org.bukkit.World event1, Location event2, Player event3) {
+        if (event) {
+            event1.strikeLightningEffect(event2);
+        } else {
+            Collection<Player> type = event3.getLocation().getNearbyEntitiesByType(Player.class, 10);
+            type.forEach(player -> {
+
+
+                player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
+                new BukkitRunnable() {
+                    int tick = 0;
+
+                    @Override
+                    public void run() {
+                        PacketManager.setSky(player, PacketManager.SkyType.END);
+                        tick++;
+                        if (tick >= 40) {
+                            this.cancel();
+                        }
+                    }
+                }.runTaskLater(Freedom.get_plugin(), 1);
+            });
+        }
     }
 
     public static ItemStack auraItem(SoulTypes type) {
         ItemStack item = new ItemStack(Material.STICK);
         ItemMeta meta = item.getItemMeta();
-        meta.setItemModel(NamespacedKey.minecraft("soul_aura-" + type.toBaseVariant()));
+        meta.setItemModel(NamespacedKey.minecraft("soul_aura-" + type.toBaseVariant().toString().toLowerCase()));
         item.setItemMeta(meta);
         return item;
     }
 
-    public static HashMap<Player, ItemDisplay> soulAuras = new HashMap<>();
+    public static HashMap<UUID, ItemDisplay> soulAuras = new HashMap<>();
+    private static final Map<UUID, BukkitRunnable> auraTasks = new HashMap<>();
+
+    private static void clearAura(UUID uuid) {
+        BukkitRunnable task = auraTasks.remove(uuid);
+        if (task != null) task.cancel();
+
+        ItemDisplay display = soulAuras.remove(uuid);
+        if (display != null && display.isValid()) {
+            display.remove();
+        }
+    }
+
+    private static void ensureAura(Player player) {
+        UUID uuid = player.getUniqueId();
+        ItemDisplay display = soulAuras.get(uuid);
+
+        if (display == null || !display.isValid()) {
+            clearAura(uuid);
+            SoulTypes type = getSoulType(player);
+            display = player.getLocation().getWorld().spawn(player.getLocation(), ItemDisplay.class);
+            display.setItemStack(auraItem(type));
+            display.setPersistent(false);
+            soulAuras.put(uuid, display);
+
+            Util.hideEntityFromPlayer(player, display);
+            for (Player viewer : Bukkit.getOnlinePlayers()) {
+                Util.hideEntityFromPlayer(viewer, display);
+            }
+        }
+
+        if (!auraTasks.containsKey(uuid)) {
+            BukkitRunnable task = aura(player);
+            auraTasks.put(uuid, task);
+            task.runTaskTimer(Freedom.get_plugin(), 0, 1);
+        }
+    }
 
 
 
 
     public static BukkitRunnable aura(Player player) {
-        ItemDisplay display = soulAuras.get(player);
-        display.setTeleportDuration(10);
+        ItemDisplay display = soulAuras.get(player.getUniqueId());
+        if (display == null) {
+            return new BukkitRunnable() {
+                @Override
+                public void run() {
+                    this.cancel();
+                }
+            };
+        }
+        display.setTeleportDuration(2);
+        display.setTransformation(new Transformation(
+                new Vector3f(0,0,0),
+                display.getTransformation().getLeftRotation(),
+                new Vector3f(4,4,4),
+                display.getTransformation().getRightRotation()
+        ));
         return new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline() || !player.isValid()) {
-                    display.remove();
-                    soulAuras.remove(player);
+                ItemDisplay current = soulAuras.get(player.getUniqueId());
+                if (current == null || !current.isValid() || !player.isOnline() || !player.isValid()) {
+                    clearAura(player.getUniqueId());
                     this.cancel();
+                    return;
                 }
-                display.teleport(player.getLocation());
+                current.teleport(player.getLocation().clone().add(0,2,0).setRotation(player.getLocation().getYaw(),0));
             }
         };
 
@@ -229,27 +269,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         if (AdminManager.isSudo(event.getPlayer())) {
-            if (!event.getPlayer().getName().equals("TheAntiClock")) {
-                event.getTo().getWorld().strikeLightningEffect(event.getTo());
-            } else {
-                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
-                type.forEach(player -> {
-                    
-                    
-                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
-                    new BukkitRunnable() {
-                        int tick = 0;
-                        @Override
-                        public void run() {
-                            PacketManager.setSky(player, PacketManager.SkyType.END);
-                            tick++;
-                            if (tick >= 40) {
-                                this.cancel();
-                            }
-                        }
-                    }.runTaskLater(Freedom.get_plugin(), 1);
-                });
-            }
+            AdminEffects(!event.getPlayer().getName().equals("TheAntiClock"), event.getPlayer().getLocation().getWorld(), event.getPlayer().getLocation(), event.getPlayer());
 
         }
     }
@@ -257,28 +277,10 @@ public final class Freedom extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         if (AdminManager.isSudo(event.getPlayer())) {
-            if (!event.getPlayer().getName().equals("TheAntiClock")) {
-                event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
-            } else {
-                Collection<Player> type = event.getPlayer().getLocation().getNearbyEntitiesByType(Player.class, 10);
-                type.forEach(player -> {
-                    
-                    
-                    player.showTitle(Title.title(dess("Look up at the stars"), dess("")));
-                    new BukkitRunnable() {
-                        int tick = 0;
-                        @Override
-                        public void run() {
-                            PacketManager.setSky(player, PacketManager.SkyType.END);
-                            tick++;
-                            if (tick >= 40) {
-                                this.cancel();
-                            }
-                        }
-                    }.runTaskLater(Freedom.get_plugin(), 1);
-                });
-            }
+            AdminEffects(!event.getPlayer().getName().equals("TheAntiClock"), event.getPlayer().getLocation().getWorld(), event.getPlayer().getLocation(), event.getPlayer());
         }
+        ensureAura(event.getPlayer());
+        Life_and_Death.updateAllVisibility(event.getPlayer());
     }
 
 
@@ -308,7 +310,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new selectionUi(),this);
         Bukkit.getPluginManager().registerEvents(new black_flash(),this);
         Bukkit.getPluginManager().registerEvents(new Life_and_Death(), this);
-        Bukkit.getPluginManager().registerEvents(this,this);
         Bukkit.getPluginManager().registerEvents(new ChatManager(), this);
         //Bukkit.getPluginManager().registerEvents(new Black(),this);
         Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
@@ -324,8 +325,10 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new PainScythe(), this);
         Bukkit.getPluginManager().registerEvents(new Information_Handler(), this);
         Bukkit.getPluginManager().registerEvents(new ChunkLootManager(), this);
+        Bukkit.getPluginManager().registerEvents(new RandomChestGenerator(), this);
         Bukkit.getPluginManager().registerEvents(new SettingsMenu(), this);
         Bukkit.getPluginManager().registerEvents(new TrustMenu(), this);
+        Bukkit.getPluginManager().registerEvents(new BlockHandler(),this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.GUI.SettingsGui.TrustMemberMenu(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.SitManager(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
@@ -414,8 +417,24 @@ public final class Freedom extends JavaPlugin implements Listener {
         MazeManager.createMazeWorld("backrooms");
         NpcManager.update().runTaskTimer(this, 0, 20);
         randomVisions();
-    }
+        protocolManager = ProtocolLibrary.getProtocolManager();
+        protocolManager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL,
+                PacketType.Play.Server.SPAWN_ENTITY,
+                PacketType.Play.Server.NAMED_ENTITY_SPAWN,
+                PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                Player receiver = event.getPlayer();
+                Entity entity = event.getPacket().getEntityModifier(event).read(0);
 
+                if (entity != null && Util.hiddenEntities.contains(entity.getUniqueId())) {
+                    // Hide this entity from this specific player
+                    event.setCancelled(true);
+                }
+            }
+        });
+    }
+    private ProtocolManager protocolManager;
 
     public static Util util = new Util();
     private SoulImbueManager soulImbueManager;
@@ -445,6 +464,16 @@ public final class Freedom extends JavaPlugin implements Listener {
             // Actually, we want persistence, so we leave them and hope loadVisits handles it.
             // But WorldEdit sessions are in-memory.
         }
+        for (BukkitRunnable task : new ArrayList<>(auraTasks.values())) {
+            task.cancel();
+        }
+        auraTasks.clear();
+        for (ItemDisplay display : new ArrayList<>(soulAuras.values())) {
+            if (display != null && display.isValid()) {
+                display.remove();
+            }
+        }
+        soulAuras.clear();
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
     }

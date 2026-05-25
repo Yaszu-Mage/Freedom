@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Objective;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.ConfigManager;
@@ -30,7 +31,7 @@ import static xyz.yaszu.freedom.Freedom.clearPlayerPersistentData;
 import static xyz.yaszu.freedom.Util.Util.*;
 
 
-public class Life_and_Death implements org.bukkit.event.Listener{
+public class Life_and_Death extends Util implements org.bukkit.event.Listener{
     @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event) {
         if (!event.getPlayer().getPersistentDataContainer().has(keygen("life"))) {
@@ -83,6 +84,18 @@ public class Life_and_Death implements org.bukkit.event.Listener{
             player_util.set_type_value(event.getPlayer(),"ghost",true,PersistentDataType.BOOLEAN);
             event.getPlayer().setAllowFlight(true);
             updateVisibility(event.getPlayer());
+            // Ensure the dead player's aura is visible to ghost viewers
+            updateAllVisibility(event.getPlayer());
+            // Reschedule visibility updates for all viewers after a short delay
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    updateAllVisibility(event.getPlayer());
+                    for (Player viewer : Bukkit.getOnlinePlayers()) {
+                        updateAllVisibility(viewer);
+                    }
+                }
+            }.runTaskLater(Freedom.get_plugin(), 2);
         }
         Player player = event.getPlayer();
     }
@@ -117,39 +130,79 @@ public class Life_and_Death implements org.bukkit.event.Listener{
     }
 
     public static void updateAllVisibility(Player viewer) {
-        Freedom.get_plugin().getLogger().info("Updating all visibility for " + viewer.getName());
-        boolean viewerInDoubleVoid = viewer.getWorld().getName().equals("doublevoid");
-        boolean viewerCanSeeGhosts = viewerInDoubleVoid || player_util.does_player_have_tag(viewer, "ghost");
-        Entity display = (Freedom.soulAuras.getOrDefault(viewer.getUniqueId(),null) != null) ? Freedom.soulAuras.get(viewer.getUniqueId()) : (Entity) viewer;
-        ItemStack item = (viewer.getInventory().getItemInMainHand() == null) ? viewer.getInventory().getItemInMainHand() : ItemStack.of(Material.BEDROCK);
-        if (!item.getType().equals(Material.BEDROCK) && item.getPersistentDataContainer().has(keygen("soulglass"))) {
-            try {
-                if (item.getPersistentDataContainer().get(keygen("soulglass"), PersistentDataType.BOOLEAN)) {
-                    viewerCanSeeGhosts = true;
-                }
-            } catch (Exception e) {
-                Freedom.get_plugin().getLogger().info("ERR " + e +" updateAllVisibility");
-            }
+         boolean viewerInDoubleVoid = viewer.getWorld().getName().equals("doublevoid");
+         boolean viewerCanSeeGhosts = viewerInDoubleVoid || player_util.does_player_have_tag(viewer, "ghost");
+         Entity display = (Freedom.soulAuras.getOrDefault(viewer.getUniqueId(),null) != null) ? Freedom.soulAuras.get(viewer.getUniqueId()) : null;
 
+         // Check BOTH main hand and off-hand for soulglass item
+         ItemStack mainHand = viewer.getInventory().getItemInMainHand();
+         ItemStack offHand = viewer.getInventory().getItemInOffHand();
+
+         boolean hasSoulGlass = false;
+
+         // Check main hand
+         if (mainHand != null && mainHand.getType() != Material.AIR) {
+             try {
+                 String itemId = mainHand.getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING);
+                 if ("soulglass".equals(itemId)) {
+                     hasSoulGlass = true;
+                 }
+             } catch (Exception ignored) {}
+         }
+
+         // Check off-hand if not found
+         if (!hasSoulGlass && offHand != null && offHand.getType() != Material.AIR) {
+             try {
+                 String itemId = offHand.getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING);
+                 if ("soulglass".equals(itemId)) {
+                     hasSoulGlass = true;
+                 }
+             } catch (Exception ignored) {}
+         }
+
+         // Enable visibility if holding soulglass
+         if (hasSoulGlass) {
+             viewerCanSeeGhosts = true;
+         }
+        if (display == null) {
+            return;}
+        if (viewerCanSeeGhosts) {
+            showEntityToPlayer(viewer,display);
+        } else {
+            hideEntityFromPlayer(viewer,display);
         }
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (viewer.equals(target)) continue;
 
             boolean targetIsGhost = target.getPersistentDataContainer().has(keygen("ghost"));
+            Entity targetAura = Freedom.soulAuras.get(target.getUniqueId());
+
             if (targetIsGhost) {
                 if (viewerCanSeeGhosts || target.getWorld().getName().equals("doublevoid") || viewerInDoubleVoid) {
                     viewer.showPlayer(Freedom.get_plugin(), target);
-                    viewer.showEntity(Freedom.get_plugin(), display);
+                    // Show target's aura if it exists
+                    if (targetAura != null) {
+                        showEntityToPlayer(viewer, targetAura);
+                    }
                 } else {
                     viewer.hidePlayer(Freedom.get_plugin(), target);
-                    viewer.hideEntity(Freedom.get_plugin(), display);
+                    // Hide target's aura if it exists
+                    if (targetAura != null) {
+                        hideEntityFromPlayer(viewer, targetAura);
+                    }
                 }
             } else {
                 viewer.showPlayer(Freedom.get_plugin(), target);
                 if (viewerCanSeeGhosts) {
-                    viewer.showEntity(Freedom.get_plugin(), display);
+                    // Show target's aura if it exists
+                    if (targetAura != null) {
+                        showEntityToPlayer(viewer, targetAura);
+                    }
                 } else {
-                    viewer.hideEntity(Freedom.get_plugin(), display);
+                    // Hide target's aura if it exists
+                    if (targetAura != null) {
+                        hideEntityFromPlayer(viewer, targetAura);
+                    }
                 }
 
             }
@@ -168,7 +221,7 @@ public class Life_and_Death implements org.bukkit.event.Listener{
         if (event.getTo().getBlockX() == event.getFrom().getBlockX() && event.getTo().getBlockY() == event.getFrom().getBlockY() && event.getTo().getBlockZ() == event.getFrom().getBlockZ()) {
             return;
         }
-
+        updateAllVisibility(event.getPlayer());
         if (event.getPlayer().getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER) <= 0) {
             if (!event.getPlayer().getPersistentDataContainer().has(keygen("ghost"))) {
                 event.getPlayer().getPersistentDataContainer().set(keygen("ghost"), PersistentDataType.BOOLEAN,true);

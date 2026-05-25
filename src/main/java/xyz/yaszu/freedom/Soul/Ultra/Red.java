@@ -230,12 +230,12 @@ public class Red extends Util implements Base_Soul {
 
     @Override
     public long AbilityTwo_Cooldown() {
-        return 1000;
+        return 30000;
     }
 
     @Override
     public long AbilityOne_Cooldown(Object obj) {
-        return 30000;
+        return 1000;
     }
 
     @Override

@@ -13,8 +13,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -22,6 +22,11 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.World;
+import xyz.yaszu.freedom.Blocks.AdminPlush.*;
+import xyz.yaszu.freedom.Blocks.BaseBlock;
+import xyz.yaszu.freedom.Blocks.Silly.Broker;
+import xyz.yaszu.freedom.Blocks.Silly.Duck;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
 import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
@@ -31,6 +36,9 @@ import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
 import xyz.yaszu.freedom.Items.Parts.*;
 import xyz.yaszu.freedom.Items.Relics.Glock;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
+import xyz.yaszu.freedom.Items.Swords.Items.Illumina;
+import xyz.yaszu.freedom.Items.Swords.Sword;
+import xyz.yaszu.freedom.Items.Swords.VisionHandler;
 import xyz.yaszu.freedom.Items.Upgrades.AstralItem;
 import xyz.yaszu.freedom.Items.Upgrades.Evolve;
 import xyz.yaszu.freedom.Items.Upgrades.Reset;
@@ -43,41 +51,58 @@ import java.util.*;
 public class ItemListener extends Util implements Listener {
     public static final Map<String, BaseItem> ITEMS = new HashMap<>();
     public static final Map<String, BaseItem> RELICS = new HashMap<>();
+    public static HashMap<UUID, HashMap<Sword.SwordType, Long>> SWORD_COOLDOWNS = new HashMap<>();
+
+    // Shared key prefix used by both ItemListener and RandomChestGenerator
+    public static final String RELIC_SPAWNED_PREFIX = "relicSpawned_";
+
     public static void registerItems() {
-        register(new Ale(),"ale",false);
-        register(new Beer(),"beer",false);
-        register(new Wine(),"wine",false);
-        register(new Evolve(), "evolutionstone",false);
-        register(new Revival(), "revival",false);
-        register(new Rifle(), "rifle",false);
-        register(new TimePiece(), "timepiece",false);
-        register(new Reset(), "resetstone",false);
-        register(new Burger(),"burger",false);
-        register(new Pizza(),"pizza",false);
-        register(new AstralItem(),"astral",false);
-        register(new PainScythe(),"painscythe",true);
-        register(new Glock(), "glock",true);
-        register(new SpellFocus.Orb(), "orb",false);
-        register(new SpellFocus.Staff(), "staff",false);
-        register(new SpellFocus.Grimoire(), "grimoire",false);
-        register(new ScythePhighting(), "scythephighting",false);
-        register(new Grapple_Hook(), "grapplehook",false);
-        register(new Railgun(), "railgun",true);
+        register(new Broker(), "broker", false);
+        register(new Duck(), "duck", false);
+        SoulGlass soulGlass = new SoulGlass();
+        register(new Ale(), "ale", false);
+        register(new Beer(), "beer", false);
+        register(new Wine(), "wine", false);
+        register(new Evolve(), "evolutionstone", false);
+        register(new Revival(), "revival", false);
+        register(new Rifle(), "rifle", false);
+        register(new TimePiece(), "timepiece", false);
+        register(new Reset(), "resetstone", false);
+        register(new Burger(), "burger", false);
+        register(new Pizza(), "pizza", false);
+        register(new AstralItem(), "astral", false);
+        register(new PainScythe(), "painscythe", true);
+        register(new Glock(), "glock", true);
+        register(new SpellFocus.Orb(), "orb", false);
+        register(new SpellFocus.Staff(), "staff", false);
+        register(new SpellFocus.Grimoire(), "grimoire", false);
+        register(new ScythePhighting(), "scythephighting", false);
+        register(new Grapple_Hook(), "grapplehook", false);
+        register(new Railgun(), "railgun", true);
         register(new Shawarma(), "shawarma", false);
         register(new Alfajores(), "alfajores", false);
         register(new Lollipop(), "lollipop", false);
         register(new BaseBackpack(), "basebackpack", false);
         register(new DoubleBackpack(), "doublebackpack", false);
-        register(new CrunchwrapSupreme(),"crunchwrapsupreme",false);
-        register(new Falafel(),"falafel",false);
-        register(new BajaBlast(),"bajablast",false);
+        register(new CrunchwrapSupreme(), "crunchwrapsupreme", false);
+        register(new Falafel(), "falafel", false);
+        register(new BajaBlast(), "bajablast", false);
+        register(soulGlass, "soulglass", true);
+        register(new ZanePlush(), "zaneplush",false);
+        register(new YaszuPlush(), "yaszuplush",false);
+        register(new SylPlush(),"sylplush",false);
+        register(new NitroPlush(), "nitroplush",false);
+        register(new GhostPlush(), "ghostplush",false);
+        register(new AugurmovPlush(), "augurmovplush",false);
+        Bukkit.getPluginManager().registerEvents(soulGlass, Freedom.get_plugin());
+        register(new Illumina(), "illumina", false);
         ArtifactManager.registerArtifacts();
         for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
-            register(artifact, artifact.getID(),false);
+            register(artifact, artifact.getID(), false);
         }
     }
 
-    private static void register(BaseItem item, String id,Boolean relic) {
+    private static void register(BaseItem item, String id, Boolean relic) {
         ITEMS.put(id, item);
         if (item.recipe() != null) {
             Bukkit.addRecipe(item.recipe());
@@ -87,35 +112,64 @@ public class ItemListener extends Util implements Listener {
         }
     }
 
+    /**
+     * Returns the overworld (first world) consistently.
+     * Both ItemListener and RandomChestGenerator must use this same method
+     * so relic-spawned flags are read/written to the same world PDC.
+     */
+    public static World getTrackedWorld() {
+        return Bukkit.getWorlds().stream().findFirst().orElseThrow();
+    }
+
+    /**
+     * Marks a relic as no longer in-world (dropped item despawned or was destroyed).
+     * Clears the flag so chest generators may spawn it again.
+     */
+    public static void unmarkRelicSpawned(String id) {
+        getTrackedWorld().getPersistentDataContainer().remove(keygen(RELIC_SPAWNED_PREFIX + id));
+        Freedom.get_plugin().getLogger().info("ItemListener: relic '" + id + "' unmarked (removed from world)");
+    }
+
     @EventHandler
     public void onOffhandItem(PlayerInventorySlotChangeEvent event) {
         ItemStack mainhand = event.getPlayer().getInventory().getItemInMainHand();
         ItemStack offhand = event.getPlayer().getInventory().getItemInOffHand();
-        if (event.getSlot() != 40 && event.getSlot() >= 8|| (event.getSlot() > 8) && (event.getSlot() != 40)) return;
+        if (event.getSlot() != 40 && event.getSlot() >= 8 || (event.getSlot() > 8) && (event.getSlot() != 40))
+            return;
         offhand = event.getNewItemStack();
-            if (offhand.getItemMeta() != null) {
-                if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
-                    if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
-                        if (event.getSlot() == 40) {
-                            meta.setChargedProjectiles(new ArrayList<>());
-                        } else {
-                            meta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
-                        }
-                        offhand.setItemMeta(meta);
-                        event.getPlayer().getInventory().setItem(event.getSlot(), offhand);
+        if (offhand.getItemMeta() != null) {
+            if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+                if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
+                    if (event.getSlot() == 40) {
+                        meta.setChargedProjectiles(new ArrayList<>());
+                    } else {
+                        meta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
                     }
+                    offhand.setItemMeta(meta);
+                    event.getPlayer().getInventory().setItem(event.getSlot(), offhand);
                 }
             }
         }
+    }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        // Cancel book opening if a spell focus is being used in either hand
-
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 
             ItemStack item = event.getItem();
-
+            if (item == null) return;
+            if (item.getPersistentDataContainer().has(keygen("sword"))) {
+                String itemId = item.getItemMeta().getPersistentDataContainer().get(FreedomKeys.itemId(), PersistentDataType.STRING);
+                if (itemId != null) {
+                    BaseItem baseItem = ITEMS.get(itemId);
+                    if (baseItem instanceof BaseBlock || baseItem.getType() == CustomItemType.BLOCK) {
+                        return;
+                    }
+                    baseItem.effect(event.getPlayer(), event, item);
+                    event.setCancelled(true);
+                    return;
+                }
+            }
 
             if (item != null && (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.WRITABLE_BOOK)) {
                 ItemStack otherHand = event.getHand() == EquipmentSlot.HAND ?
@@ -129,10 +183,7 @@ public class ItemListener extends Util implements Listener {
                 }
             }
 
-
             item = event.getItem();
-            // Verify the item is actually being held (not just in cursor or being dropped)
-            // Make sure the clicked hand actually contains the item
             ItemStack handItem = event.getHand() == EquipmentSlot.HAND ?
                     event.getPlayer().getInventory().getItemInMainHand() :
                     event.getPlayer().getInventory().getItemInOffHand();
@@ -155,6 +206,10 @@ public class ItemListener extends Util implements Listener {
                 if (itemId != null) {
                     BaseItem baseItem = ITEMS.get(itemId);
                     if (baseItem != null) {
+                        if (itemId.equals("soulglass")) {
+                            baseItem.effect(event.getPlayer(), event, item);
+                            return;
+                        }
                         baseItem.effect(event.getPlayer(), event, item);
                         event.setCancelled(true);
                     }
@@ -165,12 +220,10 @@ public class ItemListener extends Util implements Listener {
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        // Prevent any custom item from triggering its effect when dropped
         ItemStack droppedItem = event.getItemDrop().getItemStack();
         if (droppedItem != null && droppedItem.hasItemMeta()) {
             if (droppedItem.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())) {
-                // This is a custom item - don't allow any effects to trigger
-                // The item will just drop normally without opening inventories or triggering abilities
+                // Custom item dropped normally — no effect triggered
             }
         }
     }
@@ -193,7 +246,7 @@ public class ItemListener extends Util implements Listener {
             }
         }
         if (offhand.getItemMeta() != null) {
-            if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())|| offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+            if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
                 if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
                     meta.setChargedProjectiles(new ArrayList<>());
                     offhand.setItemMeta(meta);
@@ -219,7 +272,7 @@ public class ItemListener extends Util implements Listener {
                 }
             }
             if (offhand.getItemMeta() != null) {
-                if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId())|| offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
+                if (offhand.getItemMeta().getPersistentDataContainer().has(FreedomKeys.itemId()) || offhand.getItemMeta().getPersistentDataContainer().has(keygen("rifle"))) {
                     if (offhand.getItemMeta() instanceof CrossbowMeta meta) {
                         meta.setChargedProjectiles(new ArrayList<>());
                         offhand.setItemMeta(meta);
@@ -227,7 +280,6 @@ public class ItemListener extends Util implements Listener {
                     }
                 }
             }
-
         }
     }
 
@@ -250,48 +302,44 @@ public class ItemListener extends Util implements Listener {
         if (event.getEntity() instanceof Item item) {
             ItemStack stack = item.getItemStack();
             if (stack != null) {
-                RELICS.forEach((id, item1) -> {
-                    if (stack.equals(item1.item())) {
-                        Bukkit.getWorld("world").getPersistentDataContainer().remove(keygen(id));
+                RELICS.forEach((id, relic) -> {
+                    // isSimilar ignores stack size so a dropped relic (amount=1) still matches
+                    if (stack.isSimilar(relic.item())) {
+                        unmarkRelicSpawned(id);
                     }
                 });
             }
         }
     }
 
-    // no, you can prolly just add a random value to a clone of current location and store that location within a list to make sure that it isn't too close to another
     @EventHandler
     public void ItemDestruction(EntityDamageEvent event) {
         if (event.getEntity() instanceof Item item) {
             ItemStack stack = item.getItemStack();
             if (stack != null) {
-                RELICS.forEach((id, item1) -> {
-                    if (stack.equals(item1.item())) {
-                        Bukkit.getWorld("world").getPersistentDataContainer().remove(keygen(id));
+                RELICS.forEach((id, relic) -> {
+                    if (stack.isSimilar(relic.item())) {
+                        unmarkRelicSpawned(id);
                     }
                 });
             }
         }
     }
 
-
-    // what if you did a thing where it creates a bunch of stars in a radius,
-// and if they step into one of the stars they all blow up, also each star individually floats around
-    //
     @EventHandler
     public void PlayerCraftEvent(CraftItemEvent event) {
         if (event.getRecipe() != null) {
             if (event.getRecipe().getResult() != null) {
                 RELICS.forEach((id, item) -> {
                     if (event.getRecipe().getResult().isSimilar(item.item())) {
-                        if (!Bukkit.getWorld("world").getPersistentDataContainer().has(keygen(id))) {
-                            Bukkit.getWorld("world").getPersistentDataContainer().set(keygen(id), PersistentDataType.INTEGER, 0);
+                        // Use the same tracked world as everywhere else
+                        if (!getTrackedWorld().getPersistentDataContainer().has(keygen(RELIC_SPAWNED_PREFIX + id))) {
+                            getTrackedWorld().getPersistentDataContainer().set(
+                                    keygen(RELIC_SPAWNED_PREFIX + id), PersistentDataType.BYTE, (byte) 1);
                         } else {
                             if (event.getWhoClicked() instanceof Player player) {
                                 player.sendMessage(dess("YOU CANNOT CRAFT THIS. ONE OF A KIND"));
                             }
-                            // no they do not have ultras, and SHOULD NOT have ultras, they will be op in their own right
-
                             event.setCancelled(true);
                         }
                     }
@@ -299,7 +347,6 @@ public class ItemListener extends Util implements Listener {
             }
         }
     }
-
 
     @EventHandler
     public void onBlockDropItem(BlockDropItemEvent event) {

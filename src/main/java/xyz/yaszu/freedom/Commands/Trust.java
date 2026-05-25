@@ -32,6 +32,7 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.yaszu.freedom.Blocks.Silly.Duck;
 import xyz.yaszu.freedom.Commands.Arguments.CustomItemArgument;
 import xyz.yaszu.freedom.Commands.Arguments.SellArguments;
 import xyz.yaszu.freedom.Commands.Arguments.SoulArguments;
@@ -183,11 +184,8 @@ public class Trust {
                             return Command.SINGLE_SUCCESS;
                         };
                         Location loc = target.getLocation();
-                        NpcManager.NPC npc = NpcManager.createNPC(loc);
                         target.give(CustomSongHandler.constructSong(CustomSongHandler.CustomSong.third_sanctuary));
-                        if (npc != null && npc.data != null) {
-                            target.sendMessage(dess("<green>Spawned NPC: <white>" + npc.data.get(keygen("name"), PersistentDataType.STRING) + "</white></green>"));
-                        }
+                        target.give(new Duck().block());
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
 //                        Double soulpoints = target.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE);

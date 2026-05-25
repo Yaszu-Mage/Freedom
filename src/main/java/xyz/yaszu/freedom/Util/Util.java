@@ -1,5 +1,9 @@
 package xyz.yaszu.freedom.Util;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import io.papermc.paper.scoreboard.numbers.NumberFormat;
@@ -19,6 +23,7 @@ import net.skinsrestorer.api.storage.PlayerStorage;
 import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.*;
 import org.bukkit.block.Lectern;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -55,6 +60,92 @@ public class Util {
 
     public static Component dess(String minimessage) {
         return MiniMessage.miniMessage().deserialize(minimessage);
+    }
+
+    public static final Set<UUID> hiddenEntities = new HashSet<>();
+    public static ProtocolManager protocolManager;
+    public static void showEntityToPlayer(Player player, Entity entity) {
+        if (entity == null || !entity.isValid() || player == null || !player.isOnline()) return;
+
+        // remove from our hidden tracking
+        hiddenEntities.remove(entity.getUniqueId());
+
+        // Prefer Bukkit API showEntity if available
+        try {
+            // Paper / recent Bukkit has Player#showEntity(Plugin, Entity)
+            player.showEntity(Freedom.get_plugin(), entity);
+            return;
+        } catch (NoSuchMethodError | UnsupportedOperationException ignored) {
+            // fallback to ProtocolLib approach
+        }
+
+        // Fallback: ask ProtocolLib to update/resend entity data to the player
+        try {
+            protocolManager = ProtocolLibrary.getProtocolManager();
+            // try an update/refetch approach if supported
+            protocolManager.updateEntity(entity, Collections.singletonList(player));
+        } catch (Exception e) {
+            Freedom.get_plugin().getLogger().warning("Failed to show entity via ProtocolLib: " + e);
+        }
+    }
+
+
+
+
+
+    public void pulseCircle(Location center, double radius, int points, Particle particle, double smallestRadius, int pulsingTime, int pulses,Sound sound,Object options) {
+            new BukkitRunnable() {
+                double ticks = 0;
+                double currentRadius = smallestRadius;
+                double step = radius / pulses;
+                @Override
+                public void run() {
+                    if (ticks >= pulsingTime) {
+                        this.cancel();
+                        return;
+                    }
+                    if (options != null) {
+                        if (options instanceof Particle.DustOptions) {
+                            drawCircle(center, currentRadius, center.getWorld(), points, particle, (Particle.DustOptions) options);
+                        }
+                    } else {
+                        drawCircle(center, currentRadius, center.getWorld(), points, particle);
+                    }
+
+                    if (ticks == 0) {
+                        center.getWorld().playSound(center, sound, SoundCategory.MASTER, 1.0f, 1.0f);
+                    }
+                    currentRadius += step;
+                    ticks += pulsingTime / pulses;
+                }
+            }.runTaskTimer(Freedom.get_plugin(),0,pulses/pulsingTime);
+    }
+
+
+
+    public static void hideEntityFromPlayer(Player player, Entity entity) {
+        if (entity == null || !entity.isValid() || player == null || !player.isOnline()) return;
+
+        protocolManager = ProtocolLibrary.getProtocolManager();
+        hiddenEntities.add(entity.getUniqueId());
+
+        // Prefer Bukkit API hideEntity if available
+        try {
+            player.hideEntity(Freedom.get_plugin(), entity);
+            return;
+        } catch (NoSuchMethodError | UnsupportedOperationException ignored) {
+            // fallback to ProtocolLib approach
+        }
+
+        // Fallback: send ENTITY_DESTROY packet with the entity id
+        try {
+            PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
+            // set payload to int array of entity ids (single id)
+            packet.getIntegerArrays().write(0, new int[] { entity.getEntityId() });
+            protocolManager.sendServerPacket(player, packet);
+        } catch (Exception e) {
+            Freedom.get_plugin().getLogger().warning("Failed to hide entity via ProtocolLib: " + e);
+        }
     }
 
     public static void drawElipse(Location center, double radius, int points, Particle particle, double linearscale, double horizontalscale) {

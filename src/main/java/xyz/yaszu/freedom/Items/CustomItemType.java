@@ -7,5 +7,6 @@ public enum CustomItemType {
     PART,
     ARTIFACT,
     BOOK,
-    SWORD
+    SWORD,
+    BLOCK
 }

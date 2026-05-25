@@ -1,8 +1,11 @@
 package xyz.yaszu.freedom.Items.Swords.Items;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -12,9 +15,11 @@ import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.Swords.Sword;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Ghostwalker extends Util implements BaseItem, Sword {
     @Override
@@ -30,6 +35,25 @@ public class Ghostwalker extends Util implements BaseItem, Sword {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
+        Location location = player.getLocation();
+        if (Sword.canUse(player,this)) {
+            try {
+                if (!location.getNearbyPlayers(5).isEmpty()) {
+                    Player target = location.getNearbyPlayers(5).stream().findFirst().orElse(null);
+                    if (target != null && target != player) {
+                        if (!Life_and_Death.is_alive(target)) {
+                            Life_and_Death.revive_player(target,location);
+
+                            Objects.requireNonNull(player.getAttribute(Attribute.MAX_HEALTH)).addModifier(new AttributeModifier(keygen("ghostwalker"),-1, AttributeModifier.Operation.ADD_NUMBER));
+                            //VFX
+                        }
+
+                    }
+                }
+            } catch (Exception ignored) {}
+            Sword.StartCooldown(player,SwordType());
+        }
+
 
     }
 
@@ -45,6 +69,19 @@ public class Ghostwalker extends Util implements BaseItem, Sword {
 
     @Override
     public List<Component> visions() {
-        return List.of();
+        return List.of(
+                dess("<shadow:#000BBB><dark_red><b>S E A R C H I N G F O R A W A Y O U T.\n" +
+                        "A N D F O U N D N O T H I N G .</b></dark_red>")
+        );
+    }
+
+    @Override
+    public int Cooldown() {
+        return 100000;
+    }
+
+    @Override
+    public SwordType SwordType() {
+        return SwordType.Ghostwalker;
     }
 }

@@ -1,6 +1,5 @@
 package xyz.yaszu.freedom.Items.Swords;
 
-import com.github.retrooper.packetevents.protocol.potion.Potion;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -11,7 +10,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
@@ -23,15 +21,7 @@ public class VisionHandler extends Util implements Listener {
 
 
     public static final VisionHandler instance = new VisionHandler();
-    public static enum SwordType {
-        Darkheart,
-        Firebrand,
-        Windforce,
-        Ghostwalker,
-        Illumina,
-        Venomshank,
-        Icedagger,
-    }
+
 
 
     public static enum HandTypes {
@@ -40,7 +30,7 @@ public class VisionHandler extends Util implements Listener {
         Both,
         None
     }
-    public static void sendVision(Component message, SwordType type,Player player) {
+    public static void sendVision(Component message, Sword.SwordType type, Player player) {
         new VisionEvent(message, type,player).callEvent();
     }
 
@@ -82,10 +72,10 @@ public class VisionHandler extends Util implements Listener {
                     if (random.nextInt(0,1000) == 0) {
                         switch (whichHandHoldingSword(player)) {
                             case Both -> {
-                                SwordType mainHand = SwordType.valueOf(player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
-                                SwordType offHand = SwordType.valueOf(player.getInventory().getItemInOffHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
-                                Sword mainHandSword = Sword.getSword(mainHand);
-                                Sword offHandSword = Sword.getSword(offHand);
+                                Sword.SwordType mainHand = Sword.SwordType.valueOf(player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
+                                Sword.SwordType offHand = Sword.SwordType.valueOf(player.getInventory().getItemInOffHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
+                                Sword mainHandSword = Sword.getSwordfromEnum(mainHand);
+                                Sword offHandSword = Sword.getSwordfromEnum(offHand);
 
                                 if (random.nextBoolean()) {
                                     sendVision(mainHandSword.visions().get(random.nextInt(mainHandSword.visions().size())), mainHand, player);
@@ -94,13 +84,13 @@ public class VisionHandler extends Util implements Listener {
                                 }
                             }
                             case Main -> {
-                                SwordType mainHand = SwordType.valueOf(player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
-                                Sword mainHandSword = Sword.getSword(mainHand);
+                                Sword.SwordType mainHand = Sword.SwordType.valueOf(player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
+                                Sword mainHandSword = Sword.getSwordfromEnum(mainHand);
                                 sendVision(mainHandSword.visions().get(random.nextInt(mainHandSword.visions().size())), mainHand, player);
                             }
                             case Off -> {
-                                SwordType offHand = SwordType.valueOf(player.getInventory().getItemInOffHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
-                                Sword offHandSword = Sword.getSword(offHand);
+                                Sword.SwordType offHand = Sword.SwordType.valueOf(player.getInventory().getItemInOffHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
+                                Sword offHandSword = Sword.getSwordfromEnum(offHand);
                                 sendVision(offHandSword.visions().get(random.nextInt(offHandSword.visions().size())), offHand, player);
                             }
                             case None -> {}
@@ -126,7 +116,7 @@ public class VisionHandler extends Util implements Listener {
     public static class VisionEvent extends Event {
         private static final HandlerList HANDLER_LIST = new HandlerList();
         private final Component message;
-        private final SwordType type;
+        private final Sword.SwordType type;
         private final Player player;
         public Player getPlayer() {
             return player;
@@ -134,10 +124,10 @@ public class VisionHandler extends Util implements Listener {
         public Component getMessage() {
             return message;
         }
-        public SwordType getType() {
+        public Sword.SwordType getType() {
             return type;
         }
-        public VisionEvent(Component message, SwordType type, Player player) {
+        public VisionEvent(Component message, Sword.SwordType type, Player player) {
             this.message = message;
             this.type = type;
             this.player = player;

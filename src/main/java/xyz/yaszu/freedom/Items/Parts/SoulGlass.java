@@ -1,32 +1,33 @@
 package xyz.yaszu.freedom.Items.Parts;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
+import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.HashMap;
-import java.util.UUID;
-
-public class SoulGlass extends Util implements BaseItem {
+public class SoulGlass extends Util implements BaseItem, Listener {
     @Override
     public ItemStack item() {
-        ItemStack stack = ItemStack.of(Material.SPYGLASS);
+        ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
         ItemMeta meta = stack.getItemMeta();
         meta.displayName(Util.dess("<shadow:#000000FF><b><yellow>Soul Glass</yellow></b>"));
         meta.setItemModel(NamespacedKey.minecraft("soulglass"));
@@ -36,65 +37,54 @@ public class SoulGlass extends Util implements BaseItem {
         return stack;
     }
 
-    public static HashMap<UUID, BukkitRunnable> currentChecks = new HashMap<>();
-    public static HashMap<UUID, Long> currentExtensions = new HashMap<>();
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-        if (!currentChecks.containsKey(player.getUniqueId())) {
-            BukkitRunnable check = checkSoul(player,20,item);
-            currentChecks.put(player.getUniqueId(),check);
-        }
+        // Trigger an immediate visibility update to show auras/ghosts
+        Life_and_Death.updateAllVisibility(player);
     }
+
+    private void refreshVisibility(Player player) {
+        if (player == null) return;
+        Bukkit.getScheduler().runTaskLater(Freedom.get_plugin(), () -> {
+            if (player.isOnline()) {
+                Life_and_Death.updateAllVisibility(player);
+            }
+        }, 1L);
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        cheatme(event.getPlayer(),0,item());
+        // Trigger visibility update on join
+        refreshVisibility(event.getPlayer());
     }
+
     @EventHandler
-    public void onPlayerQuit(PlayerJoinEvent event) {
-        try {
-            cheatme(event.getPlayer(),0,item());
-        } catch (Exception ignored) {}
-    }
-    @EventHandler
-    public void onItemMove(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player player) {
-            cheatme(player,0,item());
+            // Trigger visibility update when inventory changes
+            refreshVisibility(player);
         }
     }
+
     @EventHandler
     public void onPlayerPickup(PlayerAttemptPickupItemEvent event) {
-        cheatme(event.getPlayer(),0,item());
-    }
-    public void cheatme(Player player,int ticktill,ItemStack stack) {
-        BukkitRunnable check = checkSoul(player,ticktill,stack);
-        currentChecks.put(player.getUniqueId(),check);
-        check.runTaskTimer(Freedom.get_plugin(),0,0);
+        // Trigger visibility update when picking up items
+        refreshVisibility(event.getPlayer());
     }
 
-    public BukkitRunnable checkSoul(Player player,int ticktill,ItemStack stack) {
-        return new BukkitRunnable() {
-            public static int ticksTillEnd = 0;
-            public int ticks = 0;
-            @Override
-            public void run() {
-                if (ticks == 0) {
-                    ticksTillEnd = ticktill;
-                }
-                ticks = ticks + 1;
-                if (ticksTillEnd >= ticks) {
-                    player.getInventory().forEach(stacker -> {
-                        if (stacker.getPersistentDataContainer().has(keygen("soulglass"))) {
-                            ItemMeta meta = stacker.getItemMeta();
-                            meta.getPersistentDataContainer().set(keygen("soulglass"), PersistentDataType.BOOLEAN, false);
-                            stacker.setItemMeta(meta);
-                        }
-                    });
-                    currentChecks.remove(player.getUniqueId());
-                    this.cancel();
-                }
+    @EventHandler
+    public void onPlayerDrop(PlayerDropItemEvent event) {
+        refreshVisibility(event.getPlayer());
+    }
 
-            }
-        };
+    @EventHandler
+    public void onHeldItemChange(PlayerItemHeldEvent event) {
+        refreshVisibility(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onSwapHands(PlayerSwapHandItemsEvent event) {
+        refreshVisibility(event.getPlayer());
     }
 
     @Override

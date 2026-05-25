@@ -47,4 +47,14 @@ public class Icedagger extends Util implements BaseItem, Sword {
     public List<Component> visions() {
         return List.of();
     }
+
+    @Override
+    public int Cooldown() {
+        return 0;
+    }
+
+    @Override
+    public SwordType SwordType() {
+        return Icedagger.SwordType.Icedagger;
+    }
 }
