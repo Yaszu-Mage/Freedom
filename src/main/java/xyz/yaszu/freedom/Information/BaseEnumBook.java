@@ -10,5 +10,14 @@ public enum BaseEnumBook {
     recipe_spellfocus,
     recipe_burger,
     recipe_rifle,
-    recipe_timepiece
+    recipe_timepiece,
+    recipe_scythephighting,
+    recipe_railgun,
+    recipe_pizza,
+    recipe_astral,
+    recipe_grapple_hook,
+    recipe_shawarma,
+    recipe_alfajores,
+    recipe_lollipop,
+
 }

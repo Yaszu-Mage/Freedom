@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -55,6 +56,11 @@ public class Broker extends Util implements BaseBlock, BaseItem {
     @Override
     public Object placeSound() {
         return "custom.squeak";
+    }
+
+    @Override
+    public InventoryHolder inventoryHolder() {
+        return null;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Items.Parts;
+package xyz.yaszu.freedom.Items.Relics;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

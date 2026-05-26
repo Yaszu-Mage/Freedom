@@ -108,7 +108,6 @@ public class Astral extends Util implements Base_Soul {
         swordMeta.lore(List.of(dess("The stars are left un-tapped")));
         swordMeta.getPersistentDataContainer().set(keygen("const"), PersistentDataType.STRING, Constilation.Crux.name());
         swordMeta.setUnbreakable(true);
-
         return Stella;
     }
 

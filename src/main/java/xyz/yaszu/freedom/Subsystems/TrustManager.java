@@ -87,6 +87,11 @@ public class TrustManager {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+
+    public static boolean isMutual(UUID target, UUID guest) {
+        return isTrusted(target, guest) && isTrusted(guest, target);
+    }
+
     public static boolean isTrusted(UUID targetUuid, UUID guestUuid) {
         if (targetUuid.equals(guestUuid)) return true;
         List<UUID> trusted = getTrustedBy(targetUuid);

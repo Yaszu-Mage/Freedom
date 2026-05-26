@@ -58,6 +58,10 @@ public class Util {
         return FreedomKeys.key(key);
     }
 
+    public static Vector directionTo(Location start, Location end) {
+        return end.toVector().subtract(start.toVector()).normalize();
+    }
+
     public static Component dess(String minimessage) {
         return MiniMessage.miniMessage().deserialize(minimessage);
     }
@@ -173,6 +177,11 @@ public class Util {
         drawCircle(location, 2 + 2 * scale, location.getWorld(), 128, Particle.DUST, new Particle.DustOptions(Color.RED, 2.0f));
     }
 
+    public static double getGroundLocation(Location loc) {
+        if (loc == null || loc.getWorld() == null) return 0d;
+        return loc.getWorld().getHighestBlockYAt(
+                loc.getBlockX(), loc.getBlockZ(), HeightMap.MOTION_BLOCKING_NO_LEAVES);
+    }
 
     public static void drawCircle(Location center, double radius, World world, int points, Particle particle, Particle.DustOptions options) {
         for (int i = 0; i < points; i++) {

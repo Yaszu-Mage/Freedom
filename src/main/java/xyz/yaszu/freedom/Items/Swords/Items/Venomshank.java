@@ -1,15 +1,20 @@
 package xyz.yaszu.freedom.Items.Swords.Items;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.Swords.Sword;
+import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
@@ -20,14 +25,25 @@ public class Venomshank extends Util implements BaseItem, Sword {
         ItemStack stack = ItemStack.of(Material.DIAMOND_SWORD);
         ItemMeta meta = stack.getItemMeta();
         meta.displayName(dess("<shadow:#000000FF><b><i><gradient:#3d431e:#7a863c>Venomshank</gradient></i></b>"));
+        meta.setItemModel(NamespacedKey.minecraft("venomshank"));
+        meta.getPersistentDataContainer().set(keygen("sword"), PersistentDataType.STRING, "venomshank");
         meta.setUnbreakable(true);
-        return null;
+        stack.setItemMeta(meta);
+        return stack;
     }
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
         if (Sword.canUse(player,this)) {
-
+            Location location = player.getLocation();
+            location.getNearbyPlayers(10).forEach(p -> {
+                if (!TrustManager.isTrusted(player.getUniqueId(),p.getUniqueId())) {
+                    if (!TrustManager.isTrusted(p.getUniqueId(),player.getUniqueId())) {
+                        p.addPotionEffect(PotionEffectType.POISON.createEffect(200,3));
+                    }
+                }
+            });
+            Sword.StartCooldown(player,SwordType.Venomshank);
         }
     }
 
@@ -48,7 +64,7 @@ public class Venomshank extends Util implements BaseItem, Sword {
 
     @Override
     public int Cooldown() {
-        return 0;
+        return 30000;
     }
 
     @Override

@@ -4,6 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -56,6 +57,11 @@ public class Rice extends Util implements BaseBlock, BaseItem {
     @Override
     public Object placeSound() {
         return Sound.BLOCK_WET_GRASS_PLACE;
+    }
+
+    @Override
+    public InventoryHolder inventoryHolder() {
+        return null;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package xyz.yaszu.freedom.Blocks;
 
 import org.bukkit.Sound;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 public interface BaseBlock {
@@ -23,5 +24,7 @@ public interface BaseBlock {
         Itsy
     }
     public Object placeSound();
+
+    public InventoryHolder inventoryHolder();
 
 }

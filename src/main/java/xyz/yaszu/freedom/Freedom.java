@@ -69,6 +69,7 @@ import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Items.Parts.Grapple_Hook;
 import xyz.yaszu.freedom.Items.Parts.ScythePhighting;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
+import xyz.yaszu.freedom.Items.Swords.Items.Firebrand;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
 import xyz.yaszu.freedom.Soul.Base.BaseOrange;
 import xyz.yaszu.freedom.Soul.SoulTypes;
@@ -314,6 +315,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         //Bukkit.getPluginManager().registerEvents(new Black(),this);
         Bukkit.getPluginManager().registerEvents(new TabDistance(), this);
         Bukkit.getPluginManager().registerEvents(new Mocha(), this);
+        Bukkit.getPluginManager().registerEvents(new Firebrand(),this);
         Bukkit.getPluginManager().registerEvents(new Orange(),this);
         Bukkit.getPluginManager().registerEvents(new BaseOrange(),this);
         Bukkit.getPluginManager().registerEvents(new BaseBlack(),this);

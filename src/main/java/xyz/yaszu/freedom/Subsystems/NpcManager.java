@@ -1266,11 +1266,7 @@ public class NpcManager extends Util implements Listener {
                 && !loc.clone().add(0,-1,0).getBlock().isPassable();
     }
 
-    public static double getGroundLocation(Location loc) {
-        if (loc == null || loc.getWorld() == null) return 0d;
-        return loc.getWorld().getHighestBlockYAt(
-                loc.getBlockX(), loc.getBlockZ(), HeightMap.MOTION_BLOCKING_NO_LEAVES);
-    }
+
 
     private static NPC nearestOther(NPC self, int radius) {
         double rSq = (double) radius * radius;

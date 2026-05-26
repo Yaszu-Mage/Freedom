@@ -22,7 +22,7 @@ public class Darkheart extends Util implements BaseItem, Sword {
         ItemStack stack = ItemStack.of(Material.DIAMOND);
         ItemMeta meta = stack.getItemMeta();
         meta.displayName(dess("<shadow:#000000FF><b><i><gradient:#001a26:#A6EB49>Darkheart</gradient></i></b>"));
-        meta.getPersistentDataContainer().set(keygen("sword"), PersistentDataType.STRING, "darkheart");
+        meta.getPersistentDataContainer().set(keygen("sword"), PersistentDataType.STRING,"darkheart");
         meta.setItemModel(NamespacedKey.minecraft("darkheart"));
         stack.setItemMeta(meta);
         return stack;
