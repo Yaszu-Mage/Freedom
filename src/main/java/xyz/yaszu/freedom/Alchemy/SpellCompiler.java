@@ -25,7 +25,7 @@ public class SpellCompiler extends Util {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
         rain, sun, thundering, day, night, shock, delay, goon, sixtyseven,nothing,
-        fire,water,earth,air,soul,blast,moveset,province,up,down,look,
+        fire,water,earth,air,soul,blast,moveset,province,up,down,look,vector,point
     }
 
 
@@ -33,9 +33,10 @@ public class SpellCompiler extends Util {
 
 
     public enum ritualtype {
-        destruction(750), teleport(50), area(40), effect(25),
-        rain(45), sun(45), thundering(45), day(30), night(30),
-        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500),moveset(250),province(1000);
+        destruction(750), teleport(5000), area(40), effect(25),
+        rain(45), sun(450), thundering(450), day(300), night(300),
+        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500),moveset(250),province(1000),
+        vector(45);
 
         private final int baseCost;
         ritualtype(int baseCost) { this.baseCost = baseCost; }
@@ -45,6 +46,14 @@ public class SpellCompiler extends Util {
             int power = stmt.range + stmt.amplification * 2;
             if (stmt.location == null) stmt.location = caster.getLocation();
             switch (this) {
+                case vector -> {
+                    if (stmt.pointA != null && stmt.pointB != null) {
+                        double distance = stmt.pointA.distance(stmt.pointB);
+                        Location midpoint = Util.getMidpoint(stmt.pointA, stmt.pointB);
+                        Location shift = caster.getLocation().clone().add(midpoint);
+                        shift.getNearbyLivingEntities(distance/2).forEach(living -> living.setVelocity(directionTo(stmt.pointA, stmt.pointB).multiply(power)));
+                    }
+                }
                 case teleport -> {
 
                     PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), stmt.location.clone().add(0,0,4));
@@ -288,6 +297,8 @@ public class SpellCompiler extends Util {
         Set<ritualkeywords> elements = new HashSet<>();
         Player caster;
         ritualtype action;
+        Location pointA;
+        Location pointB;
         Location location;
         int range = 0;
         int amplification = 0;
@@ -317,6 +328,31 @@ public class SpellCompiler extends Util {
                     used = true;
                 } else if (current != null) {
                     switch (key) {
+                        case point -> {
+                            if (current.pointA == null) {
+                                if (i + 3 < tokens.size()
+                                        && tokens.get(i + 1).type == TokenType.NUMBER
+                                        && tokens.get(i + 2).type == TokenType.NUMBER
+                                        && tokens.get(i + 3).type == TokenType.NUMBER) {
+                                    double x = Double.parseDouble(tokens.get(++i).value);
+                                    double y = Double.parseDouble(tokens.get(++i).value);
+                                    double z = Double.parseDouble(tokens.get(++i).value);
+                                    current.pointA = new Location(base.getWorld(), x, y, z);
+                                    used = true;
+                                }
+                            } else {
+                                if (i + 3 < tokens.size()
+                                        && tokens.get(i + 1).type == TokenType.NUMBER
+                                        && tokens.get(i + 2).type == TokenType.NUMBER
+                                        && tokens.get(i + 3).type == TokenType.NUMBER) {
+                                    double x = Double.parseDouble(tokens.get(++i).value);
+                                    double y = Double.parseDouble(tokens.get(++i).value);
+                                    double z = Double.parseDouble(tokens.get(++i).value);
+                                    current.pointB = new Location(base.getWorld(), x, y, z);
+                                    used = true;
+                                }
+                            }
+                        }
                         case up,down,look -> {
                             current.direction = key;
                             used = true;

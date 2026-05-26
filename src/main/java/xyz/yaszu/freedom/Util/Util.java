@@ -100,7 +100,9 @@ public class Util {
 
         return null;
     }
-
+    public static Location getMidpoint(Location loc1, Location loc2) {
+        return loc1.add(loc2).multiply(0.5);
+    }
     public static void showEntityToPlayer(Player player, Entity entity) {
         if (entity == null || !entity.isValid() || player == null || !player.isOnline()) return;
 
