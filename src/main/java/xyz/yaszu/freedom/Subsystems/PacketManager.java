@@ -22,6 +22,10 @@ public class PacketManager extends PacketListenerAbstract {
     private static final String TEAM_NAME_PREFIX = "hide_";
     private static final Set<UUID> sudoPlayers = Collections.synchronizedSet(new HashSet<>());
 
+
+
+
+
     @Override
     public void onPacketSend(PacketSendEvent event) {
         if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {

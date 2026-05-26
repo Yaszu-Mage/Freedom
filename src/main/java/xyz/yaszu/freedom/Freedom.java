@@ -15,7 +15,6 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
-import com.sk89q.worldedit.world.World;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -95,6 +94,7 @@ import static xyz.yaszu.freedom.Util.Util.*;
 public final class Freedom extends JavaPlugin implements Listener {
 
     public static int version = 6942067;
+    private BlockHandler blockHandler;
 
     public void reapplyCurseWeakness(Player player) {
         if (player == null || !player.isOnline()) return;
@@ -143,6 +143,9 @@ public final class Freedom extends JavaPlugin implements Listener {
         }
         AdminManager.handleQuit(event.getPlayer());
         clearAura(event.getPlayer().getUniqueId());
+        Util.clearPlayerCache(event.getPlayer().getUniqueId());
+        cachedPdcValues.remove(event.getPlayer().getUniqueId());
+        lastPdcRead.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -197,6 +200,10 @@ public final class Freedom extends JavaPlugin implements Listener {
     public static HashMap<UUID, ItemDisplay> soulAuras = new HashMap<>();
     private static final Map<UUID, BukkitRunnable> auraTasks = new HashMap<>();
 
+    private static final Map<UUID, Long> lastPdcRead = new HashMap<>();
+    private static final Map<UUID, Map<String, Object>> cachedPdcValues = new HashMap<>();
+    private static final long PDC_CACHE_DURATION = 1000; // 1 second in milliseconds
+
     private static void clearAura(UUID uuid) {
         BukkitRunnable task = auraTasks.remove(uuid);
         if (task != null) task.cancel();
@@ -228,7 +235,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         if (!auraTasks.containsKey(uuid)) {
             BukkitRunnable task = aura(player);
             auraTasks.put(uuid, task);
-            task.runTaskTimer(Freedom.get_plugin(), 0, 1);
+            task.runTaskTimer(Freedom.get_plugin(), 0, 4);
         }
     }
 
@@ -261,7 +268,7 @@ public final class Freedom extends JavaPlugin implements Listener {
                     this.cancel();
                     return;
                 }
-                current.teleport(player.getLocation().clone().add(0,2,0).setRotation(player.getLocation().getYaw(),0));
+                current.teleport(player.getLocation().clone().add(0,2,0));
             }
         };
 
@@ -330,7 +337,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new RandomChestGenerator(), this);
         Bukkit.getPluginManager().registerEvents(new SettingsMenu(), this);
         Bukkit.getPluginManager().registerEvents(new TrustMenu(), this);
-        Bukkit.getPluginManager().registerEvents(new BlockHandler(),this);
+        blockHandler = new BlockHandler();
+        Bukkit.getPluginManager().registerEvents(blockHandler,this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.GUI.SettingsGui.TrustMemberMenu(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.SitManager(), this);
         Bukkit.getPluginManager().registerEvents(new xyz.yaszu.freedom.Subsystems.ProvinceManager(), this);
@@ -411,13 +419,22 @@ public final class Freedom extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
+                for (World world : Bukkit.getWorlds()) {
+                    blockHandler.restore(world);
+                }
+            }
+        }.runTaskLater(this, 20L);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     xyz.yaszu.freedom.Soul.soulListener.showSoulPoints(player);
                 }
             }
-        }.runTaskTimer(this, 0, 20);
+        }.runTaskTimer(this, 0, 100);
         MazeManager.createMazeWorld("backrooms");
-        NpcManager.update().runTaskTimer(this, 0, 20);
+        NpcManager.update().runTaskTimer(this, 0, 100);
         randomVisions();
         protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL,

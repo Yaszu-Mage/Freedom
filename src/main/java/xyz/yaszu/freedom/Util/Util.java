@@ -28,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
@@ -50,7 +51,7 @@ public class Util {
 
     public static ItemStack emptyItem(ItemStack item) {
         ItemMeta workingMeta = item.getItemMeta();
-        workingMeta.displayName(dess("\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33"));
+        workingMeta.displayName(dess("\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33"));
         item.setItemMeta(workingMeta);
         return item;
     }
@@ -68,6 +69,38 @@ public class Util {
 
     public static final Set<UUID> hiddenEntities = new HashSet<>();
     public static ProtocolManager protocolManager;
+
+    private static final Map<UUID, Long> lastPdcRead = new HashMap<>();
+    private static final Map<UUID, Map<String, Object>> cachedPdcValues = new HashMap<>();
+    private static final long PDC_CACHE_DURATION = 1000; // 1 second in milliseconds
+
+    public static <T, Z> Z getCachedPdcValue(Player player, String key, PersistentDataType<T, Z> type) {
+        UUID playerUUID = player.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        if (lastPdcRead.containsKey(playerUUID) && (now - lastPdcRead.get(playerUUID)) < PDC_CACHE_DURATION) {
+            Map<String, Object> playerCache = cachedPdcValues.get(playerUUID);
+            if (playerCache != null && playerCache.containsKey(key)) {
+                try {
+                    return (Z) playerCache.get(key);
+                } catch (ClassCastException e) {
+                    // Fall through to read from PDC if type is wrong
+                }
+            }
+        }
+
+        // If cache is invalid or missing, read from PDC
+        PersistentDataContainer container = player.getPersistentDataContainer();
+        if (container.has(FreedomKeys.key(key), type)) {
+            Z value = container.get(FreedomKeys.key(key), type);
+            cachedPdcValues.computeIfAbsent(playerUUID, k -> new HashMap<>()).put(key, value);
+            lastPdcRead.put(playerUUID, now);
+            return value;
+        }
+
+        return null;
+    }
+
     public static void showEntityToPlayer(Player player, Entity entity) {
         if (entity == null || !entity.isValid() || player == null || !player.isOnline()) return;
 
@@ -154,6 +187,7 @@ public class Util {
 
     public static void drawElipse(Location center, double radius, int points, Particle particle, double linearscale, double horizontalscale) {
         World world = center.getWorld();
+        if (points <= 0) return;
         for (int i = 0; i < points; i++) {
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
             double x = (center.getX() + (horizontalscale * (radius * Math.cos(angle)))); // Calculate X coordinate
@@ -343,6 +377,12 @@ public class Util {
     public static HashMap<UUID,Long> abilityOneCooldowns = new HashMap<>();
 
     public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
+
+    public static void clearPlayerCache(UUID playerUUID) {
+        souls.remove(playerUUID);
+        abilityOneCooldowns.remove(playerUUID);
+        abilityTwoCooldowns.remove(playerUUID);
+    }
 
     public static Component loadingBar(double value, double max, double min) {
         int maxBars = 5;
@@ -652,7 +692,6 @@ public class Util {
                     }
 
                     center.getWorld().spawnParticle(Particle.EXPLOSION, center, 30);
-                    center.getWorld().createExplosion(center, size, true, true);
                     this.cancel();
                 }
             }

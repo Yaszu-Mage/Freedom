@@ -14,6 +14,8 @@ import org.bukkit.entity.Player;
 import xyz.yaszu.freedom.Alchemy.MazeConfig;
 import xyz.yaszu.freedom.Alchemy.MazeManager;
 
+import java.util.function.Predicate;
+
 /**
  * Command to create and manage maze worlds
  */
@@ -26,8 +28,7 @@ public class MazeCommand {
                                 .executes(ctx -> {
                                     String worldName = ctx.getArgument("world", String.class);
 
-                                    if (Bukkit.getWorld(worldName) != null) {
-                                        ctx.getSource().getSender().sendMessage(Component.text("World '" + worldName + "' already exists!", NamedTextColor.RED));
+                                    if (worldExists(ctx.getSource(), worldName)) {
                                         return 0;
                                     }
 
@@ -44,8 +45,7 @@ public class MazeCommand {
                                                     int cellSize = ctx.getArgument("cellSize", int.class);
                                                     int wallHeight = ctx.getArgument("wallHeight", int.class);
 
-                                                    if (Bukkit.getWorld(worldName) != null) {
-                                                        ctx.getSource().getSender().sendMessage(Component.text("World '" + worldName + "' already exists!", NamedTextColor.RED));
+                                                    if (worldExists(ctx.getSource(), worldName)) {
                                                         return 0;
                                                     }
 
@@ -71,8 +71,7 @@ public class MazeCommand {
                                             String presetName = ctx.getArgument("preset", String.class).toUpperCase();
                                             String worldName = ctx.getArgument("world", String.class);
 
-                                            if (Bukkit.getWorld(worldName) != null) {
-                                                ctx.getSource().getSender().sendMessage(Component.text("World '" + worldName + "' already exists!", NamedTextColor.RED));
+                                            if (worldExists(ctx.getSource(), worldName)) {
                                                 return 0;
                                             }
 
@@ -124,6 +123,26 @@ public class MazeCommand {
                                 })
                         )
                 )
+                .then(Commands.literal("tpmaze") // Alias for teleport
+                        .requires(isPlayer())
+                        .then(Commands.argument("world", StringArgumentType.string())
+                                .executes(ctx -> {
+                                    Player player = (Player) ctx.getSource().getSender();
+                                    String worldName = ctx.getArgument("world", String.class);
+
+                                    org.bukkit.World world = Bukkit.getWorld(worldName);
+                                    if (world == null) {
+                                        player.sendMessage(Component.text("World '" + worldName + "' not found!", NamedTextColor.RED));
+                                        return 0;
+                                    }
+
+                                    player.teleport(world.getSpawnLocation());
+                                    player.sendMessage(Component.text("Teleported to maze world: " + worldName, NamedTextColor.GREEN));
+
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                        )
+                )
                 .then(Commands.literal("help")
                         .executes(ctx -> {
                             ctx.getSource().getSender().sendMessage(Component.text("=== Maze Command Help ===", NamedTextColor.GOLD));
@@ -135,6 +154,8 @@ public class MazeCommand {
                             ctx.getSource().getSender().sendMessage(Component.text("  List available presets", NamedTextColor.GRAY));
                             ctx.getSource().getSender().sendMessage(Component.text("/maze teleport <world_name>", NamedTextColor.AQUA));
                             ctx.getSource().getSender().sendMessage(Component.text("  Teleport to a maze world", NamedTextColor.GRAY));
+                            ctx.getSource().getSender().sendMessage(Component.text("/maze tpmaze <world_name>", NamedTextColor.AQUA));
+                            ctx.getSource().getSender().sendMessage(Component.text("  Alias for /maze teleport", NamedTextColor.GRAY));
 
                             return Command.SINGLE_SUCCESS;
                         })
@@ -145,5 +166,22 @@ public class MazeCommand {
                 })
                 .build();
     }
-}
 
+    /**
+     * Checks if a world with the given name already exists and sends an error message if it does.
+     */
+    private static boolean worldExists(CommandSourceStack source, String worldName) {
+        if (Bukkit.getWorld(worldName) != null) {
+            source.getSender().sendMessage(Component.text("World '" + worldName + "' already exists!", NamedTextColor.RED));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns a predicate that checks if the command sender is a player.
+     */
+    private static Predicate<CommandSourceStack> isPlayer() {
+        return source -> source.getSender() instanceof Player;
+    }
+}

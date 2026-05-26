@@ -50,7 +50,8 @@ public class Life_and_Death extends Util implements org.bukkit.event.Listener{
         if (DuelManager.playerInDuelArena.containsKey(event.getPlayer().getUniqueId())) {
             return;
         }
-        if ((Integer) player_util.get_type_value(event.getPlayer(), "life",PersistentDataType.INTEGER) <= 0) {
+        Integer lives = getCachedPdcValue(event.getPlayer(), "life", PersistentDataType.INTEGER);
+        if (lives != null && lives <= 0) {
             return;
         }
         Player victim = event.getEntity();
@@ -59,28 +60,26 @@ public class Life_and_Death extends Util implements org.bukkit.event.Listener{
             Entity damager = damageByEntity.getDamager();
 
             if (damager instanceof Player killer) {
-                if (killer.getPersistentDataContainer().has(FreedomKeys.trustedBy())) {
-                    if (victim.getPersistentDataContainer().has(FreedomKeys.trustedBy())) {
-                        String trustedby = killer.getPersistentDataContainer().get(FreedomKeys.trustedBy(),PersistentDataType.STRING);
-                        String trustedby2 = victim.getPersistentDataContainer().get(FreedomKeys.trustedBy(),PersistentDataType.STRING);
-                        if (trustedby != null && trustedby2 != null) {
-                            if (trustedby.contains(killer.getName()) && trustedby2.contains(damager.getName())) {
-                                victim.setHealth(1);
-                                victim.setFireTicks(0);
-                                return;
-                            }
-                        }
+                String trustedby = getCachedPdcValue(killer, "trustedby", PersistentDataType.STRING);
+                String trustedby2 = getCachedPdcValue(victim, "trustedby", PersistentDataType.STRING);
+
+                if (trustedby != null && trustedby2 != null) {
+                    if (trustedby.contains(killer.getName()) && trustedby2.contains(damager.getName())) {
+                        victim.setHealth(1);
+                        victim.setFireTicks(0);
+                        return;
                     }
                 }
                 player_util.set_type_value(
                         event.getPlayer(),
                         "life",
-                        (Integer) player_util.get_type_value(event.getPlayer(), "life",PersistentDataType.INTEGER) - 1,
+                        (lives != null ? lives : 9) - 1,
                         PersistentDataType.INTEGER
                 );
             }
         }
-        if ((Integer) player_util.get_type_value(event.getPlayer(), "life",PersistentDataType.INTEGER) <= 0) {
+        Integer newLives = getCachedPdcValue(event.getPlayer(), "life", PersistentDataType.INTEGER);
+        if (newLives != null && newLives <= 0) {
             player_util.set_type_value(event.getPlayer(),"ghost",true,PersistentDataType.BOOLEAN);
             event.getPlayer().setAllowFlight(true);
             updateVisibility(event.getPlayer());

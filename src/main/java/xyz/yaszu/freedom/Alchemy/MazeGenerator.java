@@ -3,6 +3,10 @@ package xyz.yaszu.freedom.Alchemy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Stairs;
 import org.bukkit.generator.ChunkGenerator;
 
 import java.util.Random;
@@ -17,6 +21,13 @@ public class MazeGenerator extends ChunkGenerator {
 
     private MazeConfig config;
     private long worldSeed;
+
+    private static final long SEED_GATE_WIDTH_VERTICAL = 0xBEEFBEEFL;
+    private static final long SEED_GATE_WIDTH_HORIZONTAL = 0xDEADBEEFL;
+    private static final long SEED_REMOVE_WALL_VERTICAL = 0xFAFADADAL;
+    private static final long SEED_REMOVE_WALL_HORIZONTAL = 0xDADAFADAL;
+
+    private final ThreadLocal<Random> random = ThreadLocal.withInitial(Random::new);
 
     public MazeGenerator() {
         this(new MazeConfig());
@@ -53,14 +64,18 @@ public class MazeGenerator extends ChunkGenerator {
         int wallHeight = config.getWallHeight();
         int roofOffset = config.getRoofOffset();
         int cellSize = config.getCellSize();
-        int mid = cellSize / 2;
 
         for (int blockX = 0; blockX < 16; blockX++) {
             for (int blockZ = 0; blockZ < 16; blockZ++) {
                 int globalX = (chunkX << 4) | blockX;
                 int globalZ = (chunkZ << 4) | blockZ;
 
-                boolean isWall = isWallBlock(globalX, globalZ);
+                int cellX = Math.floorDiv(globalX, cellSize);
+                int cellZ = Math.floorDiv(globalZ, cellSize);
+                int localX = Math.floorMod(globalX, cellSize);
+                int localZ = Math.floorMod(globalZ, cellSize);
+
+                boolean isWall = isWallBlock(globalX, globalZ, cellX, cellZ, localX, localZ);
 
                 if (isWall) {
                     // Create wall
@@ -70,17 +85,11 @@ public class MazeGenerator extends ChunkGenerator {
                 } else {
                     // Create passage
                     chunk.setBlock(blockX, baseHeight, blockZ, config.getFloorMaterial());
-                    
+
                     // Add floor protection (bedrock underneath)
                     chunk.setBlock(blockX, baseHeight - 1, blockZ, Material.BEDROCK);
-                    
-                    // Check if this is a gate (opening in the middle of a wall segment)
-                    int localX = Math.floorMod(globalX, cellSize);
-                    int localZ = Math.floorMod(globalZ, cellSize);
-                    
-                    int cellX = Math.floorDiv(globalX, cellSize);
-                    int cellZ = Math.floorDiv(globalZ, cellSize);
 
+                    // Check if this is a gate (opening in the middle of a wall segment)
                     if (localX == 0) {
                         if (!shouldRemoveWall(cellX, cellZ, true)) {
                             int gateWidth = getGateWidth(cellX, cellZ, true);
@@ -118,29 +127,34 @@ public class MazeGenerator extends ChunkGenerator {
      */
     private void generateGate(ChunkData chunk, int x, int z, boolean vertical) {
         int baseHeight = config.getBaseHeight();
-        
+
         // Clear the space for the gate
         for (int y = baseHeight + 1; y < baseHeight + config.getRoofOffset(); y++) {
             chunk.setBlock(x, y, z, Material.AIR);
         }
-        
-        Material stairs = config.getDoorMaterial();
-        int gateHeight = baseHeight + 3;
-        
-        try {
-            if (vertical) {
-                // Gate in a vertical wall (X=0), so it faces East/West
-                // Top arch
 
-                chunk.setBlock(x, gateHeight + 1, z, Bukkit.createBlockData(stairs, "[half=top,facing=east]"));
+        Material stairsMaterial = config.getDoorMaterial();
+        int gateHeight = baseHeight + 3;
+
+        try {
+            BlockData blockData = Bukkit.createBlockData(stairsMaterial);
+            if (blockData instanceof Stairs) {
+                Stairs stairs = (Stairs) blockData;
+                stairs.setHalf(Bisected.Half.TOP);
+                if (vertical) {
+                    // Gate in a vertical wall (X=0), so it faces East/West
+                    stairs.setFacing(BlockFace.EAST);
+                } else {
+                    // Gate in a horizontal wall (Z=0), so it faces North/South
+                    stairs.setFacing(BlockFace.SOUTH);
+                }
+                chunk.setBlock(x, gateHeight + 1, z, stairs);
             } else {
-                // Gate in a horizontal wall (Z=0), so it faces North/South
-                // Top arch
-                chunk.setBlock(x, gateHeight + 1, z, Bukkit.createBlockData(stairs, "[half=top,facing=south]"));
+                chunk.setBlock(x, gateHeight + 1, z, stairsMaterial);
             }
         } catch (Exception e) {
             // Fallback if BlockData string parsing fails or Bukkit not initialized correctly
-            chunk.setBlock(x, gateHeight + 1, z, stairs);
+            chunk.setBlock(x, gateHeight + 1, z, stairsMaterial);
         }
 
         // Add some light
@@ -157,22 +171,23 @@ public class MazeGenerator extends ChunkGenerator {
      */
     private boolean isWallBlock(int globalX, int globalZ) {
         int cellSize = config.getCellSize();
-        
-        // Use Math.floorDiv and Math.floorMod to handle negative coordinates correctly
         int cellX = Math.floorDiv(globalX, cellSize);
         int cellZ = Math.floorDiv(globalZ, cellSize);
         int localX = Math.floorMod(globalX, cellSize);
         int localZ = Math.floorMod(globalZ, cellSize);
+        return isWallBlock(globalX, globalZ, cellX, cellZ, localX, localZ);
+    }
+
+    private boolean isWallBlock(int globalX, int globalZ, int cellX, int cellZ, int localX, int localZ) {
+        int cellSize = config.getCellSize();
 
         // Cell boundary walls (localX == 0 or localZ == 0)
         if (localX == 0 || localZ == 0) {
             // Corner is always a wall pillar
             if (localX == 0 && localZ == 0) return true;
-            
+
             // Middle of the wall segment might be an opening
-            int mid = cellSize / 2;
-            
-                // Vertical wall segment between cellX-1 and cellX
+            // Vertical wall segment between cellX-1 and cellX
             if (localX == 0) {
                 if (shouldRemoveWall(cellX, cellZ, true)) return false;
                 int gateWidth = getGateWidth(cellX, cellZ, true);
@@ -201,11 +216,12 @@ public class MazeGenerator extends ChunkGenerator {
     private int getGateWidth(int cellX, int cellZ, boolean vertical) {
         long seed;
         if (vertical) {
-            seed = (long) cellX * 668265261L ^ (long) cellZ * 511891231L ^ worldSeed ^ 0xBEEFBEEFL;
+            seed = (long) cellX * 668265261L ^ (long) cellZ * 511891231L ^ worldSeed ^ SEED_GATE_WIDTH_VERTICAL;
         } else {
-            seed = (long) cellX * 312151189L ^ (long) cellZ * 850327465L ^ worldSeed ^ 0xDEADBEEFL;
+            seed = (long) cellX * 312151189L ^ (long) cellZ * 850327465L ^ worldSeed ^ SEED_GATE_WIDTH_HORIZONTAL;
         }
-        Random rand = new Random(seed);
+        Random rand = random.get();
+        rand.setSeed(seed);
         // Random width between 1 and 3, but not exceeding cellSize - 2 to keep corners
         int maxWidth = Math.max(1, config.getCellSize() - 2);
         return rand.nextInt(Math.min(3, maxWidth)) + 1;
@@ -230,12 +246,13 @@ public class MazeGenerator extends ChunkGenerator {
         // Use a hash of the wall location
         long seed;
         if (vertical) {
-            seed = (long) cellX * 668265261L ^ (long) cellZ * 511891231L ^ worldSeed ^ 0xFAFADADAL;
+            seed = (long) cellX * 668265261L ^ (long) cellZ * 511891231L ^ worldSeed ^ SEED_REMOVE_WALL_VERTICAL;
         } else {
-            seed = (long) cellX * 312151189L ^ (long) cellZ * 850327465L ^ worldSeed ^ 0xDADAFADAL;
+            seed = (long) cellX * 312151189L ^ (long) cellZ * 850327465L ^ worldSeed ^ SEED_REMOVE_WALL_HORIZONTAL;
         }
 
-        Random rand = new Random(seed);
+        Random rand = random.get();
+        rand.setSeed(seed);
         // 30% chance to remove the entire wall segment to merge rooms
         return rand.nextDouble() < 0.3;
     }
@@ -246,8 +263,9 @@ public class MazeGenerator extends ChunkGenerator {
     private boolean hasPassage(int cellX, int cellZ, int dx, int dz) {
         // Use a hash of the cell coordinates and world seed to get a stable seed for this cell
         long seed = (long) cellX * 312151189L ^ (long) cellZ * 850327465L ^ worldSeed;
-        Random rand = new Random(seed);
-        
+        Random rand = random.get();
+        rand.setSeed(seed);
+
         // We use a modified Binary Tree approach that is deterministic for infinite generation.
         // For each cell, we decide if it connects to the EAST (dx=1, dz=0) 
         // or to the SOUTH (dx=0, dz=1). 
@@ -269,7 +287,7 @@ public class MazeGenerator extends ChunkGenerator {
             // which guarantees global connectivity in an infinite grid.
             return choice >= 0.55;
         }
-        
+
         return false;
     }
 
@@ -293,4 +311,3 @@ public class MazeGenerator extends ChunkGenerator {
         return false;
     }
 }
-

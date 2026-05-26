@@ -135,29 +135,50 @@ public class BlockHandler extends Util implements Listener {
 
     public void restore(World world) {
         var pdc = world.getPersistentDataContainer();
-        if (!pdc.has(keygen("customBlocks"))) return;
+
+        // --- Optimized Orphan Purge ---
+        // 1. Collect all display UUIDs from the world that are marked as custom blocks.
+        Set<UUID> allDisplayUuidsInWorld = new HashSet<>();
+        for (ItemDisplay display : world.getEntitiesByClass(ItemDisplay.class)) {
+            if (display.getPersistentDataContainer().has(keygen("customBlock"), PersistentDataType.STRING)) {
+                allDisplayUuidsInWorld.add(display.getUniqueId());
+            }
+        }
+
+        // 2. If there are no custom blocks in PDC, remove all custom block displays and exit.
+        if (!pdc.has(keygen("customBlocks"))) {
+            for (UUID displayUuid : allDisplayUuidsInWorld) {
+                Entity e = Bukkit.getEntity(displayUuid);
+                if (e != null) e.remove();
+            }
+            return;
+        }
 
         Map<Location, BaseBlock> blockMap = pdc.get(keygen("customBlocks"), BlockMapPersistentDataType.INSTANCE);
-        if (blockMap == null) return;
+        if (blockMap == null || blockMap.isEmpty()) {
+            for (UUID displayUuid : allDisplayUuidsInWorld) {
+                Entity e = Bukkit.getEntity(displayUuid);
+                if (e != null) e.remove();
+            }
+            return;
+        }
 
-        // First, kill ALL existing ItemDisplays that were spawned by us in this world.
-        // This purges the ~41k orphans before we respawn cleanly.
-        for (Entity e : world.getEntities()) {
-            if (e instanceof ItemDisplay) {
-                // Check if this display's location matches any stored block position
-                BlockPos ePos = BlockPos.of(e.getLocation());
-                // If it's tracked in our runtime map already, skip — we'll reuse it
-                if (currentCustomBlocks.containsValue(e.getUniqueId())) continue;
-                // Check if persisted UUID matches anything we know about
-                boolean isOrphan = true;
-                for (Location loc : blockMap.keySet()) {
-                    UUID stored = getStoredDisplayUUID(loc);
-                    if (stored != null && stored.equals(e.getUniqueId())) {
-                        isOrphan = false;
-                        break;
-                    }
+        // 3. Collect all KNOWN display UUIDs from the blockMap's PDC entries.
+        Set<UUID> knownDisplayUuids = new HashSet<>();
+        for (Location loc : blockMap.keySet()) {
+            UUID storedUuid = getStoredDisplayUUID(loc);
+            if (storedUuid != null) {
+                knownDisplayUuids.add(storedUuid);
+            }
+        }
+
+        // 4. Iterate through all found display UUIDs and remove any that are NOT in our known set.
+        for (UUID displayUuid : allDisplayUuidsInWorld) {
+            if (!knownDisplayUuids.contains(displayUuid)) {
+                Entity e = Bukkit.getEntity(displayUuid);
+                if (e != null) {
+                    e.remove();
                 }
-                if (isOrphan) e.remove();
             }
         }
 
@@ -168,9 +189,9 @@ public class BlockHandler extends Util implements Listener {
             // Already tracked in runtime map with a live entity — skip
             if (currentCustomBlocks.containsKey(pos)) {
                 Entity e = Bukkit.getEntity(currentCustomBlocks.get(pos));
-                if (e instanceof ItemDisplay) {
+                if (e instanceof ItemDisplay && !e.isDead()) {
                     currentCustomData.put(pos, baseBlock);
-                    return;
+                    return; // Already live and tracked, do nothing.
                 }
             }
 
@@ -178,10 +199,11 @@ public class BlockHandler extends Util implements Listener {
             UUID stored = getStoredDisplayUUID(location);
             if (stored != null) {
                 Entity e = Bukkit.getEntity(stored);
-                if (e instanceof ItemDisplay) {
+                if (e instanceof ItemDisplay && !e.isDead()) {
+                    // Found a live entity, let's start tracking it.
                     currentCustomBlocks.put(pos, stored);
                     currentCustomData.put(pos, baseBlock);
-                    return;
+                    return; // Found, do nothing more.
                 }
             }
 

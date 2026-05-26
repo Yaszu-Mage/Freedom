@@ -24,16 +24,20 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static xyz.yaszu.freedom.Util.Util.getGroundLocation;
 
-public class Firebrand extends Util implements BaseItem, Sword, Listener {
+public class Firebrand implements BaseItem, Sword, Listener {
+    private final Map<UUID, BukkitRunnable> activeTasks = new ConcurrentHashMap<>();
     @Override
     public ItemStack item() {
         ItemStack stack = ItemStack.of(Material.DIAMOND_SWORD);
         ItemMeta meta = stack.getItemMeta();
-        meta.displayName(dess("<shadow:#000000FF><b><i><gradient:#E82A03:#FE8500>Firebrand</gradient></i></b>"));
-        meta.getPersistentDataContainer().set(keygen("sword"), PersistentDataType.STRING, "firebrand");
+        meta.displayName(Util.dess("<shadow:#000000FF><b><i><gradient:#E82A03:#FE8500>Firebrand</gradient></i></b>"));
+        meta.getPersistentDataContainer().set(Util.keygen("sword"), PersistentDataType.STRING, "firebrand");
         meta.setItemModel(NamespacedKey.minecraft("firebrand"));
         stack.setItemMeta(meta);
         return stack;
@@ -45,68 +49,82 @@ public class Firebrand extends Util implements BaseItem, Sword, Listener {
     }
 
     public boolean isHittingWithSword(Player player) {
-        try {
-            return player.getInventory().getItemInMainHand().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING).equals("firebrand");
-        } catch (Exception e) {
+        ItemStack item = player.getInventory().getItemInMainHand();
+        if (item == null || item.getType() == Material.AIR) {
             return false;
         }
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return false;
+        }
+        String swordType = meta.getPersistentDataContainer().get(Util.keygen("sword"), PersistentDataType.STRING);
+        return "firebrand".equals(swordType);
     }
 
 
     @EventHandler
     public void OnHit(PrePlayerAttackEntityEvent event) {
-        if (!isHittingWithSword(event.getPlayer())) return;
-        new BukkitRunnable() {
-            int currentradius = 1;
-            Location center = event.getPlayer().getLocation();
+        Player player = event.getPlayer();
+        if (!isHittingWithSword(player)) return;
+
+        if (activeTasks.containsKey(player.getUniqueId())) {
+            return;
+        }
+
+        BukkitRunnable task = new BukkitRunnable() {
+            int currentRadius = 1;
+            final Location center = player.getLocation().clone();
+            {
+                center.setY(getGroundLocation(player.getLocation()));
+            }
+
             @Override
             public void run() {
-                if (currentradius > 10) {
-                    List<Location> lastPoints = circlePoints(64, center, currentradius - 1);
-                    lastPoints.forEach(point -> {
-                        Block block = point.getBlock();
-                        if (block.getType() == Material.FIRE) {
-                            block.setType(Material.AIR);
-                        }
-                    });
+                if (currentRadius > 10) {
+                    clearPreviousCircle(center, currentRadius - 1);
                     this.cancel();
+                    activeTasks.remove(player.getUniqueId());
                 } else {
-                    List<Location> circlePoints = circlePoints(64, center, currentradius);
-                    drawCircle(center, currentradius, center.getWorld(), 16, Particle.FLAME);
+                    Util.drawCircle(center, currentRadius, center.getWorld(), 16, Particle.FLAME);
+                    List<Location> circlePoints = circlePoints(64, center, currentRadius);
                     circlePoints.forEach(point -> {
                         Block block = point.getBlock();
                         if (!block.getType().isSolid()) {
                             block.setType(Material.FIRE);
                         }
                     });
-                    if (currentradius != 1) {
-                        List<Location> lastPoints = circlePoints(32, center, currentradius - 1);
-                        lastPoints.forEach(point -> {
-                            Block block = point.getBlock();
-                            if (block.getType() == Material.FIRE) {
-                                block.setType(Material.AIR);
-                            }
-                        });
+
+                    if (currentRadius > 1) {
+                        clearPreviousCircle(center, currentRadius - 1);
                     }
-                    currentradius++;
+                    currentRadius++;
                 }
             }
-        }.runTaskTimer(Freedom.get_plugin(),0,1);
+        };
 
+        activeTasks.put(player.getUniqueId(), task);
+        task.runTaskTimer(Freedom.get_plugin(), 0, 1);
     }
 
+    private void clearPreviousCircle(Location center, double radius) {
+        List<Location> lastPoints = circlePoints(32, center, radius);
+        lastPoints.forEach(point -> {
+            Block block = point.getBlock();
+            if (block.getType() == Material.FIRE) {
+                block.setType(Material.AIR);
+            }
+        });
+    }
 
 
     public List<Location> circlePoints(int points, Location center, double radius) {
         List<Location> pointsList = new ArrayList<>();
+        double angleIncrement = 2 * Math.PI / points;
         for (int i = 0; i < points; i++) {
-            double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
-            double x = center.getX() + (radius * Math.cos(angle)); // Calculate X coordinate
-            double z = center.getZ() + (radius * Math.sin(angle)); // Calculate Z coordinate
-            double y = center.getY(); // Y remains constant for a flat circle
-
-            // Create a new location for the point
-            pointsList.add(new Location(center.getWorld(), x, y, z));
+            double angle = i * angleIncrement;
+            double x = center.getX() + (radius * Math.cos(angle));
+            double z = center.getZ() + (radius * Math.sin(angle));
+            pointsList.add(new Location(center.getWorld(), x, center.getY(), z));
         }
         return pointsList;
     }
