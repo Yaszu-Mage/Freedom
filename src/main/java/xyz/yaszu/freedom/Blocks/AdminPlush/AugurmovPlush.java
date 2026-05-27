@@ -48,7 +48,7 @@ public class AugurmovPlush extends Util implements BaseBlock, BaseItem {
     }
     @Override
     public Behavior behavior() {
-        return Behavior.Building;
+        return Behavior.Interactable;
     }
 
     @Override
@@ -83,53 +83,7 @@ public class AugurmovPlush extends Util implements BaseBlock, BaseItem {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-        player.getWorld().playSound(player.getLocation(), (String) placeSound(), 10f, 1f);
-        UUID uuid = BlockHandler.currentCustomBlocks.get(event.getInteractionPoint());
-        if (uuid != null) {
-            ItemDisplay display = (ItemDisplay) Bukkit.getEntity(uuid);
-            //lets do an animation
-            float yaw;
-            yaw = restoreRotation(Objects.requireNonNull(event.getInteractionPoint()));
-            AxisAngle4f rotation = new AxisAngle4f((float) Math.toRadians(yaw), 0, -1, 0);
-            new BukkitRunnable() {
-                int tick = 1;
-                int secondtick = 50;
-                @Override
-                public void run() {
-                    if (secondtick == 0) {
-                        this.cancel();
-                    }
-                    if (tick >= 50) {
-                        display.setTransformation(new Transformation(
-                                display.getTransformation().getTranslation(),
-                                new Quaternionf(rotation),
-                                new Vector3f(1,tick/50,1),
-                                display.getTransformation().getRightRotation()
-                        ));
-                        tick++;
-                    } else {
-                        display.setTransformation(new Transformation(
-                                display.getTransformation().getTranslation(),
-                                new Quaternionf(rotation),
-                                new Vector3f(1,secondtick/50,1),
-                                display.getTransformation().getRightRotation()
-                        ));
-                        secondtick--;
-                    }
-
-                    if (tick == 100) {
-                        float s = (float) 1;
-                        display.setTransformation(new Transformation(
-                                display.getTransformation().getTranslation(),
-                                new Quaternionf(rotation),
-                                new Vector3f(s, s, s),
-                                display.getTransformation().getRightRotation()
-                        ));
-                    }
-
-                }
-            }.runTaskTimer(Freedom.get_plugin(),0,2);
-        }
+        plush(player,event,this);
     }
 
     @Override

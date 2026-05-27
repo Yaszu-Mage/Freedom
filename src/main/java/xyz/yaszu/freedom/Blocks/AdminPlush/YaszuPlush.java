@@ -35,7 +35,7 @@ public class YaszuPlush extends Util implements BaseBlock, BaseItem {
 
     @Override
     public Behavior behavior() {
-        return Behavior.Building;
+        return Behavior.Interactable;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class YaszuPlush extends Util implements BaseBlock, BaseItem {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-
+        plush(player,event,this);
     }
 
     @Override

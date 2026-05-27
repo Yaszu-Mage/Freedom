@@ -24,7 +24,9 @@ import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.*;
 import org.bukkit.block.Lectern;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -32,7 +34,13 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import xyz.yaszu.freedom.Blocks.BaseBlock;
+import xyz.yaszu.freedom.Blocks.BlockHandler;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.Soul.Base.BaseRed;
@@ -43,10 +51,61 @@ import xyz.yaszu.freedom.Subsystems.TrustManager;
 
 import java.util.*;
 
+import static xyz.yaszu.freedom.Blocks.BlockHandler.restoreRotation;
 import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 import static xyz.yaszu.freedom.Subsystems.CurrencyManager.getCurrency;
 
 public class Util {
+    public static void plush(Player player, PlayerInteractEvent event, BaseBlock baseBlock) {
+        player.getWorld().playSound(player.getLocation(), (String) baseBlock.placeSound(), 10f, 1f);
+        BlockHandler.BlockPos pos = BlockHandler.BlockPos.of(event.getClickedBlock().getLocation());
+
+        UUID uuid = BlockHandler.currentCustomBlocks.get(pos);
+        if (uuid != null) {
+            ItemDisplay display = (ItemDisplay) Bukkit.getEntity(uuid);
+            //lets do an animation
+            float yaw;
+            yaw = restoreRotation(Objects.requireNonNull(event.getInteractionPoint()));
+            AxisAngle4f rotation = new AxisAngle4f((float) Math.toRadians(yaw), 0, -1, 0);
+            new BukkitRunnable() {
+                // single tick counter driving the whole animation (0..100)
+                int tick = 0;
+                @Override
+                public void run() {
+                    // when finished, ensure final transform and stop
+                    if (tick > 10) {
+                        display.setTransformation(new Transformation(
+                                display.getTransformation().getTranslation(),
+                                new Quaternionf(rotation),
+                                new Vector3f(1f, 1f, 1f),
+                                display.getTransformation().getRightRotation()
+                        ));
+                        this.cancel();
+                        return;
+                    }
+
+                    // progress: 0..50 collapse from 1 -> 0, 51..100 expand from 0 -> 1
+                    float yScale;
+                    if (tick <= 5) {
+                        yScale = 1f - (tick / 5f);
+                    } else {
+                        yScale = (tick - 5f) / 5f;
+                    }
+
+                    display.setTransformation(new Transformation(
+                            display.getTransformation().getTranslation(),
+                            new Quaternionf(rotation),
+                            new Vector3f(1f, yScale, 1f),
+                            display.getTransformation().getRightRotation()
+                    ));
+
+                    tick++;
+                }
+            }.runTaskTimer(Freedom.get_plugin(),0,0);
+        } else {
+            Freedom.get_plugin().getLogger().info("no uuid");
+        }
+    }
     public static SkinsRestorer skinsRestorerAPI;
 
     public static ItemStack emptyItem(ItemStack item) {

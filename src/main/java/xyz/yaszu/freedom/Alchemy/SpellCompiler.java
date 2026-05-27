@@ -25,7 +25,8 @@ public class SpellCompiler extends Util {
         amplification, destruction, teleport, area, effect, location, range,
         regeneration, haste, speed, jump, poison, wither, strength, weakness,
         rain, sun, thundering, day, night, shock, delay, goon, sixtyseven,nothing,
-        fire,water,earth,air,soul,blast,moveset,province,up,down,look,vector,point
+        fire,water,earth,air,soul,blast,moveset,province,up,down,look,vector,point,
+        duration,offset
     }
 
 
@@ -33,9 +34,9 @@ public class SpellCompiler extends Util {
 
 
     public enum ritualtype {
-        destruction(750), teleport(5000), area(40), effect(25),
+        destruction(1050), teleport(5000), area(40), effect(1000),
         rain(45), sun(450), thundering(450), day(300), night(300),
-        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500),moveset(250),province(1000),
+        shock(45), goon(1000), sixtyseven(1000), nothing(750),blast(500),moveset(2500),province(1000),
         vector(45);
 
         private final int baseCost;
@@ -45,12 +46,13 @@ public class SpellCompiler extends Util {
         public void execute(StatementNode stmt, Player caster) {
             int power = stmt.range + stmt.amplification * 2;
             if (stmt.location == null) stmt.location = caster.getLocation();
+            stmt.location = stmt.location.clone().add(stmt.offset);
             switch (this) {
                 case vector -> {
                     if (stmt.pointA != null && stmt.pointB != null) {
                         double distance = stmt.pointA.distance(stmt.pointB);
                         Location midpoint = Util.getMidpoint(stmt.pointA, stmt.pointB);
-                        Location shift = caster.getLocation().clone().add(midpoint);
+                        Location shift = stmt.location.clone().add(midpoint);
                         shift.getNearbyLivingEntities(distance/2).forEach(living -> living.setVelocity(directionTo(stmt.pointA, stmt.pointB).multiply(power)));
                     }
                 }
@@ -293,6 +295,8 @@ public class SpellCompiler extends Util {
     }
 
     static class StatementNode {
+        Vector offset = new Vector(0,0,0);
+        int duration = 0;
         ritualkeywords direction = ritualkeywords.down;
         Set<ritualkeywords> elements = new HashSet<>();
         Player caster;
@@ -327,7 +331,20 @@ public class SpellCompiler extends Util {
                     current.caster = caster;
                     used = true;
                 } else if (current != null) {
+
                     switch (key) {
+                        case offset -> {
+                            if (i + 3 < tokens.size()
+                                    && tokens.get(i + 1).type == TokenType.NUMBER
+                                    && tokens.get(i + 2).type == TokenType.NUMBER
+                                    && tokens.get(i + 3).type == TokenType.NUMBER) {
+                                double x = Double.parseDouble(tokens.get(++i).value);
+                                double y = Double.parseDouble(tokens.get(++i).value);
+                                double z = Double.parseDouble(tokens.get(++i).value);
+                                current.offset = new Vector(x, y, z);
+                                used = true;
+                            }
+                        }
                         case point -> {
                             if (current.pointA == null) {
                                 if (i + 3 < tokens.size()
@@ -365,6 +382,12 @@ public class SpellCompiler extends Util {
                         case range -> {
                             if (i + 1 < tokens.size() && tokens.get(i + 1).type == TokenType.NUMBER) {
                                 current.range = Math.min(25, Integer.parseInt(tokens.get(++i).value));
+                                used = true;
+                            }
+                        }
+                        case duration -> {
+                            if (i + 1 < tokens.size() && tokens.get(i + 1).type == TokenType.NUMBER) {
+                                current.duration = Integer.parseInt(tokens.get(++i).value) * 20;
                                 used = true;
                             }
                         }
@@ -463,7 +486,7 @@ public class SpellCompiler extends Util {
         int totalRequiredPower = 0;
         for (StatementNode stmt : spell.statements) {
             // Base complexity: Range and Amp increase cost exponentially
-            int complexity = 1 + stmt.range + (stmt.amplification * 5) + (stmt.elements.size() * 10);
+            int complexity = 1 + stmt.range + (stmt.amplification * 5) + (stmt.elements.size() * 10) * Math.max(stmt.duration,1);
             log("Complexity " + complexity);
             int actionBase = stmt.action.getBaseCost();
             log("Action Base " + actionBase);
@@ -548,7 +571,21 @@ public class SpellCompiler extends Util {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    stmt.action.execute(stmt, caster);
+                    if (stmt.duration != 0) {
+                        new BukkitRunnable() {
+                            int tick = 0;
+                            @Override
+                            public void run() {
+                                stmt.action.execute(stmt, caster);
+                                tick++;
+                                if (tick >= stmt.duration * 20) {
+                                    cancel();
+                                }
+                            }
+                        }.runTaskTimerAsynchronously(Freedom.get_plugin(),0,0);
+                    } else {
+                        stmt.action.execute(stmt, caster);
+                    }
                 }
             }.runTaskLater(Freedom.get_plugin(), stmt.delay);
         }
