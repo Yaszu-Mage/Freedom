@@ -78,10 +78,7 @@ import xyz.yaszu.freedom.Soul.Ultra.Orange;
 import xyz.yaszu.freedom.Subsystems.*;
 import xyz.yaszu.freedom.Subsystems.WorldManager;
 import xyz.yaszu.freedom.Soul.soulListener;
-import xyz.yaszu.freedom.Util.BulletSystem;
-import xyz.yaszu.freedom.Util.FreedomKeys;
-import xyz.yaszu.freedom.Util.StructureUtil;
-import xyz.yaszu.freedom.Util.Util;
+import xyz.yaszu.freedom.Util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -452,6 +449,13 @@ public final class Freedom extends JavaPlugin implements Listener {
                 }
             }
         });
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                new CustomEvents.TimeChangeEvent(Objects.requireNonNull(Bukkit.getWorld("world")).getTime()).callEvent();
+            }
+        }.runTaskTimerAsynchronously(Freedom.get_plugin(), 0, 20);
+
     }
     private ProtocolManager protocolManager;
 

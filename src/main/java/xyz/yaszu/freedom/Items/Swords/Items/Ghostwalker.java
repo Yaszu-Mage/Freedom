@@ -1,9 +1,7 @@
 package xyz.yaszu.freedom.Items.Swords.Items;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
@@ -43,8 +41,8 @@ public class Ghostwalker extends Util implements BaseItem, Sword {
                     if (target != null && target != player) {
                         if (!Life_and_Death.is_alive(target)) {
                             Life_and_Death.revive_player(target,location);
-
                             Objects.requireNonNull(player.getAttribute(Attribute.MAX_HEALTH)).addModifier(new AttributeModifier(keygen("ghostwalker"),-1, AttributeModifier.Operation.ADD_NUMBER));
+                            pulseCircle(target.getLocation(),2,16, Particle.SNOWFLAKE,1,2,3, Sound.ENTITY_WITCH_DRINK,new Particle.DustOptions(Color.fromRGB(255,255,255),0.5f));
                             //VFX
                         }
 

@@ -1,17 +1,19 @@
 package xyz.yaszu.freedom.Items.Swords.Items;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.Swords.Sword;
+import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
@@ -30,7 +32,27 @@ public class Icedagger extends Util implements BaseItem, Sword {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-
+        Location location = player.getLocation();
+        location.getNearbyPlayers(5).forEach(p -> {
+            if (!TrustManager.isMutual(player.getUniqueId(), p.getUniqueId())) {
+                new BukkitRunnable() {
+                    int tick = 0;
+                    final Location initial = p.getLocation();
+                    @Override
+                    public void run() {
+                        if (tick % 20 == 0) {
+                            p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_HURT_FREEZE, 1, 1);
+                            p.spawnParticle(Particle.SNOWFLAKE, p.getLocation().add(0,1,0), 40, 0.5, 0.5, 0.5, 0.1);
+                        }
+                        p.teleportAsync(initial);
+                        if (tick >= 200) {
+                            this.cancel();
+                        }
+                        tick++;
+                    }
+                }.runTaskTimerAsynchronously(Freedom.get_plugin(),0,0);
+            }
+        });
     }
 
     @Override

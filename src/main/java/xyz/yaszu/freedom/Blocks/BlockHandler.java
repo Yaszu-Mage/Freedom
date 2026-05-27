@@ -20,13 +20,17 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import xyz.yaszu.freedom.Blocks.AdminPlush.*;
+import xyz.yaszu.freedom.Blocks.Decorations.GrandfatherClock;
 import xyz.yaszu.freedom.Blocks.Silly.Broker;
 import xyz.yaszu.freedom.Blocks.Silly.Duck;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Items.BaseItem;
+import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Util.BlockMapPersistentDataType;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import java.util.*;
 
 import static xyz.yaszu.freedom.Util.Util.keygen;
@@ -116,8 +120,15 @@ public class BlockHandler extends Util implements Listener {
 
     public void register(BaseBlock block, String id) {
         ITEMS.put(id, block);
-        if (block.behavior() == BaseBlock.Behavior.Interface) {
+        if (block.behavior() == BaseBlock.Behavior.Interface || block.behavior() == BaseBlock.Behavior.Updatable || BaseBlock.Behavior.Farm == block.behavior()) {
             Bukkit.getPluginManager().registerEvents((Listener) block, Freedom.get_plugin());
+        }
+        if (block instanceof BaseItem baseItem) {
+            ItemListener.register(
+                    baseItem,
+                    block.block().getPersistentDataContainer().get(FreedomKeys.itemId(),PersistentDataType.STRING),
+                    false
+            );
         }
     }
 
@@ -424,6 +435,10 @@ public class BlockHandler extends Util implements Listener {
     }
 
     private static void ConstructBlock(BaseBlock baseBlock, Location location, Player player) {
+
+
+
+
         Location centre = location.clone().add(0.5, baseBlock.scale() / 2.0, 0.5);
 
         // Evict any stray tagged display that is already sitting at this exact
@@ -470,6 +485,22 @@ public class BlockHandler extends Util implements Listener {
         BlockPos pos = BlockPos.of(location);
         currentCustomBlocks.put(pos, display.getUniqueId());
         currentCustomData.put(pos, baseBlock);
+        if (baseBlock instanceof GrandfatherClock grandfatherClock) {
+            ItemDisplay clock = (ItemDisplay) location.getWorld().spawnEntity(centre.clone().add(0,1.5,0),EntityType.ITEM_DISPLAY);
+            clock.setPersistent(true);
+            clock.setItemStack(ItemStack.of(Material.CLOCK));
+            clock.getPersistentDataContainer().set(keygen("customBlock"), PersistentDataType.STRING, "true");
+
+            clock.setTransformation(new Transformation(
+                    clock.getTransformation().getTranslation(),
+                    new Quaternionf(rotation),
+                    new Vector3f(s,s,s),
+                    clock.getTransformation().getRightRotation()
+            ));
+            storeDisplayUUID(centre.clone().add(0,1,0), clock.getUniqueId());
+            currentCustomBlocks.put(pos,clock.getUniqueId());
+            currentCustomData.put(pos,grandfatherClock);
+        }
     }
 
     private static float snapTo90(float yaw) {

@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Blocks;
 
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -11,11 +12,13 @@ public interface BaseBlock {
     public int toolValue();
     public boolean waterNeeded();
     public double scale();
+    public Location mountLocation();
     public enum Behavior {
         Farm,
         Building,
         Interface,
-        Interactable
+        Interactable,
+        Updatable
     }
 
     public enum CollisionSize {

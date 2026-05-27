@@ -1,13 +1,14 @@
-package xyz.yaszu.freedom.Blocks.AdminPlush;
+package xyz.yaszu.freedom.Blocks.Decorations;
 
+import com.sk89q.worldedit.world.item.ItemTypes;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Blocks.BaseBlock;
@@ -16,26 +17,27 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class NitroPlush extends Util implements BaseBlock, BaseItem {
+public class Table extends Util implements BaseBlock, BaseItem, Listener {
     @Override
     public ItemStack block() {
-        ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
+        ItemStack stack = ItemStack.of(org.bukkit.Material.RECOVERY_COMPASS);
         ItemMeta meta = stack.getItemMeta();
-        meta.displayName(dess("<shadow:#000000FF><b>Nitro Plush"));
-        meta.getPersistentDataContainer().set(keygen("customBlock"), PersistentDataType.STRING,"nitroplush");
-        meta.getPersistentDataContainer().set(FreedomKeys.itemId(),PersistentDataType.STRING,"nitroplush");
-        meta.setItemModel(NamespacedKey.minecraft("nitroplush"));
+        meta.displayName(dess("Table"));
+        meta.getPersistentDataContainer().set(keygen("customBlock"), PersistentDataType.STRING,"table");
+        meta.getPersistentDataContainer().set(FreedomKeys.itemId(),PersistentDataType.STRING,"table");
+        meta.setItemModel(NamespacedKey.minecraft("table"));
         stack.setItemMeta(meta);
         return stack;
     }
+
     @Override
     public CollisionSize collisionSize() {
-        return CollisionSize.Itsy;
+        return CollisionSize.Teeny;
     }
 
     @Override
     public Behavior behavior() {
-        return Behavior.Interactable;
+        return Behavior.Building;
     }
 
     @Override
@@ -52,13 +54,15 @@ public class NitroPlush extends Util implements BaseBlock, BaseItem {
     public double scale() {
         return 1;
     }
+
     @Override
     public Location mountLocation() {
         return null;
     }
+
     @Override
     public Object placeSound() {
-        return "custom.squeak";
+        return Sound.BLOCK_WOOD_PLACE;
     }
 
     @Override
@@ -73,12 +77,19 @@ public class NitroPlush extends Util implements BaseBlock, BaseItem {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-        plush(player,event,this);
+
     }
 
     @Override
     public Recipe recipe() {
-        return null;
+        ShapedRecipe recipe = new ShapedRecipe(keygen("table"),block());
+        recipe.shape(
+                "WWW",
+                " W ",
+                " W "
+        );
+        recipe.setIngredient('W', RecipeChoice.itemType(ItemType.OAK_PLANKS,ItemType.SPRUCE_PLANKS,ItemType.BIRCH_PLANKS,ItemType.JUNGLE_PLANKS,ItemType.ACACIA_PLANKS,ItemType.DARK_OAK_PLANKS,ItemType.CRIMSON_PLANKS,ItemType.WARPED_PLANKS));
+        return recipe;
     }
 
     @Override

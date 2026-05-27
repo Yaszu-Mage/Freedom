@@ -25,10 +25,6 @@ import java.util.UUID;
 
 
 public class BasePurple extends Util implements Base_Soul {
-
-
-
-
     @Override
     public String Name_For_Container() {
         return "BasePurple";

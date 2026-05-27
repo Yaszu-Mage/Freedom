@@ -1,8 +1,10 @@
 package xyz.yaszu.freedom.Blocks.Crops;
 
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +18,7 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Rice extends Util implements BaseBlock, BaseItem {
+public class Rice extends Util implements BaseBlock, BaseItem, Listener {
     @Override
     public ItemStack block() {
         ItemStack stack = ItemStack.of(org.bukkit.Material.RECOVERY_COMPASS);
@@ -80,7 +82,10 @@ public class Rice extends Util implements BaseBlock, BaseItem {
         player.getInventory().getItemInMainHand().subtract(1);
     }
 
-
+    @Override
+    public Location mountLocation() {
+        return null;
+    }
     @Override
     public Recipe recipe() {
         return null;

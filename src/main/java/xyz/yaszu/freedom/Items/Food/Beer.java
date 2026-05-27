@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Items.Parts;
+package xyz.yaszu.freedom.Items.Food;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -47,6 +47,6 @@ public class Beer extends Util implements BaseItem {
 
     @Override
     public CustomItemType getType() {
-        return CustomItemType.PART;
+        return CustomItemType.FOOD;
     }
 }

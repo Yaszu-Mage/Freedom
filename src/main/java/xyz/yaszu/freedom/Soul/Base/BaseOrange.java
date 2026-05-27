@@ -164,7 +164,6 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
 
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
-
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().getOrDefault(keygen("disguised"), PersistentDataType.BOOLEAN, false)) {
             if (Bukkit.getOnlinePlayers().size() >= 2) {
                 player.playSound(player.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE,1,1);

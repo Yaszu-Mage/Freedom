@@ -1,6 +1,7 @@
 package xyz.yaszu.freedom.Blocks.AdminPlush;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.ItemDisplay;
@@ -60,7 +61,10 @@ public class AugurmovPlush extends Util implements BaseBlock, BaseItem {
     public boolean waterNeeded() {
         return false;
     }
-
+    @Override
+    public Location mountLocation() {
+        return null;
+    }
     @Override
     public double scale() {
         return 1;

@@ -1,7 +1,6 @@
-package xyz.yaszu.freedom.Items.Parts;
+package xyz.yaszu.freedom.Items.Food;
 
 import org.bukkit.*;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -9,7 +8,6 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
@@ -88,6 +86,6 @@ public class CrunchwrapSupreme extends Util implements BaseItem {
 
     @Override
     public CustomItemType getType() {
-        return CustomItemType.PART;
+        return CustomItemType.FOOD;
     }
 }

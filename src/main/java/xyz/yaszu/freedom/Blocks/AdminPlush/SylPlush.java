@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Blocks.AdminPlush;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -26,6 +27,10 @@ public class SylPlush extends Util implements BaseBlock, BaseItem {
         meta.setItemModel(NamespacedKey.minecraft("sylplush"));
         stack.setItemMeta(meta);
         return stack;
+    }
+    @Override
+    public Location mountLocation() {
+        return null;
     }
     @Override
     public CollisionSize collisionSize() {

@@ -1,9 +1,9 @@
-package xyz.yaszu.freedom.Blocks.AdminPlush;
+package xyz.yaszu.freedom.Blocks.Decorations;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -13,20 +13,25 @@ import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Blocks.BaseBlock;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
+import xyz.yaszu.freedom.Subsystems.SitManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class NitroPlush extends Util implements BaseBlock, BaseItem {
+public class Couch extends Util implements BaseBlock, BaseItem, Listener {
     @Override
     public ItemStack block() {
-        ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
+        ItemStack stack = ItemStack.of(org.bukkit.Material.RECOVERY_COMPASS);
         ItemMeta meta = stack.getItemMeta();
-        meta.displayName(dess("<shadow:#000000FF><b>Nitro Plush"));
-        meta.getPersistentDataContainer().set(keygen("customBlock"), PersistentDataType.STRING,"nitroplush");
-        meta.getPersistentDataContainer().set(FreedomKeys.itemId(),PersistentDataType.STRING,"nitroplush");
-        meta.setItemModel(NamespacedKey.minecraft("nitroplush"));
+        meta.displayName(dess("Couch"));
+        meta.getPersistentDataContainer().set(keygen("customBlock"), PersistentDataType.STRING,"couch");
+        meta.getPersistentDataContainer().set(FreedomKeys.itemId(),PersistentDataType.STRING,"couch");
+        meta.setItemModel(org.bukkit.NamespacedKey.minecraft("couch"));
         stack.setItemMeta(meta);
         return stack;
+    }
+    @Override
+    public Location mountLocation() {
+        return new Location(null,0,0,0);
     }
     @Override
     public CollisionSize collisionSize() {
@@ -52,13 +57,10 @@ public class NitroPlush extends Util implements BaseBlock, BaseItem {
     public double scale() {
         return 1;
     }
-    @Override
-    public Location mountLocation() {
-        return null;
-    }
+
     @Override
     public Object placeSound() {
-        return "custom.squeak";
+        return Sound.BLOCK_WOOL_PLACE;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class NitroPlush extends Util implements BaseBlock, BaseItem {
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-        plush(player,event,this);
+        SitManager.sit(player,event.getInteractionPoint().clone().add(mountLocation().clone()));
     }
 
     @Override
@@ -83,6 +85,6 @@ public class NitroPlush extends Util implements BaseBlock, BaseItem {
 
     @Override
     public CustomItemType getType() {
-        return CustomItemType.BLOCK;
+        return CustomItemType.PART;
     }
 }

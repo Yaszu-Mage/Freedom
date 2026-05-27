@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Blocks.Silly;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -27,7 +28,10 @@ public class Broker extends Util implements BaseBlock, BaseItem {
         stack.setItemMeta(meta);
         return stack;
     }
-
+    @Override
+    public Location mountLocation() {
+        return null;
+    }
 
     @Override
     public CollisionSize collisionSize() {

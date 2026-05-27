@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Items.Parts;
+package xyz.yaszu.freedom.Items.Food;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -18,16 +17,16 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Onigiri extends Util implements BaseItem {
+public class Shawarma extends Util implements BaseItem {
     @Override
     public ItemStack item() {
-        ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
-        ItemMeta meta = stack.getItemMeta();
-        meta.displayName(dess("<shadow:#000000FF><b> Onigiri"));
-        meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"onigiri");
-        meta.setItemModel(NamespacedKey.minecraft("onigiri"));
-        stack.setItemMeta(meta);
-        return stack;
+        ItemStack item  = ItemStack.of(Material.RECOVERY_COMPASS);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(dess("<shadow:#000000FF><b> Shawarma"));
+        meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"shawarma");
+        meta.setItemModel(NamespacedKey.minecraft("shawarma"));
+        item.setItemMeta(meta);
+        return item;
     }
 
     @Override
@@ -36,8 +35,9 @@ public class Onigiri extends Util implements BaseItem {
             player.sendMessage(dess("You are already full!"));
             return;
         }
-        player.addPotionEffect(PotionEffectType.SPEED.createEffect(100,3));
-        player.addPotionEffect(PotionEffectType.STRENGTH.createEffect(100,0));
+        player.setSaturation(player.getSaturation()+9);
+        player.setFoodLevel(player.getFoodLevel()+6);
+        player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(1800,2));
         player.getWorld().spawnParticle(Particle.EGG_CRACK,player.getLocation(),10);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP,10f,2f);
         item.subtract();
@@ -45,17 +45,15 @@ public class Onigiri extends Util implements BaseItem {
 
     @Override
     public Recipe recipe() {
-        ShapedRecipe recipe = new ShapedRecipe(keygen("onigiri"),item());
-        recipe.shape(
-                "   ",
-                "   ",
-                "   "
-        );
-        return null;
+        ShapelessRecipe recipe = new ShapelessRecipe(keygen("shawarma"),item());
+        recipe.addIngredient(ItemStack.of(Material.BREAD));
+        recipe.addIngredient(ItemStack.of(Material.BEEF));
+        recipe.addIngredient(ItemStack.of(Material.CARROT));
+        return recipe;
     }
 
     @Override
     public CustomItemType getType() {
-        return CustomItemType.PART;
+        return CustomItemType.FOOD;
     }
 }

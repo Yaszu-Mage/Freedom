@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Blocks.AdminPlush;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -52,6 +53,10 @@ public class GhostPlush extends Util implements BaseBlock, BaseItem {
         return 1;
     }
 
+    @Override
+    public Location mountLocation() {
+        return null;
+    }
     @Override
     public Object placeSound() {
         return "custom.squeak";

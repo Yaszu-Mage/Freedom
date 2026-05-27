@@ -1,9 +1,6 @@
 package xyz.yaszu.freedom.Blocks.Silly;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -45,6 +42,10 @@ public class Duck extends Util implements BaseBlock, BaseItem, Listener {
     @Override
     public int toolValue() {
         return 1;
+    }
+    @Override
+    public Location mountLocation() {
+        return null;
     }
     @Override
     public boolean waterNeeded() {

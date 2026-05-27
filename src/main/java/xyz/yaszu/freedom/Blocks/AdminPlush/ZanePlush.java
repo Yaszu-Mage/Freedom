@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Blocks.AdminPlush;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -31,7 +32,10 @@ public class ZanePlush extends Util implements BaseBlock, BaseItem {
     public CollisionSize collisionSize() {
         return CollisionSize.Itsy;
     }
-
+    @Override
+    public Location mountLocation() {
+        return null;
+    }
     @Override
     public Behavior behavior() {
         return Behavior.Interactable;

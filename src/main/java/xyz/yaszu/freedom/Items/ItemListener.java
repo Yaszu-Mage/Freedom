@@ -33,6 +33,7 @@ import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
 import xyz.yaszu.freedom.Items.ColorSpecific.Railgun;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
+import xyz.yaszu.freedom.Items.Food.*;
 import xyz.yaszu.freedom.Items.Parts.*;
 import xyz.yaszu.freedom.Items.Relics.Glock;
 import xyz.yaszu.freedom.Items.Relics.PainScythe;
@@ -88,12 +89,6 @@ public class ItemListener extends Util implements Listener {
         register(new Falafel(), "falafel", false);
         register(new BajaBlast(), "bajablast", false);
         register(soulGlass, "soulglass", true);
-        register(new ZanePlush(), "zaneplush",false);
-        register(new YaszuPlush(), "yaszuplush",false);
-        register(new SylPlush(),"sylplush",false);
-        register(new NitroPlush(), "nitroplush",false);
-        register(new GhostPlush(), "ghostplush",false);
-        register(new AugurmovPlush(), "augurmovplush",false);
         register(new Darkheart(), "darkheart", true);
         register(new Venomshank(), "venomshank", true);
         register(new Windforce(), "windforce", true);
@@ -106,7 +101,7 @@ public class ItemListener extends Util implements Listener {
         }
     }
 
-    private static void register(BaseItem item, String id, Boolean relic) {
+    public static void register(BaseItem item, String id, Boolean relic) {
         ITEMS.put(id, item);
         if (item.recipe() != null) {
             Bukkit.addRecipe(item.recipe());

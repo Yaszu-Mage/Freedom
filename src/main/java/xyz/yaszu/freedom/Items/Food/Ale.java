@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Items.Parts;
+package xyz.yaszu.freedom.Items.Food;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -17,37 +17,37 @@ import xyz.yaszu.freedom.Subsystems.AlcoholManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Wine extends Util implements BaseItem {
+public class Ale extends Util implements BaseItem {
     @Override
     public ItemStack item() {
         ItemStack itemStack = ItemStack.of(Material.RECOVERY_COMPASS);
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setItemModel(NamespacedKey.minecraft("wine"));
-        meta.displayName(Util.dess("<shadow:#000000FF><b><Red>Wine</Red></b>"));
-        meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"wine");
+        meta.setItemModel(NamespacedKey.minecraft("ale"));
+        meta.displayName(Util.dess("<shadow:#000000FF><b><yellow>Ale</yellow></b>"));
+        meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"ale");
         itemStack.setItemMeta(meta);
         return itemStack;
     }
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-        AlcoholManager.addAlcohol(player,1,1,1);
+        AlcoholManager.addAlcohol(player,1,1,3);
         player.getWorld().spawnParticle(Particle.EGG_CRACK,player.getLocation(),10);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_DRINK,10f,1f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_DRINK,10f,2f);
         item.subtract();
     }
 
     @Override
     public Recipe recipe() {
-        ShapelessRecipe recipe = new ShapelessRecipe(keygen("wine"),item());
+        ShapelessRecipe recipe = new ShapelessRecipe(keygen("ale"),item());
         recipe.addIngredient(ItemStack.of(Material.WATER_BUCKET));
-        recipe.addIngredient(ItemStack.of(Material.SWEET_BERRIES));
-        recipe.addIngredient(ItemStack.of(Material.HONEY_BOTTLE));
+        recipe.addIngredient(ItemStack.of(Material.WHEAT));
+        recipe.addIngredient(ItemStack.of(Material.SUGAR));
         return recipe;
     }
 
     @Override
     public CustomItemType getType() {
-        return CustomItemType.PART;
+        return CustomItemType.FOOD;
     }
 }
