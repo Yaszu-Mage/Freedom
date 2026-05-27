@@ -27,7 +27,6 @@ public class GhostPlush extends Util implements BaseBlock, BaseItem {
         stack.setItemMeta(meta);
         return stack;
     }
-
     @Override
     public CollisionSize collisionSize() {
         return CollisionSize.Itsy;

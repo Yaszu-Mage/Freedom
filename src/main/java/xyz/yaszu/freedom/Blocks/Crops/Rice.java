@@ -38,7 +38,6 @@ public class Rice extends Util implements BaseBlock, BaseItem {
     public Behavior behavior() {
         return Behavior.Farm;
     }
-
     @Override
     public int toolValue() {
         return 0;

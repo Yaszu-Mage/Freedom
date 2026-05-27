@@ -46,7 +46,6 @@ public class Duck extends Util implements BaseBlock, BaseItem, Listener {
     public int toolValue() {
         return 1;
     }
-
     @Override
     public boolean waterNeeded() {
         return false;

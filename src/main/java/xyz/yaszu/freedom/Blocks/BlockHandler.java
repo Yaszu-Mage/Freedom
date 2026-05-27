@@ -23,6 +23,7 @@ import xyz.yaszu.freedom.Blocks.AdminPlush.*;
 import xyz.yaszu.freedom.Blocks.Silly.Broker;
 import xyz.yaszu.freedom.Blocks.Silly.Duck;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Util.BlockMapPersistentDataType;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -89,7 +90,7 @@ public class BlockHandler extends Util implements Listener {
                 .set(keygen(rotKey(loc)), PersistentDataType.FLOAT, yaw);
     }
 
-    private static float restoreRotation(Location loc) {
+    public static float restoreRotation(Location loc) {
         var pdc = loc.getWorld().getPersistentDataContainer();
         var k   = keygen(rotKey(loc));
         return pdc.has(k) ? pdc.get(k, PersistentDataType.FLOAT) : 0f;
@@ -354,9 +355,18 @@ public class BlockHandler extends Util implements Listener {
             if (!currentCustomBlocks.containsKey(pos)) return;
 
             BaseBlock baseBlock = currentCustomData.get(pos);
-            if (baseBlock != null && baseBlock.behavior() == BaseBlock.Behavior.Interface) {
+            if (baseBlock == null) return;
+
+            if (baseBlock.behavior() == BaseBlock.Behavior.Interface) {
                 player.openInventory(baseBlock.inventoryHolder().getInventory());
             }
+            if (baseBlock.behavior() == BaseBlock.Behavior.Interactable) {
+                if (baseBlock instanceof BaseItem baseItem) {
+                    baseItem.effect(player,event,baseBlock.block());
+                }
+                //do wtv
+            }
+
         }
     }
 

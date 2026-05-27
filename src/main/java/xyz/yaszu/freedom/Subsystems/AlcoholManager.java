@@ -183,8 +183,11 @@ public class AlcoholManager extends Util implements Listener {
 
         if (alcoholLevel >= 5) {
             player.addPotionEffect(PotionEffectType.NAUSEA.createEffect(20, 1));
-        } else if (alcoholLevel >= 4) {
+            player.addPotionEffect(PotionEffectType.DARKNESS.createEffect(100,4));
+        } else if (alcoholLevel == 4) {
             player.addPotionEffect(PotionEffectType.NAUSEA.createEffect(20, 0));
+            player.addPotionEffect(PotionEffectType.DARKNESS.createEffect(100,4));
+            player.addPotionEffect(PotionEffectType.BLINDNESS.createEffect(100,4));
         }
     }
 

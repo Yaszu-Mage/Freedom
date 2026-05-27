@@ -11,11 +11,11 @@ import java.util.Random;
 
 public class Card extends Util {
     String cardID = "cardS1";
-    enum Suit {
+    public static enum Suit {
         Spades, Clubs, Hearts, Diamonds
     }
-    int rank = 0;
-    Suit suit = Suit.Spades;
+    public int rank = 0;
+    public Suit suit = Suit.Spades;
 
     public Card(String card) {
         cardID = card;
@@ -46,7 +46,19 @@ public class Card extends Util {
             }
         }
         rank = Integer.parseInt(String.valueOf(cardID.charAt(6)));
-        cardMeta.displayName(/* decode card id HERE*/dess(rank + " of " + color + suit.toString()));
+        // we need more for kings aces jacks, queens
+        String rankString = "";
+        if (rank >= 11) {
+            switch (rank) {
+                case 11 -> rankString = "Jack";
+                case 12 -> rankString = "Queen";
+                case 13 -> rankString = "King";
+                case 14 -> rankString = "Ace";
+            }
+            cardMeta.displayName(/* decode card id HERE*/dess(rankString + " of " + color + suit.toString()));
+        } else {
+            cardMeta.displayName(/* decode card id HERE*/dess(rank + " of " + color + suit.toString()));
+        }
         cardMeta.getPersistentDataContainer().set(keygen(cardID), PersistentDataType.STRING, cardID);
         cardMeta.setItemModel(NamespacedKey.minecraft(cardID));
         card.setItemMeta(cardMeta);

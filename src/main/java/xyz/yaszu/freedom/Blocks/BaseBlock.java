@@ -14,8 +14,10 @@ public interface BaseBlock {
     public enum Behavior {
         Farm,
         Building,
-        Interface
+        Interface,
+        Interactable
     }
+
     public enum CollisionSize {
         Small,
         Medium,

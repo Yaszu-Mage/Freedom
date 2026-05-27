@@ -27,7 +27,6 @@ public class SylPlush extends Util implements BaseBlock, BaseItem {
         stack.setItemMeta(meta);
         return stack;
     }
-
     @Override
     public CollisionSize collisionSize() {
         return CollisionSize.Itsy;
