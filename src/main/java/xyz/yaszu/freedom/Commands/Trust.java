@@ -314,7 +314,7 @@ public class Trust {
                         player.sendMessage(dess("<shadow:#000000FF><b>3. No Hacking/Cheating/Exploiting (etc.)"));
                         player.sendMessage(dess("<shadow:#000000FF><b>4. Be respectful to all players "));
                         player.sendMessage(dess("<shadow:#000000FF><b>5. No major griefing (ex. destroying entire towns) (yes that means if you nuke one person that's fine)"));
-                        player.sendMessage(dess("<shadow:#000000FF><b>6. No Innapropiate Content (ex. Genitalia buildings, skins, paintings, usernames)"));
+                        player.sendMessage(dess("<shadow:#000000FF><b>6. No Inappropriate Content (ex. Genitalia buildings, skins, paintings, usernames)"));
                         player.sendMessage(dess("<shadow:#000000FF><b>7. No account abuse (selling, trading, sharing accounts)"));
                         player.sendMessage(dess("<shadow:#000000FF><b>8. No abusive language, misleading information, or any kind of spam</shadow>"));
                         player.sendMessage(dess("<shadow:#000000FF><b>9. No combat logging</shadow>"));
