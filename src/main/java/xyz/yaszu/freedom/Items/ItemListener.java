@@ -58,8 +58,6 @@ public class ItemListener extends Util implements Listener {
     public static final String RELIC_SPAWNED_PREFIX = "relicSpawned_";
 
     public static void registerItems() {
-        register(new Broker(), "broker", false);
-        register(new Duck(), "duck", false);
         SoulGlass soulGlass = new SoulGlass();
         register(new Ale(), "ale", false);
         register(new Beer(), "beer", false);
@@ -95,6 +93,9 @@ public class ItemListener extends Util implements Listener {
         register(new Firebrand(), "firebrand", true);
         Bukkit.getPluginManager().registerEvents(soulGlass, Freedom.get_plugin());
         register(new Illumina(), "illumina", false);
+        register(new Ghostwalker(), "ghostwalker", false);
+        register(new Icedagger(), "icedagger", false);
+        register(new Darkheart(), "darkheart", true);
         ArtifactManager.registerArtifacts();
         for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
             register(artifact, artifact.getID(), false);

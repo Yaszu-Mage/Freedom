@@ -454,7 +454,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             public void run() {
                 new CustomEvents.TimeChangeEvent(Objects.requireNonNull(Bukkit.getWorld("world")).getTime()).callEvent();
             }
-        }.runTaskTimerAsynchronously(Freedom.get_plugin(), 0, 20);
+        }.runTaskTimer(Freedom.get_plugin(), 0, 20);
 
     }
     private ProtocolManager protocolManager;
