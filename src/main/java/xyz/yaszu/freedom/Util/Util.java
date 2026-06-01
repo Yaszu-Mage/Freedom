@@ -23,6 +23,8 @@ import net.skinsrestorer.api.storage.PlayerStorage;
 import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.*;
 import org.bukkit.block.Lectern;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
@@ -62,6 +64,47 @@ public class Util {
         PotionEffectType[] types = PotionEffectType.values();
         Random random = new Random();
         return types[random.nextInt(types.length)];
+    }
+    public static int getSoulPoints(Player player) {
+        Double SoulPoints;
+        try {
+            SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+        } catch (Exception e) {
+            player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, 0d);
+            return 0;
+        }
+        return SoulPoints.intValue();
+    }
+    public static String itemToString(ItemStack item) {
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("item", item);
+        return config.saveToString();
+    }
+    public static ItemStack stringToItem(String data) {
+        YamlConfiguration config = new YamlConfiguration();
+        try {
+            config.loadFromString(data);
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return config.getItemStack("item");
+    }
+
+
+    public static String locationToString(Location loc) {
+        return loc.getWorld().toString() + "," + loc.getX() + "," +loc.getY() + "," + loc.getZ() + "-";
+    }
+    public static ArrayList<Location> stringToLocations(String loc) {
+        ArrayList<Location> locations = new ArrayList<>();
+        String[] parts = loc.split("-");
+        for (String location : parts) {
+            parts = location.split(",");
+            if (parts.length == 4) {
+                locations.add(new Location(Bukkit.getWorld(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3])));
+            }
+        }
+        return locations;
     }
 
     public PotionEffectType randomPositivePotionEffect(){

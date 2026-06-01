@@ -84,8 +84,6 @@ public class CustomSongHandler extends Util implements Listener {
 
             CustomSong disc = jukes.remove(loc);
 
-            // BUG FIX: Stop sound for all players in range individually.
-            // world.stopSound() from the Adventure API targets nobody on its own.
             Key soundKey = Key.key("custom." + disc.name());
             Collection<? extends Player> nearbyPlayers =
                     loc.getWorld().getNearbyPlayers(loc, 64, 64, 64);

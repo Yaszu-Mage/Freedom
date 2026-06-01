@@ -23,6 +23,8 @@ public enum SoulTypes {
     Leaf,
     Arcanus,
     Astral,
+    BaseCyan,
+    Cyan,
     Orange;
 
     public SoulTypes toBaseVariant() {
@@ -33,6 +35,7 @@ public enum SoulTypes {
             case Purple, BasePurple -> BasePurple;
             case Black, BaseBlack -> BaseBlack;
             case Cafe, BaseCafe -> BaseCafe;
+            case Cyan, BaseCyan -> BaseCyan;
             case Orange, BaseOrange -> BaseOrange;
             case Yellow, BaseYellow -> BaseYellow;
             case Blue, BaseBlue -> BaseBlue;

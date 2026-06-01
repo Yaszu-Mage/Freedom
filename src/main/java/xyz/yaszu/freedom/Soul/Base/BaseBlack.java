@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -31,10 +30,10 @@ import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.soulListener;
-import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BaseBlack extends Util implements Base_Soul, Listener {
 
@@ -538,6 +537,98 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
     @Override
     public void ActivePassive(Player player) {
 
+    }
+
+
+
+    public static class BlackInformation {
+        public static HashMap<UUID,BlackInformation> people = new HashMap<>();
+
+
+        public ArrayList<ItemStack> items = new ArrayList<>();
+        public ArrayList<Location> locations = new ArrayList<>();
+        boolean isFresh = false;
+        NamespacedKey self = keygen("blackinformation");
+
+        public BlackInformation(Player player) {
+            String construct = player.getPersistentDataContainer().getOrDefault(self, PersistentDataType.STRING, "");
+            if (!construct.isEmpty()) {
+                BlackInformation info = fromString(construct);
+                if (info != null) {
+                    self = fromString(construct).self;
+
+                } else isFresh = true;
+            } else isFresh = true;
+        }
+        public BlackInformation() {
+            isFresh = true;
+        }
+
+        public BlackInformation fromString(String string) {
+            BlackInformation output = new BlackInformation();
+            String[] parts = string.split("|");
+            if (parts.length != 2) {
+                return null;
+            }
+            String locationsString = parts[0];
+            final int[] index = {0};
+            stringToLocations(locationsString).forEach(loc -> {
+                locations.set(index[0],loc);
+                index[0] = index[0] + 1;
+            });
+            String itemString = parts[1];
+            String[] split = itemString.split(",");
+            index[0] = 0;
+            for (String foundItem : split) {
+                ItemStack item = stringToItem(foundItem);
+                items.set(index[0],item);
+                index[0] = index[0] + 1;
+            }
+            return output;
+        }
+        public String toString(Player player) {
+            BlackInformation stored = people.get(player.getUniqueId());
+            if (stored == null) {
+                return "";
+            }
+            AtomicReference<String> output = new AtomicReference<>("");
+            locations.forEach(loc -> {;
+                output.set(output + locationToString(loc) + "-");
+            });
+            output.set(output + "|");
+            for (ItemStack item : items) {
+                output.set(output + itemToString(item) + ",");
+            }
+            return output.get();
+        }
+
+        public class Menu implements InventoryHolder {
+            Inventory inventory;
+
+            public void constructMenu(BlackInformation information) {
+                inventory = Bukkit.createInventory(this, 9, dess("Black Information"));
+                if (information.isFresh) {
+                    try {
+                        for (int i = 0; i < inventory.getSize(); i++) {
+                            inventory.setItem(i, emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE, i + 1)));
+                        }
+
+                    } catch (Exception ignored) {}
+                } else {
+                    // do null checks
+                    final int[] index = {0};
+                    information.items.forEach(item -> {
+                        inventory.setItem(index[0], item);
+                        index[0] = index[0] + 1;
+                    });
+                }
+            }
+
+            @Override
+            public @NotNull Inventory getInventory() {
+                return inventory;
+            }
+        }
     }
 }
 
