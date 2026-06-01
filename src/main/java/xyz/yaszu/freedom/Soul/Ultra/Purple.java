@@ -182,7 +182,7 @@ public class Purple extends Util implements Base_Soul {
 
     @Override
     public void Passive(Player player,Object Event) {
-
+// null bc xp gain is kinda already added
     }
 
     @Override
@@ -197,7 +197,7 @@ public class Purple extends Util implements Base_Soul {
 
     @Override
     public long AbilityOne_Cooldown(Object obj) {
-        return 2500;
+        return purple.AbilityOne_Cooldown(obj);
     }
 
     @Override

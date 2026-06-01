@@ -122,6 +122,8 @@ public class BaseOrange extends Util implements Base_Soul, Listener {
                                 playeriterated.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, playeriterated.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.1);
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITCH_DRINK,1,1);
                             }
+                            player.addPotionEffect(randomPositivePotionEffect().createEffect(200,0));
+                            playeriterated.addPotionEffect(randomPositivePotionEffect().createEffect(200,0));
                         }
                     }
                 }

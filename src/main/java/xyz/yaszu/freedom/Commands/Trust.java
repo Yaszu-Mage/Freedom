@@ -263,6 +263,17 @@ public class Trust {
     }
     public static soulListener soulListener = new soulListener();
 
+    public static LiteralCommandNode<CommandSourceStack> reset() {
+
+        return Commands.literal("reset").executes(
+                ctx -> {
+                    if (ctx.getSource().getSender() instanceof Player player) {
+                        //todo
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }
+        ).build();
+    }
 
     public static LiteralCommandNode<CommandSourceStack> Ability_One() {
         return Commands.literal("abilityone").executes(

@@ -117,6 +117,8 @@ public class Orange extends Util implements Base_Soul, Listener {
                                 Color color = Color.ORANGE;
                                 drawSpiral(player.getLocation(),6, 3,player.getWorld(),16, Particle.DUST,new Particle.DustOptions(color,1.0f));
                             }
+                            player.addPotionEffect(randomPositivePotionEffect().createEffect(200,0));
+                            playeriterated.addPotionEffect(randomPositivePotionEffect().createEffect(200,0));
                         }
                     }
                 }

@@ -70,7 +70,7 @@ public class ArtifactManager extends Util implements Listener {
             }
             if (!activeIds.isEmpty()) {
                 player.getPersistentDataContainer().set(FreedomKeys.activeArtifact(), PersistentDataType.STRING, String.join(",", activeIds));
-                Component msg = dess("<green>You feel well rested thanks to your: </green>");
+                Component msg = dess("<green>You feel well rested thanks to your:</green>");
                 for (int i = 0; i < activeIds.size(); i++) {
                     Base_Artifact art = ARTIFACTS.get(activeIds.get(i));
                     if (art != null) {

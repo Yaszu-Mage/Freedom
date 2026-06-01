@@ -38,6 +38,7 @@ public class Pizza extends Util implements BaseItem {
         player.setFoodLevel(player.getFoodLevel()+4);
         player.getWorld().spawnParticle(Particle.EGG_CRACK,player.getLocation(),10);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP,10f,2f);
+        player.sendMessage(dess("Pizza Pizza!"));
         item.subtract();
     }
 

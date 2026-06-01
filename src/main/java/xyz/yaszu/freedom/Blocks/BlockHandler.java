@@ -21,6 +21,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import xyz.yaszu.freedom.Blocks.AdminPlush.*;
 import xyz.yaszu.freedom.Blocks.Decorations.GrandfatherClock;
+import xyz.yaszu.freedom.Blocks.Decorations.NightDesk;
 import xyz.yaszu.freedom.Blocks.Silly.Broker;
 import xyz.yaszu.freedom.Blocks.Silly.Duck;
 import xyz.yaszu.freedom.Freedom;
@@ -339,7 +340,6 @@ public class BlockHandler extends Util implements Listener {
         removeRotation(location);
         currentCustomBlocks.remove(pos);
         currentCustomData.remove(pos);
-
         event.setDropItems(false);
         world.dropItemNaturally(location, baseBlock.block());
     }
@@ -378,9 +378,14 @@ public class BlockHandler extends Util implements Listener {
             if (baseBlock == null) return;
 
             if (baseBlock.behavior() == BaseBlock.Behavior.Interface) {
+                if (baseBlock instanceof NightDesk nightDesk) {
+                    NightDesk.NightStand stand = new NightDesk.NightStand();
+                    stand.setInventory(event.getInteractionPoint());
+                    player.openInventory(stand.getInventory());
+                    return;
+                }
                 player.openInventory(baseBlock.inventoryHolder().getInventory());
             }
-
             if (baseBlock.behavior() == BaseBlock.Behavior.Interactable) {
                 if (baseBlock instanceof BaseItem baseItem) {
                     baseItem.effect(player, event, baseBlock.block());

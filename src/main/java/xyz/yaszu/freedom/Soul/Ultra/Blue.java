@@ -106,7 +106,6 @@ public class Blue extends Util implements Base_Soul, Listener {
                                 iterator.teleport(locations.get(iterator.getUniqueId()));
                             }
                             iterator.setVelocity(new Vector(0,0,0));
-
                         }
                     });
                     tick++;

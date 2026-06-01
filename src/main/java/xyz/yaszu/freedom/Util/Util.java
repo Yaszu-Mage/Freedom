@@ -32,6 +32,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 import org.bukkit.util.Transformation;
@@ -56,6 +57,54 @@ import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 import static xyz.yaszu.freedom.Subsystems.CurrencyManager.getCurrency;
 
 public class Util {
+
+    public PotionEffectType randomPotionEffect(){
+        PotionEffectType[] types = PotionEffectType.values();
+        Random random = new Random();
+        return types[random.nextInt(types.length)];
+    }
+
+    public PotionEffectType randomPositivePotionEffect(){
+        PotionEffectType[] types = new PotionEffectType[] {
+                PotionEffectType.ABSORPTION,
+                PotionEffectType.REGENERATION,
+                PotionEffectType.SPEED,
+                PotionEffectType.CONDUIT_POWER,
+                PotionEffectType.NIGHT_VISION,
+                PotionEffectType.FIRE_RESISTANCE,
+                PotionEffectType.WATER_BREATHING,
+                PotionEffectType.INVISIBILITY,
+                PotionEffectType.STRENGTH,
+                PotionEffectType.SATURATION,
+                PotionEffectType.JUMP_BOOST,
+                PotionEffectType.LUCK,
+                PotionEffectType.HASTE,
+                PotionEffectType.INSTANT_HEALTH
+        };
+        Random random = new Random();
+        return types[random.nextInt(types.length)];
+    }
+
+    public PotionEffectType randomNegativePotionEffect(){
+        PotionEffectType[] types = new PotionEffectType[] {
+                PotionEffectType.POISON,
+                PotionEffectType.BLINDNESS,
+                PotionEffectType.WEAKNESS,
+                PotionEffectType.SLOWNESS,
+                PotionEffectType.HUNGER,
+                PotionEffectType.WITHER,
+                PotionEffectType.INFESTED,
+                PotionEffectType.LEVITATION,
+                PotionEffectType.GLOWING,
+                PotionEffectType.INSTANT_DAMAGE,
+                PotionEffectType.BAD_OMEN,
+                PotionEffectType.SLOW_FALLING
+        };
+        Random random = new Random();
+        return types[random.nextInt(types.length)];
+    }
+
+
     public static void plush(Player player, PlayerInteractEvent event, BaseBlock baseBlock) {
         player.getWorld().playSound(player.getLocation(), (String) baseBlock.placeSound(), 10f, 1f);
         BlockHandler.BlockPos pos = BlockHandler.BlockPos.of(event.getClickedBlock().getLocation());

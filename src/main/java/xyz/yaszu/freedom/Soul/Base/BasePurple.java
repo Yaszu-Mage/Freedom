@@ -48,7 +48,6 @@ public class BasePurple extends Util implements Base_Soul {
         workingItem.setItemMeta(workingMeta);
         return workingItem;
     }
-
     @Override
     public Component AbilityOneName() {
         return dess("<color:#3700ff>Ability One</color> - Teleportation");
@@ -126,9 +125,6 @@ public class BasePurple extends Util implements Base_Soul {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
         }
     }
-
-
-
     @Override
     public ItemStack Related_Item() {
         ItemStack workingItem = ItemStack.of(Material.CROSSBOW);
@@ -136,7 +132,7 @@ public class BasePurple extends Util implements Base_Soul {
         workingMeta.setItemModel(NamespacedKey.minecraft("rifle"));
         workingMeta.getPersistentDataContainer().set(keygen("rifle"), PersistentDataType.BOOLEAN, true);
         workingMeta.setChargedProjectiles(List.of(ItemStack.of(Material.ARROW)));
-        workingMeta.displayName(dess("<color:#3700ff>My</color> rifle"));
+        workingMeta.displayName(dess("<color:#3700ff>Rifle</color>"));
         workingItem.setItemMeta(workingMeta);
         return workingItem;
     }
@@ -193,7 +189,6 @@ public class BasePurple extends Util implements Base_Soul {
                 } else {
                     createVerticleMinMagicCircle(snipeLocation.clone().add(player.getLocation().getDirection()),15, SoulTypes.Purple,player.getLocation().getYaw(),player.getLocation(),100,0.25);
                 }
-
                 snipeLocation.add(direction);
                 for (Entity inst : snipeLocation.getNearbyEntities(4,4,4)) {
                     Freedom.get_plugin().getLogger().info(String.valueOf(inst.getLocation().distance(snipeLocation)));

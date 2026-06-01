@@ -37,6 +37,7 @@ public class Life_and_Death extends Util implements org.bukkit.event.Listener{
         if (!event.getPlayer().getPersistentDataContainer().has(keygen("life"))) {
             player_util.set_type_value(event.getPlayer(),"life",9, PersistentDataType.INTEGER);
         }
+
     }
 
 
@@ -287,9 +288,10 @@ public class Life_and_Death extends Util implements org.bukkit.event.Listener{
                     }
                     player.sendActionBar(MiniMessage.miniMessage().deserialize("<dark_red>* "+ String.valueOf(players - 1) + " left.</dark_red>"));
                 }
-    }
-    }
 
+    }
+    player.getPersistentDataContainer().set(keygen("life"), PersistentDataType.INTEGER, 9);
+    }
 
     @EventHandler
     public void Hostile_Target_Event(EntityTargetLivingEntityEvent event) {

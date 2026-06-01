@@ -39,6 +39,10 @@ public class Capybara extends Util implements BaseEntity {
 
     @Override
     public List<Biome> spawnBiomes() {
-        return List.of();
+        return List.of(
+                Biome.PLAINS,
+                Biome.FLOWER_FOREST,
+                Biome.SUNFLOWER_PLAINS
+        );
     }
 }
