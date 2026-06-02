@@ -59,6 +59,31 @@ import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 import static xyz.yaszu.freedom.Subsystems.CurrencyManager.getCurrency;
 
 public class Util {
+    public Entity getTargetEntity(Player player) {
+        int range = 10; // Detection range in blocks
+        Entity target = null;
+        double targetDistanceSq = range * range;
+
+        Location eyeLocation = player.getEyeLocation();
+        Vector lookDirection = eyeLocation.getDirection().normalize();
+
+        for (Entity entity : player.getNearbyEntities(range, range, range)) {
+            if (entity == player) continue; // Skip the player themselves
+
+            Vector toEntity = entity.getLocation().subtract(eyeLocation).toVector();
+            double dotProduct = lookDirection.dot(toEntity.normalize());
+
+            // The closer the dot product is to 1.0, the more directly the player is looking at it
+            if (dotProduct > 0.99) {
+                double distanceSq = eyeLocation.distanceSquared(entity.getLocation());
+                if (distanceSq < targetDistanceSq) {
+                    target = entity;
+                    targetDistanceSq = distanceSq;
+                }
+            }
+        }
+        return target;
+    }
 
     public PotionEffectType randomPotionEffect(){
         PotionEffectType[] types = PotionEffectType.values();

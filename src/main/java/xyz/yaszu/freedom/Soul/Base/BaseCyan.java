@@ -3,12 +3,10 @@ package xyz.yaszu.freedom.Soul.Base;
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,6 +27,7 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class BaseCyan extends Util implements Base_Soul, Listener {
     @Override
@@ -75,21 +74,39 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
             } else {
                 offset.put(player.getUniqueId(), Math.clamp(offset.getOrDefault(player.getUniqueId(), 0) + 1,0,15));
             }
+            event.setCancelled(true);
         }
 
 
     }
 
     public NamespacedKey activeAbilityOne = keygen("ActiveAbilityOne");
+    Predicate<Entity> filter(Player player) {
+        return entity -> !(entity instanceof ItemDisplay || entity == player);
+    }
+
+
 
     @Override
     public void AbilityOne(Player player) {
         // get player that is being looked at
         Vector vector = player.getLocation().getDirection();
         // check if vector is pointing at a nearby player
-        RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), vector, 5d);
-        assert ray != null;
-        Entity entity = ray.getHitEntity();
+        Entity entity;
+        RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(),player.getEyeLocation().getDirection(),10,0.5,filter(player));
+        if (result != null) {
+            if (result.getHitBlock() != null) {
+                entity = null;
+                // Player is looking at a block
+            } else if (result.getHitEntity() != null) {
+                entity = result.getHitEntity();
+                Freedom.get_plugin().getLogger().info("Player is looking at entity: " + entity.getName());
+            } else {
+                entity = null;
+            }
+        } else {
+            entity = null;
+        }
         if (entity == null) {
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 0.5f);
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 0.5f);
@@ -110,8 +127,8 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
                 }
                 blocksAffected.forEach(block -> block.setType(Material.AIR));
                 blocksAffected.clear();
-                offset.putIfAbsent(player.getUniqueId(), 0);
-                Vector vector = player.getLocation().getDirection();
+                offset.putIfAbsent(player.getUniqueId(), 10);
+                Vector vector = player.getEyeLocation().getDirection();
                 //let's get offset from that vector
                 int offsetValue = offset.get(player.getUniqueId());
                 Location targetLocation = player.getLocation().add(vector.multiply(offsetValue));
@@ -127,6 +144,7 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
                         .multiply(0.5);
                 //now let's create the bubble
                 Location corner = entity.getLocation().clone().subtract(1, -1, 1);
+                entity.setVelocity(velocity);
                 for (int x = 0; x < 3; x++) {
                     for (int y = 0; y < 3; y++) {
                         for (int z = 0; z < 3; z++) {

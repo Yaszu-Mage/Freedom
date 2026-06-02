@@ -55,7 +55,7 @@ public class soulListener extends Util implements Listener {
         SOULS.put(SoulTypes.Arcanus, new Arcanus());
         SOULS.put(SoulTypes.Leaf, new Leaf());
         SOULS.put(SoulTypes.Astral, new Astral());
-        SOULS.put(Soultypes.BaseCyan,new BaseCyan());
+        SOULS.put(SoulTypes.BaseCyan,new BaseCyan());
     }
     //by by
     // I was thinking more custom mobs bc that shit would be cool as balls
