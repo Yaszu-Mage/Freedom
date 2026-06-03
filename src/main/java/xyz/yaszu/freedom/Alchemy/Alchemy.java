@@ -113,9 +113,7 @@ public class Alchemy implements Listener {
                 }
 
 
-            } else {
             }
-        } else {
         }
 
     }

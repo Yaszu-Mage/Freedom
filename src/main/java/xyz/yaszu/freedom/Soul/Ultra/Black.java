@@ -649,6 +649,9 @@ public class Black extends Util implements Base_Soul, Listener {
                 player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(PotionEffect.INFINITE_DURATION,1));
             }
             switch (soulType) {
+                case Astral -> {
+                    player.displayName(Component.text("", NamedTextColor.DARK_PURPLE).append(player.name()));
+                }
                 case BaseRed,Red -> {
                     player.displayName(Component.text("", NamedTextColor.RED).append(player.name()));
                 }

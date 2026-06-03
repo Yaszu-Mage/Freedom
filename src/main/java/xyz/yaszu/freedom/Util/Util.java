@@ -84,7 +84,12 @@ public class Util {
         }
         return target;
     }
-
+/*
+Dear Reviewers,
+I apologize in advance, this file is hell. It's a bunch of methods I made,and used throughout the entire project
+Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
+- Yaszu
+ */
     public PotionEffectType randomPotionEffect(){
         PotionEffectType[] types = PotionEffectType.values();
         Random random = new Random();
@@ -561,6 +566,9 @@ public class Util {
         abilityOneCooldowns.remove(playerUUID);
         abilityTwoCooldowns.remove(playerUUID);
     }
+
+    //We are not done yet, you got this keep going
+
 
     public static Component loadingBar(double value, double max, double min) {
         int maxBars = 5;
@@ -1629,3 +1637,6 @@ public class Util {
         drawLine(center, back, world, points, particle, options);
     }
 }
+/*
+You finally finished it... good work... 
+ */

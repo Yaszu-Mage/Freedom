@@ -74,14 +74,18 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-            save(player);
-            return;
-        }
-        if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-
-            load(player);
-        }
+        BlackInformation blackInformation = BlackInformation.people.getOrDefault(player.getUniqueId(),new BlackInformation());
+        BlackInformation.BlackMenu blackMenu = new BlackInformation.BlackMenu();
+        blackMenu.constructMenu(blackInformation);
+        player.openInventory(blackMenu.getInventory());
+//        if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
+//            save(player);
+//            return;
+//        }
+//        if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
+//
+//            load(player);
+//        }
     }
 
     public void load(Player player) {
@@ -440,7 +444,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
     }
     }
 
-
+// reviewers SOS why expand this system
     @EventHandler
     public void Respawnevent(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
@@ -538,9 +542,81 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
     public void ActivePassive(Player player) {
 
     }
+    NamespacedKey blackInformationKey = keygen("blackInformation");
 
+    @EventHandler
+    public void onPlayerClickInventory(InventoryClickEvent event) {
+        if (event.getInventory().getHolder() instanceof BlackInformation.BlackMenu blackMenu) {
+            if (BlackInformation.people.containsKey(event.getWhoClicked().getUniqueId())) {
+                BlackInformation blackInformation = BlackInformation.people.get(event.getWhoClicked().getUniqueId());
+                if (event.getCurrentItem() != null || event.getCurrentItem().equals(emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE,1)))) {
+                    if (blackInformation.items.size() < 9) {
+                        Player player = (Player) event.getWhoClicked();
+                        blackInformation.items.add(player.getInventory().getItemInMainHand());
+                        blackInformation.locations.set(event.getSlot(),player.getLocation());
+                        player.getPersistentDataContainer().set(blackInformationKey,PersistentDataType.STRING,blackInformation.toString(player));
+                    } else {
+                        event.getWhoClicked().sendMessage(dess("You can't add more than 9 locations!"));
+                    }
+                } else {
+                    int slot = event.getSlot();
+                    if (slot >= 0 && slot < 9) {
+                        Player player = (Player) event.getWhoClicked();
+                        new BukkitRunnable() {
+                            final Player player = (Player) event.getWhoClicked();
+                            final Location startLocation = player.getLocation();
+                            final int time = 5 * 20;
+                            int tick = 0;
+                            final Location location = blackInformation.locations.get(slot);
+                            @Override
+                            public void run() {
+                                tick = tick + 1;
+                                if (player.getLocation().distance(startLocation) >= 2) {
+                                    player.sendMessage(dess("<shadow><b><Red> ERROR</b> you cannot move while teleporting"));
+                                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 0.5f);
+                                    this.cancel();
+                                }
+                                if (tick >= time) {
+                                    this.cancel();
+                                    player.teleport(location);
+                                    player.getPersistentDataContainer().remove(blackInformationKey);
+                                    BlackInformation.people.remove(player.getUniqueId());
+                                }
+                                if (tick % 20 == 0) {
+                                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, (float) tick /2);
+                                    player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.05);
+                                    int rand = random.nextInt(0,3);
+                                    switch (rand) {
+                                        case 0 -> {
+                                            drawSpiral(player.getLocation(), 1, 4,player.getWorld(),32,Particle.DUST,new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
+                                        }
+                                        case 1 -> {
+                                            drawStar(player.getLocation(), 1, player.getWorld(), 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
+                                        }
+                                        case 2 -> {
+                                            drawCircle(player.getLocation(), 1, player.getWorld(), 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
+                                        }
+                                        default -> drawSquare(player.getLocation(), 1, 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f),0,0,0);
 
+                                    }
+                                }
 
+                            }
+                        }.runTaskTimer(Freedom.get_plugin(),0,1);
+
+                    }
+                }
+            } else {
+                Player player = (Player) event.getWhoClicked();
+                BlackInformation blackInformation = new BlackInformation(player);
+                blackInformation.items.add(player.getInventory().getItemInMainHand());
+                blackInformation.locations.set(event.getSlot(),player.getLocation());
+                player.getPersistentDataContainer().set(blackInformationKey,PersistentDataType.STRING,blackInformation.toString(player));
+                BlackInformation.people.put(player.getUniqueId(),blackInformation);
+            }
+        }
+    }
+// lowkey losing my mind
     public static class BlackInformation {
         public static HashMap<UUID,BlackInformation> people = new HashMap<>();
 
@@ -602,7 +678,7 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             return output.get();
         }
 
-        public class Menu implements InventoryHolder {
+        public static class BlackMenu implements InventoryHolder {
             Inventory inventory;
 
             public void constructMenu(BlackInformation information) {
@@ -616,11 +692,18 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                     } catch (Exception ignored) {}
                 } else {
                     // do null checks
+                    try {
+                        for (int i = 0; i < inventory.getSize(); i++) {
+                            inventory.setItem(i, emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE, i + 1)));
+                        }
+                    }catch (Exception ignored) {}
                     final int[] index = {0};
                     information.items.forEach(item -> {
                         inventory.setItem(index[0], item);
                         index[0] = index[0] + 1;
                     });
+                    index[0] = 0;
+
                 }
             }
 

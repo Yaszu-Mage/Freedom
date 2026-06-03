@@ -38,6 +38,7 @@ public class ChatManager extends Util implements Listener {
         
         Player realTypist = isEcho ? sourcePlayer : player;
         String message = event.getMessage();
+        //Yes, there is booze
         message = AlcoholManager.handleChat(realTypist, message);
         // If not an echo, process message and check for disguise
         if (!isEcho) {
@@ -70,7 +71,7 @@ public class ChatManager extends Util implements Listener {
                 }
             }
         }
-
+        // This is hell, I am so sorry
         // Filtering logic (runs for non-disguised OR for the echoed event OR for offline disguise)
         String processedMessage = event.getMessage();
         

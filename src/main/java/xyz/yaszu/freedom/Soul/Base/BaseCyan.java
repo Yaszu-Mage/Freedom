@@ -10,6 +10,7 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -87,6 +88,14 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
 
 
+    @EventHandler
+    public void onWaterFlow(BlockFromToEvent event) {
+        if (blocksAffected.contains(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    public final ArrayList<Block> blocksAffected = new ArrayList<>();
     @Override
     public void AbilityOne(Player player) {
         // get player that is being looked at
@@ -113,10 +122,10 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
             player.sendMessage(dess("<b><Red>ERROR</Red></b>You are not looking at something!!"));
             return;
         }
+
         player.getPersistentDataContainer().set(keygen("ActiveAbilityOne"), PersistentDataType.BOOLEAN,true);
         offset.put(player.getUniqueId(), (int) entity.getLocation().distance(player.getLocation()));
         new BukkitRunnable() {
-            public final ArrayList<Block> blocksAffected = new ArrayList<>();
             int noSneak = 0;
             @Override
             public void run() {
@@ -126,6 +135,7 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
                     noSneak++;
                 }
                 blocksAffected.forEach(block -> block.setType(Material.AIR));
+
                 blocksAffected.clear();
                 offset.putIfAbsent(player.getUniqueId(), 10);
                 Vector vector = player.getEyeLocation().getDirection();
@@ -151,6 +161,7 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
                             Block block = corner.clone().add(x, y, z).getBlock();
                             if (block.getType() == Material.AIR) {
                                 block.setType(Material.WATER);
+
                                 blocksAffected.add(block);
                             }
                         }

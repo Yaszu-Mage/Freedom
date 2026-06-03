@@ -69,7 +69,8 @@ public class Ghostwalker extends Util implements BaseItem, Sword {
     public List<Component> visions() {
         return List.of(
                 dess("<shadow:#000BBB><dark_red><b>S E A R C H I N G F O R A W A Y O U T.\n" +
-                        "A N D F O U N D N O T H I N G .</b></dark_red>")
+                        "A N D F O U N D N O T H I N G .</b></dark_red>"),
+                dess("<shadow:#000BBB><dark_red><b>H A T R E D F O R M S I N T H E M O U T H O F T H E C O R R U P T E D</b></dark_red>")
         );
     }
 

@@ -59,7 +59,11 @@ public class Venomshank extends Util implements BaseItem, Sword {
 
     @Override
     public List<Component> visions() {
-        return List.of();
+        return List.of(
+                dess("<gradient:#3d431e:#7a863c>You will fail.</gradient>"),
+                dess("<gradient:#3d431e:#7a863c>Death is inevitable.</gradient>"),
+                dess("Kill them, it is the only option to salvation")
+        );
     }
 
     @Override

@@ -67,7 +67,9 @@ public class Icedagger extends Util implements BaseItem, Sword {
 
     @Override
     public List<Component> visions() {
-        return List.of();
+        return List.of(
+                dess("They will overthrow you")
+        );
     }
 
     @Override

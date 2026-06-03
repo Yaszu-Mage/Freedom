@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static xyz.yaszu.freedom.Util.Util.dess;
 import static xyz.yaszu.freedom.Util.Util.getGroundLocation;
 
 public class Firebrand implements BaseItem, Sword, Listener {
@@ -141,7 +142,13 @@ public class Firebrand implements BaseItem, Sword, Listener {
 
     @Override
     public List<Component> visions() {
-        return List.of();
+        return List.of(
+                dess("They will betray you."),
+                dess("Do not trust them, they will only hurt you."),
+                dess("They will burn you to the ground."),
+                dess("You will be burned to the ground."),
+                dess("Trust no one but yourself.")
+        );
     }
 
     @Override
