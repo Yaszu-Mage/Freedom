@@ -60,7 +60,6 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
  public void AbilityOne(Player player) {
         AbilityOne(player, false);
     }
-
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         if (!player.getPersistentDataContainer().has(keygen("tpyes"))) player.getPersistentDataContainer().set(keygen("tpyes"),PersistentDataType.BOOLEAN, true);

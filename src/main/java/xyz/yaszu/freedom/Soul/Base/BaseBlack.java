@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -33,7 +34,6 @@ import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class BaseBlack extends Util implements Base_Soul, Listener {
 
@@ -74,18 +74,18 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        BlackInformation blackInformation = BlackInformation.people.getOrDefault(player.getUniqueId(),new BlackInformation());
-        BlackInformation.BlackMenu blackMenu = new BlackInformation.BlackMenu();
-        blackMenu.constructMenu(blackInformation);
-        player.openInventory(blackMenu.getInventory());
-//        if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-//            save(player);
-//            return;
-//        }
-//        if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-//
-//            load(player);
-//        }
+//        BlackInformation blackInformation = BlackInformation.people.getOrDefault(player.getUniqueId(),new BlackInformation());
+//        BlackInformation.BlackMenu blackMenu = new BlackInformation.BlackMenu();
+//        blackMenu.constructMenu(blackInformation);
+//        player.openInventory(blackMenu.getInventory());
+        if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
+            save(player);
+            return;
+        }
+        if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
+
+            load(player);
+        }
     }
 
     public void load(Player player) {
@@ -546,28 +546,44 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
 
     @EventHandler
     public void onPlayerClickInventory(InventoryClickEvent event) {
-        if (event.getInventory().getHolder() instanceof BlackInformation.BlackMenu blackMenu) {
+        if (event.getInventory().getHolder() instanceof BlackInformation.BlackMenu) {
+            BlackInformation blackInformation;
             if (BlackInformation.people.containsKey(event.getWhoClicked().getUniqueId())) {
-                BlackInformation blackInformation = BlackInformation.people.get(event.getWhoClicked().getUniqueId());
-                if (event.getCurrentItem() != null || event.getCurrentItem().equals(emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE,1)))) {
+                Player player = (Player) event.getWhoClicked();
+                blackInformation = BlackInformation.people.get(event.getWhoClicked().getUniqueId());
+                ItemStack currentItem = event.getCurrentItem();
+                boolean clickedEmptySlot = currentItem == null
+                        || currentItem.getType().isAir()
+                        || currentItem.isSimilar(emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE, 1)));
+
+                if (clickedEmptySlot) {
                     if (blackInformation.items.size() < 9) {
-                        Player player = (Player) event.getWhoClicked();
-                        blackInformation.items.add(player.getInventory().getItemInMainHand());
-                        blackInformation.locations.set(event.getSlot(),player.getLocation());
-                        player.getPersistentDataContainer().set(blackInformationKey,PersistentDataType.STRING,blackInformation.toString(player));
+                        int slot = event.getRawSlot();
+                        if (slot >= 0 && slot < 9) {
+                                // expand lists to fit the slot index
+                                while (blackInformation.items.size() <= slot) {
+                                    blackInformation.items.add(null);
+                                }
+                                while (blackInformation.locations.size() <= slot) {
+                                    blackInformation.locations.add(null);
+                                }
+                                blackInformation.items.set(slot, player.getInventory().getItemInMainHand());
+                                blackInformation.locations.set(slot, player.getLocation());
+                                player.getPersistentDataContainer().set(blackInformationKey, PersistentDataType.STRING, blackInformation.toString());
+                        }
                     } else {
                         event.getWhoClicked().sendMessage(dess("You can't add more than 9 locations!"));
                     }
                 } else {
-                    int slot = event.getSlot();
-                    if (slot >= 0 && slot < 9) {
-                        Player player = (Player) event.getWhoClicked();
+                    int slot = event.getRawSlot();
+                    if (slot >= 0 && slot < blackInformation.locations.size()) {
+                        final Location location = blackInformation.locations.get(slot);
                         new BukkitRunnable() {
                             final Player player = (Player) event.getWhoClicked();
                             final Location startLocation = player.getLocation();
                             final int time = 5 * 20;
                             int tick = 0;
-                            final Location location = blackInformation.locations.get(slot);
+
                             @Override
                             public void run() {
                                 tick = tick + 1;
@@ -583,38 +599,57 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                                     BlackInformation.people.remove(player.getUniqueId());
                                 }
                                 if (tick % 20 == 0) {
-                                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, (float) tick /2);
+                                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, (float) tick / 2);
                                     player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.05);
-                                    int rand = random.nextInt(0,3);
+                                    int rand = random.nextInt(0, 3);
                                     switch (rand) {
-                                        case 0 -> {
-                                            drawSpiral(player.getLocation(), 1, 4,player.getWorld(),32,Particle.DUST,new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
-                                        }
-                                        case 1 -> {
-                                            drawStar(player.getLocation(), 1, player.getWorld(), 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
-                                        }
-                                        case 2 -> {
-                                            drawCircle(player.getLocation(), 1, player.getWorld(), 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
-                                        }
-                                        default -> drawSquare(player.getLocation(), 1, 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f),0,0,0);
-
+                                        case 0 -> drawSpiral(player.getLocation(), 1, 4, player.getWorld(), 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
+                                        case 1 -> drawStar(player.getLocation(), 1, player.getWorld(), 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
+                                        case 2 -> drawCircle(player.getLocation(), 1, player.getWorld(), 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f));
+                                        default -> drawSquare(player.getLocation(), 1, 32, Particle.DUST, new Particle.DustOptions(DyeColor.BLACK.getColor(), 4f), 0, 0, 0);
                                     }
                                 }
 
                             }
-                        }.runTaskTimer(Freedom.get_plugin(),0,1);
+                        }.runTaskTimer(Freedom.get_plugin(), 0, 1);
 
                     }
                 }
+
             } else {
                 Player player = (Player) event.getWhoClicked();
-                BlackInformation blackInformation = new BlackInformation(player);
-                blackInformation.items.add(player.getInventory().getItemInMainHand());
-                blackInformation.locations.set(event.getSlot(),player.getLocation());
-                player.getPersistentDataContainer().set(blackInformationKey,PersistentDataType.STRING,blackInformation.toString(player));
+                blackInformation = new BlackInformation(player);
+                int slot = event.getSlot();
+                if (slot < 0) slot = 0;
+                while (blackInformation.items.size() <= slot) blackInformation.items.add(null);
+                while (blackInformation.locations.size() <= slot) blackInformation.locations.add(null);
+                blackInformation.items.set(slot, player.getInventory().getItemInMainHand());
+                blackInformation.locations.set(slot, player.getLocation());
+                player.getPersistentDataContainer().set(blackInformationKey,PersistentDataType.STRING,blackInformation.toString());
                 BlackInformation.people.put(player.getUniqueId(),blackInformation);
             }
+            // Do not auto-close here. Persisted on InventoryCloseEvent to allow multiple edits.
+            event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onBlackInformationClose(InventoryCloseEvent event) {
+        if (!(event.getInventory().getHolder() instanceof BlackInformation.BlackMenu)) {
+            return;
+        }
+
+        if (!(event.getPlayer() instanceof Player player)) {
+            return;
+        }
+
+        BlackInformation blackInformation = BlackInformation.people.get(player.getUniqueId());
+        if (blackInformation == null) {
+            blackInformation = new BlackInformation(player);
+        }
+
+        player.getPersistentDataContainer().set(blackInformationKey, PersistentDataType.STRING, blackInformation.toString());
+        BlackInformation.people.put(player.getUniqueId(), blackInformation);
     }
 // lowkey losing my mind
     public static class BlackInformation {
@@ -631,9 +666,13 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             if (!construct.isEmpty()) {
                 BlackInformation info = fromString(construct);
                 if (info != null) {
-                    self = fromString(construct).self;
-
-                } else isFresh = true;
+                    items = info.items;
+                    locations = info.locations;
+                    self = info.self;
+                    isFresh = false;
+                    return;
+                }
+                isFresh = true;
             } else isFresh = true;
         }
         public BlackInformation() {
@@ -642,40 +681,73 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
 
         public BlackInformation fromString(String string) {
             BlackInformation output = new BlackInformation();
-            String[] parts = string.split("|");
-            if (parts.length != 2) {
-                return null;
+            // Format: locations part = 9 entries separated by ';', each entry either "world,x,y,z" or empty
+            // then '|' then items part = 9 entries separated by ',' where each entry is an item yaml or empty
+            String[] parts = string.split("\\|", 2);
+            if (parts.length != 2) return null;
+            String locPart = parts[0];
+            String itemPart = parts[1];
+
+            String[] locEntries = locPart.split(";", -1);
+            for (int i = 0; i < locEntries.length && i < 9; i++) {
+                String e = locEntries[i];
+                if (e == null || e.isEmpty()) {
+                    output.locations.add(null);
+                } else {
+                    String[] p = e.split(",");
+                    if (p.length == 4) {
+                        World w = Bukkit.getWorld(p[0]);
+                        try {
+                            double x = Double.parseDouble(p[1]);
+                            double y = Double.parseDouble(p[2]);
+                            double z = Double.parseDouble(p[3]);
+                            if (w != null) output.locations.add(new Location(w, x, y, z)); else output.locations.add(null);
+                        } catch (NumberFormatException ex) {
+                            output.locations.add(null);
+                        }
+                    } else {
+                        output.locations.add(null);
+                    }
+                }
             }
-            String locationsString = parts[0];
-            final int[] index = {0};
-            stringToLocations(locationsString).forEach(loc -> {
-                locations.set(index[0],loc);
-                index[0] = index[0] + 1;
-            });
-            String itemString = parts[1];
-            String[] split = itemString.split(",");
-            index[0] = 0;
-            for (String foundItem : split) {
-                ItemStack item = stringToItem(foundItem);
-                items.set(index[0],item);
-                index[0] = index[0] + 1;
+            // pad to 9
+            while (output.locations.size() < 9) output.locations.add(null);
+
+            String[] itemEntries = itemPart.split(",", -1);
+            for (int i = 0; i < itemEntries.length && i < 9; i++) {
+                String e = itemEntries[i];
+                if (e == null || e.isEmpty()) {
+                    output.items.add(null);
+                } else {
+                    ItemStack item = stringToItem(e);
+                    output.items.add(item);
+                }
             }
+            while (output.items.size() < 9) output.items.add(null);
             return output;
         }
-        public String toString(Player player) {
-            BlackInformation stored = people.get(player.getUniqueId());
-            if (stored == null) {
-                return "";
+        public String toString() {
+            // build locations with exactly 9 entries separated by ';'
+            StringBuilder locBuilder = new StringBuilder();
+            for (int i = 0; i < 9; i++) {
+                if (i > 0) locBuilder.append(';');
+                Location loc = (i < locations.size()) ? locations.get(i) : null;
+                if (loc != null) {
+                    locBuilder.append(loc.getWorld().getName()).append(',')
+                            .append(loc.getX()).append(',')
+                            .append(loc.getY()).append(',')
+                            .append(loc.getZ());
+                }
             }
-            AtomicReference<String> output = new AtomicReference<>("");
-            locations.forEach(loc -> {;
-                output.set(output + locationToString(loc) + "-");
-            });
-            output.set(output + "|");
-            for (ItemStack item : items) {
-                output.set(output + itemToString(item) + ",");
+            StringBuilder itemBuilder = new StringBuilder();
+            for (int i = 0; i < 9; i++) {
+                if (i > 0) itemBuilder.append(',');
+                ItemStack it = (i < items.size()) ? items.get(i) : null;
+                if (it != null) {
+                    itemBuilder.append(itemToString(it));
+                }
             }
-            return output.get();
+            return locBuilder.toString() + "|" + itemBuilder.toString();
         }
 
         public static class BlackMenu implements InventoryHolder {
@@ -697,12 +769,13 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
                             inventory.setItem(i, emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE, i + 1)));
                         }
                     }catch (Exception ignored) {}
-                    final int[] index = {0};
-                    information.items.forEach(item -> {
-                        inventory.setItem(index[0], item);
-                        index[0] = index[0] + 1;
-                    });
-                    index[0] = 0;
+                    // place saved items into their slots without clearing placeholders for nulls
+                    for (int i = 0; i < Math.min(inventory.getSize(), information.items.size()); i++) {
+                        ItemStack it = information.items.get(i);
+                        if (it != null) {
+                            inventory.setItem(i, it);
+                        }
+                    }
 
                 }
             }
