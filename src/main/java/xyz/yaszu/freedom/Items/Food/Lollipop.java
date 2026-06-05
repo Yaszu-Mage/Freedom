@@ -19,6 +19,8 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.List;
+
 public class Lollipop extends Util implements BaseItem {
     @Override
     public ItemStack item() {
@@ -27,6 +29,9 @@ public class Lollipop extends Util implements BaseItem {
         meta.displayName(dess("<shadow:#000000FF><b> Lollipop"));
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"lollipop");
         meta.setItemModel(NamespacedKey.minecraft("lollipop"));
+        meta.lore(List.of(
+                dess("Lollipop, lollipop, oh lolli lolli")
+        ));
         meta.addAttributeModifier(Attribute.ATTACK_KNOCKBACK,new AttributeModifier(keygen("lollipop"),8, AttributeModifier.Operation.ADD_NUMBER));
         item.setItemMeta(meta);
         return item;

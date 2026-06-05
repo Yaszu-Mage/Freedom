@@ -58,7 +58,7 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneDescription() {
-        return null;
+        return dess("Pick up entities and drown them");
     }
 
     public static HashMap<UUID,Integer> offset = new HashMap<>();
@@ -122,7 +122,6 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
             player.sendMessage(dess("<b><Red>ERROR</Red></b>You are not looking at something!!"));
             return;
         }
-
         player.getPersistentDataContainer().set(keygen("ActiveAbilityOne"), PersistentDataType.BOOLEAN,true);
         offset.put(player.getUniqueId(), (int) entity.getLocation().distance(player.getLocation()));
         new BukkitRunnable() {
@@ -178,17 +177,17 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
     @Override
     public ItemStack Related_Item() {
-        return null;
+        return ItemStack.of(Material.WATER_BUCKET);
     }
 
     @Override
     public Component AbilityTwoName() {
-        return null;
+        return dess("Ability Two - Riptide");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return null;
+        return dess("Riptide through the air");
     }
 
     @Override
