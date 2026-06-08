@@ -65,6 +65,7 @@ public class soulListener extends Util implements Listener {
     // oh I just came up with something I am so stupid... why use mannequins when every npc can be a fucking cow or smtn
     //ugh wtv I'll work on npc system and give them abilities and combat AI
     //MAHORAGA HELPPPP HELP ME HELPPPPPPPPPPPPP
+    public static boolean canAbility = true;
     public static Base_Soul getSoul(Player player) {
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
         if (soulName == null) return null;
@@ -378,7 +379,7 @@ public class soulListener extends Util implements Listener {
 
         String soulName = soul.Name_For_Container();
         if (soulName != null) {
-            if (soulName.contains("Red") || soulName.contains("Yellow") || soulName.contains("Blue")) {
+            if (soulName.contains("Yellow") || soulName.contains("Blue")) {
                 ItemStack item = findItemInHand(player, "timepiece");
                 if (item != null) {
                     soul.AbilityTwo(player, item);
@@ -456,32 +457,44 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
         Player player = event.getPlayer();
-        ItemStack drop = event.getItemDrop().getItemStack();
-        if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
-            Base_Soul soul = getSoul(player);
-            if (soul == null) return;
+        ItemStack item = event.getItemDrop().getItemStack();
+        Base_Soul soul = getSoul(player);
+        if (soul == null) return;
 
-            if (!Life_and_Death.is_alive(player) && soul.ImbueActive(player)) {
-                AbilityTwo(player);
-                event.setCancelled(true);
-                return;
-            }
-
-            String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
-            if (soulName != null) {
-                if ((soulName.contains("Red") || soulName.contains("Yellow") || soulName.contains("Blue")) && drop.getPersistentDataContainer().has(keygen("timepiece"))) {
-                    soul.AbilityTwo(player, drop);
-                    event.setCancelled(true);
-                    return;
-                } else if (soulName.contains("Purple") && drop.getPersistentDataContainer().has(keygen("rifle"))) {
-                    soul.AbilityTwo(player, drop);
-                    event.setCancelled(true);
-                    return;
+        if (!Life_and_Death.is_alive(player)) {
+            Player imbueHolder = soul.getImbuePlayer(player);
+            Base_Soul liteSoul = getImbueLiteSoul(player);
+            if (imbueHolder != null && liteSoul != null) {
+                ItemStack imbuedItem = liteSoul.getOwnersImbuedItemInHand(imbueHolder, player);
+                if (imbuedItem != null) {
+                    liteSoul.AbilityTwoLite(imbueHolder, player, imbuedItem);
                 }
             }
-
-            soul.AbilityTwo(player, player.getInventory().getItem(0));
+            return;
         }
+
+        player.sendActionBar(dess("<green>Ability Two</green>"));
+
+        String soulName = soul.Name_For_Container();
+        if (soulName != null) {
+            if (soulName.contains("Yellow") || soulName.contains("Blue")) {
+                if (item != null) {
+                    soul.AbilityTwo(player, item);
+                    event.setCancelled(true);
+                }
+
+                return;
+            } else if (soulName.contains("Purple")) {
+                if (item != null) {
+                    soul.AbilityTwo(player, item);
+                    event.setCancelled(true);
+                }
+                return;
+            }
+        }
+
+        // For others, use first item slot as per original logic
+        soul.AbilityTwo(player, player.getInventory().getItem(0));
     }
 
     @EventHandler

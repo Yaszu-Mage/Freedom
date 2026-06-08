@@ -123,7 +123,9 @@ public class Purple extends Util implements Base_Soul {
 
             player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 10f, 0f);
-
+//      player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, player.getLocation().add(player.getLocation().getDirection()), 1);
+            drawPlayerTintedDisplay(true,2,player,10,null,player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(1.5)),Color.PURPLE,4,6);
+            drawPlayerTintedDisplay(true,2,player,10,null,player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(1.5)),Color.YELLOW,2,1);
             handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
             abilityTwoCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
@@ -155,10 +157,11 @@ public class Purple extends Util implements Base_Soul {
                             }
                         }
                     } else {
+                        if (inst instanceof LivingEntity entity) {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
-                            LivingEntity entity = (LivingEntity) inst;
                             entity.damage(16 + player.getLocation().distance(snipeLocation) * 2.75, player);
                             this.cancel();
+                        }
                         }
                     }
                 }

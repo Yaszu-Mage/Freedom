@@ -34,7 +34,6 @@ public class selectionGui implements Listener {
         if (event.getCurrentItem() != null) {
             //Do what you need to do for selection
             event.setCancelled(true);
-            return;
         }
     }
     public static void openGUI(Player player) {

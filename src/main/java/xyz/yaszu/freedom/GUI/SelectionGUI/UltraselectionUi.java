@@ -22,6 +22,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Util.Util;
@@ -41,64 +42,37 @@ public class UltraselectionUi extends Util implements Listener {
         if (active_souls_in_config.contains("Red")) {
             active_souls.add(new Red());
         }
-        if (active_souls_in_config.contains("Purple")) {
-            active_souls.add(new Purple());
+        if (active_souls_in_config.contains("Orange")) {
+            active_souls.add(new Orange());
         }
-        if (active_souls_in_config.contains("Blue")) {
-            active_souls.add(new Mocha());
+        if (active_souls_in_config.contains("Yellow")) {
+            active_souls.add(new Yellow());
         }
         if (active_souls_in_config.contains("Green")) {
             active_souls.add(new Green());
         }
+        if (active_souls_in_config.contains("Blue")) {
+            active_souls.add(new Blue());
+        }
+        if (active_souls_in_config.contains("Purple")) {
+            active_souls.add(new Purple());
+        }
         if (active_souls_in_config.contains("Black")) {
             active_souls.add(new Black());
         }
-        if (active_souls_in_config.contains("Yellow")) {
+        if (active_souls_in_config.contains("Cafe")) {
             active_souls.add(new Cafe());
+        }
+        if (active_souls_in_config.contains("Mocha")) {
+            active_souls.add(new Mocha());
         }
         if (active_souls_in_config.contains("None")) {
             active_souls.add(new None());
-        }
-        if (active_souls_in_config.contains("Orange")) {
-            active_souls.add(new Orange());
         }
         return active_souls;
     }
 
 
-
-    public Base_Soul get_next_soul(Player player, Base_Soul soul_name, boolean is_forward) {
-        int max_size = active_souls().size();
-        int location = 0;
-        for (int i = 0; i < active_souls().size(); i++) {
-            Base_Soul soul = (Base_Soul) active_souls().get(i);
-            if (soul.Name_For_Container().equals(soul_name.Name_For_Container())) {
-                location = i;
-                break;
-            }
-
-        }
-        if (is_forward) {
-            if (location + 1 >= max_size) {
-                Base_Soul base = (Base_Soul) active_souls().get(0);
-                return base;
-            } else {
-                Base_Soul base = (Base_Soul) active_souls().get(location + 1);
-                return base;
-            }
-        } else {
-            if (location - 1 <= 0) {
-                Base_Soul base = (Base_Soul) active_souls().get(max_size - 1);
-                return base;
-            } else {
-                Base_Soul base = (Base_Soul) active_souls().get(location - 1);
-                return base;
-            }
-        }
-    }
-
-
-    public static HashMap<UUID, Base_Soul> soul_selection_map = new HashMap<UUID, Base_Soul>();
 
     @EventHandler
     void handleDialog(PlayerCustomClickEvent event) throws MineSkinException, DataRequestException {

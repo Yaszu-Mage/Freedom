@@ -42,14 +42,20 @@ public class selectionUi extends Util implements Listener {
         if (active_souls_in_config.contains("Red")) {
             active_souls.add(new BaseRed());
         }
-        if (active_souls_in_config.contains("Purple")) {
-            active_souls.add(new BasePurple());
+        if (active_souls_in_config.contains("Orange")) {
+            active_souls.add(new BaseOrange());
         }
-        if (active_souls_in_config.contains("Mocha")) {
-            active_souls.add(new BaseMocha());
+        if (active_souls_in_config.contains("Yellow")) {
+            active_souls.add(new BaseYellow());
         }
         if (active_souls_in_config.contains("Green")) {
             active_souls.add(new BaseGreen());
+        }
+        if (active_souls_in_config.contains("Blue")) {
+            active_souls.add(new BaseBlue());
+        }
+        if (active_souls_in_config.contains("Purple")) {
+            active_souls.add(new BasePurple());
         }
         if (active_souls_in_config.contains("Black")) {
             active_souls.add(new BaseBlack());
@@ -57,17 +63,11 @@ public class selectionUi extends Util implements Listener {
         if (active_souls_in_config.contains("Cafe")) {
             active_souls.add(new BaseCafe());
         }
+        if (active_souls_in_config.contains("Mocha")) {
+            active_souls.add(new BaseMocha());
+        }
         if (active_souls_in_config.contains("None")) {
             active_souls.add(new BaseNone());
-        }
-        if (active_souls_in_config.contains("Orange")) {
-            active_souls.add(new BaseOrange());
-        }
-        if (active_souls_in_config.contains("Yellow")) {
-            active_souls.add(new BaseYellow());
-        }
-        if (active_souls_in_config.contains("Blue")) {
-            active_souls.add(new BaseBlue());
         }
         return active_souls;
     }
@@ -94,7 +94,7 @@ public class selectionUi extends Util implements Listener {
                 return base;
             }
         } else {
-            if (location - 1 <= 0) {
+            if (location - 1 < 0) {
                 Base_Soul base = (Base_Soul) active_souls().get(max_size - 1);
                 return base;
             } else {

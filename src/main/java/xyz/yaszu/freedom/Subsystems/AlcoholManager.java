@@ -21,6 +21,8 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -220,15 +222,17 @@ public class AlcoholManager extends Util implements Listener {
         if (!isDrunk(player)) return message;
 
         String[] msg = message.split(" ");
+        ArrayList<String> array = new ArrayList<>(Arrays.asList(msg));
         StringBuilder newmsg = new StringBuilder();
         int alcohollevel = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
         switch (alcohollevel) {
             case 0 -> {
                 return message;
             }
-            case 1 -> {
-                for (int i = 0; i < msg.length; i++) {
-                    int rand = random.nextInt(0,4);
+            case 1,2,3,4,5 -> {
+                for (int i = 0; i < array.size(); i++) {
+                    int rand = random.nextInt(0,array.size());
+                    newmsg.append(array.get(rand) + " ");
                 }
             }
         }

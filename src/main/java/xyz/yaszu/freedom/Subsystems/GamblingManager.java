@@ -4,6 +4,7 @@ import com.arakelian.core.feature.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import xyz.yaszu.freedom.Items.Gambling.Card;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -18,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GamblingManager extends Util implements Listener {
-    public HashMap<Location, Gambling> gamblingLocations = new HashMap<>();
+    public static HashMap<Location, Gambling> gamblingLocations = new HashMap<>();
     @EventHandler
     public void InventoryInteract(InventoryClickEvent event) {
         if (event.getInventory().getHolder() instanceof GamblingInventory gamblingInventory) {
@@ -26,23 +28,25 @@ public class GamblingManager extends Util implements Listener {
         }
     }
 
-    public class GamblingInventory implements InventoryHolder {
-
+    public static class GamblingInventory implements InventoryHolder {
         private final Inventory inventory;
-
-
         public void setInventory(Location location) {
+            try {
+                for (int x = 0; x < inventory.getSize(); x++) {
+                    inventory.setItem(x,emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE)));
+                }
+            } catch (Exception ignored) {}
 
-            inventory.forEach(item -> item = emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE)));
             //set all inventory data
             //let's format
             if (gamblingLocations.getOrDefault(location,null) != null) {
-
+                Gambling gambling = gamblingLocations.get(location);
             } else {
                 Gambling gambling = new Gambling(location, inventory);
                 gamblingLocations.put(location, gambling);
 
             }
+
         }
 
         public GamblingInventory(Inventory inventory) {
@@ -53,13 +57,67 @@ public class GamblingManager extends Util implements Listener {
             return inventory;
         }
 
+        public ItemStack selectIcon() {
+            ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
+            ItemMeta meta = stack.getItemMeta();
+            meta.displayName(dess("Select Game"));
+            meta.setItemModel(NamespacedKey.minecraft("selectIcon"));
+            stack.setItemMeta(meta);
+            return stack;
+        }
+
+        public ItemStack randomStandardCard(String name) {
+            String suit = "";
+            switch (random.nextInt(0,4)) {
+                case 0 -> suit = "S";
+                case 1 -> suit = "C";
+                case 2 -> suit = "H";
+                case 3 -> suit = "D";
+            }
+            Card card = new Card("card"+suit+random.nextInt(1,14), Gambling.Deck.DeckTypes.Standard);
+            ItemStack cardItem = card.getCardItem();
+            ItemMeta meta = cardItem.getItemMeta();
+            meta.displayName(dess(name));
+            cardItem.setItemMeta(meta);
+            return cardItem;
+        }
+
+        public ItemStack randomUnoCard(String name) {
+            String suit = "";
+            switch (random.nextInt(0,4)) {
+                case 0 -> suit = "R";
+                case 1 -> suit = "W";
+                case 2 -> suit = "B";
+                case 3 -> suit = "G";
+                case 4 -> suit = "Y";
+            }
+            Card card = new Card("card"+suit+random.nextInt(1,10), Gambling.Deck.DeckTypes.UNO);
+            ItemStack cardItem = card.getCardItem();
+            ItemMeta meta = cardItem.getItemMeta();
+            meta.displayName(dess(name));
+            cardItem.setItemMeta(meta);
+            return cardItem;
+        }
+
+
         public void updateInventory(MenuState state, @Nullable List<Card> hand, @Nullable Object extraData) {
             switch (state) {
                 case MainMenu -> {
-
+                    try {
+                        for (int x = 0; x < inventory.getSize(); x++) {
+                            inventory.setItem(x,emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE)));
+                        }
+                    } catch (Exception ignored) {}
+                    inventory.setItem(13,selectIcon());
                 }
                 case GameSelect -> {
+                    try {
+                        for (int x = 0; x < inventory.getSize(); x++) {
+                            inventory.setItem(x,emptyItem(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE)));
+                        }
 
+                    } catch (Exception ignored) {}
+                    inventory.setItem(13,randomStandardCard("Poker"));
                 }
                 case Poker -> {
                     //on the bottom row set cards, slowly reveal "extra data"
@@ -79,7 +137,8 @@ public class GamblingManager extends Util implements Listener {
         public enum MenuState {
             MainMenu,
             GameSelect,
-            Poker
+            Poker,
+            Uno
         }
         public static void cashOut(Player player, int balance) {
             CurrencyManager.addCurrency(balance,player);
@@ -198,7 +257,7 @@ public class GamblingManager extends Util implements Listener {
         }
     }
 
-    public class Gambling {
+    public static class Gambling {
         public Gambling(Location location,Inventory inventory) {
             deck.reset();
         }
@@ -282,20 +341,49 @@ public class GamblingManager extends Util implements Listener {
         public static class Deck {
             int DeckSize = 52;
             public List<Card> cards = new ArrayList<>();
+            public enum DeckTypes {
+                Standard,
+                UNO
+            }
+            DeckTypes DeckType = DeckTypes.Standard;
             public void reset() {
                 cards.clear();
-                for (int x = 0; x < 14; x++) {
-                    cards.add(new Card("card"+"S"+x));
+                switch (DeckType) {
+                   case Standard -> {
+                       for (int x = 0; x < 14; x++) {
+                           cards.add(new Card("card"+"S"+x,DeckType));
+                       }
+                       for (int x = 0; x < 14; x++) {
+                           cards.add(new Card("card"+"D"+x,DeckType));
+                       }
+                       for (int x = 0; x < 14; x++) {
+                           cards.add(new Card("card"+"H"+x,DeckType));
+                       }
+                       for (int x = 0; x < 14; x++) {
+                           cards.add(new Card("card"+"C"+x,DeckType));
+                       }
+                   }
+                   case UNO -> {
+                        for (int x = 0; x < 10; x++) {
+                            cards.add(new Card("card"+"R"+x,DeckType));
+                        }
+                        for (int x = 0; x < 4; x++) {
+                            for (int z = 0; z < 4; z++) {
+                                cards.add(new Card("card"+"W"+x,DeckType));
+                            }
+                            for (int z = 0; z < 4; z++) {
+                                cards.add(new Card("card"+"W"+x,DeckType));
+                            }
+                        }
+
+                        for (int x = 0; x < 10; x++) {
+                            cards.add(new Card("card"+"B"+x,DeckType));
+                        }
+                   }
                 }
-                for (int x = 0; x < 14; x++) {
-                    cards.add(new Card("card"+"D"+x));
-                }
-                for (int x = 0; x < 14; x++) {
-                    cards.add(new Card("card"+"H"+x));
-                }
-                for (int x = 0; x < 14; x++) {
-                    cards.add(new Card("card"+"C"+x));
-                }
+
+
+
             }
 
             public Card getRandomCard() {

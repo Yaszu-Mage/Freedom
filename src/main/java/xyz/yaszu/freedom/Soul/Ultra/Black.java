@@ -29,6 +29,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base.BaseBlack;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.soulListener;
@@ -78,17 +79,14 @@ public class Black extends Util implements Base_Soul, Listener {
  public void AbilityOne(Player player) {
         AbilityOne(player, false);
     }
-
+    NamespacedKey deleteSlotKey = keygen("black_delete_slot");
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         if (alive(player)) {
-            if (!player.getPersistentDataContainer().has(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-                save(player);
-                return;
-            }
-            if (player.getPersistentDataContainer().get(keygen("black_save"), PersistentDataType.BOOLEAN)) {
-                load(player);
-            }
+            BaseBlack.BlackInformation blackInformation = BaseBlack.BlackInformation.people.getOrDefault(player.getUniqueId(),new BaseBlack.BlackInformation());
+            BaseBlack.BlackInformation.BlackMenu blackMenu = new BaseBlack.BlackInformation.BlackMenu();
+            blackMenu.constructMenu(blackInformation,deleteSlotKey);
+            player.openInventory(blackMenu.getInventory());
         } else {
             //imbue ability
             if (ImbueActive(player)) {

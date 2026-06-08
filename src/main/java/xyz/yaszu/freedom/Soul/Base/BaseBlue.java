@@ -89,7 +89,10 @@ public class BaseBlue extends Util implements Base_Soul, Listener {
                         new Particle.DustOptions(Color.AQUA,1f)
                 );
                 Collection<Player> near = player.getLocation().getNearbyEntitiesByType(Player.class,2);
-                Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING));
+                if (player.getPersistentDataContainer().has(keygen("doubleclock"),PersistentDataType.STRING)) {
+                    Player doubleclock = Bukkit.getPlayer(player.getPersistentDataContainer().get(keygen("doubleclock"),PersistentDataType.STRING));
+                }
+                Player doubleclock = player;
                 near.forEach(iterator -> {
                     if (iterator != player) {
                         if (doubleclock != null) {

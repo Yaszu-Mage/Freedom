@@ -160,8 +160,9 @@ public class BasePurple extends Util implements Base_Soul {
         player.setVelocity(player.getLocation().getDirection().multiply(-1.2));
         player.getWorld().playSound(player.getLocation(),Sound.ENTITY_WARDEN_SONIC_BOOM,10f,0f);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
-        player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, player.getLocation().add(player.getLocation().getDirection()), 1);
-
+//      player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, player.getLocation().add(player.getLocation().getDirection()), 1);
+        drawPlayerTintedDisplay(true,2,player,10,null,player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(1.5)),Color.PURPLE,4,6);
+        drawPlayerTintedDisplay(true,2,player,10,null,player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(1.5)),Color.YELLOW,2,1);
         handleSnipe(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 0);
         abilityTwoCooldowns.put(player.getUniqueId(),System.currentTimeMillis());
         } else {
@@ -191,7 +192,6 @@ public class BasePurple extends Util implements Base_Soul {
                 }
                 snipeLocation.add(direction);
                 for (Entity inst : snipeLocation.getNearbyEntities(4,4,4)) {
-                    Freedom.get_plugin().getLogger().info(String.valueOf(inst.getLocation().distance(snipeLocation)));
                     if (inst instanceof Player) {
                         if (inst != player) {
                             if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
@@ -204,11 +204,13 @@ public class BasePurple extends Util implements Base_Soul {
                         }
                     } else {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
-                            LivingEntity entity = (LivingEntity) inst;
-                            entity.damage(4.5+ player.getLocation().distance(snipeLocation)/2, player);
-                            entity.getWorld().spawnParticle(Particle.FLASH, entity.getLocation().add(0, 1, 0), 1);
-                            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
-                            this.cancel();
+                            if (inst instanceof LivingEntity entity) {
+                                entity.damage(4.5+ player.getLocation().distance(snipeLocation)/2, player);
+                                entity.getWorld().spawnParticle(Particle.FLASH, entity.getLocation().add(0, 1, 0), 1);
+                                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
+                                this.cancel();
+                            }
+
                         }
                     }
                 }

@@ -9,7 +9,15 @@ public interface BaseFood extends BaseItem {
         player.setFoodLevel(player.getFoodLevel() + hunger());
         player.setSaturation(player.getSaturation() + saturation());
         effect(player);
+        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount()-1);
     };
     public void effect(Player player);
-    public void bakeTime();
+    public int bakeTime();
+    public int avgCookTime();
+    public enum GameTypes {
+        Dropper,
+        QuickTime,
+        Tetris
+    }
+    public GameTypes gameType();
 }

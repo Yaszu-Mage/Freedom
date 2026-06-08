@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static xyz.yaszu.freedom.Soul.soulListener.canAbility;
 import static xyz.yaszu.freedom.Subsystems.AlcoholManager.removeAlcohol;
 import static xyz.yaszu.freedom.Util.Util.*;
 
@@ -203,6 +204,24 @@ public class Trust {
                 }
         ).build();
     }
+
+    public static LiteralCommandNode<CommandSourceStack> disableAll() {
+        return Commands.literal("disableall").executes(
+                ctx -> {
+
+                    if ( ctx.getSource().getSender() instanceof Player target) {
+                        if (!target.isOp()) {
+                            target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                            return Command.SINGLE_SUCCESS;
+                        };
+                        canAbility = !canAbility;
+                    }
+
+                    return Command.SINGLE_SUCCESS;
+                }
+        ).build();
+    }
+
 
     public static LiteralCommandNode<CommandSourceStack> sell() {
         return Commands.literal("sell")

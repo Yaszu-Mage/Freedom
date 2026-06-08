@@ -3,17 +3,14 @@ package xyz.yaszu.freedom.Soul.Base;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -74,6 +71,8 @@ public class BaseRed extends Util implements Base_Soul {
         if (can_ability(AbilityOne_Cooldown(null),abilityOneCooldowns,player.getUniqueId())) {
                 player.setVelocity(player.getLocation().getDirection().multiply(1.5));
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
+
+            drawPlayerTintedDisplay(false,1.5,player,5,Clover(),player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(1.5)), Color.RED,4,8);
                 spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
                 abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
@@ -158,6 +157,8 @@ public class BaseRed extends Util implements Base_Soul {
             public Entity fireball;
             public Vector direction = player.getLocation().getDirection();
             public boolean rocketjump = false;
+            int tick = 0;
+            int max_tick = 6000;
             @Override
             public void run() {
                 if (fireball == null) {
@@ -168,7 +169,7 @@ public class BaseRed extends Util implements Base_Soul {
                     itemDisplay.setRotation(90,90);
                 } else {
                     ItemDisplay itemDisplay = (ItemDisplay) fireball;
-                    itemDisplay.teleport(itemDisplay.getLocation().add(direction.multiply(1)));
+                    itemDisplay.teleport(itemDisplay.getLocation().add(direction));
                     int entitycount = 0;
                     for (Entity entity : itemDisplay.getNearbyEntities(1,3,1)) {
                         if (entity instanceof Player instanceplayer) {
@@ -207,9 +208,14 @@ public class BaseRed extends Util implements Base_Soul {
                     }
 
                 }
+                tick++;
+                if (tick >= max_tick) {
+                    this.cancel();
+                }
 
             }
         };
+
     }
 
     @Override

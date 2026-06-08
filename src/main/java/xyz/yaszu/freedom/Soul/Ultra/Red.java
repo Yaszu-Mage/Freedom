@@ -3,20 +3,18 @@ package xyz.yaszu.freedom.Soul.Ultra;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -71,6 +69,7 @@ public class Red extends Util implements Base_Soul {
                 player.setVelocity(player.getLocation().getDirection().multiply(2));
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1.0f, 1.2f);
                 spawnFlames(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"), 0, 1);
+            drawPlayerTintedDisplay(false,1.5,player,5,Clover(),player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(1.5)), Color.RED,4,8);
             abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         } else {
             double seconds = (double) (effective_cooldown(AbilityOne_Cooldown(null), player.getUniqueId()) - (System.currentTimeMillis() - abilityOneCooldowns.get(player.getUniqueId()))) / 1000;
@@ -80,6 +79,8 @@ public class Red extends Util implements Base_Soul {
 
 
     }
+
+
 
     public BukkitRunnable spawnFlames(Player player) {
         return new BukkitRunnable() {
@@ -91,6 +92,8 @@ public class Red extends Util implements Base_Soul {
                     this.cancel();
                 }
                 tick = tick + 1;
+
+
                 player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 0, 0), 10, 0.2, 0.2, 0.2, 0.05);
                 player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME,player.getLocation().add(0, 0, 0), 10, 0.2, 0.2, 0.2, 0.05);
                 player.getWorld().spawnParticle(Particle.LAVA, player.getLocation().add(0, 0, 0), 2, 0.1, 0.1, 0.1, 0.02);

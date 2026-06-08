@@ -311,7 +311,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         soulListener.registerSouls();
         Bukkit.getPluginManager().registerEvents(this,this);
         Bukkit.getPluginManager().registerEvents(soulListener,this);
-        Bukkit.getPluginManager().registerEvents(new selectionGui(), this);
         Bukkit.getPluginManager().registerEvents(new selectionUi(),this);
         Bukkit.getPluginManager().registerEvents(new black_flash(),this);
         Bukkit.getPluginManager().registerEvents(new Life_and_Death(), this);
@@ -455,7 +454,13 @@ public final class Freedom extends JavaPlugin implements Listener {
                 new CustomEvents.TimeChangeEvent(Objects.requireNonNull(Bukkit.getWorld("world")).getTime()).callEvent();
             }
         }.runTaskTimer(Freedom.get_plugin(), 0, 20);
-
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                //get current time
+                
+            }
+        }.runTaskTimer(Freedom.get_plugin(),10,0);
     }
     private ProtocolManager protocolManager;
 

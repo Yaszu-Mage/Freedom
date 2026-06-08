@@ -25,12 +25,11 @@ import org.bukkit.*;
 import org.bukkit.block.Lectern;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -42,6 +41,7 @@ import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.jspecify.annotations.NonNull;
 import xyz.yaszu.freedom.Blocks.BaseBlock;
 import xyz.yaszu.freedom.Blocks.BlockHandler;
 import xyz.yaszu.freedom.Freedom;
@@ -52,6 +52,8 @@ import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Subsystems.CombatTimer;
 import xyz.yaszu.freedom.Subsystems.TrustManager;
 
+import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static xyz.yaszu.freedom.Blocks.BlockHandler.restoreRotation;
@@ -106,36 +108,69 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
         return SoulPoints.intValue();
     }
     public static String itemToString(ItemStack item) {
+        if (item == null) return "";
         YamlConfiguration config = new YamlConfiguration();
         config.set("item", item);
-        return config.saveToString();
+        String yaml = config.saveToString();
+        return Base64.getEncoder().encodeToString(yaml.getBytes(StandardCharsets.UTF_8));
     }
+
     public static ItemStack stringToItem(String data) {
-        YamlConfiguration config = new YamlConfiguration();
+        if (data == null || data.isEmpty()) return null;
         try {
-            config.loadFromString(data);
+            byte[] bytes = Base64.getDecoder().decode(data);
+            String yaml = new String(bytes, StandardCharsets.UTF_8);
+            YamlConfiguration config = new YamlConfiguration();
+            config.loadFromString(yaml);
+            ItemStack item = config.getItemStack("item");
+            if (item == null) {
+                Freedom.get_plugin().getLogger().warning("[BlackInformation] stringToItem: deserialized null item from data: " + data.substring(0, Math.min(data.length(), 40)));
+            }
+            return item;
+        } catch (IllegalArgumentException e) {
+            // Not valid Base64 — try legacy plain-YAML path for data saved before this fix.
+            try {
+                YamlConfiguration config = new YamlConfiguration();
+                config.loadFromString(data);
+                return config.getItemStack("item");
+            } catch (InvalidConfigurationException ex) {
+                Freedom.get_plugin().getLogger().warning("[BlackInformation] stringToItem: failed to parse item data — " + ex.getMessage());
+                return null;
+            }
         } catch (InvalidConfigurationException e) {
-            e.printStackTrace();
+            Freedom.get_plugin().getLogger().warning("[BlackInformation] stringToItem: invalid YAML — " + e.getMessage());
             return null;
         }
-        return config.getItemStack("item");
     }
-
 
     public static String locationToString(Location loc) {
-        return loc.getWorld().toString() + "," + loc.getX() + "," +loc.getY() + "," + loc.getZ() + "-";
+        if (loc == null || loc.getWorld() == null) return "";
+        return loc.getWorld().getName() + "," + loc.getX() + "," + loc.getY() + "," + loc.getZ();
     }
+
     public static ArrayList<Location> stringToLocations(String loc) {
         ArrayList<Location> locations = new ArrayList<>();
+        if (loc == null || loc.isEmpty()) return locations;
         String[] parts = loc.split("-");
-        for (String location : parts) {
-            parts = location.split(",");
-            if (parts.length == 4) {
-                locations.add(new Location(Bukkit.getWorld(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3])));
+        for (String entry : parts) {                          // FIX: iterate `parts`, not reassign it
+            if (entry == null || entry.isEmpty()) continue;   // FIX: skip spurious empty entries
+            String[] fields = entry.split(",");               // FIX: separate variable, not `parts`
+            if (fields.length == 4) {
+                World world = Bukkit.getWorld(fields[0]);     // getName()-compatible lookup
+                if (world == null) continue;                  // FIX: skip unknown worlds gracefully
+                try {
+                    double x = Double.parseDouble(fields[1]);
+                    double y = Double.parseDouble(fields[2]);
+                    double z = Double.parseDouble(fields[3]);
+                    locations.add(new Location(world, x, y, z));
+                } catch (NumberFormatException e) {
+                    Freedom.get_plugin().getLogger().warning("[BlackInformation] stringToLocations: bad coordinate in entry '" + entry + "'");
+                }
             }
         }
         return locations;
     }
+
 
     public PotionEffectType randomPositivePotionEffect(){
         PotionEffectType[] types = new PotionEffectType[] {
@@ -419,6 +454,122 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
         }
     }
 
+
+    public static @NonNull ItemStack Clover() {
+        ItemStack itemStack = new ItemStack(Material.LEATHER_HORSE_ARMOR);
+        ItemMeta meta = (LeatherArmorMeta) itemStack.getItemMeta();
+        meta.setItemModel(NamespacedKey.minecraft("cloversigna"));
+        itemStack.setItemMeta(meta);
+        return itemStack;
+    }
+
+    public static void drawPlayerTintedDisplay(boolean isEye,double time,  Player player,int teleportationDuration, @Nullable ItemStack itemStack,  Location endingTransformation, Color tint,int scale,double offset) {
+        Location beginningTransform = player.getLocation();
+        if (isEye) {
+            beginningTransform = player.getEyeLocation();
+        }
+
+        ItemDisplay display = (ItemDisplay) beginningTransform.getWorld().spawnEntity(beginningTransform, EntityType.ITEM_DISPLAY);
+        display.setBrightness(new Display.Brightness(15,15));
+        display.setGlowColorOverride(tint.setAlpha(0));
+        display.setTransformation(
+                new Transformation(
+                        display.getTransformation().getTranslation(),
+                        display.getTransformation().getLeftRotation(),
+                        new Vector3f(scale, scale, scale),
+                        display.getTransformation().getRightRotation()
+                )
+        );
+        LeatherArmorMeta meta;
+        if (itemStack != null) {
+            meta = (LeatherArmorMeta) itemStack.getItemMeta();
+        } else {
+            itemStack = new ItemStack(Material.LEATHER_HORSE_ARMOR);
+            meta = (LeatherArmorMeta) itemStack.getItemMeta();
+            meta.setItemModel(NamespacedKey.minecraft("defaultsigna"));
+
+        }
+        meta.setColor(tint);
+        itemStack.setItemMeta(meta);
+        display.setItemStack(itemStack);
+        display.setTeleportDuration(Math.clamp(teleportationDuration,0,59));
+        new BukkitRunnable() {
+            float rotation = (float) offset;
+            @Override
+            public void run() {
+                if (display.isDead()) {
+                    this.cancel();
+                }
+                display.setTransformation(
+                        new Transformation(
+                                display.getTransformation().getTranslation(),
+                                display.getTransformation().getLeftRotation(),
+                                new Vector3f(scale, scale, scale),
+                                display.getTransformation().getRightRotation().rotateZ(rotation)
+                        )
+                );
+                if (isEye) {
+                    display.teleport(player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1 + scale/offset)));
+                } else {
+                    display.teleport(player);
+                }
+                rotation = (rotation + 0.01f);
+            }
+        }.runTaskTimer(Freedom.get_plugin(), 0,0);
+        display.teleport(endingTransformation);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                this.cancel();
+                display.remove();
+            }
+        }.runTaskLater(Freedom.get_plugin(), (long) secondsToTicks(time));
+
+
+
+
+
+    }
+
+
+    public static void drawTintedDisplay(double time,  Location beginningTransform,int teleportationDuration, @Nullable ItemStack itemStack,  Location endingTransformation, Color tint,int scale) {
+        ItemDisplay display = (ItemDisplay) beginningTransform.getWorld().spawnEntity(beginningTransform, EntityType.ITEM_DISPLAY);
+        display.setTransformation(
+                new Transformation(
+                        display.getTransformation().getTranslation(),
+                        display.getTransformation().getLeftRotation(),
+                        new Vector3f(scale, scale, scale),
+                        display.getTransformation().getRightRotation()
+                )
+        );
+        LeatherArmorMeta meta;
+        if (itemStack != null) {
+            meta = (LeatherArmorMeta) itemStack.getItemMeta();
+        } else {
+            itemStack = new ItemStack(Material.LEATHER_HORSE_ARMOR);
+            meta = (LeatherArmorMeta) itemStack.getItemMeta();
+            meta.setItemModel(NamespacedKey.minecraft("defaultsigna"));
+
+        }
+        meta.setColor(tint);
+        itemStack.setItemMeta(meta);
+        display.setItemStack(itemStack);
+        display.setTeleportDuration(Math.clamp(teleportationDuration,0,59));
+        display.teleport(endingTransformation);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                    this.cancel();
+                    display.remove();
+            }
+        }.runTaskLater(Freedom.get_plugin(), (long) secondsToTicks(time));
+
+
+
+
+
+    }
+
     public static void drawCircle(Location center, double radius, World world, int points, Particle particle) {
         for (int i = 0; i < points; i++) {
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
@@ -438,6 +589,10 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
         }
     }
 
+
+    public static double secondsToTicks(double seconds) {
+        return seconds * 20;
+    }
     public static Objective getUI(Player player) {
         Scoreboard score = player.getScoreboard();
         if (score.getObjective("UI") == null) {
