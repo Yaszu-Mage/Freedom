@@ -2,6 +2,7 @@
 ## **Paper 1.21.11**
 ### This plugin will be deployed at [play.yaszu.xyz](play.yaszu.xyz) on June 11th, 2026
 >Named After a Song I was listening to with the freedom motif in January.
+
 [![CodeFactor](https://www.codefactor.io/repository/github/yaszu-mage/freedom/badge)](https://www.codefactor.io/repository/github/yaszu-mage/freedom)
 
 
