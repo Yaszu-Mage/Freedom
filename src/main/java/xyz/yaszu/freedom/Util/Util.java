@@ -1513,8 +1513,7 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
             double x = center.getX() + (radius * Math.cos(angle)); // Calculate X coordinate
             double z = center.getZ(); // Calculate Z coordinate
-            double y = center.getY() + (radius * Math.sin(angle));; // Y remains constant for a flat circle
-
+            double y = center.getY() + (radius * Math.sin(angle)); // Y remains constant for a flat circle
             // Create a new location for the point
             Location pointLocation = new Location(world, x, y, z);
 

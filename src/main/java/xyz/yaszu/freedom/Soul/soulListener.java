@@ -253,7 +253,7 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void enableActivePassives(PlayerArmSwingEvent event) {
-        if (!Life_and_Death.is_alive(event.getPlayer())) return;
+        if (!Life_and_Death.is_alive(event.getPlayer()) || canAbility == false) return;
         Player player = event.getPlayer();
         if (!player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             return;
@@ -325,7 +325,7 @@ public class soulListener extends Util implements Listener {
 
     public void AbilityOne(Player player) {
         Base_Soul soul = getSoul(player);
-        if (soul == null) return;
+        if (soul == null || canAbility == false) return;
 
         if (!Life_and_Death.is_alive(player)) {
             Player imbueHolder = soul.getImbuePlayer(player);
@@ -350,7 +350,7 @@ public class soulListener extends Util implements Listener {
     public void joinAndHeal(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         Base_Soul soul = getSoul(player);
-        if (soul != null) {
+        if (soul != null || canAbility == false) {
             String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
             if (soulName != null && soulName.contains("Green")) {
                 soul.Passive(player, event);
@@ -358,10 +358,11 @@ public class soulListener extends Util implements Listener {
         }
     }
 
+
     public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
 
         Base_Soul soul = getSoul(player);
-        if (soul == null) return;
+        if (soul == null || canAbility == false) return;
 
         if (!Life_and_Death.is_alive(player)) {
             Player imbueHolder = soul.getImbuePlayer(player);
@@ -400,7 +401,7 @@ public class soulListener extends Util implements Listener {
     }
     public void ActivePassive(Player player) {
         Base_Soul soul = getSoul(player);
-        if (soul == null) return;
+        if (soul == null || canAbility == false) return;
         if (!Life_and_Death.is_alive(player)) return;
         double soulPoints = player.getPersistentDataContainer().getOrDefault(FreedomKeys.soulPoint(), PersistentDataType.DOUBLE, 0.0);
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
@@ -428,6 +429,7 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void AbilityOneListener(PlayerJumpEvent event) {
+        if (canAbility == false) return;
         Player player = event.getPlayer();
         if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             Base_Soul soul = getSoul(player);
@@ -456,6 +458,7 @@ public class soulListener extends Util implements Listener {
 
     @EventHandler
     public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
+        if (canAbility == false) return;
         Player player = event.getPlayer();
         ItemStack item = event.getItemDrop().getItemStack();
         Base_Soul soul = getSoul(player);
@@ -500,7 +503,7 @@ public class soulListener extends Util implements Listener {
     @EventHandler
     public void activateAttackPassive(PrePlayerAttackEntityEvent event) {
         Player player = event.getPlayer();
-        if (!Life_and_Death.is_alive(event.getPlayer())) return;
+        if (!Life_and_Death.is_alive(event.getPlayer()) || canAbility == false) return;
         Base_Soul soul = getSoul(player);
 
         applyMovesetAttackPassives(player, event);
@@ -546,6 +549,7 @@ public class soulListener extends Util implements Listener {
     }
 
     private void applyMovesetPassives(Player player) {
+        if (canAbility == false) return;
         MovesetData data = parseMoveset(player);
         if (data == null) return;
 
@@ -631,6 +635,7 @@ public class soulListener extends Util implements Listener {
     }
 
     private void applyMovesetAttackPassives(Player player, PrePlayerAttackEntityEvent event) {
+        if (canAbility == false) return;
         MovesetData data = parseMoveset(player);
         if (data == null) return;
 

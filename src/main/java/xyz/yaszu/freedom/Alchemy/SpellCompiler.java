@@ -57,7 +57,6 @@ public class SpellCompiler extends Util {
                     }
                 }
                 case teleport -> {
-
                     PortalParticleLifespan(caster.getLocation().clone().add(0,2,4).setRotation(0,0), stmt.location.clone().add(0,0,4));
                     PortalParticleLifespan(stmt.location.clone().add(0,2,0),caster.getLocation().clone().add(0,2,4).setRotation(0,0));
                 }

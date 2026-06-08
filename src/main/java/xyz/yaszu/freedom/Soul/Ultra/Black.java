@@ -579,9 +579,9 @@ public class Black extends Util implements Base_Soul, Listener {
             int max_players = Bukkit.getMaxPlayers();
             int remainder = max_players % 9;
             if (remainder == 0) {
-                inventory = Bukkit.createInventory(this,max_players);
+                inventory = Bukkit.createInventory(this,max_players,dess("Disguises"));
             } else {
-                inventory = Bukkit.createInventory(this,max_players + (9 - remainder));
+                inventory = Bukkit.createInventory(this,max_players + (9 - remainder),dess("Disguises"));
             }
             int iteration = 0;
             for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {
@@ -645,35 +645,6 @@ public class Black extends Util implements Base_Soul, Listener {
                 player.addPotionEffect(PotionEffectType.STRENGTH.createEffect(PotionEffect.INFINITE_DURATION,1));
                 player.addPotionEffect(PotionEffectType.SPEED.createEffect(PotionEffect.INFINITE_DURATION,1));
                 player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(PotionEffect.INFINITE_DURATION,1));
-            }
-            switch (soulType) {
-                case Astral -> {
-                    player.displayName(Component.text("", NamedTextColor.DARK_PURPLE).append(player.name()));
-                }
-                case BaseRed,Red -> {
-                    player.displayName(Component.text("", NamedTextColor.RED).append(player.name()));
-                }
-                case BaseGreen,Green -> {
-                    player.displayName(Component.text("", NamedTextColor.GREEN).append(player.name()));
-                }
-                case BaseMocha, Mocha -> {
-                    player.displayName(Component.text("", NamedTextColor.BLUE).append(player.name()));
-                }
-                case BasePurple,Purple -> {
-                    player.displayName(Component.text("", NamedTextColor.DARK_PURPLE).append(player.name()));
-                }
-                case Black,BaseBlack -> {
-                    player.displayName(Component.text("", NamedTextColor.WHITE).append(player.name()));
-                }
-                case Orange,BaseOrange -> {
-                    player.displayName(Component.text("", TextColor.color(0xff6f00)).append(player.name()));
-                }
-                case Cafe, BaseCafe -> {
-                    player.displayName(Component.text("", NamedTextColor.GOLD).append(player.name()));
-                }
-                case None,BaseNone -> {
-                    player.displayName(Component.text("", TextColor.color(0x555555)).append(player.name()));
-                }
             }
     }
     }

@@ -16,13 +16,10 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.title.Title;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
-import org.bukkit.Chunk;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -43,6 +40,7 @@ import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Soul.Base.BaseYellow;
+import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Subsystems.*;
 import xyz.yaszu.freedom.Soul.soulListener;
@@ -50,12 +48,14 @@ import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import static xyz.yaszu.freedom.Soul.soulListener.canAbility;
+import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 import static xyz.yaszu.freedom.Subsystems.AlcoholManager.removeAlcohol;
 import static xyz.yaszu.freedom.Util.Util.*;
 
@@ -205,6 +205,24 @@ public class Trust {
         ).build();
     }
 
+    public static LiteralCommandNode<CommandSourceStack> broadcast() {
+        return Commands.literal("broadcast").then(Commands.argument("string",StringArgumentType.string()).executes(ctx -> {
+            if (ctx.getSource() instanceof Player player) {
+                if (!player.isOp()) {
+                    player.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                    return Command.SINGLE_SUCCESS;
+                }
+            }
+            String message = ctx.getArgument("string", String.class);
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                player.showTitle(Title.title(dess("ANNOUNCEMENT"),dess(message)));
+            });
+            return Command.SINGLE_SUCCESS;
+        })).build();
+    }
+
+
+
     public static LiteralCommandNode<CommandSourceStack> disableAll() {
         return Commands.literal("disableall").executes(
                 ctx -> {
@@ -215,6 +233,15 @@ public class Trust {
                             return Command.SINGLE_SUCCESS;
                         };
                         canAbility = !canAbility;
+                        if (canAbility) {
+                            Bukkit.getOnlinePlayers().forEach(player -> {
+                                Base_Soul soul = getSoul(player);
+                                String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+                                if (soulName != null && soulName.contains("Green")) {
+                                    soul.Passive(player, null);
+                                }
+                            });
+                        }
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -481,8 +508,8 @@ public class Trust {
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                target.teleport(backrooms.getSpawnLocation());
-                                target.setRespawnLocation(backrooms.getSpawnLocation());
+                                target.teleport(backrooms.getSpawnLocation().clone().add(0,2,0));
+                                target.setRespawnLocation(backrooms.getSpawnLocation().clone().add(0,2,0));
                                 sender.sendRichMessage("<green>Teleported " + target.getName() + " to the backrooms.</green>");
                                 target.sendRichMessage("<red>You have been sent to the backrooms.</red>");
                             }

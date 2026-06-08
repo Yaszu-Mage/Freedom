@@ -1,6 +1,9 @@
 package xyz.yaszu.freedom.Subsystems;
 
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -28,6 +31,34 @@ public class ChatManager extends Util implements Listener {
     @EventHandler
     public void PlayerChatEvent(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
+
+        SoulTypes soulType = getSoulType(player);
+        switch (soulType) {
+            case Astral, BasePurple, Purple -> {
+                player.displayName(Component.text("", NamedTextColor.DARK_PURPLE).append(player.name()));
+            }
+            case BaseRed,Red -> {
+                player.displayName(Component.text("", NamedTextColor.RED).append(player.name()));
+            }
+            case BaseGreen,Green -> {
+                player.displayName(Component.text("", NamedTextColor.GREEN).append(player.name()));
+            }
+            case BaseMocha, Mocha -> {
+                player.displayName(Component.text("", NamedTextColor.BLUE).append(player.name()));
+            }
+            case Black,BaseBlack -> {
+                player.displayName(Component.text("", NamedTextColor.WHITE).append(player.name()));
+            }
+            case Orange,BaseOrange -> {
+                player.displayName(Component.text("", TextColor.color(0xff6f00)).append(player.name()));
+            }
+            case Cafe, BaseCafe -> {
+                player.displayName(Component.text("", NamedTextColor.GOLD).append(player.name()));
+            }
+            case None,BaseNone -> {
+                player.displayName(Component.text("", TextColor.color(0x555555)).append(player.name()));
+            }
+        }
         if (getSoulType(player) == SoulTypes.Arcanus) {
             arcanus.Passive(player,event);
         }

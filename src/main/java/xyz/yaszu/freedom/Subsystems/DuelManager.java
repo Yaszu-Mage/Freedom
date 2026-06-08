@@ -45,8 +45,10 @@ import java.util.UUID;
 public class DuelManager extends Util implements Listener {
     public static final Map<UUID, Location> playerInDuelArena = new HashMap<>();
 
-    public static String LargeArena = "LargeArena.schematic";
-    public static String MediumArena = "MediumArena.schem";
+
+    //TODO finish all arenas
+    public static String LargeArena = "SmallArena.schem";
+    public static String MediumArena = "SmallArena.schem";
     public static String SmallArena = "SmallArena.schem";
 
 

@@ -392,9 +392,9 @@ public class BaseBlack extends Util implements Base_Soul, Listener {
             int remainder = max_players % 9;
             Freedom.get_plugin().getLogger().info(String.valueOf(remainder));
             if (remainder == 0) {
-                inventory = Bukkit.createInventory(this,max_players);
+                inventory = Bukkit.createInventory(this,max_players,dess("Disguises"));
             } else {
-                inventory = Bukkit.createInventory(this,max_players - (remainder));
+                inventory = Bukkit.createInventory(this,max_players - (remainder),dess("Disguises"));
             }
             int iteration = 0;
             for (Player instancedPlayer : Bukkit.getOnlinePlayers()) {

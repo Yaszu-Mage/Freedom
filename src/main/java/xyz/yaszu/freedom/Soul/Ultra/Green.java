@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
+import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -233,10 +234,12 @@ public class Green extends Util implements Base_Soul {
 
     public BukkitRunnable heal_all_trusted(Player player) {
         return new BukkitRunnable() {
-
+            final World world = player.getWorld();
             @Override
             public void run() {
-                World world = player.getWorld();
+                if (soulListener.canAbility == false) {
+                    this.cancel();
+                }
               for (Player iterator : world.getPlayers()) {
                   if (iterator != player) {
                       if ((TrustManager.isTrustedBy(iterator, player) || TrustManager.isTrustedByName(iterator, player.getName())) && iterator.getLocation().distanceSquared(player.getLocation()) <= 100) {

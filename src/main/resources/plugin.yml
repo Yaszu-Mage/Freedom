@@ -76,6 +76,10 @@ commands:
     description: "pay"
   redcastle:
     description: "Red Castle"
+  disableall:
+    description: "Disable all abilities"
+  broadcast:
+    description: "Broadcast a message to all players"
 dependencies:
   bootstrap:
     PacketEvents:

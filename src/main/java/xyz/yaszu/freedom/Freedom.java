@@ -390,6 +390,8 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.sudoArgument());
             commands.registrar().register(Trust.skyArgument());
             commands.registrar().register(Trust.redcastle());
+            commands.registrar().register(Trust.disableAll());
+            commands.registrar().register(Trust.broadcast());
             commands.registrar().register(xyz.yaszu.freedom.Subsystems.SitManager.sitCommand());
             commands.registrar().register(SettingsMenu.settingsCommand());
             commands.registrar().register(duelManager.duel());
