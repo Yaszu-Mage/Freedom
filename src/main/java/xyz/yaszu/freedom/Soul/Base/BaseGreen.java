@@ -141,6 +141,7 @@ public class BaseGreen extends Util implements Base_Soul {
                     target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(400, 2));
                     target.addPotionEffect(PotionEffectType.SPEED.createEffect(160, 2));
                     target.addPotionEffect(PotionEffectType.STRENGTH.createEffect(400, 1));
+
                 }
             });
         } else {
