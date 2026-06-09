@@ -33,6 +33,7 @@ import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
 import xyz.yaszu.freedom.Items.ColorSpecific.Railgun;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
+import xyz.yaszu.freedom.Items.Default.endRod;
 import xyz.yaszu.freedom.Items.Food.*;
 import xyz.yaszu.freedom.Items.Parts.*;
 import xyz.yaszu.freedom.Items.Relics.Glock;
@@ -59,9 +60,9 @@ public class ItemListener extends Util implements Listener {
 
     public static void registerItems() {
         SoulGlass soulGlass = new SoulGlass();
-        register(new Ale(), "ale", false);
-        register(new Beer(), "beer", false);
-        register(new Wine(), "wine", false);
+        //register(new Ale(), "ale", false);
+        //register(new Beer(), "beer", false);
+        //register(new Wine(), "wine", false);
         register(new Evolve(), "evolutionstone", false);
         register(new Revival(), "revival", false);
         register(new Rifle(), "rifle", false);
@@ -72,21 +73,21 @@ public class ItemListener extends Util implements Listener {
         register(new AstralItem(), "astral", false);
         register(new PainScythe(), "painscythe", true);
         register(new Glock(), "glock", true);
-        register(new SpellFocus.Orb(), "orb", false);
-        register(new SpellFocus.Staff(), "staff", false);
-        register(new SpellFocus.Grimoire(), "grimoire", false);
+        //register(new SpellFocus.Orb(), "orb", false);
+        //register(new SpellFocus.Staff(), "staff", false);
+        //register(new SpellFocus.Grimoire(), "grimoire", false);
         register(new ScythePhighting(), "scythephighting", false);
         register(new Grapple_Hook(), "grapplehook", false);
         register(new Railgun(), "railgun", true);
         register(new Shawarma(), "shawarma", false);
-        register(new Alfajores(), "alfajores", false);
+        //register(new Alfajores(), "alfajores", false);
         register(new Lollipop(), "lollipop", false);
         register(new BaseBackpack(), "basebackpack", false);
         register(new DoubleBackpack(), "doublebackpack", false);
         register(new CrunchwrapSupreme(), "crunchwrapsupreme", false);
         register(new Falafel(), "falafel", false);
         register(new BajaBlast(), "bajablast", false);
-        register(soulGlass, "soulglass", true);
+        //register(soulGlass, "soulglass", true);
         register(new Darkheart(), "darkheart", true);
         register(new Venomshank(), "venomshank", true);
         register(new Windforce(), "windforce", true);
@@ -96,6 +97,7 @@ public class ItemListener extends Util implements Listener {
         register(new Ghostwalker(), "ghostwalker", false);
         register(new Icedagger(), "icedagger", false);
         register(new Darkheart(), "darkheart", true);
+        register(new endRod(),"end_rod",false);
         ArtifactManager.registerArtifacts();
         for (Base_Artifact artifact : ArtifactManager.ARTIFACTS.values()) {
             register(artifact, artifact.getID(), false);

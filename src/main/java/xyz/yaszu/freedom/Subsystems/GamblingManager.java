@@ -146,6 +146,51 @@ public class GamblingManager extends Util implements Listener {
     }
 
     public static HashMap<Location, Game> activeGames = new HashMap<>();
+    public class Uno implements Game {
+        boolean isActive = false;
+        byte handSize = 14;
+        public HashMap<UUID, GamblingInventory> displays = new HashMap<>();
+        public List<Card> revealed = new ArrayList<>();
+        @Override
+        public boolean isGameActive() {
+            return isActive;
+        }
+
+
+        public Uno(Location location,Player player) {
+            activeGames.put(location,this);
+            GamblingInventory inventory = new GamblingInventory(Bukkit.createInventory(null, 27, dess("Poker Game")));
+            displays.put(player.getUniqueId(),inventory);
+        }
+        @Override
+        public void startGame() {
+            isActive = true;
+            deck.DeckType = Gambling.Deck.DeckTypes.UNO;
+            defaultStart();
+        }
+
+        @Override
+        public void endGame() {
+            deck.reset();
+
+        }
+
+        @Override
+        public void updateGame() {
+
+        }
+
+        @Override
+        public void loop() {
+
+        }
+
+        @Override
+        public void resetGame() {
+
+        }
+    }
+
     public class Poker implements Game {
         byte handSize = 5;
         public HashMap<UUID, GamblingInventory> displays = new HashMap<>();
@@ -165,13 +210,8 @@ public class GamblingManager extends Util implements Listener {
         @Override
         public void startGame() {
             isActive = true;
-            deck.reset();
-            players.addAll(playersInQueue);
-            playersInQueue.clear();
-            for (Player player : players) {
-                    List<Card> hand = deck.createHand(handSize);
-                    playerHands.put(player.getUniqueId(), hand);
-            }
+            defaultStart();
+
         }
 
         @Override
@@ -248,6 +288,16 @@ public class GamblingManager extends Util implements Listener {
         public void updateGame();
         public void loop();
         public void resetGame();
+        byte handSize = 5;
+        public default void defaultStart() {
+            deck.reset();
+            players.addAll(playersInQueue);
+            playersInQueue.clear();
+            for (Player player : players) {
+                List<Card> hand = deck.createHand(handSize);
+                playerHands.put(player.getUniqueId(), hand);
+            }
+        }
         public default void addPlayer(Player player) {
             if (isGameActive()) {
                 playersInQueue.add(player);
@@ -391,6 +441,14 @@ public class GamblingManager extends Util implements Listener {
                 Card card = cards.get(rand);
                 cards.remove(rand);
                 return card;
+            }
+            public List<Card> drawCard(List<Card> hand, int amount) {
+                List<Card> cards = new ArrayList<>();
+                for (int x = 0; x < amount; x++) {
+                    cards.add(getRandomCard());
+                }
+                hand.addAll(cards);
+                return cards;
             }
             public List<Card> createHand(byte handSize) {
                 List<Card> hand = new ArrayList<>();

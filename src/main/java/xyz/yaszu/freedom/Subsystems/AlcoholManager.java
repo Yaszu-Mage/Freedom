@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AlcoholManager extends Util implements Listener {
 
-    public static int minSeconds = 4;
-    public static int maxSeconds = 120;
+    public static int minSeconds = (int) secondsToTicks(4);
+    public static int maxSeconds = (int) secondsToTicks(120);
     private static final double TWO_PI = Math.PI * 2.0D;
     private static final ConcurrentHashMap<UUID, DrunkSwayState> swayStates = new ConcurrentHashMap<>();
 
@@ -232,7 +232,10 @@ public class AlcoholManager extends Util implements Listener {
             case 1,2,3,4,5 -> {
                 for (int i = 0; i < array.size(); i++) {
                     int rand = random.nextInt(0,array.size());
-                    newmsg.append(array.get(rand) + " ");
+                    String given = array.get(rand);
+                    // jumble characters or return a given phrase
+
+                    newmsg.append(given + " ");
                 }
             }
         }

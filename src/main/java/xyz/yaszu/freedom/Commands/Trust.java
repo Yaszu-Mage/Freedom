@@ -11,7 +11,6 @@ import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.command.brigadier.argument.resolvers.ArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
@@ -21,25 +20,19 @@ import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Blocks.Silly.Duck;
 import xyz.yaszu.freedom.Commands.Arguments.CustomItemArgument;
 import xyz.yaszu.freedom.Commands.Arguments.SellArguments;
 import xyz.yaszu.freedom.Commands.Arguments.SoulArguments;
-import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Information.BaseInformation;
 import xyz.yaszu.freedom.Information.Information_Handler;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Items.ItemListener;
-import xyz.yaszu.freedom.Soul.Base.BaseYellow;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Subsystems.*;
@@ -47,16 +40,12 @@ import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.StructureUtil;
 import xyz.yaszu.freedom.Util.Util;
-
-import java.time.Duration;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import static xyz.yaszu.freedom.Soul.soulListener.canAbility;
 import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
-import static xyz.yaszu.freedom.Subsystems.AlcoholManager.removeAlcohol;
 import static xyz.yaszu.freedom.Util.Util.*;
 
 public class Trust {
@@ -183,8 +172,7 @@ public class Trust {
                         if (!target.isOp()) {
                             target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                             return Command.SINGLE_SUCCESS;
-                        };
-                        Location loc = target.getLocation();
+                        }
                         target.give(CustomSongHandler.constructSong(CustomSongHandler.CustomSong.third_sanctuary));
                         target.give(new Duck().block());
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
@@ -231,14 +219,18 @@ public class Trust {
                         if (!target.isOp()) {
                             target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                             return Command.SINGLE_SUCCESS;
-                        };
+                        }
                         canAbility = !canAbility;
                         if (canAbility) {
                             Bukkit.getOnlinePlayers().forEach(player -> {
                                 Base_Soul soul = getSoul(player);
                                 String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
                                 if (soulName != null && soulName.contains("Green")) {
-                                    soul.Passive(player, null);
+                                    try {
+                                        assert soul != null;
+                                        soul.Passive(player, null);
+                                    } catch (Exception ignored) {}
+
                                 }
                             });
                         }
@@ -296,7 +288,7 @@ public class Trust {
                             if (!sender.isOp()) {
                                 target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                                 return Command.SINGLE_SUCCESS;
-                            };
+                            }
                             target.setVelocity(new Vector(0, 10, 0));
                             target.sendRichMessage("You will fly.");
 
@@ -310,11 +302,10 @@ public class Trust {
     public static soulListener soulListener = new soulListener();
 
     public static LiteralCommandNode<CommandSourceStack> reset() {
-
         return Commands.literal("reset").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
-                        //todo
+                        Life_and_Death.revive_player(player,player.getLocation());
                     }
                     return Command.SINGLE_SUCCESS;
                 }
@@ -349,9 +340,7 @@ public class Trust {
                     if (ctx.getSource().getSender() instanceof Player player) {
                         try {
                             soulListener.AbilityTwo(player);
-                        } catch (MineSkinException e) {
-                            throw new RuntimeException(e);
-                        } catch (DataRequestException e) {
+                        } catch (MineSkinException | DataRequestException e) {
                             throw new RuntimeException(e);
                         }
                     }
@@ -481,7 +470,7 @@ public class Trust {
                                                     if (!sender.isOp()) {
                             target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                             return Command.SINGLE_SUCCESS;
-                        };
+                        }
 
                             sender.sendMessage(dess("<shadow:#000000FF><b><green>Reviving <target>!</green></b>"));
                             Life_and_Death.revive_player(target,sender.getLocation());
@@ -496,7 +485,7 @@ public class Trust {
                         .executes(ctx -> {
                             if (ctx.getSource().getSender() instanceof Player sender) {
                                 if (!sender.isOp()) {
-                                    sender.sendMessage(util.dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                                    sender.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                                     return Command.SINGLE_SUCCESS;
                                 }
                                 final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
@@ -519,7 +508,7 @@ public class Trust {
                 .executes(ctx -> {
                     if (ctx.getSource().getSender() instanceof Player sender) {
                         if (!sender.isOp()) {
-                            sender.sendMessage(util.dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
+                            sender.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                             return Command.SINGLE_SUCCESS;
                         }
 

@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Soul.Base;
 
+import com.arakelian.core.feature.Nullable;
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
 import kr.toxicity.model.api.bukkit.platform.BukkitAdapter;
@@ -22,12 +23,11 @@ import org.bukkit.util.RayTraceResult;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.soulListener;
+import xyz.yaszu.freedom.Subsystems.SoulImbueManager;
 import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
-import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class BaseGreen extends Util implements Base_Soul {
 
@@ -68,31 +68,32 @@ public class BaseGreen extends Util implements Base_Soul {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        if (player.getPersistentDataContainer().has(keygen("sprite_active"))) {
-            if (Boolean.FALSE.equals(player.getPersistentDataContainer().get(keygen("sprite_active"), PersistentDataType.BOOLEAN))) {
-            RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), player.getEyeLocation().toVector(), 5d);
-            if (ray != null) {
-                if (ray.getHitEntity() != null) {
-                    Entity looking_at = ray.getHitEntity();
-                    if (looking_at instanceof Player target && target != player) {
-                        if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
-                            if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
-                                registerSprite(target, player);
-                            }
-                        }
-                    } else {
-                        registerSprite(player, player);
-                    }
-                } else {
-                    registerSprite(player, player);
-                }
-            } else {
-                registerSprite(player, player);
-            }
-        }
-    } else {
-        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
-    }
+        AbilityOneRedo(player, is_imbue,0);
+//        if (player.getPersistentDataContainer().has(keygen("sprite_active"))) {
+//            if (Boolean.FALSE.equals(player.getPersistentDataContainer().get(keygen("sprite_active"), PersistentDataType.BOOLEAN))) {
+//            RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), player.getEyeLocation().toVector(), 5d);
+//            if (ray != null) {
+//                if (ray.getHitEntity() != null) {
+//                    Entity looking_at = ray.getHitEntity();
+//                    if (looking_at instanceof Player target && target != player) {
+//                        if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
+//                            if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
+//                                registerSprite(target, player);
+//                            }
+//                        }
+//                    } else {
+//                        registerSprite(player, player);
+//                    }
+//                } else {
+//                    registerSprite(player, player);
+//                }
+//            } else {
+//                registerSprite(player, player);
+//            }
+//        }
+//    } else {
+//        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+//    }
 }
     public static void removeOldFollowers() {
         for (World world : Bukkit.getWorlds()) {
@@ -106,6 +107,46 @@ public class BaseGreen extends Util implements Base_Soul {
         }
     }
 
+
+    public void AbilityOneRedo(Player player, boolean is_imbue, @Nullable int modifier) {
+        //--------------- VFX -----------------\\
+        Location playerLocation = player.getLocation();
+        Location location = player.getLocation();
+        World world = player.getWorld();
+        location.addRotation(0,0);
+        location.add(0,2,0);
+        Location endingLocation = location.clone().add(0,1,0);
+        drawTintedDisplay(10,location,10,null,endingLocation,Color.GREEN,2);
+        drawTintedDisplay(10,endingLocation.clone().add(0,3,0),10,null,endingLocation.add(0,-1,0),Color.GREEN,4);
+        drawSpiral(playerLocation,2,4,playerLocation.getWorld(),32,Particle.DUST,new Particle.DustOptions(Color.GREEN,1f));
+        //------------- Logic -------------------\\
+        if (!is_imbue) {
+            world.playSound(playerLocation, Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 1, 1);
+            world.playSound(playerLocation, Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+            Collection<Player> playersNear = playerLocation.getNearbyPlayers(4);
+            UUID casterId = player.getUniqueId();
+            playersNear.forEach(target -> {
+                UUID targetId = target.getUniqueId();
+                if (TrustManager.isMutual(casterId, targetId)) {
+                    target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(300, 2));
+                    target.addPotionEffect(PotionEffectType.SPEED.createEffect(80, 2));
+                    target.addPotionEffect(PotionEffectType.STRENGTH.createEffect(300, 0));
+                    target.sendMessage(dess("You have been buffed by ").append(player.displayName()));
+                }
+            });
+            if (modifier == 0) return;
+            playersNear.forEach(target -> {
+                UUID targetId = target.getUniqueId();
+                if (TrustManager.isMutual(casterId, targetId)) {
+                    target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(400, 2));
+                    target.addPotionEffect(PotionEffectType.SPEED.createEffect(160, 2));
+                    target.addPotionEffect(PotionEffectType.STRENGTH.createEffect(400, 1));
+                }
+            });
+        } else {
+            //TODO add logic
+        }
+    }
 
     public void registerSprite(Player target, Player player) {
         target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 2));

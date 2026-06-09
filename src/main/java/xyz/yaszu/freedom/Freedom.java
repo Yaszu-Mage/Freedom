@@ -6,20 +6,10 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.session.ClipboardHolder;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-
-import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.PacketEvents;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.kyori.adventure.title.Title;
@@ -50,14 +40,12 @@ import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 import xyz.yaszu.freedom.Alchemy.Alchemy;
 import xyz.yaszu.freedom.Alchemy.MazeManager;
-import xyz.yaszu.freedom.Alchemy.voidGenerator;
 import xyz.yaszu.freedom.Blocks.BlockHandler;
 import xyz.yaszu.freedom.Commands.DevTools.NpcDebugCommand;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
 import xyz.yaszu.freedom.GUI.NpcDebugGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
-import xyz.yaszu.freedom.GUI.SelectionGUI.selectionGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.GUI.SettingsGui.SettingsMenu;
 import xyz.yaszu.freedom.GUI.SettingsGui.TrustMenu;
@@ -199,7 +187,6 @@ public final class Freedom extends JavaPlugin implements Listener {
 
     private static final Map<UUID, Long> lastPdcRead = new HashMap<>();
     private static final Map<UUID, Map<String, Object>> cachedPdcValues = new HashMap<>();
-    private static final long PDC_CACHE_DURATION = 1000; // 1 second in milliseconds
 
     private static void clearAura(UUID uuid) {
         BukkitRunnable task = auraTasks.remove(uuid);
@@ -407,13 +394,13 @@ public final class Freedom extends JavaPlugin implements Listener {
             commands.registrar().register(Trust.sell());
             commands.registrar().register(Trust.pay());
             commands.registrar().register(Trust.backrooms());
+            commands.registrar().register(Trust.reset());
         });
         removeOldFollowers();
         start_time = System.currentTimeMillis();
         createVoid();
         createDoubleVoid();
         Bukkit.getPluginManager().registerEvents(new BackroomsManager(this), this);
-
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -422,7 +409,6 @@ public final class Freedom extends JavaPlugin implements Listener {
                 }
             }
         }.runTaskLater(this, 20L);
-
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -506,11 +492,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         soulAuras.clear();
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
-    }
-
-    @EventHandler
-    public void onChunkLoad(ChunkLoadEvent event) throws IOException, WorldEditException {
-        // Handled by WorldManager
     }
 
 

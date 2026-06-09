@@ -20,6 +20,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Soul.Base.BaseGreen;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Subsystems.TrustManager;
@@ -68,29 +69,30 @@ public class Green extends Util implements Base_Soul {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        if (player.getPersistentDataContainer().has(keygen("sprite_active"))) {
-            if (Boolean.FALSE.equals(player.getPersistentDataContainer().get(keygen("sprite_active"), PersistentDataType.BOOLEAN))) {
-            RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), player.getEyeLocation().toVector(), 5d);
-            if (ray != null) {
-                if (ray.getHitEntity() != null) {
-                    Entity looking_at = ray.getHitEntity();
-                    if (looking_at instanceof Player target && target != player) {
-                        if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
-                            if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
-                                registerSprite(target, player);
-                            }
-                        }
-                    } else {
-                        registerSprite(player, player);
-                    }
-                } else {
-                    registerSprite(player, player);
-                }
-            } else {
-                registerSprite(player, player);
-            }
-        }
-    }
+        green.AbilityOneRedo(player, false,1);
+//        if (player.getPersistentDataContainer().has(keygen("sprite_active"))) {
+//            if (Boolean.FALSE.equals(player.getPersistentDataContainer().get(keygen("sprite_active"), PersistentDataType.BOOLEAN))) {
+//            RayTraceResult ray = player.getWorld().rayTraceEntities(player.getLocation(), player.getEyeLocation().toVector(), 5d);
+//            if (ray != null) {
+//                if (ray.getHitEntity() != null) {
+//                    Entity looking_at = ray.getHitEntity();
+//                    if (looking_at instanceof Player target && target != player) {
+//                        if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
+//                            if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
+//                                registerSprite(target, player);
+//                            }
+//                        }
+//                    } else {
+//                        registerSprite(player, player);
+//                    }
+//                } else {
+//                    registerSprite(player, player);
+//                }
+//            } else {
+//                registerSprite(player, player);
+//            }
+//        }
+//    }
 }
     public static void removeOldFollowers() {
         for (World world : Bukkit.getWorlds()) {
@@ -231,7 +233,7 @@ public class Green extends Util implements Base_Soul {
     public void Passive(Player player, Object event) {
         heal_all_trusted(player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,60);
     }
-
+    BaseGreen green = new BaseGreen();
     public BukkitRunnable heal_all_trusted(Player player) {
         return new BukkitRunnable() {
             final World world = player.getWorld();
