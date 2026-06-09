@@ -78,20 +78,20 @@ public class VisionHandler extends Util implements Listener {
                                 Sword offHandSword = Sword.getSwordfromEnum(offHand);
 
                                 if (random.nextBoolean()) {
-                                    sendVision(mainHandSword.visions().get(random.nextInt(mainHandSword.visions().size())), mainHand, player);
+                                    sendVision(mainHandSword.visions().get(random.nextInt(mainHandSword.visions().size() -1 )), mainHand, player);
                                 } else {
-                                    sendVision(offHandSword.visions().get(random.nextInt(offHandSword.visions().size())), offHand, player);
+                                    sendVision(offHandSword.visions().get(random.nextInt(offHandSword.visions().size() - 1)), offHand, player);
                                 }
                             }
                             case Main -> {
                                 Sword.SwordType mainHand = Sword.SwordType.valueOf(player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
                                 Sword mainHandSword = Sword.getSwordfromEnum(mainHand);
-                                sendVision(mainHandSword.visions().get(random.nextInt(mainHandSword.visions().size())), mainHand, player);
+                                sendVision(mainHandSword.visions().get(random.nextInt(mainHandSword.visions().size() -1 )), mainHand, player);
                             }
                             case Off -> {
                                 Sword.SwordType offHand = Sword.SwordType.valueOf(player.getInventory().getItemInOffHand().getItemMeta().getPersistentDataContainer().get(keygen("sword"), PersistentDataType.STRING));
                                 Sword offHandSword = Sword.getSwordfromEnum(offHand);
-                                sendVision(offHandSword.visions().get(random.nextInt(offHandSword.visions().size())), offHand, player);
+                                sendVision(offHandSword.visions().get(random.nextInt(offHandSword.visions().size() - 1)), offHand, player);
                             }
                             case None -> {}
                         }
