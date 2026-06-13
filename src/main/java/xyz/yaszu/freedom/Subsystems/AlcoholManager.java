@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
@@ -83,6 +84,7 @@ public class AlcoholManager extends Util implements Listener {
         if (player.getPersistentDataContainer().has(FreedomKeys.alcohol())) {
             alcoholvalue = player.getPersistentDataContainer().get(FreedomKeys.alcohol(), PersistentDataType.INTEGER);
         }
+
         // Clamp alcohol to maximum of 5
         int newAlcoholValue = Math.min(alcoholvalue + alcoholpotency, 5);
         player.getPersistentDataContainer().set(FreedomKeys.alcohol(), PersistentDataType.INTEGER, newAlcoholValue);
@@ -101,6 +103,7 @@ public class AlcoholManager extends Util implements Listener {
             }
         }.runTaskLater(Freedom.get_plugin(),random.nextInt(minSeconds * 20, maxSeconds * 20));
     }
+
 
     @EventHandler
     public void playerdrunkenmove(PlayerMoveEvent event) {

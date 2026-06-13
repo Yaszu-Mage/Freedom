@@ -1,9 +1,6 @@
 package xyz.yaszu.freedom.Items.Food;
 
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -17,15 +14,16 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.List;
+
 public class BajaBlast extends Util implements BaseItem {
 
     @Override
     public ItemStack item() {
-        ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
+        ItemStack stack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("ale"), Color.GREEN);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING, "bajablast");
         meta.displayName(dess("<shadow:#000000FF><b><green>Baja Blast</green></b>"));
-        meta.setItemModel(NamespacedKey.minecraft("bajablast"));
         stack.setItemMeta(meta);
         return stack;
     }
