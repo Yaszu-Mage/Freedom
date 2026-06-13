@@ -137,13 +137,6 @@ public class Red extends Util implements Base_Soul {
         }
     }
 
-    public ItemStack Fireball() {
-        ItemStack Workingitem = ItemStack.of(Material.FIRE_CHARGE);
-        ItemMeta meta = Workingitem.getItemMeta();
-        meta.setItemModel(NamespacedKey.minecraft("fireball"));
-        Workingitem.setItemMeta(meta);
-        return Workingitem;
-    }
     public void showSoulPoints(Player player) {
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
         for (BossBar bossBar : player.activeBossBars() ) {
@@ -161,11 +154,7 @@ public class Red extends Util implements Base_Soul {
             @Override
             public void run() {
                 if (fireball == null) {
-                    fireball = player.getWorld().spawnEntity(player.getLocation(), EntityType.ITEM_DISPLAY);
-                    ItemDisplay itemDisplay = (ItemDisplay) fireball;
-                    itemDisplay.setItemStack(Fireball());
-                    itemDisplay.teleport(player.getLocation().add(player.getLocation().getDirection()));
-                    itemDisplay.setRotation(90,90);
+                    fireball = initFireball(fireball,player);
                 } else {
                     ItemDisplay itemDisplay = (ItemDisplay) fireball;
                     itemDisplay.teleport(itemDisplay.getLocation().add(direction.multiply(1)));
@@ -207,7 +196,9 @@ public class Red extends Util implements Base_Soul {
                 }
 
             }
+
         };
+
     }
 
     @Override

@@ -9,5 +9,6 @@ public enum CustomItemType {
     BOOK,
     SWORD,
     BLOCK,
-    FOOD
+    FOOD,
+    TOOL
 }

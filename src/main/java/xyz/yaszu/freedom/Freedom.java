@@ -6,7 +6,6 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import com.sk89q.worldedit.WorldEditException;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,7 +24,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -41,17 +39,14 @@ import org.joml.Vector3f;
 import xyz.yaszu.freedom.Alchemy.Alchemy;
 import xyz.yaszu.freedom.Alchemy.MazeManager;
 import xyz.yaszu.freedom.Blocks.BlockHandler;
-import xyz.yaszu.freedom.Commands.DevTools.NpcDebugCommand;
 import xyz.yaszu.freedom.Commands.DevTools.openGui;
 import xyz.yaszu.freedom.Commands.Trust;
-import xyz.yaszu.freedom.GUI.NpcDebugGui;
 import xyz.yaszu.freedom.GUI.SelectionGUI.UltraselectionUi;
 import xyz.yaszu.freedom.GUI.SelectionGUI.selectionUi;
 import xyz.yaszu.freedom.GUI.SettingsGui.SettingsMenu;
 import xyz.yaszu.freedom.GUI.SettingsGui.TrustMenu;
 import xyz.yaszu.freedom.Information.Information_Handler;
 import xyz.yaszu.freedom.Items.Artifacts.ArtifactManager;
-import xyz.yaszu.freedom.Items.ColorSpecific.Railgun;
 import xyz.yaszu.freedom.Items.ItemListener;
 import xyz.yaszu.freedom.Items.Parts.Grapple_Hook;
 import xyz.yaszu.freedom.Items.Parts.ScythePhighting;
@@ -60,7 +55,6 @@ import xyz.yaszu.freedom.Items.Swords.Items.Firebrand;
 import xyz.yaszu.freedom.Soul.Base.BaseBlack;
 import xyz.yaszu.freedom.Soul.Base.BaseOrange;
 import xyz.yaszu.freedom.Soul.SoulTypes;
-import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.Ultra.Mocha;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
 import xyz.yaszu.freedom.Subsystems.*;
@@ -68,8 +62,6 @@ import xyz.yaszu.freedom.Subsystems.WorldManager;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Util.*;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 import static xyz.yaszu.freedom.Items.Swords.VisionHandler.randomVisions;
@@ -331,7 +323,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new ScythePhighting(),this);
         Bukkit.getPluginManager().registerEvents(new BulletSystem(),this);
         Bukkit.getPluginManager().registerEvents(new NpcManager(), this);
-        Bukkit.getPluginManager().registerEvents(new NpcDebugGui.NpcDebugGuiListener(), this);
         Bukkit.getPluginManager().registerEvents(new CustomSongHandler(), this);
         Bukkit.getPluginManager().registerEvents(new Grapple_Hook(), this);
         Bukkit.getPluginManager().registerEvents(new GatewayListener(), this);
@@ -349,12 +340,8 @@ public final class Freedom extends JavaPlugin implements Listener {
         this.getLogger().info("---Registered Listeners!---");
         //Register Commands
         openGui openGui = new openGui();
-        NpcDebugCommand npcDebugCommand = new NpcDebugCommand();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-            commands.registrar().register("openGui", openGui);
             commands.registrar().register("opengui", openGui);
-            commands.registrar().register("npcdebug", npcDebugCommand);
-            commands.registrar().register("npcdbg", npcDebugCommand);
             commands.registrar().register(Trust.reviveArgument());
             commands.registrar().register(Trust.uncurseArgument());
             commands.registrar().register(Trust.trustArgument());
@@ -418,7 +405,6 @@ public final class Freedom extends JavaPlugin implements Listener {
             }
         }.runTaskTimer(this, 0, 100);
         MazeManager.createMazeWorld("backrooms");
-        NpcManager.update().runTaskTimer(this, 0, 100);
         randomVisions();
         protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL,

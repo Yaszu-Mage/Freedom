@@ -31,6 +31,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -1784,6 +1785,46 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
     }
 
 
+
+    public static ItemStack constructColoredBottle(List<NamespacedKey> keys,List<String> values, Color color) {
+        ItemStack itemStack = ItemStack.of(Material.POTION);
+        PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
+        meta.setColor(color);
+        keys.forEach(key -> {
+            meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, values.get(keys.indexOf(key)));
+        });
+        itemStack.setItemMeta(meta);
+        return itemStack;
+    }
+    public static void dealTrueDamage(LivingEntity entity, double amount) {
+        // Check if the entity is dead already
+        if (entity.isDead()) return;
+
+        // Get current health
+        double currentHealth = entity.getHealth();
+        double newHealth = currentHealth - amount;
+
+        if (newHealth <= 0) {
+            entity.setHealth(0); // This triggers the standard death event
+        } else {
+            entity.setHealth(newHealth);
+        }
+    }
+    public static ItemStack Fireball() {
+        ItemStack Workingitem = ItemStack.of(Material.FIRE_CHARGE);
+        ItemMeta meta = Workingitem.getItemMeta();
+        meta.setItemModel(NamespacedKey.minecraft("fireball"));
+        Workingitem.setItemMeta(meta);
+        return Workingitem;
+    }
+    public static ItemDisplay initFireball(Entity fireball, Player player) {
+        fireball = player.getWorld().spawnEntity(player.getLocation().clone().add(player.getLocation().getDirection().multiply(1.25)), EntityType.ITEM_DISPLAY);
+        ItemDisplay itemDisplay = (ItemDisplay) fireball;
+        itemDisplay.setItemStack(Fireball());
+        itemDisplay.teleport(player.getLocation().add(player.getLocation().getDirection()));
+        itemDisplay.setRotation(90,90);
+        return itemDisplay;
+    }
 
 
     public static void drawArrow(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options,float rot) {
