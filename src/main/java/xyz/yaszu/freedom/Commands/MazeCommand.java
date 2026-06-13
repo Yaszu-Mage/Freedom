@@ -27,11 +27,9 @@ public class MazeCommand {
                         .then(Commands.argument("world", StringArgumentType.string())
                                 .executes(ctx -> {
                                     String worldName = ctx.getArgument("world", String.class);
-
                                     if (worldExists(ctx.getSource(), worldName)) {
                                         return 0;
                                     }
-
                                     MazeManager.createMazeWorld(worldName);
                                     ctx.getSource().getSender().sendMessage(Component.text("Created maze world: ", NamedTextColor.GREEN)
                                             .append(Component.text(worldName, NamedTextColor.AQUA)));
@@ -129,7 +127,6 @@ public class MazeCommand {
                                 .executes(ctx -> {
                                     Player player = (Player) ctx.getSource().getSender();
                                     String worldName = ctx.getArgument("world", String.class);
-
                                     org.bukkit.World world = Bukkit.getWorld(worldName);
                                     if (world == null) {
                                         player.sendMessage(Component.text("World '" + worldName + "' not found!", NamedTextColor.RED));
@@ -156,7 +153,6 @@ public class MazeCommand {
                             ctx.getSource().getSender().sendMessage(Component.text("  Teleport to a maze world", NamedTextColor.GRAY));
                             ctx.getSource().getSender().sendMessage(Component.text("/maze tpmaze <world_name>", NamedTextColor.AQUA));
                             ctx.getSource().getSender().sendMessage(Component.text("  Alias for /maze teleport", NamedTextColor.GRAY));
-
                             return Command.SINGLE_SUCCESS;
                         })
                 )
@@ -166,7 +162,6 @@ public class MazeCommand {
                 })
                 .build();
     }
-
     /**
      * Checks if a world with the given name already exists and sends an error message if it does.
      */

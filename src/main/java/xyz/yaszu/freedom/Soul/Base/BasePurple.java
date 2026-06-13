@@ -66,8 +66,6 @@ public class BasePurple extends Util implements Base_Soul {
 
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
-        //
-
         if (can_ability(AbilityOne_Cooldown(player),abilityOneCooldowns,player.getUniqueId())) {
             World world = player.getWorld();
             world.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1.2f);
@@ -102,6 +100,10 @@ public class BasePurple extends Util implements Base_Soul {
                         player.getPersistentDataContainer().remove(keygen("purpledrag"));
                     }
                 }.runTaskLater(Bukkit.getPluginManager().getPlugin("Freedom"), (long) dragTime);
+            }
+            if (!location.getWorld().getWorldBorder().isInside(location)) {
+                player.sendMessage(dess("You can't teleport there"));
+                return;
             }
         player.teleport(location);
         try {
@@ -196,19 +198,13 @@ public class BasePurple extends Util implements Base_Soul {
                         if (inst != player) {
                             if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                                 LivingEntity entity = (LivingEntity) inst;
-                                entity.damage(4.5 + player.getLocation().distance(snipeLocation)/2, player);
-                                entity.getWorld().spawnParticle(Particle.FLASH, entity.getLocation().add(0, 1, 0), 1);
-                                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
-                                this.cancel();
+                                dealSnipeDamage(entity);
                             }
                         }
                     } else {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                             if (inst instanceof LivingEntity entity) {
-                                entity.damage(4.5+ player.getLocation().distance(snipeLocation)/2, player);
-                                entity.getWorld().spawnParticle(Particle.FLASH, entity.getLocation().add(0, 1, 0), 1);
-                                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
-                                this.cancel();
+                                dealSnipeDamage(entity);
                             }
 
                         }
@@ -219,6 +215,13 @@ public class BasePurple extends Util implements Base_Soul {
                     snipeLocation.getBlock().setType(Material.AIR);
                     this.cancel();
                 }
+            }
+
+            private void dealSnipeDamage(LivingEntity entity) {
+                entity.damage(4.5 + player.getLocation().distance(snipeLocation)/2, player);
+                entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, entity.getLocation().add(0, 1, 0), 1);
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
+                this.cancel();
             }
 
             public Location snipeLocation;

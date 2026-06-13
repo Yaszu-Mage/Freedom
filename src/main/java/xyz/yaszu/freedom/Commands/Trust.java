@@ -199,12 +199,12 @@ public class Trust {
                 if (!player.isOp()) {
                     player.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                     return Command.SINGLE_SUCCESS;
+                } else {
+                    String message = ctx.getArgument("string", String.class);
+                    util.broadcast(message);
+                    return Command.SINGLE_SUCCESS;
                 }
             }
-            String message = ctx.getArgument("string", String.class);
-            Bukkit.getOnlinePlayers().forEach(player -> {
-                player.showTitle(Title.title(dess("ANNOUNCEMENT"),dess(message)));
-            });
             return Command.SINGLE_SUCCESS;
         })).build();
     }
@@ -233,6 +233,9 @@ public class Trust {
 
                                 }
                             });
+                            util.broadcast("<shadow:#000000FF><b><green>All abilities have been enabled!</green>");
+                        } else {
+                            util.broadcast("<shadow:#000000FF><b><Red>All abilities have been disabled!</Red></b>");
                         }
                     }
 
@@ -386,14 +389,14 @@ public class Trust {
         return Commands.literal("comoraction").executes(
                 ctx -> {
                     if (ctx.getSource().getSender() instanceof Player player) {
-                        Boolean current = player.getPersistentDataContainer().get(keygen("ComorAction"), PersistentDataType.BOOLEAN);
+                        Boolean current = player.getPersistentDataContainer().get(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN);
                         boolean actionsOnly = current != null && current;
 
                         if (actionsOnly) {
-                            player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, false);
+                            player.getPersistentDataContainer().set(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, false);
                             player.sendRichMessage("You have selected to use Commands Instead of Actions");
                         } else {
-                            player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, true);
+                            player.getPersistentDataContainer().set(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true);
                             player.sendRichMessage("You have selected to use Actions Instead of Commands");
                         }
                     }
@@ -496,9 +499,10 @@ public class Trust {
                                     sender.sendRichMessage("<red>Backrooms world not found!</red>");
                                     return Command.SINGLE_SUCCESS;
                                 }
-
-                                target.teleport(backrooms.getSpawnLocation().clone().add(0,2,0));
-                                target.setRespawnLocation(backrooms.getSpawnLocation().clone().add(0,2,0));
+                                Location location = backrooms.getSpawnLocation().clone();
+                                location.setY(65);
+                                target.teleport(location);
+                                target.setRespawnLocation(location);
                                 sender.sendRichMessage("<green>Teleported " + target.getName() + " to the backrooms.</green>");
                                 target.sendRichMessage("<red>You have been sent to the backrooms.</red>");
                             }

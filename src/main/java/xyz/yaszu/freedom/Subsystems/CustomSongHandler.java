@@ -35,25 +35,25 @@ public class CustomSongHandler extends Util implements Listener {
         sarajinae_ishmael("Project Moon", "A song sung by Ishmael"),
         sarajinae_rodion("Project Moon", "A song sung by Rodion"),
         sarajinae_sinclair("Project Moon", "A song sung by Sinclair"),
-        sarajinae_hongLu("Project Moon", "A song sung by Hong Lu"),
+        //sarajinae_honglu("Project Moon", "A song sung by Hong Lu"),
         sarajinae_ryoshu("Project Moon", "A song sung by Ryoshu"),
         sarajinae_yisang("Project Moon", "A song sung by Yi Sang"),
-        noli("Luca", "The world is bound to know Noli."),
+        //noli("Luca", "The world is bound to know Noli."),
         how_many_more_now("Luca", "Song sung by Postman for Nostalgic Hangout Game"),
         broken("Luca", "Deltarune Fan Song"),
         getting_pwned("Luca", "Going out's not a good decision."),
         koppen_as_fuck("Chris's chrisotodoulou", "--Find the TELEPORTER--"),
         the_rain_formerly_known_as_purple("Chris's chrisotodoulou", "--ESCAPE THE MOON--"),
         overworld_day("Terraria", "Is it day?"),
-        third_sanctuary("Toby Fox", "Third Sanctuary; but Minecraft"),
-        nine_thrumamind("Phighting", ""),
-        to_you("Dreamcatcher", ""),
-        the_housebuilding_song("David Ferguson", ""),
-        the_most_wanted("Phighting", ""),
-        final_duet("Omori", ""),
-        bitter_and_blunt("Yonkagor", ""),
-        kill_this_love("Blackpink", ""),
-        raise_up_your_bat("Toby Fox", "Raise up your bat and start a fight!");
+        third_sanctuary("Toby Fox", "Third Sanctuary; but Minecraft");
+        //nine_thrumamind("Phighting", ""),
+        //to_you("Dreamcatcher", ""),
+        //the_housebuilding_song("David Ferguson", ""),
+        //the_most_wanted("Phighting", ""),
+        //final_duet("Omori", ""),
+        //bitter_and_blunt("Yonkagor", ""),
+        //kill_this_love("Blackpink", ""),
+        //raise_up_your_bat("Toby Fox", "Raise up your bat and start a fight!");
 
         private final String author;
         private final String description;
@@ -62,6 +62,7 @@ public class CustomSongHandler extends Util implements Listener {
             this.author = author;
             this.description = description;
         }
+        //TODO fix broken textures
     }
 
     public static final HashMap<Location, CustomSong> jukes = new HashMap<>();

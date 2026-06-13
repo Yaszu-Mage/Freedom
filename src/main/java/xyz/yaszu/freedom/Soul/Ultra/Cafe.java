@@ -41,7 +41,7 @@ public class Cafe extends Util implements Base_Soul {
 
     @Override
     public Component AbilityOneName() {
-        return dess("<color:#815854>Selective TP</color>");
+        return dess("<color:#815854>Ability One: Selective TP</color>");
     }
 
     @Override
@@ -66,12 +66,12 @@ public class Cafe extends Util implements Base_Soul {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Ability Two: <color:#F9EBDE> AOE </color>");
     }
 
     @Override
     public Component AbilityTwoDescription() {
-        return dess("⬛⬛⬛⬛⬛⬛");
+        return dess("Damage people within a 5 block radius with an AOE attack");
     }
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {

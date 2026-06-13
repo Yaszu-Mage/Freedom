@@ -38,7 +38,7 @@ public class BaseCafe extends Util implements Base_Soul {
 
     @Override
     public Component AbilityOneName() {
-        return dess("<color:#F9EBDE>Selective TP</color>");
+        return dess("<color:#F9EBDE>Ability One: Selective TP</color>");
     }
 
     @Override
@@ -63,7 +63,7 @@ public class BaseCafe extends Util implements Base_Soul {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("<color:#F9EBDE> AOE </color>");
+        return dess("Ability Two: <color:#F9EBDE> AOE </color>");
     }
 
     @Override

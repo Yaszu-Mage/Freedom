@@ -47,8 +47,6 @@ public class Burger extends Util implements BaseItem {
         recipe.addIngredient(ItemStack.of(Material.COOKED_BEEF));
         recipe.addIngredient(ItemStack.of(Material.BREAD));
         recipe.addIngredient(ItemStack.of(Material.GOLD_INGOT));
-        recipe.addIngredient(ItemStack.of(Material.CLOCK));
-
         return recipe;
     }
 

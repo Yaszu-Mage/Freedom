@@ -67,7 +67,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneName() {
-        return dess("Trickster");
+        return dess("<gradient:#0f000f:#555555:#aa00aa>Ability One:<gradient> Trickster");
     }
 
     @Override
@@ -311,7 +311,7 @@ public class Black extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("Mimicry");
+        return dess("<gradient:#0f000f:#555555:#aa00aa>Ability Two:<gradient> Mimicry");
     }
 
     @Override

@@ -431,9 +431,6 @@ public class GamblingManager extends Util implements Listener {
                         }
                    }
                 }
-
-
-
             }
 
             public Card getRandomCard() {

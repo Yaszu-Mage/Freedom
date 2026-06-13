@@ -56,7 +56,7 @@ public class Yellow extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneDescription() {
-        return dess("While triggering the clock item, Yellow gains speed I for 10 seconds.");
+        return dess("While triggering the clock item, Yellow can give themselves an ability and their partner during activation");
     }
 
     @Override

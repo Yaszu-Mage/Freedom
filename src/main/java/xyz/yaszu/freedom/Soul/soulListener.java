@@ -431,6 +431,7 @@ public class soulListener extends Util implements Listener {
     public void AbilityOneListener(PlayerJumpEvent event) {
         if (canAbility == false) return;
         Player player = event.getPlayer();
+        if (!player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) return;
         if (player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             Base_Soul soul = getSoul(player);
             if (soul == null) return;
@@ -440,14 +441,20 @@ public class soulListener extends Util implements Listener {
                 return;
             }
 
+
             String soulName = soul.Name_For_Container();
-            if (soulName.contains("Yellow")) {
+            if (soulName.contains("Yellow") || soulName.contains("Blue") || soulName.contains("Red")) {
                 if (findItemInHand(player, "timepiece") != null) {
                     AbilityOne(player);
                 }
                 return;
             }
-
+            if (soulName.contains("Purple")) {
+                if (findItemInHand(player, "rifle") != null) {
+                    AbilityOne(player);
+                }
+                return;
+            }
             if (soulName != null && soulName.contains("Orange")) {
                 AbilityOne(player);
             } else if (player.isSneaking()) {
@@ -460,6 +467,7 @@ public class soulListener extends Util implements Listener {
     public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
         if (canAbility == false) return;
         Player player = event.getPlayer();
+        if (!player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) return;
         ItemStack item = event.getItemDrop().getItemStack();
         Base_Soul soul = getSoul(player);
         if (soul == null) return;

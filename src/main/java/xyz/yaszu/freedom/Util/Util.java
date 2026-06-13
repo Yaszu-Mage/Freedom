@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
@@ -1097,6 +1098,12 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
         }
     }
 
+
+    public void broadcast(String message) {
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.showTitle(Title.title(dess("<shadow:#000000FF><b><Red>ANNOUNCEMENT"),dess(message)));
+        });
+    }
     public static void multisquare(Location location, int tick, int size, Particle particle, int initialrot, Particle.DustOptions options) {
         Color optionscolor = options.getColor();
         optionscolor = optionscolor.mixColors(Color.RED);

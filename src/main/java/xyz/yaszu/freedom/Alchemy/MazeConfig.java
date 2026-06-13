@@ -25,7 +25,7 @@ public class MazeConfig {
         this.wallHeight = 4;
         this.roofOffset = 5;
         this.wallMaterial = Material.SMOOTH_SANDSTONE;
-        this.floorMaterial = Material.SMOOTH_SANDSTONE;
+        this.floorMaterial = Material.STRIPPED_BIRCH_WOOD;
         this.roofMaterial = Material.SMOOTH_STONE;
         this.doorMaterial = Material.SMOOTH_SANDSTONE_STAIRS;
         this.baseHeight = 64;

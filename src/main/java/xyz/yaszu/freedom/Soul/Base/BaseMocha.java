@@ -47,7 +47,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityOneName() {
-        return dess("<color:#F9EBDE> Selective TP </color>");
+        return dess("<color:#F9EBDE>Ability One: </color> Selective TP");
     }
 
     @Override
@@ -128,7 +128,7 @@ public class BaseMocha extends Util implements Base_Soul, Listener {
 
     @Override
     public Component AbilityTwoName() {
-        return dess("Time slow");
+        return dess("<color:#F9EBDE> Ability Two: </color> Time slow");
     }
 
     @Override
