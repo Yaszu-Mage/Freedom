@@ -6,9 +6,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
@@ -47,7 +45,7 @@ public class Shawarma extends Util implements BaseItem {
     public Recipe recipe() {
         ShapelessRecipe recipe = new ShapelessRecipe(keygen("shawarma"),item());
         recipe.addIngredient(ItemStack.of(Material.BREAD));
-        recipe.addIngredient(ItemStack.of(Material.BEEF));
+        recipe.addIngredient(RecipeChoice.itemType(ItemType.BEEF,ItemType.COOKED_BEEF));
         recipe.addIngredient(ItemStack.of(Material.CARROT));
         return recipe;
     }

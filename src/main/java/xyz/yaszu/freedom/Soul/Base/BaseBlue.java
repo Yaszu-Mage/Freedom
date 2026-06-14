@@ -24,7 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class BaseBlue extends Util implements Base_Soul, Listener {
+public class
+BaseBlue extends Util implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
         return "BaseBlue";

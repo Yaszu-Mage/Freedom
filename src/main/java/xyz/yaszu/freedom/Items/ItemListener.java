@@ -33,6 +33,7 @@ import xyz.yaszu.freedom.Items.Artifacts.Base_Artifact;
 import xyz.yaszu.freedom.Items.ColorSpecific.Railgun;
 import xyz.yaszu.freedom.Items.ColorSpecific.Rifle;
 import xyz.yaszu.freedom.Items.ColorSpecific.TimePiece;
+import xyz.yaszu.freedom.Items.Default.deepslateBricks;
 import xyz.yaszu.freedom.Items.Default.endRod;
 import xyz.yaszu.freedom.Items.Food.*;
 import xyz.yaszu.freedom.Items.Parts.*;
@@ -60,9 +61,9 @@ public class ItemListener extends Util implements Listener {
 
     public static void registerItems() {
         SoulGlass soulGlass = new SoulGlass();
-        //register(new Ale(), "ale", false);
-        //register(new Beer(), "beer", false);
-        //register(new Wine(), "wine", false);
+        register(new Ale(), "ale", false);
+        register(new Beer(), "beer", false);
+        register(new Wine(), "wine", false);
         register(new Evolve(), "evolutionstone", false);
         register(new Revival(), "revival", false);
         register(new Rifle(), "rifle", false);
@@ -73,6 +74,7 @@ public class ItemListener extends Util implements Listener {
         register(new AstralItem(), "astral", false);
         register(new PainScythe(), "painscythe", true);
         register(new Glock(), "glock", true);
+        register(new deepslateBricks(), "deepslatebricks", false);
         //register(new SpellFocus.Orb(), "orb", false);
         //register(new SpellFocus.Staff(), "staff", false);
         //register(new SpellFocus.Grimoire(), "grimoire", false);

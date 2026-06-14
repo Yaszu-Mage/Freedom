@@ -19,7 +19,7 @@ import java.util.List;
 public class Beer extends Util implements BaseItem {
     @Override
     public ItemStack item() {
-        ItemStack itemStack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("beer"), Color.fromRGB(200,125,0));
+        ItemStack itemStack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("ale"), Color.fromRGB(200,125,0));
         ItemMeta meta = itemStack.getItemMeta();
         meta.displayName(Util.dess("<shadow:#000000FF><b><yellow>Beer</yellow></b>"));
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"beer");
