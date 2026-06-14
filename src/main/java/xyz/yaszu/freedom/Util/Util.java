@@ -1785,6 +1785,21 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
     }
 
 
+    public static void silenceFor(Player player, int seconds) {
+        player.getPersistentDataContainer().set(keygen("silence"), PersistentDataType.BOOLEAN, true);
+        new BukkitRunnable() {
+            int tick = 0;
+            double tickGoal = secondsToTicks(seconds);
+            @Override
+            public void run() {
+                tick += 1;
+                if (tick >= tickGoal) {
+                    player.getPersistentDataContainer().remove(keygen("silence"));
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer(Freedom.get_plugin(), 0,0);
+    }
 
     public static ItemStack constructColoredBottle(List<NamespacedKey> keys,List<String> values, Color color) {
         ItemStack itemStack = ItemStack.of(Material.POTION);
@@ -1805,10 +1820,14 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
         double newHealth = currentHealth - amount;
 
         if (newHealth <= 0) {
+            //Kill
+            Freedom.get_plugin().getLogger().info("Killing " + entity.getName());
             entity.setHealth(0); // This triggers the standard death event
         } else {
+            Freedom.get_plugin().getLogger().info("Dealing " + amount + " damage to " + entity.getName());
             entity.setHealth(newHealth);
         }
+        entity.playHurtAnimation(45);
     }
     public static ItemStack Fireball() {
         ItemStack Workingitem = ItemStack.of(Material.FIRE_CHARGE);

@@ -6,6 +6,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -16,6 +17,7 @@ import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base.BasePurple;
 import xyz.yaszu.freedom.Soul.Base_Soul;
+import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
@@ -135,8 +137,10 @@ public class Purple extends Util implements Base_Soul {
     }
     public BukkitRunnable handleSnipe(Player player) {
         return new BukkitRunnable() {
-            Vector direction = player.getLocation().getDirection();
-            World world = player.getWorld();
+            final Vector direction = player.getLocation().getDirection();
+            final World world = player.getWorld();
+            int piercing = 0;
+            final int piercing_max = 5;
             @Override
             public void run() {
                 if (snipeLocation == null) {
@@ -152,20 +156,25 @@ public class Purple extends Util implements Base_Soul {
                         if (inst != player) {
                             if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
                                 LivingEntity entity = (LivingEntity) inst;
-                                entity.damage(16 + player.getLocation().distance(snipeLocation) * 2.75, player);
+                                dealSnipeDamage(entity);
                                 this.cancel();
                             }
                         }
                     } else {
                         if (inst instanceof LivingEntity entity) {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
-                            entity.damage(16 + player.getLocation().distance(snipeLocation) * 2.75, player);
+                            if (inst instanceof Tameable tameable) {
+                                if (tameable.isTamed() && (tameable.getOwnerUniqueId() == player.getUniqueId() || TrustManager.isMutual(tameable.getOwnerUniqueId(),player.getUniqueId()))) {
+                                    return;
+                                }
+                            }
+                            dealSnipeDamage(entity);
+//                            entity.damage(16 + player.getLocation().distance(snipeLocation) * 2.75, player);
                             this.cancel();
                         }
                         }
                     }
                 }
-
                 if (snipeLocation.isBlock()) {
                     snipeLocation.getBlock().setType(Material.AIR);
                     this.cancel();
@@ -173,9 +182,26 @@ public class Purple extends Util implements Base_Soul {
             }
 
             public Location snipeLocation;
-
+            private void dealSnipeDamage(LivingEntity entity) {
+                //old
+//              entity.damage(16 + player.getLocation().distance(snipeLocation) * 2.75, player);
+                // GHOST REVAMP
+                if (entity instanceof Player) {
+                    dealTrueDamage(entity,10);
+                } else {
+                    dealTrueDamage(entity,20);
+                }
+                //VFX
+                entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, entity.getLocation().add(0, 1, 0), 1);
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
+                piercing++;
+                if (piercing > piercing_max) {
+                    this.cancel();
+                }
+            }
 
         };
+
     }
 
     @Override

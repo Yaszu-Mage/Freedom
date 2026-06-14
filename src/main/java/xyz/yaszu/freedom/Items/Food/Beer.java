@@ -1,9 +1,6 @@
 package xyz.yaszu.freedom.Items.Food;
 
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -17,12 +14,13 @@ import xyz.yaszu.freedom.Subsystems.AlcoholManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.util.List;
+
 public class Beer extends Util implements BaseItem {
     @Override
     public ItemStack item() {
-        ItemStack itemStack = ItemStack.of(Material.RECOVERY_COMPASS);
+        ItemStack itemStack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("ale"), Color.fromRGB(200,125,0));
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setItemModel(NamespacedKey.minecraft("beer"));
         meta.displayName(Util.dess("<shadow:#000000FF><b><yellow>Beer</yellow></b>"));
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"beer");
         itemStack.setItemMeta(meta);

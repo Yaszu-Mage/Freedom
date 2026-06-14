@@ -6,6 +6,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,6 +18,7 @@ import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
@@ -181,6 +183,8 @@ public class BasePurple extends Util implements Base_Soul {
         return new BukkitRunnable() {
             Vector direction = player.getLocation().getDirection();
             World world = player.getWorld();
+            int piercing = 0;
+            int piercing_max = 5;
             @Override
             public void run() {
                 if (snipeLocation == null) {
@@ -203,6 +207,11 @@ public class BasePurple extends Util implements Base_Soul {
                         }
                     } else {
                         if (inst.getLocation().distanceSquared(snipeLocation) <= 4) {
+                            if (inst instanceof Tameable tameable) {
+                                if (tameable.isTamed() && (tameable.getOwnerUniqueId() == player.getUniqueId() || TrustManager.isMutual(tameable.getOwnerUniqueId(),player.getUniqueId()))) {
+                                    return;
+                                }
+                            }
                             if (inst instanceof LivingEntity entity) {
                                 dealSnipeDamage(entity);
                             }
@@ -219,13 +228,20 @@ public class BasePurple extends Util implements Base_Soul {
 
             private void dealSnipeDamage(LivingEntity entity) {
                 //old
-                entity.damage(4.5 + player.getLocation().distance(snipeLocation)/2, player);
+//                entity.damage(4.5 + player.getLocation().distance(snipeLocation)/2, player);
                 // GHOST REVAMP
-                dealTrueDamage(entity,5);
+                if (entity instanceof Player) {
+                    dealTrueDamage(entity,5);
+                } else {
+                    dealTrueDamage(entity,10);
+                }
                 //VFX
                 entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, entity.getLocation().add(0, 1, 0), 1);
                 entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
-                this.cancel();
+                piercing++;
+                if (piercing > piercing_max) {
+                    this.cancel();
+                }
             }
 
             public Location snipeLocation;
