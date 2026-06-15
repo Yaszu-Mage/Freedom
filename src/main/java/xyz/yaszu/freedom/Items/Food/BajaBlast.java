@@ -55,6 +55,6 @@ public class BajaBlast extends Util implements BaseItem {
 
     @Override
     public CustomItemType getType() {
-        return CustomItemType.FOOD;
+        return CustomItemType.DRINK;
     }
 }

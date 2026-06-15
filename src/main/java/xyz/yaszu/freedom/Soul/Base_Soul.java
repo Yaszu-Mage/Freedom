@@ -7,14 +7,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Util.FreedomKeys;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static xyz.yaszu.freedom.Subsystems.SoulImbueManager.getWhoImbued;
 import static xyz.yaszu.freedom.Subsystems.SoulImbueManager.isImbued;
-import static xyz.yaszu.freedom.Util.Util.abilityOneCooldowns;
-import static xyz.yaszu.freedom.Util.Util.abilityTwoCooldowns;
+import static xyz.yaszu.freedom.Util.Util.*;
 
 public interface Base_Soul {
     //Name Used in Components
@@ -70,6 +70,11 @@ public interface Base_Soul {
 
     default boolean can_ability(long cooldown, java.util.HashMap<java.util.UUID, Long> cooldown_list, java.util.UUID player) {
         org.bukkit.entity.Player p = org.bukkit.Bukkit.getPlayer(player);
+        assert p!= null;
+        if (p.getPersistentDataContainer().has(FreedomKeys.silence())) {
+            p.sendMessage(dess("<red>You are silenced and cannot use this ability.</red>"));
+            return false;
+        }
         if (p != null && xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(p)) {
             return true;
         }
