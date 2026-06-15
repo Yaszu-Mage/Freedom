@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Items.Food;
+package xyz.yaszu.freedom.Items.Drinks;
 
 import org.bukkit.Color;
 import org.bukkit.entity.Player;
