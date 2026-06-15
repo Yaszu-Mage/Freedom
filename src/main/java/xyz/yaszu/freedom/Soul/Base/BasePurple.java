@@ -228,20 +228,20 @@ public class BasePurple extends Util implements Base_Soul {
 
             private void dealSnipeDamage(LivingEntity entity) {
                 //old
-//                entity.damage(4.5 + player.getLocation().distance(snipeLocation)/2, player);
+                 entity.damage(4.5 + player.getLocation().distance(snipeLocation)/2, player);
                 // GHOST REVAMP
-                if (entity instanceof Player) {
-                    dealTrueDamage(entity,5);
-                } else {
-                    dealTrueDamage(entity,10);
-                }
+//                if (entity instanceof Player) {
+//                    dealTrueDamage(entity,5);
+//                } else {
+//                    dealTrueDamage(entity,10);
+//                }
                 //VFX
                 entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, entity.getLocation().add(0, 1, 0), 1);
                 entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1.0f, 1.2f);
-                piercing++;
-                if (piercing > piercing_max) {
+//                piercing++;
+//                if (piercing > piercing_max) {
                     this.cancel();
-                }
+//                }
             }
 
             public Location snipeLocation;

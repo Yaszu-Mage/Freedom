@@ -18,6 +18,8 @@ public class FreedomKeys {
         return key("sprite_active");
     }
 
+    public static NamespacedKey silence() {return key("silence");}
+
     public static NamespacedKey comorAction() {
         return key("comoraction");
     }

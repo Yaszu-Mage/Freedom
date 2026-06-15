@@ -5,11 +5,14 @@ import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.Util;
@@ -53,26 +56,25 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
     public void AbilityOne(Player player) {
         int teleportAmount = player.getPersistentDataContainer().getOrDefault(keygen("cyanTeleport".toLowerCase()), PersistentDataType.INTEGER, 0);
         if (can_ability(AbilityOne_Cooldown(player),abilityOneCooldowns,player.getUniqueId())) {
-            if (teleportAmount > 5) {
-                abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + AbilityOne_Cooldown(player));
-                return;
-            }
             Random random = new Random();
             World world = player.getWorld();
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 1f, 1f);
-            Location teleportLocation = player.getLocation().add(player.getLocation().getDirection().multiply(1.25));
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.5f, 1f);
+            Location teleportLocation = player.getLocation().add(player.getLocation().getDirection().multiply(4.5));
             Location midPoint = getMidpoint(player.getLocation(), teleportLocation);
-            midPoint.add(random.nextDouble(-8,8),0,random.nextDouble(-8,8));
-            drawLine(player.getLocation(),midPoint,world,16, Particle.ELECTRIC_SPARK,0,0,0,0,Color.BLUE);
-            drawLine(teleportLocation,midPoint,world,16, Particle.ELECTRIC_SPARK,0,0,0,0,Color.BLUE);
-            player.getWorld().playSound(teleportLocation, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 1f, 1f);
+            midPoint.add(random.nextDouble(-1,1),0,random.nextDouble(-1,1));
+            drawLine(player.getLocation().clone().add(0,1,0),midPoint.add(0,1,0),world,16, Particle.ELECTRIC_SPARK);
+            drawLine(teleportLocation.add(0,1,0),midPoint.add(0,1,0),world,16, Particle.ELECTRIC_SPARK);
+            player.getWorld().playSound(teleportLocation, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.5f, 1f);
             player.teleport(teleportLocation);
             teleportAmount++;
-            if (teleportAmount > 5) {
-
-                abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + AbilityOne_Cooldown(player));
-            }
             player.getPersistentDataContainer().set(keygen("cyanTeleport".toLowerCase()), PersistentDataType.INTEGER, teleportAmount);
+            if (teleportAmount >= 5) {
+                Freedom.get_plugin().getLogger().info("resetting!");
+                player.getPersistentDataContainer().set(keygen("cyanTeleport".toLowerCase()), PersistentDataType.INTEGER, 0);
+                abilityOneCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+            } else {
+                player.getPersistentDataContainer().set(keygen("cyanTeleport".toLowerCase()), PersistentDataType.INTEGER, teleportAmount);
+            }
         }
     }
 
@@ -90,12 +92,29 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
     public Component AbilityTwoDescription() {
         return dess("Zap between 5 locations quickly");
     }
-
+    double comboTime = 5.5;
     @Override
     public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(),abilityOneCooldowns,player.getUniqueId())) {
-
+            womboCombo(player).runTaskTimer(Freedom.get_plugin(), 0L, (long) secondsToTicks(comboTime));
         }
+    }
+
+    public static BukkitRunnable womboCombo(Player player) {
+        return new BukkitRunnable() {
+            @Override
+            public void run() {
+                Long lastHit = player.getPersistentDataContainer().getOrDefault(keygen("wombocombokept"),PersistentDataType.LONG, 0L);
+                long Timer = lastHit * 1000;
+                long currentTime = System.currentTimeMillis();
+                if (currentTime + 5500 <= currentTime + Timer) {
+                    player.getPersistentDataContainer().set(keygen("wombocombo"),PersistentDataType.BOOLEAN,true);
+                } else {
+                    abilityTwoCooldowns.put(player.getUniqueId(),currentTime);
+                    this.cancel();
+                }
+            }
+        };
     }
 
     @EventHandler
@@ -103,9 +122,12 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
         Player player = event.getPlayer();
         SoulTypes soulType = getSoulType(player);
         if (soulType == SoulTypes.Cyan && player.getPersistentDataContainer().getOrDefault(keygen("wombocombo"),PersistentDataType.BOOLEAN,false)) {
-            player.getPersistentDataContainer().set(keygen("wombocombokept"),PersistentDataType.LONG,System.currentTimeMillis());
+            if (event.getAttacked() instanceof Player attacked) {
+                player.getPersistentDataContainer().set(keygen("wombocombokept"),PersistentDataType.LONG,System.currentTimeMillis());
+                silenceFor(attacked, 5);
+            }
+            dealTrueDamage((LivingEntity) event.getAttacked(),1);
         }
-
     }
 
 
@@ -131,7 +153,7 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
     @Override
     public long AbilityOne_Cooldown(Object given) {
-        return 0;
+        return 10000;
     }
 
     @Override

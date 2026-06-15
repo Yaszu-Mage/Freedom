@@ -98,3 +98,4 @@ dependencies:
       load: AFTER
       required: true
 load: POSTWORLD
+folia-supported: true

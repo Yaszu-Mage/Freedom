@@ -10,5 +10,6 @@ public enum CustomItemType {
     SWORD,
     BLOCK,
     FOOD,
-    TOOL
+    TOOL,
+    DRINK
 }

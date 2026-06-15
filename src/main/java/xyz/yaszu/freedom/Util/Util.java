@@ -1647,7 +1647,16 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
             world.spawnParticle(particle, point, 1,offsetX, offsetY, offsetZ, extra, color);
         }
     }
+    public static void drawLine(Location start, Location end, World world, int points, Particle particle) {
+        double dx = (end.getX() - start.getX()) / points;
+        double dy = (end.getY() - start.getY()) / points;
+        double dz = (end.getZ() - start.getZ()) / points;
 
+        for (int i = 0; i <= points; i++) {
+            Location point = start.clone().add(dx * i, dy * i, dz * i);
+            world.spawnParticle(particle, point, 1);
+        }
+    }
     private static void spawn(World world, Location loc, Particle particle, Particle.DustOptions options) {
         if (particle == Particle.DUST && options != null) {
             world.spawnParticle(particle, loc, 1, 0, 0, 0, 1, options);
@@ -1786,15 +1795,21 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
 
 
     public static void silenceFor(Player player, int seconds) {
-        player.getPersistentDataContainer().set(keygen("silence"), PersistentDataType.BOOLEAN, true);
         new BukkitRunnable() {
             int tick = 0;
             double tickGoal = secondsToTicks(seconds);
             @Override
             public void run() {
                 tick += 1;
+                if (tick <= 10) {
+                    player.getPersistentDataContainer().set(FreedomKeys.silence(), PersistentDataType.BOOLEAN, false);
+                    player.getPersistentDataContainer().set(FreedomKeys.silence(), PersistentDataType.BOOLEAN, true);
+                }
+                if (tick >= 10 && !player.getPersistentDataContainer().getOrDefault(keygen("silence"), PersistentDataType.BOOLEAN, false)) {
+                    this.cancel();
+                }
                 if (tick >= tickGoal) {
-                    player.getPersistentDataContainer().remove(keygen("silence"));
+                    player.getPersistentDataContainer().remove(FreedomKeys.silence());
                     this.cancel();
                 }
             }
