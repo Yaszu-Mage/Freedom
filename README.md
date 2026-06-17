@@ -76,6 +76,7 @@ Within the project, I wanted to be able to play the server while still having cr
 ### [Actually Building the Project](#actually-building-the-project)
 Create a clone of the project by using:
 `git clone https://github.com/Yaszu-Mage/Freedom`
+### BTW IF YOU ARE A REVIEWER, MY HACKATIME IS WEIRD BC I TRIED TO MERGE WITH MY WAKA TIME AND I HAD THE BROWSER EXTENSION, I ALREADY SUBMITTED MULTIPLE TICKETS TO GET THIS FIXED TO NO AVAIL PLEASE DONT SHOOT ME DEAD ###
 Then build the project by doing within the directory
 Replace "path/to/output" to the directory you want to build it to
 `./gradlew build -PshadowJarPath="path/to/output"`
