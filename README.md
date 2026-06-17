@@ -4,7 +4,7 @@
 >Named After a Song I was listening to with the freedom motif in January.
 
 [![CodeFactor](https://www.codefactor.io/repository/github/yaszu-mage/freedom/badge)](https://www.codefactor.io/repository/github/yaszu-mage/freedom)
-[![HackaTime](https://hackatime.hackclub.com/api/v1/badge/U0B1MV9NZFU/Yaszu-Mage/Freedom)
+[!HackaTime](https://hackatime.hackclub.com/api/v1/badge/U0B1MV9NZFU/Yaszu-Mage/Freedom)
 
 This project requres these dependencies;
 - Packet Events
