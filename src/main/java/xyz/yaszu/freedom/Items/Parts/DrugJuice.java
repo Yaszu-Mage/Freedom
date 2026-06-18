@@ -1,4 +1,4 @@
-package xyz.yaszu.freedom.Items.Drinks;
+package xyz.yaszu.freedom.Items.Parts;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -8,32 +8,35 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
-import xyz.yaszu.freedom.Items.Parts.DrugJuice;
+import xyz.yaszu.freedom.Items.Drinks.BaseDrink;
+import xyz.yaszu.freedom.Subsystems.AlcoholManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class Martini extends Util implements BaseItem,BaseDrink {
+public class DrugJuice extends Util implements BaseItem, BaseDrink {
     @Override
     public ItemStack item() {
-        ItemStack itemStack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("martini"), Color.LIME);
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.displayName(Util.dess("<shadow:#000000FF><b><yellow>Martini</yellow></b>"));
-        meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"beer");
-        itemStack.setItemMeta(meta);
-        return itemStack;
+        ItemStack stack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("drugjuice"), Color.WHITE);
+        ItemMeta meta = stack.getItemMeta();
+        meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"drugjuice");
+        stack.setItemMeta(meta);
+        return stack;
     }
 
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
-
+        AlcoholManager.addAlcohol(player,0,0,10);
+        player.addPotionEffect(PotionEffectType.POISON.createEffect(100,8));
     }
 
     @Override
     public Recipe recipe() {
+
         return null;
     }
 
@@ -49,16 +52,16 @@ public class Martini extends Util implements BaseItem,BaseDrink {
 
     @Override
     public ItemStack ingredient() {
-        return new DrugJuice().item();
+        return ItemStack.of(Material.GLASS_BOTTLE);
     }
 
     @Override
     public int inbetweenBrewTime() {
-        return 40;
+        return 30;
     }
 
     @Override
     public ItemStack stir() {
-        return ItemStack.of(Material.SWEET_BERRIES);
+        return ItemStack.of(Material.FERN);
     }
 }

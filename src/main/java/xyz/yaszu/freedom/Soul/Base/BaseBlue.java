@@ -24,8 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static xyz.yaszu.freedom.Util.Util.*;
+
 public class
-BaseBlue extends Util implements Base_Soul, Listener {
+BaseBlue implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
         return "BaseBlue";

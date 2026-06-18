@@ -11,7 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Util.Util;
 
-public class BaseNone extends Util implements Base_Soul, Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+
+public class BaseNone implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
         return "BaseNone";

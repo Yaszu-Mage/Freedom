@@ -15,7 +15,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class BaseCafe extends Util implements Base_Soul {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class BaseCafe implements Base_Soul {
     @Override
     public String Name_For_Container() {
         return "BaseCafe";

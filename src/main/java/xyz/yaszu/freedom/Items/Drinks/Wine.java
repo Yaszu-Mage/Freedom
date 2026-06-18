@@ -10,13 +10,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
+import xyz.yaszu.freedom.Items.Parts.DrugJuice;
 import xyz.yaszu.freedom.Subsystems.AlcoholManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class Wine extends Util implements BaseItem {
+public class Wine extends Util implements BaseItem, BaseDrink {
     @Override
     public ItemStack item() {
         ItemStack itemStack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("ale"), Color.fromRGB(150,75,0));
@@ -46,6 +47,26 @@ public class Wine extends Util implements BaseItem {
 
     @Override
     public CustomItemType getType() {
-        return CustomItemType.FOOD;
+        return CustomItemType.DRINK;
+    }
+
+    @Override
+    public ItemStack result() {
+        return item();
+    }
+
+    @Override
+    public ItemStack ingredient() {
+        return new DrugJuice().item();
+    }
+
+    @Override
+    public int inbetweenBrewTime() {
+        return 30;
+    }
+
+    @Override
+    public ItemStack stir() {
+        return ItemStack.of(Material.HONEY_BOTTLE);
     }
 }

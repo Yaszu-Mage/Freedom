@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
@@ -19,7 +20,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.Random;
 
-public class BaseCyan extends Util implements Base_Soul, Listener {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class BaseCyan implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
         return "BaseCyan";
@@ -38,7 +41,6 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
     @Override
     public ItemStack Icon() {
-
         return ItemStack.of(Material.LIGHTNING_ROD);
     }
 
@@ -133,7 +135,7 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
     @Override
     public Component Passive_Description() {
-        return null;
+        return dess("Voltage Transient: Reach 2 blocks Farther");
     }
 
     @Override
@@ -143,12 +145,12 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
     @Override
     public Component ActivePassive_Description() {
-        return null;
+        return dess("Joule Surge: Haste 3 for 300 ticks");
     }
 
     @Override
     public long AbilityTwo_Cooldown() {
-        return 0;
+        return 40000;
     }
 
     @Override
@@ -158,6 +160,10 @@ public class BaseCyan extends Util implements Base_Soul, Listener {
 
     @Override
     public void ActivePassive(Player player) {
-
+        Double soulpoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
+        if (soulpoints >= 5) {
+            player.addPotionEffect(PotionEffectType.HASTE.createEffect(300,2));
+            player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, soulpoints - 5);
+        }
     }
 }

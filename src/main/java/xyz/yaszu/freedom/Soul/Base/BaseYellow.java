@@ -24,12 +24,12 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Util.Util;
-
+import static xyz.yaszu.freedom.Util.Util.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseYellow extends Util implements Base_Soul, Listener {
+public class BaseYellow implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
         return "BaseYellow";

@@ -24,7 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class BaseRed extends Util implements Base_Soul {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class BaseRed implements Base_Soul {
 
 
 

@@ -23,7 +23,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
-public class BaseMocha extends Util implements Base_Soul, Listener {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class BaseMocha implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {

@@ -33,10 +33,10 @@ import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Util.Util;
-
+import static xyz.yaszu.freedom.Util.Util.*;
 import java.util.*;
 
-public class BaseBlack extends Util implements Base_Soul, Listener {
+public class BaseBlack implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {

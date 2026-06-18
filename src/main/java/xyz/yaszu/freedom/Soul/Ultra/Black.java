@@ -667,10 +667,13 @@ public class Black extends Util implements Base_Soul, Listener {
         join(player);
         if (player.getPersistentDataContainer().has(keygen("soul"))) {
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
-        if (soulType == SoulTypes.Black) {
+        if (soulType == SoulTypes.Black || soulType == SoulTypes.BaseBlack) {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) == null) {
                 player.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(keygen("black"),-0.20, AttributeModifier.Operation.ADD_NUMBER));
             }
+        }
+        if (soulType == SoulTypes.Cyan || soulType == SoulTypes.BaseCyan) {
+            player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).addModifier(new AttributeModifier(keygen("cyan"),2, AttributeModifier.Operation.ADD_NUMBER));
         }
         if (soulType == SoulTypes.Orange) {
             if (!player.getPersistentDataContainer().has(keygen("cancurse"))) {

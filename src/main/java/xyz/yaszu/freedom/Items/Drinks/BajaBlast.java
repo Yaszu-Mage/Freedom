@@ -20,7 +20,7 @@ public class BajaBlast extends Util implements BaseItem {
 
     @Override
     public ItemStack item() {
-        ItemStack stack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("ale"), Color.GREEN);
+        ItemStack stack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("bajablast"), Color.GREEN);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING, "bajablast");
         meta.displayName(dess("<shadow:#000000FF><b><green>Baja Blast</green></b>"));

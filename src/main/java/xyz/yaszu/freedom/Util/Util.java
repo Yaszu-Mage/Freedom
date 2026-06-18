@@ -61,7 +61,12 @@ import java.util.*;
 import static xyz.yaszu.freedom.Blocks.BlockHandler.restoreRotation;
 import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 import static xyz.yaszu.freedom.Subsystems.CurrencyManager.getCurrency;
-
+/*
+Dear Reviewers,
+I apologize in advance, this file is hell. It's a bunch of methods I made,and used throughout the entire project
+Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
+- Yaszu
+ */
 public class Util {
     public Entity getTargetEntity(Player player) {
         int range = 10; // Detection range in blocks
@@ -88,13 +93,8 @@ public class Util {
         }
         return target;
     }
-/*
-Dear Reviewers,
-I apologize in advance, this file is hell. It's a bunch of methods I made,and used throughout the entire project
-Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
-- Yaszu
- */
-    public PotionEffectType randomPotionEffect(){
+
+    public static PotionEffectType randomPotionEffect(){
         PotionEffectType[] types = PotionEffectType.values();
         Random random = new Random();
         return types[random.nextInt(types.length)];
@@ -174,7 +174,7 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
     }
 
 
-    public PotionEffectType randomPositivePotionEffect(){
+    public static PotionEffectType randomPositivePotionEffect(){
         PotionEffectType[] types = new PotionEffectType[] {
                 PotionEffectType.ABSORPTION,
                 PotionEffectType.REGENERATION,
@@ -195,7 +195,7 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
         return types[random.nextInt(types.length)];
     }
 
-    public PotionEffectType randomNegativePotionEffect(){
+    public static PotionEffectType randomNegativePotionEffect(){
         PotionEffectType[] types = new PotionEffectType[] {
                 PotionEffectType.POISON,
                 PotionEffectType.BLINDNESS,
@@ -1814,6 +1814,14 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
                 }
             }
         }.runTaskTimer(Freedom.get_plugin(), 0,0);
+    }
+
+    public boolean isItemNull(ItemStack stack) {
+        try {
+            return stack == null || stack.getType() == Material.AIR;
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     public static ItemStack constructColoredBottle(List<NamespacedKey> keys,List<String> values, Color color) {
