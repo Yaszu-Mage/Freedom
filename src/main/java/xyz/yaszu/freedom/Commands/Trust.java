@@ -52,6 +52,23 @@ public class Trust {
     public static Util util = new Util();
     private static final Map<UUID, EditSession> lastEditSessions = new HashMap<>();
 
+    public static LiteralCommandNode<CommandSourceStack> toggleSit() {
+        return Commands.literal("toggleseat")
+                .executes(ctx -> {
+                    if (ctx.getSource() instanceof Player player) {
+                        if (player.getPersistentDataContainer().getOrDefault(keygen("seattoggle"),PersistentDataType.BOOLEAN,true)) {
+                            player.getPersistentDataContainer().set(keygen("seattoggle"), PersistentDataType.BOOLEAN, false);
+                            player.sendRichMessage("<green>You have disabled seat mode.</green>");
+                        } else {
+                            player.getPersistentDataContainer().set(keygen("seattoggle"), PersistentDataType.BOOLEAN, true);
+                            player.sendRichMessage("<green>You have enabled seat mode.</green>");
+                        }
+                    }
+                   return Command.SINGLE_SUCCESS;
+                }).build();
+    }
+
+
     public static LiteralCommandNode<CommandSourceStack> soulArgument() {
         return Commands.literal("setsoul")
                 .then(Commands.argument("flavor", new SoulArguments()).then(Commands.argument("target", ArgumentTypes.player())

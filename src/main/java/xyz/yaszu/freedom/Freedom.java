@@ -17,13 +17,13 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -82,6 +82,19 @@ public final class Freedom extends JavaPlugin implements Listener {
         player.removePotionEffect(PotionEffectType.WEAKNESS);
         player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 0, true, false));
     }
+
+
+
+    @EventHandler
+    public void onVillagerStockRunOut(EntityInteractEvent event) {
+        Villager villager = (event.getEntity() instanceof Villager) ? (Villager) event.getEntity() : null;
+        if (villager != null) {
+            getLogger().info("RESTOCK");
+            villager.restock();
+        }
+    }
+
+
 
     @EventHandler
     public void onTotemPop(EntityResurrectEvent event) {
