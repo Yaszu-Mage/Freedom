@@ -448,7 +448,9 @@ public final class Freedom extends JavaPlugin implements Listener {
                 
             }
         }.runTaskTimer(Freedom.get_plugin(),10,0);
+        crossplay.init();
     }
+    public static RobloxCrossplay crossplay = new RobloxCrossplay();
     private ProtocolManager protocolManager;
 
     public static Util util = new Util();

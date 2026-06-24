@@ -5,27 +5,44 @@ import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.registry.data.EnchantmentRegistryEntry;
 import io.papermc.paper.registry.event.RegistryEvents;
 import io.papermc.paper.registry.keys.EnchantmentKeys;
-import io.papermc.paper.registry.keys.tags.ItemTypeTagKeys;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.EquipmentSlotGroup;
+import xyz.yaszu.freedom.Enchantments.Enchant.SmeltingEnchant;
+
+import java.util.HashMap;
 
 public class Bootstrap implements PluginBootstrap {
+
+    public static HashMap<String, BaseEnchant> ENCHANTS = new HashMap<>();
+
+
+    public void registerAll() {
+        register(new SmeltingEnchant());
+    }
+
+    public void register(BaseEnchant enchant) {
+        ENCHANTS.put(enchant.id(), enchant);
+    }
+
+
     @Override
     public void bootstrap(BootstrapContext context) {
+        registerAll();
         context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.compose().newHandler(event -> {
-            event.registry().register(
-                    EnchantmentKeys.create(Key.key("freedom.smelt")),
-                    b -> b.description(Component.text("Smelt"))
-                            .supportedItems(event.getOrCreateTag(ItemTypeTagKeys.PICKAXES))
-                            .anvilCost(1)
-                            .maxLevel(1)
-                            .weight(10)
-                            .minimumCost(EnchantmentRegistryEntry.EnchantmentCost.of(1,1))
-                            .maximumCost(EnchantmentRegistryEntry.EnchantmentCost.of(3,1))
-                            .activeSlots(EquipmentSlotGroup.ANY)
-            );
+            for (BaseEnchant enchant : ENCHANTS.values()) {
+                event.registry().register(
+                        EnchantmentKeys.create(Key.key(enchant.id())),
+                        b -> b.description(Component.text(enchant.description()))
+                                .supportedItems(event.getOrCreateTag(enchant.supportedItems()))
+                                .anvilCost(enchant.anvilCost())
+                                .maxLevel(enchant.maxLevel())
+                                .weight(enchant.weight())
+                                .minimumCost(EnchantmentRegistryEntry.EnchantmentCost.of(enchant.minEnchantCost(), 1))
+                                .maximumCost(EnchantmentRegistryEntry.EnchantmentCost.of(enchant.maxEnchantCost(), 1))
+                                .activeSlots(enchant.activeSlots())
+                );
+            }
         }));
+        EnchantmentListener.update();
     }
 }

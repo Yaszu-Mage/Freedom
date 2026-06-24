@@ -6,7 +6,11 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.scoreboard.numbers.NumberFormat;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.KeyPattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -26,9 +30,12 @@ import org.bukkit.*;
 import org.bukkit.block.Lectern;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -40,6 +47,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -1792,7 +1800,38 @@ public class Util {
         });
         return players;
     }
+    public static ItemStack getSmeltingResult(ItemStack item) {
+        ItemStack result = null;
+        Iterator<Recipe> iter = Bukkit.recipeIterator();
+        while (iter.hasNext()) {
+            Recipe recipe = iter.next();
+            if (!(recipe instanceof FurnaceRecipe)) continue;
+            if (((FurnaceRecipe) recipe).getInput().getType() != item.getType()) continue;
+            result = recipe.getResult();
+            break;
+        }
+        result.setAmount(item.getAmount());
+        return result;
+    }
 
+    public static boolean isSmeltable(Material material) {
+        // Iterate through all server recipes
+        java.util.Iterator<Recipe> recipeIterator = Bukkit.recipeIterator();
+        while (recipeIterator.hasNext()) {
+            Recipe recipe = recipeIterator.next();
+
+            // Check if the recipe is a smelting recipe
+            if (recipe instanceof FurnaceRecipe) {
+                FurnaceRecipe furnaceRecipe = (FurnaceRecipe) recipe;
+
+                // Check if our material matches the recipe's input
+                if (furnaceRecipe.getInput().getType() == material) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public static void silenceFor(Player player, int seconds) {
         new BukkitRunnable() {
@@ -1816,14 +1855,17 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0,0);
     }
 
-    public boolean isItemNull(ItemStack stack) {
+    public static boolean isItemNull(ItemStack stack) {
         try {
             return stack == null || stack.getType() == Material.AIR;
         } catch (Exception e) {
             return true;
         }
     }
-
+    @NotNull
+    public static Enchantment getEnchantment(@NotNull @KeyPattern.Value String key) {
+        return RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).getOrThrow(Key.key(Key.MINECRAFT_NAMESPACE, key));
+    }
     public static ItemStack constructColoredBottle(List<NamespacedKey> keys,List<String> values, Color color) {
         ItemStack itemStack = ItemStack.of(Material.POTION);
         PotionMeta meta = (PotionMeta) itemStack.getItemMeta();

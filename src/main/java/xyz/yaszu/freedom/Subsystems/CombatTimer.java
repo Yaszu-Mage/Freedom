@@ -17,7 +17,10 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class CombatTimer extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class CombatTimer implements Listener {
     public static HashMap<UUID,Long> combatTimer = new HashMap<>();
     public static long combatTime = 30000;
 
@@ -40,6 +43,10 @@ public class CombatTimer extends Util implements Listener {
         }
     }
 
+
+    public static boolean isCombat(Player player) {
+        return combatTimer.containsKey(player.getUniqueId());
+    }
     @EventHandler
     public void PlayerDamagePlayer (EntityDamageByEntityEvent event) {
         if (event.getEntity() instanceof Player player && event.getDamager() instanceof Player damager) {

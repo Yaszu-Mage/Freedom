@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Soul.Base_Soul;
 import xyz.yaszu.freedom.Soul.SoulTypes;
+import xyz.yaszu.freedom.Subsystems.CombatTimer;
 import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -278,8 +279,14 @@ public class BasePurple implements Base_Soul {
             PersistentDataContainer data = player.getPersistentDataContainer();
             Boolean hasTransportedAnother = data.get(keygen("purpledrag"), PersistentDataType.BOOLEAN);
             if (hasTransportedAnother == null) {
+                if (CombatTimer.isCombat(player)) {
+                    return 15000;
+                }
                 return 2500;
             } else if (hasTransportedAnother) {
+                if (CombatTimer.isCombat(player)) {
+                    return 25000;
+                }
                 return 10000;
             }
         }
