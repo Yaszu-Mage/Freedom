@@ -149,7 +149,9 @@ implements org.bukkit.event.Listener</span></div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOneListener(com.destroystokyo.paper.event.player.PlayerJumpEvent)" class="member-name-link">AbilityOneListener</a><wbr>(com.destroystokyo.paper.event.player.PlayerJumpEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Ability One Listener, event that is triggered every time a player jumps, checks if they have com or action</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwo(org.bukkit.entity.Player)" class="member-name-link">AbilityTwo</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -157,10 +159,14 @@ implements org.bukkit.event.Listener</span></div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwoListener(org.bukkit.event.player.PlayerDropItemEvent)" class="member-name-link">AbilityTwoListener</a><wbr>(org.bukkit.event.player.PlayerDropItemEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Handles the Ability Two action triggered by a player dropping an item.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#activateAttackPassive(io.papermc.paper.event.player.PrePlayerAttackEntityEvent)" class="member-name-link">activateAttackPassive</a><wbr>(io.papermc.paper.event.player.PrePlayerAttackEntityEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Handles the activation of attack passives for a player during a pre-attack event.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ActivePassive(org.bukkit.entity.Player)" class="member-name-link">ActivePassive</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -457,6 +463,11 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="AbilityOneListener(com.destroystokyo.paper.event.player.PlayerJumpEvent)">
 <h3>AbilityOneListener</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">AbilityOneListener</span><wbr><span class="parameters">(com.destroystokyo.paper.event.player.PlayerJumpEvent&nbsp;event)</span></div>
+<div class="block">Ability One Listener, event that is triggered every time a player jumps, checks if they have com or action</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - Event that is called during the Player Jump Event Update</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -465,10 +476,20 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">AbilityTwoListener</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerDropItemEvent&nbsp;event)</span>
                         throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
+<div class="block">Handles the Ability Two action triggered by a player dropping an item.
+ This listener is invoked when a <code>PlayerDropItemEvent</code> is fired.
+ It checks multiple conditions, including the player's state, the soul's state,
+ and specific ability logic, to determine the appropriate actions.
+
+ The method may cancel the event based on condition evaluations.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - The <code>PlayerDropItemEvent</code> that represents the action of a player dropping an item.
+              This event contains information about the player and the dropped item,
+              which is used for evaluating the ability logic.</dd>
 <dt>Throws:</dt>
-<dd><code>net.skinsrestorer.api.exception.MineSkinException</code></dd>
-<dd><code>net.skinsrestorer.api.exception.DataRequestException</code></dd>
+<dd><code>net.skinsrestorer.api.exception.MineSkinException</code> - If there is an issue related to MineSkin operations during ability execution.</dd>
+<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - If there is an issue retrieving required data for the ability.</dd>
 </dl>
 </section>
 </li>
@@ -476,6 +497,14 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="activateAttackPassive(io.papermc.paper.event.player.PrePlayerAttackEntityEvent)">
 <h3>activateAttackPassive</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">activateAttackPassive</span><wbr><span class="parameters">(io.papermc.paper.event.player.PrePlayerAttackEntityEvent&nbsp;event)</span></div>
+<div class="block">Handles the activation of attack passives for a player during a pre-attack event.
+
+ This method checks the player's state, applies any associated moveset attack
+ passives, and triggers the passive effect of the player's soul if applicable.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - the PrePlayerAttackEntityEvent triggered when a player is about to attack an entity</dd>
+</dl>
 </section>
 </li>
 </ul>
