@@ -65,6 +65,9 @@ import xyz.yaszu.freedom.Subsystems.TrustManager;
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static xyz.yaszu.freedom.Blocks.BlockHandler.restoreRotation;
 import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
@@ -76,7 +79,15 @@ Welcome to my own personal hell, I suck at vector math. Good luck godspeed.
 - Yaszu
  */
 public class Util {
-    public Entity getTargetEntity(Player player) {
+    /**
+     * Get the target Entity a player is looking at
+     *
+     * @param player that is looking at the entity
+     * @return Entity that the player is looking At
+     * @deprecated
+     * @since 1.0.0
+     */
+    public static Entity getTargetEntity(Player player) {
         int range = 10; // Detection range in blocks
         Entity target = null;
         double targetDistanceSq = range * range;
@@ -102,11 +113,44 @@ public class Util {
         return target;
     }
 
+    /**
+     * Get's a Random Potion Effect Type
+     * @return Random Potion Effect Type
+     */
     public static PotionEffectType randomPotionEffect(){
         PotionEffectType[] types = PotionEffectType.values();
         Random random = new Random();
         return types[random.nextInt(types.length)];
     }
+
+    /**
+     * Retrieves an array of chunks near the specified location within the given range.
+     *
+     * @param location the central location from which nearby chunks are determined
+     * @param range the distance in chunks to search for nearby chunks
+     * @return an array of chunks located within the specified range of the given location
+     */
+    public static Chunk[] getNearbyChunks(Location location,int range) throws ExecutionException, InterruptedException, TimeoutException {
+        World world = location.getWorld();
+        if (world == null) return new Chunk[0];
+        range = range * 16;
+        int centerX = location.getChunk().getX();
+        int centerZ = location.getChunk().getZ();
+        List<Chunk> nearbyChunks = new ArrayList<>();
+        for (int x = centerX - range; x <= centerX + range; x++) {
+            for (int z = centerZ - range; z <= centerZ + range; z++) {
+                nearbyChunks.add(world.getChunkAtAsync(x, z).get(1000, TimeUnit.MILLISECONDS));
+            }
+        }
+        return nearbyChunks.toArray(new Chunk[0]);
+    }
+
+
+    /**
+     * Get's the SoulPoints of a Currenly Selected Player
+     * @param player who is currently selected
+     * @return Integer of the SoulPoints of the player
+     */
     public static int getSoulPoints(Player player) {
         Double SoulPoints;
         try {
@@ -117,6 +161,12 @@ public class Util {
         }
         return SoulPoints.intValue();
     }
+
+    /**
+     * Converts and Item Into a string
+     * @param item that is being converted into a string
+     * @return string of the item in Yaml format
+     */
     public static String itemToString(ItemStack item) {
         if (item == null) return "";
         YamlConfiguration config = new YamlConfiguration();
@@ -125,6 +175,11 @@ public class Util {
         return Base64.getEncoder().encodeToString(yaml.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Converts a String into an Item
+     * @param data that is being converted into an item, it's in standard yaml format
+     * @return ItemStack of the item that was converted from the string
+     */
     public static ItemStack stringToItem(String data) {
         if (data == null || data.isEmpty()) return null;
         try {
@@ -153,11 +208,22 @@ public class Util {
         }
     }
 
+
+    /**
+     * Converts a location into a string, which is stored "x,y,z"
+     * @param loc Location that is being converted into a string
+     * @return String of the location in the format "world,x,y,z"
+     */
     public static String locationToString(Location loc) {
         if (loc == null || loc.getWorld() == null) return "";
         return loc.getWorld().getName() + "," + loc.getX() + "," + loc.getY() + "," + loc.getZ();
     }
 
+    /**
+     * Converts a string into a list of locations
+     * @param loc String that is being converted into a list of locations
+     * @return locations that were converted from the string
+     */
     public static ArrayList<Location> stringToLocations(String loc) {
         ArrayList<Location> locations = new ArrayList<>();
         if (loc == null || loc.isEmpty()) return locations;
@@ -181,7 +247,10 @@ public class Util {
         return locations;
     }
 
-
+    /**
+     * Get's a random Positive Potion Effect
+     * @return Positive Potion Effect
+     */
     public static PotionEffectType randomPositivePotionEffect(){
         PotionEffectType[] types = new PotionEffectType[] {
                 PotionEffectType.ABSORPTION,
@@ -203,6 +272,10 @@ public class Util {
         return types[random.nextInt(types.length)];
     }
 
+    /** Gets a random Negative Potion Effect
+     *
+     * @return Negative Potion Effect
+     */
     public static PotionEffectType randomNegativePotionEffect(){
         PotionEffectType[] types = new PotionEffectType[] {
                 PotionEffectType.POISON,
@@ -222,7 +295,12 @@ public class Util {
         return types[random.nextInt(types.length)];
     }
 
-
+    /**
+     * Plush Squish Animation
+     * @param player player who is squishing the plush
+     * @param event player interactevent that was triggered to squish the plush
+     * @param baseBlock baseblock that was squished
+     */
     public static void plush(Player player, PlayerInteractEvent event, BaseBlock baseBlock) {
         player.getWorld().playSound(player.getLocation(), (String) baseBlock.placeSound(), 10f, 1f);
         BlockHandler.BlockPos pos = BlockHandler.BlockPos.of(event.getClickedBlock().getLocation());
@@ -275,20 +353,43 @@ public class Util {
     }
     public static SkinsRestorer skinsRestorerAPI;
 
+    /**
+     * Empty Item Constructor of a Base ItemStack
+     * @param item inherits item type from this but set's display name
+     * @return ItemStack of the item type but with the display name set to the empty item name
+     */
     public static ItemStack emptyItem(ItemStack item) {
         ItemMeta workingMeta = item.getItemMeta();
         workingMeta.displayName(dess("\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33\uD83D\uDD33"));
         item.setItemMeta(workingMeta);
         return item;
     }
+
+    /**
+     * Creates a new Namespaced Key with a String "id"
+     * @param key String Key ID to generate NamespacedKey
+     * @return NamespacedKey of the key "id" from earlier
+     */
     public static NamespacedKey keygen(String key) {
         return FreedomKeys.key(key);
     }
 
+    /**
+     * Gets the direction between two locations to create a vector line
+     * @param start Start Location of the Vector Line
+     * @param end End Location of the Vector Line
+     * @return Vector of the direction from start to end
+     */
     public static Vector directionTo(Location start, Location end) {
         return end.toVector().subtract(start.toVector()).normalize();
     }
 
+    /**
+     * Creates a component using Mini Message with a given string without the long
+     * Minimessage.miniMessage().deserialize(String)
+     * @param minimessage String of Minimessage you want to construct the component
+     * @return Component Construction of the Minimessage String
+     */
     public static Component dess(String minimessage) {
         return MiniMessage.miniMessage().deserialize(minimessage);
     }
@@ -300,6 +401,18 @@ public class Util {
     private static final Map<UUID, Map<String, Object>> cachedPdcValues = new HashMap<>();
     private static final long PDC_CACHE_DURATION = 1000; // 1 second in milliseconds
 
+    /**
+     * Retrieves a cached value associated with a player's Persistent Data Container (PDC).
+     * If the value exists in the cache and is still valid, it is returned directly from the cache.
+     * Otherwise, the value is fetched from the PDC, stored in the cache, and then returned.
+     *
+     * @param player The player whose PDC is being accessed.
+     * @param key The key that identifies the specific value within the PDC.
+     * @param type The data type of the value being fetched from the PDC.
+     * @param <T> The primitive type the PersistentDataType maps from.
+     * @param <Z> The object type the PersistentDataType maps to.
+     * @return The value associated with the given key and type, or {@code null} if the key is not present in the PDC.
+     */
     public static <T, Z> Z getCachedPdcValue(Player player, String key, PersistentDataType<T, Z> type) {
         UUID playerUUID = player.getUniqueId();
         long now = System.currentTimeMillis();
@@ -326,9 +439,23 @@ public class Util {
 
         return null;
     }
+
+    /**
+     * Gets midpoint between two locations
+     * @param loc1 Location one to get midpoint
+     * @param loc2 Location two to get midpoint
+     * @return Midpoint Location between two locations
+     */
     public static Location getMidpoint(Location loc1, Location loc2) {
         return loc1.add(loc2).multiply(0.5);
     }
+
+    /**
+     * Shows Entity to Player if that Entity was hidden using
+     * @see #hideEntityFromPlayer(Player, Entity)
+     * @param player player to show entity to
+     * @param entity entity to show to player
+     */
     public static void showEntityToPlayer(Player player, Entity entity) {
         if (entity == null || !entity.isValid() || player == null || !player.isOnline()) return;
 
@@ -355,9 +482,18 @@ public class Util {
     }
 
 
-
-
-
+    /**
+     * Creates a Particle Pulse Circle, which is a circle that expands a couple times from a center point
+     * @param center Location of the center of the circle
+     * @param radius Radius of the circle
+     * @param points Number of points to use for the circle
+     * @param particle Particle to use for the circle
+     * @param smallestRadius Smallest radius to use for the circle
+     * @param pulsingTime Time to pulse the circle
+     * @param pulses how many pulses to do
+     * @param sound Sound to make while pulsing the circle
+     * @param options Whatever freaking particle options you want to use
+     */
     public void pulseCircle(Location center, double radius, int points, Particle particle, double smallestRadius, int pulsingTime, int pulses,Sound sound,Object options) {
             new BukkitRunnable() {
                 double ticks = 0;
@@ -387,7 +523,12 @@ public class Util {
     }
 
 
-
+    /**
+     * Hiding an entity from the Player
+     * @see #showEntityToPlayer(Player, Entity)
+     * @param player player to hide entity from
+     * @param entity entity to hide from player
+     */
     public static void hideEntityFromPlayer(Player player, Entity entity) {
         if (entity == null || !entity.isValid() || player == null || !player.isOnline()) return;
 
@@ -413,6 +554,15 @@ public class Util {
         }
     }
 
+    /**
+     * Drawing an Elipse using Particles
+     * @param center Location of the center of the ellipse
+     * @param radius Radius of the ellipse
+     * @param points Number of points to use for the ellipse
+     * @param particle Particle to use for the ellipse
+     * @param linearscale Linear Scale of the ellipse
+     * @param horizontalscale Horizontal Scale of the ellipse
+     */
     public static void drawElipse(Location center, double radius, int points, Particle particle, double linearscale, double horizontalscale) {
         World world = center.getWorld();
         if (points <= 0) return;
@@ -433,18 +583,37 @@ public class Util {
         }
     }
 
+    /**
+     * Drawing an Eye using Particles
+     * @param location Center Location of the Eye
+     * @param scale Scale of the Eye
+     */
     public static void drawEye(Location location, int scale) {
         drawElipse(location, 1 + scale, 128, Particle.DUST, -2.58, 6.6);
         drawElipse(location, 1 + scale, 128, Particle.DUST, -2.58, 3.3);
         drawCircle(location, 2 + 2 * scale, location.getWorld(), 128, Particle.DUST, new Particle.DustOptions(Color.RED, 2.0f));
     }
 
+    /**
+     * Get the highest Location at a specific point
+     * @param loc Point to get the highest location at
+     * @return Location of the highest block at the point
+     */
     public static double getGroundLocation(Location loc) {
         if (loc == null || loc.getWorld() == null) return 0d;
         return loc.getWorld().getHighestBlockYAt(
                 loc.getBlockX(), loc.getBlockZ(), HeightMap.MOTION_BLOCKING_NO_LEAVES);
     }
 
+    /**
+     * Draw A circle using particles
+     * @param center Center Location of the circle
+     * @param radius Radius of the circle
+     * @param world World to spawn the circle in
+     * @param points Number of points to use for the circle
+     * @param particle Particle to use for the circle
+     * @param options Particle Options to use for the circle
+     */
     public static void drawCircle(Location center, double radius, World world, int points, Particle particle, Particle.DustOptions options) {
         for (int i = 0; i < points; i++) {
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
@@ -464,7 +633,10 @@ public class Util {
         }
     }
 
-
+    /**
+     * Creates a new ItemStack of the Clover Signa
+     * @return ItemStack of the Clover Signa
+     */
     public static @NonNull ItemStack Clover() {
         ItemStack itemStack = new ItemStack(Material.LEATHER_HORSE_ARMOR);
         ItemMeta meta = (LeatherArmorMeta) itemStack.getItemMeta();
@@ -473,6 +645,21 @@ public class Util {
         return itemStack;
     }
 
+    /**
+     * Draws a tinted display around the player with animations and optional teleportation.
+     * This method creates an `ItemDisplay` entity and applies transformations, tint coloring, scaling,
+     * and rotational animations, while managing its lifecycle.
+     *
+     * @param isEye                  If true, the display originates from the player's eye location; otherwise, the player's main location is used.
+     * @param time                   Duration (in seconds) for how long the display should persist.
+     * @param player                 The player around whom the display is created.
+     * @param teleportationDuration  Specifies the duration (in ticks) for item display teleportation.
+     * @param itemStack              The item stack to be displayed. If null, a default leather armor item is used.
+     * @param endingTransformation   The location where the display should move to at the end of its lifecycle.
+     * @param tint                   The color tint to apply to the `ItemDisplay`.
+     * @param scale                  The scale of the item display.
+     * @param offset                 The offset value used for rotational animation.
+     */
     public static void drawPlayerTintedDisplay(boolean isEye,double time,  Player player,int teleportationDuration, @Nullable ItemStack itemStack,  Location endingTransformation, Color tint,int scale,double offset) {
         Location beginningTransform = player.getLocation();
         if (isEye) {
@@ -541,7 +728,22 @@ public class Util {
 
     }
 
-
+    /**
+     * Creates and manages a tinted item display entity that transitions between two locations
+     * over a configurable duration, with scaling and timing options. The display appears with
+     * a specified color tint and is automatically removed after a set time.
+     *
+     * @param time The time in seconds after which the display entity will be removed.
+     * @param beginningTransform The starting location where the display entity will spawn.
+     * @param teleportationDuration The duration in ticks for the display to transition
+     *                              between the beginning and ending transformations, clamped
+     *                              between 0 and 59.
+     * @param itemStack The desired {@link ItemStack} to be displayed. If null, a default
+     *                  {@link Material#LEATHER_HORSE_ARMOR} with applied tint is used.
+     * @param endingTransformation The location where the display entity will be teleported to.
+     * @param tint The {@link Color} to apply as a tint to the displayed item.
+     * @param scale The scaling factor to be applied to the displayed item during transformation.
+     */
     public static void drawTintedDisplay(double time,  Location beginningTransform,int teleportationDuration, @Nullable ItemStack itemStack,  Location endingTransformation, Color tint,int scale) {
         ItemDisplay display = (ItemDisplay) beginningTransform.getWorld().spawnEntity(beginningTransform, EntityType.ITEM_DISPLAY);
         display.setTransformation(
@@ -580,6 +782,16 @@ public class Util {
 
     }
 
+    /**
+     * Drawing a Circle with any Particle Similar to
+     * @see #drawCircle(Location, double, World, int, Particle, Particle.DustOptions)
+     * Only difference is that it works with literally any particle while that is meant for dust
+     * @param center Location of the center of the circle
+     * @param radius Radius of the circle
+     * @param world World to spawn the circle in
+     * @param points Number of points to use for the circle
+     * @param particle Particle to use for the circle
+     */
     public static void drawCircle(Location center, double radius, World world, int points, Particle particle) {
         for (int i = 0; i < points; i++) {
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
@@ -599,10 +811,23 @@ public class Util {
         }
     }
 
-
+    /**
+     * Converts seconds to ticks
+     * @param seconds to convert to ticks
+     * @return Ticks equivalent to the seconds
+     */
     public static double secondsToTicks(double seconds) {
         return seconds * 20;
     }
+
+    /**
+     * Retrieves or initializes a scoreboard objective named "UI" for the specified player.
+     * The objective displays player-specific data such as "Lives" and "SoulPoints" in the sidebar slot.
+     * If the objective does not already exist, it will be created with default settings and styled components.
+     *
+     * @param player the player whose scoreboard will be retrieved or modified
+     * @return the initialized or existing objective named "UI" associated with the player's scoreboard
+     */
     public static Objective getUI(Player player) {
         Scoreboard score = player.getScoreboard();
         if (score.getObjective("UI") == null) {
@@ -620,7 +845,14 @@ public class Util {
 
     public static HashMap<UUID, Scoreboard> souls = new HashMap<>();
 
-
+    /**
+     * Updates and displays a custom scoreboard for the given player based on various parameters
+     * such as soul value, lives, and cooldowns of abilities. It also handles the player's combat status.
+     *
+     * @param player The player for whom the scoreboard is being updated.
+     * @param soulvalue The current soul value of the player.
+     * @param lives The current number of lives the player has.
+     */
     public static void open(Player player, int soulvalue, int lives) {
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         Scoreboard score;
@@ -726,6 +958,10 @@ public class Util {
 
     public static HashMap<UUID,Long> abilityTwoCooldowns = new HashMap<>();
 
+    /**
+     * Clears the souls HashMap along with Ability Cooldowns for one Player
+     * @param playerUUID uuid of player you are removing
+     */
     public static void clearPlayerCache(UUID playerUUID) {
         souls.remove(playerUUID);
         abilityOneCooldowns.remove(playerUUID);
@@ -734,7 +970,19 @@ public class Util {
 
     //We are not done yet, you got this keep going
 
-
+    /**
+     * Generates a loading bar representation as a Component based on the provided value,
+     * maximum, and minimum limits. The loading bar is displayed using a fixed number of
+     * segments, where filled segments represent the progress proportionally, and unfilled
+     * segments represent the remaining portion.
+     *
+     * @param value The current progress value to be represented by the loading bar.
+     * @param max The maximum limit of the progress range. Must be greater than the minimum limit.
+     * @param min The minimum limit of the progress range. Must be less than the maximum limit.
+     * @return A Component object containing the styled loading bar representation,
+     *         or a default fallback representation if the maximum limit is less than
+     *         or equal to the minimum limit.
+     */
     public static Component loadingBar(double value, double max, double min) {
         int maxBars = 5;
 
@@ -765,18 +1013,15 @@ public class Util {
 
         return dess("<shadow:#000000FF><b>|<aqua>" + filled + "</aqua><gray>" + empty + "</gray>|</b>");
     }
-    public static void updateValue(String name,Double value, Player player) {
-        Objective objective = getUI(player);
-        objective.getScore(name).setScore(value.intValue());
-    }
 
 
-
-    public static void updateValue(String name,Integer value, Player player) {
-
-    }
-
-
+    /**
+     * Creates a minimal magic circle effect around the specified player. The circle's color
+     * is determined by the player's soul type, and it evolves over time with visual effects.
+     *
+     * @param target   The player around whom the magic circle will be generated.
+     * @param tickRate The rate at which the magic circle effect updates, measured in ticks.
+     */
     public static void createMinMagicCircleAroundPlayer(Player target, int tickRate) {
         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         Color color = Color.PURPLE;
@@ -805,6 +1050,17 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0, 10);
     }
 
+
+    /**
+     * Creates a magic circle animation at a given location with specific particle effects and behavior based on the
+     * soul type. This method spawns particle effects in patterns, which dynamically evolve over time.
+     * The animation stops under certain conditions such as exceeding a threshold tick count or changes in the
+     * block state at the specified location.
+     *
+     * @param center   The central {@code Location} where the magic circle will be created.
+     * @param tickRate The rate at which the animation progresses, affecting how frequently particles are updated.
+     * @param soulType The type of {@code SoulTypes} that determines the color of the particles used in the animation.
+     */
     public static void createMinMagicCircle(Location center, int tickRate, SoulTypes soulType) {
         Color color = Color.PURPLE;
 
@@ -869,7 +1125,18 @@ public class Util {
 
     }
 
-
+    /**
+     * Creates a minimal magic circle visual effect at a specified location.
+     * The effect's color and behavior are determined by the specified soul type and timing parameters.
+     *
+     * @param center   The {@link Location} where the magic circle will be created.
+     * @param tickRate The rate at which the effects update, in game ticks.
+     * @param soulType The type of soul determining the color of the magic circle.
+     *                 Available soul types include: Green, BaseGreen, Red, BaseRed, Cafe, BaseCafe,
+     *                 Orange, BaseOrange, BaseMocha, Mocha, Black, BaseBlack.
+     * @param time     The duration (in game ticks) for which the effect should last
+     *                 if the location is not a lectern or the item on a lectern becomes invalid.
+     */
     public static void createMinMagicCircle(Location center, int tickRate, SoulTypes soulType,int time) {
         Color color = Color.PURPLE;
         switch (soulType) {
@@ -933,7 +1200,18 @@ public class Util {
 
     }
 
-
+    /**
+     * Creates a vertical magic circle animation with a specified color and properties.
+     * The animation's appearance and behavior depend on the provided soul type, rotation, scale, and time duration.
+     *
+     * @param center The central location where the magic circle is created.
+     * @param tickRate The rate at which the circle animation updates.
+     * @param soulType The type of soul that determines the color of the magic circle.
+     * @param yaw The yaw rotation angle to apply, influencing the orientation of the circle.
+     * @param pivot The pivot point used for rotation calculations.
+     * @param time The total duration (in ticks) for which the magic circle should animate.
+     * @param scale The scaling factor to modify the size of the magic circle.
+     */
     public static void createVerticleMinMagicCircle(Location center, int tickRate, SoulTypes soulType, double yaw,Location pivot, int time,double scale) {
         Color color = Color.PURPLE;
         switch (soulType) {
@@ -962,7 +1240,16 @@ public class Util {
         }
 
 
-
+    /**
+     * Creates a "magic circle" effect at a given location using particles, tick rate, scaling, and soul type.
+     * This method animates the circle with specific patterns and colors, dynamically determined based on the soul type.
+     * The task automatically cancels based on certain conditions, such as the absence of a lectern or an empty inventory slot.
+     *
+     * @param center   The central location where the magic circle will be created.
+     * @param tickRate The rate at which the animation progresses, controlling the speed of updates.
+     * @param scale    The scale or size of the magic circle, influencing its dimensions and effect radius.
+     * @param soulType The type of soul that determines the color of the magic circle and its thematic representation.
+     */
     public static void createMaxMagicCircle(Location center, int tickRate, int scale, SoulTypes soulType) {
         Color color = Color.PURPLE;
         switch (soulType) {
@@ -1000,6 +1287,14 @@ public class Util {
 
     public static Random random = new Random();
 
+    /**
+     * Creates and animates remote explosion particles at a specified location. The animation
+     * includes rotational effects, particle trails, sound effects, and ends with a simulated explosion.
+     *
+     * @param center The central {@code Location} where the explosion particles originate.
+     * @param tickrate The rate at which the particle rotation and animation steps occur, measured in ticks.
+     * @param size The power or scale of the explosion, determining the size and intensity of the particle effects.
+     */
     public static void createRemoteExplosionParticles(Location center/* Center of Explosion*/, int tickrate/* rate of rotation*/, int size/* Power given from spell compiler*/) {
         new BukkitRunnable() {
             double size_modifier = 1;
@@ -1053,7 +1348,13 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0, 4);
     }
 
-
+    /**
+     * Creates a maximum magic circle effect around the specified player. The visual effect is dynamic
+     * and involves particles, changing intention and color based on the player's soul
+     * @param scale The scale of the magic circle, affecting its size and visual impact.
+     * @param tickRate The rate at which the animation progresses, affecting the speed of the effect.
+     *
+     * */
     public void createMaxMagicCircleAroundPlayer(Player target, int tickRate, int scale) {
         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
         Color color = Color.PURPLE;
@@ -1083,6 +1384,13 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0, 12);
     }
 
+    /**
+     * Gets a random point on a circle
+     * @param center {@Code Location} of the center of the circle
+     * @param points How many points on the original Circle
+     * @param radius The Radius of the Original Circle
+     * @param particle Particle Type that you want to spawn as the little pillar thing
+     */
     public static void randompointoncircle(Location center, int points, int radius, Particle particle) {
         World world = center.getWorld();
         Random random = new Random();
@@ -1107,12 +1415,25 @@ public class Util {
         }
     }
 
-
+    /**
+     * Broadcast a message to all online players
+     * @param message The message you want to broadcast
+     */
     public void broadcast(String message) {
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.showTitle(Title.title(dess("<shadow:#000000FF><b><Red>ANNOUNCEMENT"),dess(message)));
         });
     }
+
+    /**
+     * Creates a multilayered square looking Just like a magic circle
+     * @param location Center Location of the Magic Circle
+     * @param tick Tick offset you want to start at
+     * @param size size of the multisquare, acts as a scale
+     * @param particle Particle Type that you want to spawn as the little pillar thing
+     * @param initialrot Initial offset of the circle's rotations
+     * @param options Any Dust Options you want to use
+     */
     public static void multisquare(Location location, int tick, int size, Particle particle, int initialrot, Particle.DustOptions options) {
         Color optionscolor = options.getColor();
         optionscolor = optionscolor.mixColors(Color.RED);
@@ -1121,6 +1442,16 @@ public class Util {
         drawSquare(location, size, initialrot - 45 + tick, particle, options1, 0, 8, 0);
     }
 
+    /**
+     * Creates a verticle multisquare similar to multisquare
+     * @param location Center Location of the Magic Circle
+     * @param tick Tick offset you want to start at
+     * @param size size of the multisquare, acts as a scale
+     * @param particle Particle Type that you want to spawn as the little pillar thing
+     * @param initialrot Initial offset of the circle's rotations
+     * @param options Any Dust Options you want to use
+     * @param yaw Yaw angle for the vertical square
+     */
     public static void Vertmultisquare(Location location, int tick, double size, Particle particle, int initialrot, Particle.DustOptions options, double yaw) {
         Color optionscolor = options.getColor();
         optionscolor = optionscolor.mixColors(Color.RED);
@@ -1129,7 +1460,17 @@ public class Util {
         drawVerticleSquare(location, size, initialrot - 45 + tick, particle, options1, 0, 8, 0,true,yaw);
     }
 
-    // Example: Draw a 5x5 square on the ground around the player
+    /**
+     * Draws a square shape using particles at a specified location, with configurable size, rotation, particle type, and dust options.
+     * @param center The center location of the square.
+     * @param size The size of the square, affecting its width and height.
+     * @param rot The initial rotation angle of the square.
+     * @param particle Particle type to spawn for the square.
+     * @param options Dust options to apply to the particles in the square.
+     * @param xlimit A cutting variable that stops the drawing at a certain point, to allow for "loading animations" on the X axis
+     * @param ylimit A cutting variable that stops the drawing at a certain point, to allow for "loading animations" on the Y axis
+     * @param zlimit A cutting variable that stops the drawing at a certain point, to allow for "loading animations" on the Z axis
+     */
     public static void drawSquare(Location center, double size, double rot, Particle particle, Particle.DustOptions options, double xlimit, double ylimit, double zlimit) {
         size = size / 2; // Half-size for a 5x5
 
@@ -1150,6 +1491,17 @@ public class Util {
         drawParticleLine(c4, c1, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
     }
 
+    /**
+     * Draws a verticle square shape using particles at a specified location, with configurable size, rotation, particle type, and dust options.
+     * @param center The center location of the square.
+     * @param size The size of the square, affecting its width and height.
+     * @param rot The initial rotation angle of the square.
+     * @param particle Particle type to spawn for the square.
+     * @param options Dust options to apply to the particles in the square.
+     * @param xlimit A cutting variable that stops the drawing at a certain point, to allow for "loading animations" on the X axis
+     * @param ylimit A cutting variable that stops the drawing at a certain point, to allow for "loading animations" on the Y axis
+     * @param zlimit A cutting variable that stops the drawing at a certain point, to allow for "loading animations" on the Z axis
+     */
     public static void drawVerticleSquare(Location center, double size, double rot, Particle particle, Particle.DustOptions options, double xlimit, double ylimit, double zlimit) {
         size = size / 2; // Half-size for a 5x5
 
@@ -1169,6 +1521,21 @@ public class Util {
         drawParticleLine(c3, c4, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
         drawParticleLine(c4, c1, center.getWorld(), particle, options, xlimit, ylimit, zlimit);
     }
+
+    /**
+     * Draws a vertical square using particles in a 3D space, with options for size, rotation, and positional limits.
+     *
+     * @param center The central {@code Location} around which the square will be drawn.
+     * @param size The length of the sides of the square. This value will be halved internally to determine the distance from the center.
+     * @param rot The rotation angle in radians to apply to the square around the Y-axis.
+     * @param particle The {@code Particle} type used to draw the square.
+     * @param options Additional {@code DustOptions} for customizing particle appearance, such as color and size.
+     * @param xlimit The limit on the X-axis beyond which particles will not be rendered.
+     * @param ylimit The limit on the Y-axis beyond which particles will not be rendered.
+     * @param zlimit The limit on the Z-axis beyond which particles will not be rendered.
+     * @param baller A boolean flag determining whether specific rotational effects will be applied during rendering.
+     * @param yaw The yaw angle in degrees to apply when rotating the square along its Z-axis.
+     */
     public static void drawVerticleSquare(Location center, double size, double rot, Particle particle, Particle.DustOptions options, double xlimit, double ylimit, double zlimit,boolean baller, double yaw) {
         size = size / 2; // Half-size for a 5x5
 
@@ -1213,7 +1580,14 @@ public class Util {
     }
 
 
-
+    /**
+     * Rotates a point around a pivot on the XZ-plane by a specified angle in degrees.
+     *
+     * @param pivot the location used as the center of rotation
+     * @param angleDegrees the angle in degrees to rotate the point
+     * @param toRotate the location of the point to be rotated
+     * @return the new location of the point after rotation
+     */
     public static Location rotpointX(Location pivot, double angleDegrees, Location toRotate) {
         double radians = Math.toRadians(angleDegrees);
         double cos = Math.cos(radians);
@@ -1230,6 +1604,24 @@ public class Util {
         return pivot.clone().add(new Vector(x, v.getY(), z));
     }
 
+    /**
+     * Draws a clock visualization at the specified location using particle effects. The clock includes a face,
+     * tick marks, an hour hand, and a minute hand. The appearance of the clock components is customizable
+     * through various particle options.
+     *
+     * @param center the location where the clock will be drawn
+     * @param radius the radius of the clock face
+     * @param circlePoints the number of points used to render the circular clock face
+     * @param handPoints the number of points used to render the clock hands
+     * @param hours the hour value of the time to display on the clock (0-23)
+     * @param minutes the minute value of the time to display on the clock (0-59)
+     * @param faceParticle the type of particle to use for the clock face
+     * @param faceOptions additional customization options for the clock face particle
+     * @param tickParticle the type of particle to use for the tick marks
+     * @param handParticle the type of particle to use for the hour and minute hands
+     * @param minuteOptions additional customization options for the minute hand particle
+     * @param hourOptions additional customization options for the hour hand particle
+     */
     public static void drawClock(
             Location center,
             double radius,
@@ -1333,6 +1725,17 @@ public class Util {
         }
     }
 
+    /**
+     * Draws clock-like lines radiating outward from a central point on a circular plane.
+     *
+     * @param center   The central location around which the clocklines are drawn.
+     * @param radius   The radius of the circle for the clocklines.
+     * @param world    The world in which the particles will be displayed.
+     * @param points   The total number of points (or divisions) around the circle.
+     * @param particle The particle type to be displayed for the clocklines.
+     * @param options  The particle dust options, if applicable for the given particle type.
+     * @param rot      The rotational offset in radians for the starting angle of the clocklines.
+     */
     public static void drawClocklines(Location center, double radius, World world, int points, Particle particle, Particle.DustOptions options, double rot) {
         for (int i = 0; i < points; i++) {
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
@@ -1354,6 +1757,15 @@ public class Util {
 
         }
     }
+
+    /**
+     * Rotates a 3D point around the Z-axis by a specified angle relative to a pivot point.
+     *
+     * @param pivot        The pivot point around which the rotation is performed.
+     * @param angleDegrees The rotation angle in degrees.
+     * @param toRotate     The point to rotate.
+     * @return A new Location representing the rotated point.
+     */
     public static Location rotpointZ(Location pivot, double angleDegrees, Location toRotate) {
         double radians = Math.toRadians(angleDegrees);
         double cos = Math.cos(radians);
@@ -1370,6 +1782,14 @@ public class Util {
         return pivot.clone().add(new Vector(x, v.getY(), Y));
     }
 
+    /**
+     * Rotates a point around the Y-axis relative to a specified pivot point by a given angle.
+     *
+     * @param pivot the location of the pivot point around which the rotation is performed
+     * @param angleDegrees the angle of rotation in degrees, measured clockwise
+     * @param toRotate the location of the point to be rotated
+     * @return the new location of the point after being rotated around the Y-axis
+     */
     public static Location rotpointY(Location pivot, double angleDegrees, Location toRotate) {
         double radians = Math.toRadians(angleDegrees);
         double cos = Math.cos(radians);
@@ -1386,6 +1806,19 @@ public class Util {
         return pivot.clone().add(new Vector(x, Y, v.getZ()));
     }
 
+    /**
+     * Draws a line of particles between two locations in the specified world.
+     * The particle line can have limitations in the x, y, and z directions, and supports custom particle options for dynamic effects.
+     *
+     * @param start The starting location of the particle line.
+     * @param end The ending location of the particle line.
+     * @param world The world in which the particles will be displayed.
+     * @param particle The type of particle to be used for the line.
+     * @param optionsdouble The additional options for the DUST particle effect, used when the particle type is {@code Particle.DUST}.
+     * @param xlimit The distance along the x-axis after which particles will start being drawn.
+     * @param ylimit The distance along the y-axis that affects particle display (currently unused in logic).
+     * @param zlimit The distance along the z-axis that affects particle display (currently unused in logic).
+     */
     public static void drawParticleLine(Location start, Location end, World world, Particle particle, Particle.DustOptions optionsdouble, double xlimit, double ylimit, double zlimit) {
         double space = 0.2; // Density of particles
         double distance = start.distance(end);
@@ -1406,11 +1839,27 @@ public class Util {
         }
     }
 
+    /**
+     * Represents the various states of a particle portal.
+     * This enum is used to describe the lifecycle of a portal,
+     * transitioning through its opening, open, and closing phases.
+     */
     public static enum ParticlePortalState {
         Opening,
         Open,
         Closing
     }
+
+    /**
+     * Creates and manages the lifecycle of a particle-based portal effect at the specified location.
+     * The portal progresses through three states: Opening, Open, and Closing, with particles displayed
+     * to depict these transitions. Additionally, players near the portal during its "Open" state
+     * are teleported to the specified target location.
+     *
+     * @param center The location where the portal is centered and particles are displayed.
+     * @param targetLocation The location to which players will be teleported when near the portal
+     *                       during its "Open" state.
+     */
     public static void PortalParticleLifespan(Location center, Location targetLocation) {
 
         new BukkitRunnable() {
@@ -1453,6 +1902,15 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(),0,10);
     }
 
+    /**
+     * Creates a particle animation to simulate a portal with states: opening, open, and closing.
+     * While the portal is open, nearby players are teleported to the target location.
+     * The portal animation progresses over time and eventually stops after a set duration.
+     *
+     * @param center The location at which the portal particles are created. This is the center of the portal.
+     * @param targetLocation The destination to which players will be teleported when they interact with the portal.
+     * @param options The particle options used to define the appearance of the portal particles.
+     */
     public static void PortalParticleLifespan(Location center, Location targetLocation, Particle.DustOptions options) {
 
         new BukkitRunnable() {
@@ -1494,6 +1952,16 @@ public class Util {
             }
         }.runTaskTimer(Freedom.get_plugin(),0,10);
     }
+
+    /**
+     * Creates portal particle effects at the specified location. The particle shapes can either form a circle
+     * or multiple vertical squares depending on the configuration.
+     *
+     * @param center The central {@code Location} where the particles will be generated.
+     * @param xlimit The x-axis limit controlling the particle effect spread in the x-direction.
+     * @param ylimit The y-axis limit controlling the particle effect spread in the y-direction and affecting particle size.
+     * @param zlimit The z-axis limit controlling the particle effect spread in the z-direction.
+     */
     public static void createPortalParticles(Location center, double xlimit, double ylimit, double zlimit) {
         boolean circle = false;
         if (circle) {
@@ -1509,6 +1977,18 @@ public class Util {
             drawVerticleSquare(center,1,rot, Particle.DUST,new Particle.DustOptions(Color.BLACK,(float) ylimit),xlimit,0,0);
         }
     }
+
+    /**
+     * Creates portal particle effects around a given location by generating various patterns such as circles or squares.
+     * The type, color, and size of the particles can be customized using the provided parameters.
+     *
+     * @param center The center location where the portal particles will be created.
+     * @param xlimit The horizontal limit defining the size or spread of the particle patterns along the X-axis.
+     * @param ylimit The vertical limit defining the size or spread of the particle patterns along the Y-axis.
+     * @param zlimit The depth limit defining the size or spread of the particle patterns along the Z-axis.
+     * @param ring The `Particle.DustOptions` object specifying the properties (e.g., color, size) of the outer-ring particles.
+     * @param inside The `Particle.DustOptions` object specifying the properties (e.g., color, size) of the inner particles.
+     */
     public static void createPortalParticles(Location center, double xlimit, double ylimit, double zlimit, Particle.DustOptions ring, Particle.DustOptions inside) {
         boolean circle = false;
         if (circle) {
@@ -1524,6 +2004,17 @@ public class Util {
             drawVerticleSquare(center,1,rot, Particle.DUST,inside,xlimit,0,0);
         }
     }
+
+    /**
+     * Draws a vertical circle in the specified world using particles.
+     *
+     * @param center   The center location of the circle.
+     * @param radius   The radius of the circle.
+     * @param world    The world where the circle will be drawn.
+     * @param points   The number of points (or particles) to use for forming the circle.
+     * @param particle The type of particle to use for drawing the circle.
+     * @param options  The particle options to be applied if the particle type is {@link Particle#DUST}.
+     */
     public static void drawverticleCircle(Location center, double radius, World world, int points, Particle particle, Particle.DustOptions options) {
         for (int i = 0; i < points; i++) {
             double angle = Math.toRadians(i * 360.0 / points); // Calculate angle in radians
@@ -1541,6 +2032,13 @@ public class Util {
             }
         }
     }
+
+    /**
+     * Creates and returns an ItemStack representing a player head with the specified player's skin.
+     *
+     * @param player The player whose skin will be applied to the player head.
+     * @return An ItemStack representing a player head with the specified player's skin.
+     */
     public static ItemStack getSkull(Player player) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();
@@ -1548,6 +2046,14 @@ public class Util {
         item.setItemMeta(meta);
         return item;
     }
+
+    /**
+     * Creates a custom player head item with a texture based on the provided Base64-encoded string.
+     *
+     * @param base64 the Base64-encoded texture string to apply to the player head.
+     *               If the string is empty, a plain player head is returned.
+     * @return an {@link ItemStack} representing the custom player head with the specified texture.
+     */
     public static ItemStack getCustomSkull(String base64) {
 
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
@@ -1561,6 +2067,14 @@ public class Util {
         head.setItemMeta(skullMeta);
         return head;
     }
+
+    /**
+     * Retrieves the skin property of a specified player.
+     *
+     * @param player the player whose skin property is to be retrieved
+     * @return the skin property of the player, or null if not found
+     * @throws DataRequestException if there is an error during the skin data retrieval process
+     */
     public static SkinProperty getPlayerSkin(Player player) throws DataRequestException {
         PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
         Optional<SkinProperty> property = playerStorage.getSkinForPlayer(
@@ -1570,6 +2084,14 @@ public class Util {
         return property.orElse(null);
     }
 
+    /**
+     * Determines the soul type of a given player.
+     *
+     * @param player The player whose soul type is to be determined. The player must have
+     *               their soul type stored in the persistent data container.
+     * @return The determined soul type of the player. If the player does not have a soul
+     *         type stored, it defaults to {@code SoulTypes.Red} and opens a selection UI.
+     */
     public static SoulTypes getSoulType(Player player) {
         if (!player.getPersistentDataContainer().has(FreedomKeys.soul(), PersistentDataType.STRING)) {
             selectionUi.open_UI(player,new BaseRed());
@@ -1578,6 +2100,14 @@ public class Util {
         return SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
     }
 
+    /**
+     * Sets the skin of a player based on the specified skin name.
+     *
+     * @param player   The player whose skin is to be updated.
+     * @param skinName The name of the skin to apply to the player.
+     * @throws MineSkinException      If an error occurs while processing the skin data.
+     * @throws DataRequestException   If an error occurs while requesting skin data.
+     */
     public static void setSkinByName(Player player, String skinName) throws MineSkinException, DataRequestException {
         SkinStorage skinStorage = skinsRestorerAPI.getSkinStorage();
         PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
@@ -1594,6 +2124,14 @@ public class Util {
         }
     }
 
+    /**
+     * Sets the skin of a given player using a skin image retrieved from a specified URL.
+     *
+     * @param player The player whose skin is to be set.
+     * @param url The URL of the skin image to be applied. Must be a valid image link.
+     * @throws MineSkinException If an error occurs while generating the skin using the MineSkin API.
+     * @throws DataRequestException If there is an issue during the data request to fetch the skin information.
+     */
     public static void setSkinByUrl(Player player, String url) throws MineSkinException, DataRequestException {
         MineSkinAPI mineSkinAPI = skinsRestorerAPI.getMineSkinAPI();
         // Generate skin from URL (use CLASSIC as default)
@@ -1603,6 +2141,13 @@ public class Util {
         skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player, skinProperty);
     }
 
+    /**
+     * Sets the skin of the specified player using the provided skin properties.
+     *
+     * @param player the player whose skin is to be updated
+     * @param value the value of the skin property
+     * @param signature the signature of the skin property
+     */
     public static void setSkinByProperties(Player player, String value, String signature) {
         SkinProperty skinProperty = SkinProperty.of(value, signature);
         // Apply directly to player
@@ -1610,6 +2155,15 @@ public class Util {
         skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player, skinProperty);
     }
 
+    /**
+     * Draws a sphere by spawning particles at locations calculated around the given center point.
+     *
+     * @param center   The central location of the sphere.
+     * @param radius   The radius of the sphere.
+     * @param points   The number of points to use for each dimension in rendering the sphere.
+     * @param particle The type of particle to use for the sphere.
+     * @param options  The options for the particle if the particle type is {@code Particle.DUST}, otherwise ignored.
+     */
     public static void drawSphere(Location center, double radius, int points,Particle particle, Particle.DustOptions options) {
         //x coordinate = cos(a)*cos(b)
         //y coordinate = sin(a)*cos(b)
@@ -1633,7 +2187,16 @@ public class Util {
     }
 
 
-
+    /**
+     * Draws a line in the world by spawning particles between two given locations.
+     *
+     * @param start    the starting location of the line
+     * @param end      the ending location of the line
+     * @param world    the world in which the line will be drawn
+     * @param points   the number of points (particles) to spawn along the line
+     * @param particle the type of particle to use for drawing the line
+     * @param options  additional options for customizing the appearance of the particles
+     */
     public static void drawLine(Location start, Location end, World world, int points, Particle particle, Particle.DustOptions options) {
         double dx = (end.getX() - start.getX()) / points;
         double dy = (end.getY() - start.getY()) / points;
@@ -1645,6 +2208,20 @@ public class Util {
         }
     }
 
+    /**
+     * Draws a line between two locations in a specified world using particles.
+     *  QUICK DISCLAIMER, THIS IS DIFFERENT THAN OTHER DRAW LINE BECAUSE THIS IS MEANT FOR GENERAL PARTICLES
+     * @param start    The starting location of the line.
+     * @param end      The ending location of the line.
+     * @param world    The world in which the particles will be displayed.
+     * @param points   The number of points (or segments) along the line where particles will be spawned.
+     * @param particle The type of particle to display along the line.
+     * @param offsetX  The offset for the particle's movement along the X-axis.
+     * @param offsetY  The offset for the particle's movement along the Y-axis.
+     * @param offsetZ  The offset for the particle's movement along the Z-axis.
+     * @param extra    Additional data or modifiers for the particle, such as speed or size, depending on the particle type.
+     * @param color    The color of the particle, if the particle type supports coloring.
+     */
     public static void drawLine(Location start, Location end, World world, int points, Particle particle,int offsetX, int offsetY, int offsetZ, int extra, Color color) {
         double dx = (end.getX() - start.getX()) / points;
         double dy = (end.getY() - start.getY()) / points;
@@ -1655,6 +2232,16 @@ public class Util {
             world.spawnParticle(particle, point, 1,offsetX, offsetY, offsetZ, extra, color);
         }
     }
+
+    /**
+     * Draws a line between two locations in the specified world using particles.
+     *
+     * @param start    The starting location of the line.
+     * @param end      The ending location of the line.
+     * @param world    The world in which the line will be drawn.
+     * @param points   The number of points to distribute along the line, determining its density.
+     * @param particle The type of particle to use for drawing the line.
+     */
     public static void drawLine(Location start, Location end, World world, int points, Particle particle) {
         double dx = (end.getX() - start.getX()) / points;
         double dy = (end.getY() - start.getY()) / points;
@@ -1665,6 +2252,19 @@ public class Util {
             world.spawnParticle(particle, point, 1);
         }
     }
+
+    /**
+     * Spawns a particle at the specified location in the given world.
+     * If the particle type is Particle.DUST and the dust options are provided,
+     * the particle will be spawned with the specified options. Otherwise,
+     * the particle will be spawned using default values.
+     *
+     * @param world    the world in which the particle will be spawned
+     * @param loc      the location where the particle will appear
+     * @param particle the type of particle to spawn
+     * @param options  the options for the particle if it is of type Particle.DUST,
+     *                 otherwise null
+     */
     private static void spawn(World world, Location loc, Particle particle, Particle.DustOptions options) {
         if (particle == Particle.DUST && options != null) {
             world.spawnParticle(particle, loc, 1, 0, 0, 0, 1, options);
@@ -1673,7 +2273,16 @@ public class Util {
         }
     }
 
-
+    /**
+     * Draws an isosceles triangle using particles in the specified world.
+     *
+     * @param center   The center location of the triangle's base.
+     * @param size     The size of the triangle. This determines the distance from the center to the vertices.
+     * @param world    The world in which the triangle will be drawn.
+     * @param points   The number of points to use for drawing the edges of the triangle.
+     * @param particle The type of particle to use for drawing the triangle.
+     * @param options  Additional options for the particle appearance, such as color (if applicable).
+     */
     public static void drawIsoscelesTriangle(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options) {
         Location top = center.clone().add(0, 0, -size);
         Location left = center.clone().add(-size, 0, size);
@@ -1686,6 +2295,18 @@ public class Util {
         drawLine(left, right, world, points, particle, options);
         drawLine(right, top, world, points, particle, options);
     }
+
+    /**
+     * Draws an isosceles triangle in the given world using particles, based on the specified parameters.
+     *
+     * @param center the central location of the triangle, which determines its position
+     * @param size the size of the triangle, affecting the distance from the center to each vertex
+     * @param world the world in which the triangle will be drawn
+     * @param points the number of points to be used for rendering the lines of the triangle
+     * @param particle the type of particle to be used for drawing the triangle
+     * @param options particle rendering options to be applied, such as color or size
+     * @param offset an offset applied to the triangle's vertices to adjust its position
+     */
     public static void drawIsoscelesTriangle(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options,Location offset) {
 
         Location top = center.clone().add(0, 0, -size);
@@ -1700,6 +2321,19 @@ public class Util {
         drawLine(right, top, world, points, particle, options);
     }
 
+    /**
+     * Draws a spiral originating from a specified center location in the given world.
+     * The spiral expands outward based on the specified radius and completes a number of turns,
+     * with a configurable number of points and visual appearance.
+     *
+     * @param center   The central location from which the spiral originates.
+     * @param radius   The maximum radius of the spiral at its furthest point from the center.
+     * @param turns    The number of complete turns the spiral will make.
+     * @param world    The world in which the spiral will be drawn.
+     * @param points   The number of particle points used to draw the spiral, affecting its smoothness.
+     * @param particle The type of particle used to render the spiral.
+     * @param options  Additional options for customizing the appearance of the particle.
+     */
     public static void drawSpiral(Location center, double radius, int turns, World world, int points, Particle particle, Particle.DustOptions options) {
         for (int i = 0; i < points; i++) {
             double progress = (double) i / points;
@@ -1716,7 +2350,16 @@ public class Util {
     }
 
 
-
+    /**
+     * Draws a star-shaped pattern in the world using particles.
+     *
+     * @param center The center location of the star.
+     * @param radius The radius of the outer points of the star.
+     * @param world The world in which the star will be drawn.
+     * @param points The number of particles to draw between each point of the star.
+     * @param particle The particle type to use for drawing the star.
+     * @param options The dust options for the particle, used if the particle type supports it.
+     */
     public static void drawStar(Location center, double radius, World world, int points, Particle particle, Particle.DustOptions options) {
         int vertices = 5;
         Location[] pts = new Location[vertices * 2];
@@ -1736,6 +2379,14 @@ public class Util {
         }
     }
 
+    /**
+     * Elevates the target player and performs visual effects based on their soul type.
+     * This method creates a star effect with alternating colors around the target player
+     * for a duration of 10 ticks.
+     *
+     * @param target The player to be affected and elevated. This method uses the player's
+     *               current location and persistent data to determine the behavior and effects.
+     */
     public static void Lift(Player target) {
         Location loc = target.getLocation();
         SoulTypes soulType = SoulTypes.valueOf(target.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
@@ -1757,6 +2408,16 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0, 5);
     }
 
+    /**
+     * Draws an exclamation point at the specified location using particles.
+     *
+     * @param center   The central location where the exclamation point will be drawn.
+     * @param size     The size of the exclamation point. This determines the length of the shaft and the size of the circle.
+     * @param points   The number of points used to draw the lines and circle, affecting the visual smoothness.
+     * @param particle The particle type used to render the exclamation point.
+     * @param options  Additional options for customizing the appearance of the particle (e.g., color or transition effects).
+     * @param offset   The offset to apply to the particle positions during drawing.
+     */
     public static void drawExclamationPoint(Location center, double size, int points, Particle particle, Particle.DustOptions options, Location offset) {
         Location tip = center.clone().add(0, 0, size / 8 - 3.5);
         Location back = center.clone().add(0, 0, size);
@@ -1771,12 +2432,31 @@ public class Util {
         drawCircle(tip, size / 6, world, points, particle, options);
     }
 
-
+    /**
+     * Draws a danger symbol composed of an exclamation point and an enclosing isosceles triangle.
+     *
+     * @param center   The central location where the danger symbol will be drawn.
+     * @param size     The size factor for scaling the danger symbol.
+     * @param points   The resolution or number of points for rendering the shapes.
+     * @param particle The type of particle to use for drawing the symbol.
+     * @param outside  The visual options for the particles used in the outer triangle.
+     * @param inside   The visual options for the particles used in the exclamation point.
+     */
     public static void drawDangerSymbol(Location center, double size, int points, Particle particle, Particle.DustOptions outside, Particle.DustOptions inside) {
         drawExclamationPoint(center, size, points, particle, inside,new Location(center.getWorld(),0,0,1));
         drawIsoscelesTriangle(center, size * 1.5,center.getWorld(), points,particle,outside,new Location(center.getWorld(),0,0,-2.5));
     }
 
+    /**
+     * Draws a heart shape in the world using the specified particle effect.
+     *
+     * @param center The central location of the heart shape.
+     * @param size The size multiplier for the heart shape.
+     * @param world The world in which the particles will be displayed.
+     * @param points The number of points used to define the heart's shape. A higher value will result in smoother curves.
+     * @param particle The particle effect to use for drawing the heart shape.
+     * @param options The dust options to customize the appearance of the particles, applicable if the particle type supports it.
+     */
     public static void drawHeart(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options) {
         for (int i = 0; i < points; i++) {
             double t = Math.PI * 2 * i / points;
@@ -1791,6 +2471,14 @@ public class Util {
         }
     }
 
+    /**
+     * Retrieves a list of nearby trusted players within a specified radius of a given player.
+     * A player is considered trusted if both players mutually trust each other.
+     *
+     * @param player the player for whom nearby trusted players are to be retrieved
+     * @param radius the radius within which to search for other trusted players
+     * @return a list of players who are within the specified radius and are mutually trusted by the given player
+     */
     public static List<Player> getNearbyTrusted(Player player,int radius) {
         List<Player> players = new ArrayList<>();
         player.getLocation().getNearbyEntitiesByType(Player.class,radius).forEach( iterated -> {
@@ -1800,6 +2488,14 @@ public class Util {
         });
         return players;
     }
+
+    /**
+     * Retrieves the smelting result of the given item stack based on furnace recipes.
+     *
+     * @param item The {@code ItemStack} to check for a smelting result. Must not be null.
+     * @return The {@code ItemStack} that represents the smelted result, with the same amount as the input {@code item}.
+     *         Returns null if no matching furnace recipe is found.
+     */
     public static ItemStack getSmeltingResult(ItemStack item) {
         ItemStack result = null;
         Iterator<Recipe> iter = Bukkit.recipeIterator();
@@ -1814,9 +2510,15 @@ public class Util {
         return result;
     }
 
+    /**
+     * Checks if the given material can be smelted using a furnace recipe.
+     *
+     * @param material the material to check for smelting compatibility
+     * @return {@code true} if the material can be smelted, {@code false} otherwise
+     */
     public static boolean isSmeltable(Material material) {
         // Iterate through all server recipes
-        java.util.Iterator<Recipe> recipeIterator = Bukkit.recipeIterator();
+        Iterator<Recipe> recipeIterator = Bukkit.recipeIterator();
         while (recipeIterator.hasNext()) {
             Recipe recipe = recipeIterator.next();
 
@@ -1833,6 +2535,14 @@ public class Util {
         return false;
     }
 
+    /**
+     * Applies a temporary silence effect to a player for the specified number of seconds.
+     * During the silence period, the silence state is tracked and removed automatically
+     * after the duration expires.
+     *
+     * @param player The player to whom the silence effect will be applied.
+     * @param seconds The duration of the silence effect in seconds.
+     */
     public static void silenceFor(Player player, int seconds) {
         new BukkitRunnable() {
             int tick = 0;
@@ -1855,6 +2565,12 @@ public class Util {
         }.runTaskTimer(Freedom.get_plugin(), 0,0);
     }
 
+    /**
+     * Checks if the given ItemStack is null or represents air.
+     *
+     * @param stack the ItemStack to be checked
+     * @return true if the ItemStack is null or its type is Material.AIR, false otherwise
+     */
     public static boolean isItemNull(ItemStack stack) {
         try {
             return stack == null || stack.getType() == Material.AIR;
@@ -1862,10 +2578,27 @@ public class Util {
             return true;
         }
     }
+
+    /**
+     * Retrieves an Enchantment object associated with the specified key.
+     *
+     * @param key the unique string key representing the enchantment within the Minecraft namespace.
+     *            This parameter must not be null.
+     * @return the Enchantment corresponding to the given key, never null.
+     */
     @NotNull
     public static Enchantment getEnchantment(@NotNull @KeyPattern.Value String key) {
         return RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).getOrThrow(Key.key(Key.MINECRAFT_NAMESPACE, key));
     }
+
+    /**
+     * Constructs a colored potion bottle with the provided keys and values stored as persistent data.
+     *
+     * @param keys   A list of NamespacedKeys to store in the potion's persistent data container.
+     * @param values A list of strings corresponding to the keys to be stored as persistent data.
+     * @param color  The color of the potion.
+     * @return An ItemStack representing the colored potion bottle with the specified persistent data.
+     */
     public static ItemStack constructColoredBottle(List<NamespacedKey> keys,List<String> values, Color color) {
         ItemStack itemStack = ItemStack.of(Material.POTION);
         PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
@@ -1876,6 +2609,14 @@ public class Util {
         itemStack.setItemMeta(meta);
         return itemStack;
     }
+
+    /**
+     * Deals true damage to a living entity, bypassing armor and resistances. If the entity's health
+     * drops to or below zero, it will be killed and the standard death event will be triggered.
+     *
+     * @param entity The living entity to deal true damage to. If the entity is already dead, no action is taken.
+     * @param amount The amount of true damage to deal to the entity. This damage directly subtracts from the entity's health.
+     */
     public static void dealTrueDamage(LivingEntity entity, double amount) {
         // Check if the entity is dead already
         if (entity.isDead()) return;
@@ -1894,6 +2635,14 @@ public class Util {
         }
         entity.playHurtAnimation(45);
     }
+
+    /**
+     * Creates and returns an ItemStack representing a fireball.
+     * The item uses the material FIRE_CHARGE and assigns a custom item model
+     * associated with the "fireball" NamespacedKey.
+     *
+     * @return an ItemStack configured as a fireball with a specific item model.
+     */
     public static ItemStack Fireball() {
         ItemStack Workingitem = ItemStack.of(Material.FIRE_CHARGE);
         ItemMeta meta = Workingitem.getItemMeta();
@@ -1901,16 +2650,36 @@ public class Util {
         Workingitem.setItemMeta(meta);
         return Workingitem;
     }
+
+    /**
+     * Initializes a fireball as an {@link ItemDisplay} entity, spawns it in the player's world
+     * with the appropriate location and orientation, and sets its item stack to a fireball.
+     *
+     * @param fireball The entity to initialize. This is replaced with the newly spawned {@link ItemDisplay} entity.
+     * @param player The player whose location and direction are used to position and orient the fireball.
+     * @return The initialized {@link ItemDisplay} entity representing the fireball.
+     */
     public static ItemDisplay initFireball(Entity fireball, Player player) {
         fireball = player.getWorld().spawnEntity(player.getLocation().clone().add(player.getLocation().getDirection().multiply(1.25)), EntityType.ITEM_DISPLAY);
         ItemDisplay itemDisplay = (ItemDisplay) fireball;
         itemDisplay.setItemStack(Fireball());
         itemDisplay.teleport(player.getLocation().add(player.getLocation().getDirection()));
-        itemDisplay.setRotation(90,90);
+        itemDisplay.setRotation(player.getYaw(),player.getPitch());
         return itemDisplay;
     }
 
-
+    /**
+     * Draws an arrow in the specified world using particles. The arrow is composed of an isosceles triangle
+     * representing the arrowhead and a line representing the shaft.
+     *
+     * @param center   The location representing the center of the arrow.
+     * @param size     The size of the arrow, determining the length and dimensions.
+     * @param world    The world where the arrow will be drawn.
+     * @param points   The number of points used to draw the arrow's shapes (affects smoothness).
+     * @param particle The particle type used to render the arrow.
+     * @param options  The particle options for customization, such as color or size.
+     * @param rot      The rotation of the arrow in degrees, applied about the center.
+     */
     public static void drawArrow(Location center, double size, World world, int points, Particle particle, Particle.DustOptions options,float rot) {
         Location tip = center.clone().add(0, 0, -size / 2);
         Location back = center.clone().add(0, 0, size);

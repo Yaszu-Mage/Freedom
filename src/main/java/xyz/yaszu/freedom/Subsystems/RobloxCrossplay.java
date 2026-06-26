@@ -6,10 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -19,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Util.Util;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,10 +25,15 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static xyz.yaszu.freedom.Util.Util.dess;
-import static xyz.yaszu.freedom.Util.Util.keygen;
+import static xyz.yaszu.freedom.Util.Util.*;
 
 public class RobloxCrossplay {
     private HttpServer server;
@@ -1461,7 +1465,6 @@ public class RobloxCrossplay {
                                 JsonObject jsonResponse = new JsonObject();
                                 jsonResponse.addProperty("player", finalPlayerName);
                                 jsonResponse.addProperty("world", world.getName());
-                                
                                 JsonObject position = new JsonObject();
                                 position.addProperty("x", sheep.getLocation().getX());
                                 position.addProperty("y", sheep.getLocation().getY());
@@ -1490,7 +1493,7 @@ public class RobloxCrossplay {
                            AtomicReference<JsonObject> jsonObjectAtomicReference = new AtomicReference<>();
                            jsonObjectAtomicReference.set(new JsonObject());
                            JsonObject statusJson = jsonObjectAtomicReference.get();
-                           
+                           CompletableFuture<JsonObject> future = new CompletableFuture<>();
                            BukkitTask task = Bukkit.getScheduler().runTask(Freedom.get_plugin(), () -> {
                                Entity display = entity.get();
                                if (display != null) {
@@ -1513,7 +1516,11 @@ public class RobloxCrossplay {
                                    }
                                    statusJson.add("nearbyEntities", nearbyEntities);
                                }
+                               future.complete(statusJson);
 
+
+                           });
+                           future.thenAccept(jsonObject -> {
                                String response = statusJson.toString();
                                try {
                                    byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
@@ -1548,6 +1555,7 @@ public class RobloxCrossplay {
                             double yaw = information.get("yaw").getAsDouble();
                             double pitch = information.get("pitch").getAsDouble();
                             Freedom.get_plugin().getLogger().info("Before scheduler");
+
                             if (entity.get() == null || entity.get().isDead()) {
                                 BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
                                     entity.set(world.spawn(new Location(world, x / scale, y / scale, z / scale), ItemDisplay.class));
@@ -1569,15 +1577,86 @@ public class RobloxCrossplay {
                             /*
                              {entity : {positionX : 0,positionY : 0, positionZ : 0, velocityX, velocityY, velocityZ,type}
                              */
-                            String response = ok;
+                            CompletableFuture<JsonObject> future = new CompletableFuture<>();
+                            AtomicReference<JsonObject> jsonObjectAtomicReference = new AtomicReference<>();
+                            jsonObjectAtomicReference.set(new JsonObject());
+                            JsonObject statusJson = jsonObjectAtomicReference.get();
+                            BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
+                                        Entity display = entity.get();
+                                        if (display != null) {
+                                            statusJson.addProperty("Living", !display.isDead());
+                                            statusJson.addProperty("velocityX", display.getVelocity().getX());
+                                            statusJson.addProperty("velocityY", display.getVelocity().getY());
+                                            statusJson.addProperty("velocityZ", display.getVelocity().getZ());
+                                            //Decode and encode format for every nearby entity and what you can get by looking at them
+                                            JsonArray nearbyEntities = new JsonArray();
 
-                            asyncHttpExchange.sendResponseHeaders(200, response.length());
+                                            for (Entity e : display.getNearbyEntities(10, 10, 10)) {
+                                                JsonObject entityJson = new JsonObject();
+                                                entityJson.addProperty("type", e.getType().toString());
+                                                entityJson.addProperty("x", e.getLocation().getX() * scale);
+                                                entityJson.addProperty("y", e.getLocation().getY() * scale);
+                                                entityJson.addProperty("z", e.getLocation().getZ() * scale);
+                                                entityJson.addProperty("pitch", Math.toRadians(e.getLocation().getPitch() * -1));
+                                                entityJson.addProperty("yaw", Math.toRadians(e.getLocation().getYaw() * -1));
+                                                entityJson.addProperty("UniqueID", e.getUniqueId().toString());
+                                                nearbyEntities.add(entityJson);
+                                            }
+                                            statusJson.add("nearbyEntities", nearbyEntities);
+                                        }
+                                        future.complete(statusJson);
+                            });
+                            future.thenAcceptAsync(jsonObject -> {
+                                //Get all nearby Chunks
+                                JsonArray nearbyChunks = new JsonArray();
+                                Entity display = entity.get();
+                                Location location = display.getLocation();
+                                Chunk[] chunks = null;
+                                int range = 3 * 16;
+                                int centerX = location.getChunk().getX();
+                                int centerZ = location.getChunk().getZ();
+                                List<Chunk> nearbyChunkList = new ArrayList<>();
+                                try {
+                                    for (int xCord = centerX - range; xCord <= centerX + range; xCord++) {
+                                        for (int zCord = centerZ - range; zCord <= centerZ + range; zCord++) {
+                                            nearbyChunkList.add(world.getChunkAtAsync(xCord, zCord).get(1000, TimeUnit.MILLISECONDS));
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
 
-                            OutputStream os = asyncHttpExchange.getResponseBody();
-                            os.write(response.getBytes());
-                            os.close();
-                            asyncHttpExchange.getResponseBody().close();
-                            asyncHttpExchange.close();
+                                for (Chunk chunk : nearbyChunkList) {
+                                    //Now iterate through all blocks within chunks
+                                    for (int xCord = 0; xCord < 4; xCord++) {
+                                        for (int yCord = -64; yCord < 0; yCord++) {
+                                            for (int zCord = 0; zCord < 4; zCord++) {
+                                                Block block = chunk.getBlock(xCord, yCord, zCord);
+                                                JsonObject blockJson = new JsonObject();
+                                                blockJson.addProperty("type", block.getType().toString());
+                                                blockJson.addProperty("x", block.getLocation().getX() * scale);
+                                                blockJson.addProperty("y", block.getLocation().getY() * scale);
+                                                blockJson.addProperty("z", block.getLocation().getZ() * scale);
+                                                nearbyChunks.add(blockJson);
+                                            }
+                                        }
+                                    }
+                                    jsonObject.add("nearbyChunks", nearbyChunks);
+                                }
+                            }).thenAccept(jsonObject -> {
+
+                                String response = statusJson.toString();
+                                try {
+                                    byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                                    asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
+                                    try (OutputStream os = asyncHttpExchange.getResponseBody()) {
+                                        os.write(responseBytes);
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+
                         });
                     } else {
                         Freedom.get_plugin().getLogger().info("Invalid player: " + playerName);

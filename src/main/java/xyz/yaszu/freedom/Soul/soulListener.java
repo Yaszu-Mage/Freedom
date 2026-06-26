@@ -57,14 +57,6 @@ public class soulListener extends Util implements Listener {
         SOULS.put(SoulTypes.Astral, new Astral());
         SOULS.put(SoulTypes.BaseCyan,new BaseCyan());
     }
-    //by by
-    // I was thinking more custom mobs bc that shit would be cool as balls
-    // what if there is a mob that uses a moveset?
-    //like a shadow
-    //I think it would be funny if they walk into the red castle and be like, excuse me, what the fuck why can they cast FUCKING FIREBALL
-    // oh I just came up with something I am so stupid... why use mannequins when every npc can be a fucking cow or smtn
-    //ugh wtv I'll work on npc system and give them abilities and combat AI
-    //MAHORAGA HELPPPP HELP ME HELPPPPPPPPPPPPP
     public static boolean canAbility = true;
     public static Base_Soul getSoul(Player player) {
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
