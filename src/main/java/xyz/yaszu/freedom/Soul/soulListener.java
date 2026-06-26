@@ -502,6 +502,11 @@ public class soulListener implements Listener {
         }
     }
 
+
+    /**
+     * Ability One Listener, event that is triggered every time a player jumps, checks if they have com or action
+     * @param event Event that is called during the Player Jump Event Update
+     */
     @EventHandler
     public void AbilityOneListener(PlayerJumpEvent event) {
         if (canAbility == false) return;
@@ -538,6 +543,20 @@ public class soulListener implements Listener {
         }
     }
 
+    /**
+     * Handles the Ability Two action triggered by a player dropping an item.
+     * This listener is invoked when a {@link PlayerDropItemEvent} is fired.
+     * It checks multiple conditions, including the player's state, the soul's state,
+     * and specific ability logic, to determine the appropriate actions.
+     *
+     * The method may cancel the event based on condition evaluations.
+     *
+     * @param event The {@link PlayerDropItemEvent} that represents the action of a player dropping an item.
+     *              This event contains information about the player and the dropped item,
+     *              which is used for evaluating the ability logic.
+     * @throws MineSkinException      If there is an issue related to MineSkin operations during ability execution.
+     * @throws DataRequestException   If there is an issue retrieving required data for the ability.
+     */
     @EventHandler
     public void AbilityTwoListener(PlayerDropItemEvent event) throws MineSkinException, DataRequestException {
         if (canAbility == false) return;
@@ -583,6 +602,14 @@ public class soulListener implements Listener {
         soul.AbilityTwo(player, player.getInventory().getItem(0));
     }
 
+    /**
+     * Handles the activation of attack passives for a player during a pre-attack event.
+     *
+     * This method checks the player's state, applies any associated moveset attack
+     * passives, and triggers the passive effect of the player's soul if applicable.
+     *
+     * @param event the PrePlayerAttackEntityEvent triggered when a player is about to attack an entity
+     */
     @EventHandler
     public void activateAttackPassive(PrePlayerAttackEntityEvent event) {
         Player player = event.getPlayer();
@@ -599,12 +626,31 @@ public class soulListener implements Listener {
         }
     }
 
+    /**
+     * Represents the data structure for a moveset, encapsulating its elements,
+     * amplification factor, and range.
+     *
+     * This class is a helper utility for organizing and managing moveset data,
+     * such as elemental types, amplification, and the range of the moveset.
+     * It is designed to store data related to a specific set of moves.
+     *
+     * Thread-safety: This class is not thread-safe as it uses a HashSet and
+     * mutable integer fields without synchronization.
+     */
     private static class MovesetData {
         Set<String> elements = new HashSet<>();
         int amp = 0;
         int range = 0;
     }
 
+    /**
+     * Parses the moveset data from a given player.
+     * The moveset is retrieved from the player's persistent data container.
+     * It can handle both old and new formatted moveset strings.
+     *
+     * @param player The player whose moveset data is being parsed.
+     * @return A MovesetData object containing the parsed moveset data, or null if no valid moveset data exists.
+     */
     private MovesetData parseMoveset(Player player) {
         String moveset = player.getPersistentDataContainer().get(FreedomKeys.moveset(), PersistentDataType.STRING);
         if (moveset == null) return null;
@@ -631,6 +677,15 @@ public class soulListener implements Listener {
         return data;
     }
 
+    /**
+     * Applies passive abilities to a player based on their moveset. This method determines the
+     * player's elemental abilities and amplifies their power and range accordingly. If the
+     * moveset elements include predefined combinations, additional effects may be applied
+     * either to the player or to nearby entities.
+     *
+     * @param player The player to whom passive abilities will be applied. This player will
+     *               receive effects based on their moveset elements and corresponding abilities.
+     */
     private void applyMovesetPassives(Player player) {
         if (canAbility == false) return;
         MovesetData data = parseMoveset(player);
@@ -717,6 +772,14 @@ public class soulListener implements Listener {
         }
     }
 
+    /**
+     * Applies passive attack effects from the player's moveset when they attack an entity.
+     * The effects are based on the elements in the player's moveset and the amplification level.
+     * Each element in the moveset triggers its own unique effect, with special interactions for combined elements.
+     *
+     * @param player The player performing the attack. This player's moveset and attributes are checked to determine the effects.
+     * @param event The event triggered by the player attacking an entity. Contains information about the attacked entity and event context.
+     */
     private void applyMovesetAttackPassives(Player player, PrePlayerAttackEntityEvent event) {
         if (canAbility == false) return;
         MovesetData data = parseMoveset(player);

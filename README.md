@@ -85,7 +85,7 @@ Replace "path/to/output" to the directory you want to build it to
 It should build a shadow jar, please reach out to me on Discord if there are any issues. ```Yaszu``` on discord :3
 
 ### Quick Setup
-I have created a quick setup script for Windows, if you do not want to try and attempt to setup the server yourself because it is boring as heck... you can download it [here]()
+I have created a quick setup script for Windows, if you do not want to try and attempt to setup the server yourself because it is boring as heck... make a new file and paste in the contents listed [here](https://raw.githubusercontent.com/Yaszu-Mage/Freedom/refs/heads/master/setup.bat) filename should be "setup.bat" (without the quotes)
 
 If you want to run it again, the generated run start.bat :D
 
