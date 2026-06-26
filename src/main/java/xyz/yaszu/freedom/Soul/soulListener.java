@@ -30,7 +30,9 @@ import xyz.yaszu.freedom.Util.Util;
 import java.net.URI;
 import java.util.*;
 
-public class soulListener extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class soulListener implements Listener {
     public static final Map<SoulTypes, Base_Soul> SOULS = new EnumMap<>(SoulTypes.class);
 
     /**
@@ -112,7 +114,10 @@ public class soulListener extends Util implements Listener {
         }
     }
 
-
+    /**
+     * Initial Player Join Function, it sends ResourcePack, then sets default values such as ComorAction, Soulpoints, and Ability One Cooldowns
+     * @param event Actual Player Join Event, this is called whenever a player Joins
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -174,8 +179,19 @@ public class soulListener extends Util implements Listener {
         if (!abilityTwoCooldowns.containsKey(player.getUniqueId())) {
             abilityTwoCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         }
+        if (soul != null || canAbility == false) {
+            String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
+            if (soulName != null && soulName.contains("Green")) {
+                soul.Passive(player, event);
+            }
+        }
     }
 
+
+    /**
+     * Telemetry Data to know about Resource Pack Responses
+     * @param event Event that is called during the ResourcePack Status update
+     */
     @EventHandler
     public void onResourcePackResponse(PlayerResourcePackStatusEvent event) {
         Player player = event.getPlayer();
@@ -190,6 +206,10 @@ public class soulListener extends Util implements Listener {
         }
     }
 
+    /**
+     * Player Damage SoulPoints: Whenever a player is damaged their soul points go up
+     * @param event Event that is called during the Entity Damage Event Update
+     */
     @EventHandler
     public void onPlayerDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player player) {
@@ -201,8 +221,10 @@ public class soulListener extends Util implements Listener {
     }
 
 
-
-
+    /**
+     * Entity Damage Player Soulpoints: Whenever a player damages an Entity their SoulPoints go up
+     * @param event Event that is called during the Entity Damaged by Entity Event Update
+     */
     @EventHandler
     public void onPlayerDamagedEntity(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player player) {
@@ -214,7 +236,10 @@ public class soulListener extends Util implements Listener {
     }
 
 
-
+    /**
+     * Player Move Update: Whenever a player moves, this event checks if they have a soul and sets their walk and fly speed accordingly. If they don't have a soul, it opens the starting GUI after a small delay to ensure the resource pack is sent first. It also initializes the ComorAction persistent data if it doesn't exist.
+     * @param event Event that is called during the Player Move Event Update
+     */
     @EventHandler
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
         Player player = event.getPlayer();
@@ -238,15 +263,6 @@ public class soulListener extends Util implements Listener {
         if (!player.getPersistentDataContainer().has(keygen("ComorAction"))) {
             player.getPersistentDataContainer().set(keygen("ComorAction"), PersistentDataType.BOOLEAN, true);
         }
-    }
-
-
-
-
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
         if (!abilityOneCooldowns.containsKey(player.getUniqueId())) {
             abilityOneCooldowns.put(player.getUniqueId(), 0L);
         }
@@ -257,20 +273,21 @@ public class soulListener extends Util implements Listener {
     }
 
 
-
-
-
+    /**
+     * Shows the SoulPoints of a Given Player Within their UI, and resets it if they do not have it
+     * @param player to show SoulPoints of
+     */
     public static void showSoulPoints(Player player) {
         if (!player.getPersistentDataContainer().has(keygen("SoulPoint"))) {
             player.getPersistentDataContainer().set(keygen("SoulPoint"),PersistentDataType.DOUBLE,0d);
         }
         double SoulPoints = player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE);
-        for (BossBar bossBar : player.activeBossBars() ) {
-            if (bossBar.name().toString().contains("SoulPoints")) {
-                player.hideBossBar(bossBar);
-            }
-
-        }
+//        for (BossBar bossBar : player.activeBossBars() ) {
+//            if (bossBar.name().toString().contains("SoulPoints")) {
+//                player.hideBossBar(bossBar);
+//            }
+//
+//        }
         Integer life = player.getPersistentDataContainer().get(keygen("life"),PersistentDataType.INTEGER);
         if (life == null) {
             player.getPersistentDataContainer().set(keygen("life"),PersistentDataType.INTEGER,9);
@@ -278,7 +295,12 @@ public class soulListener extends Util implements Listener {
         open(player, (int) SoulPoints,life);
     }
 
-
+    /**
+     * Enable the Active Passives of a Player, this is the Event Key for the Player Arm Swing Event
+     * Whenever a player swings their arm, this event checks if they have a soul and if they do, it calls the ActivePassive method of the soul. If they don't have a soul, it does nothing.
+     * Also it checks ComorAction to see if the method should rlly be run
+     * @param event Event that is called during the Player Arm Swing Event
+     */
     @EventHandler
     public void enableActivePassives(PlayerArmSwingEvent event) {
         if (!Life_and_Death.is_alive(event.getPlayer()) || canAbility == false) return;
@@ -321,6 +343,12 @@ public class soulListener extends Util implements Listener {
         soul.ActivePassive(player);
     }
 
+    /**
+     * Finds an item in the player's hand that has the specified key.
+     * @param player The player to search for the item.
+     * @param key The key to check for in the item's persistent data.
+     * @return The item in the player's hand that has the specified key, or null if not found.
+     */
     private ItemStack findItemInHand(Player player, String key) {
         ItemStack mainHand = player.getInventory().getItemInMainHand();
         if (mainHand.getPersistentDataContainer().has(keygen(key))) {
@@ -334,6 +362,18 @@ public class soulListener extends Util implements Listener {
         return null;
     }
 
+
+    /**
+     * Retrieves the soul type associated with the given player based on their persistent data.
+     *
+     * This method attempts to resolve the player's soul type by querying their {@code PersistentDataContainer}
+     * for a stored soul identifier. If the identifier is found and matches a valid {@code SoulTypes} value,
+     * the corresponding {@code SoulTypes} enum is returned. If no valid identifier is found, the method returns {@code null}.
+     *
+     * @param player the player whose soul type is to be retrieved; must not be {@code null}
+     * @return the {@code SoulTypes} value associated with the player, or {@code null}
+     *         if no valid soul type identifier is found or is improperly formatted
+     */
     private SoulTypes getOwnedSoulType(Player player) {
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
         if (soulName == null) return null;
@@ -351,6 +391,10 @@ public class soulListener extends Util implements Listener {
     }
 
 
+    /**
+     * Ability One: This method is responsible for handling the Ability One functionality of a player. This is the Keyboard / Command Triggered Function
+     * @param player Player to handle Ability One for
+     */
     public void AbilityOne(Player player) {
         Base_Soul soul = getSoul(player);
         if (soul == null || canAbility == false) return;
@@ -374,19 +418,12 @@ public class soulListener extends Util implements Listener {
         soul.AbilityOne(player);
     }
 
-    @EventHandler
-    public void joinAndHeal(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        Base_Soul soul = getSoul(player);
-        if (soul != null || canAbility == false) {
-            String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
-            if (soulName != null && soulName.contains("Green")) {
-                soul.Passive(player, event);
-            }
-        }
-    }
-
-
+    /**
+     * Ability Two: This method is responsible for handling the Ability Two functionality of a player. This is the Keyboard / Command Triggered Function
+     * @param player Player to handle Ability Two for
+     * @throws MineSkinException Data Exception
+     * @throws DataRequestException Data Exception
+     */
     public void AbilityTwo(Player player) throws MineSkinException, DataRequestException {
 
         Base_Soul soul = getSoul(player);
@@ -427,6 +464,12 @@ public class soulListener extends Util implements Listener {
         // For others, use first item slot as per original logic
         soul.AbilityTwo(player, player.getInventory().getItem(0));
     }
+
+    /**
+     * Active Passive: This method is responsible for handling the Active Passive functionality of a player. This is the Keyboard / Command Triggered Function
+     *
+     * @param player the player triggering the active or passive ability; must not be null
+     */
     public void ActivePassive(Player player) {
         Base_Soul soul = getSoul(player);
         if (soul == null || canAbility == false) return;
@@ -444,6 +487,10 @@ public class soulListener extends Util implements Listener {
         }
     }
 
+    /**
+     * Event handler for when a player gains experience points.
+     * @param event The event that triggered the XP gain.
+     */
     @EventHandler
     public void onPlayerXPgain(PlayerExpChangeEvent event) {
         Player player = event.getPlayer();

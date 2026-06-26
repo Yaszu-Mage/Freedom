@@ -12,6 +12,8 @@ This project requres these dependencies;
 - World Edit
 - Skins Restorer
 - Lib's Disguises
+- BetterModel
+- ProtocolLib
 
 If you just want to build the project from source, just head to [Actually building the project](#actually-building)
 
@@ -81,4 +83,10 @@ Then build the project by doing within the directory
 Replace "path/to/output" to the directory you want to build it to
 `./gradlew build -PshadowJarPath="path/to/output"`
 It should build a shadow jar, please reach out to me on Discord if there are any issues. ```Yaszu``` on discord :3
+
+### Quick Setup
+I have created a quick setup script for Windows, if you do not want to try and attempt to setup the server yourself because it is boring as heck... you can download it [here]()
+
+If you want to run it again, the generated run start.bat :D
+
 ### BTW IF YOU ARE A REVIEWER, MY HACKATIME IS WEIRD BC I TRIED TO MERGE WITH MY WAKA TIME AND I HAD THE BROWSER EXTENSION, I ALREADY SUBMITTED MULTIPLE TICKETS TO GET THIS FIXED TO NO AVAIL PLEASE DONT SHOOT ME DEAD ###
