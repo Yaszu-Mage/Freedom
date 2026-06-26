@@ -28,7 +28,7 @@ import java.util.UUID;
  *   <li>{@link BaseBlock} — fully-qualified class name; reconstructed via public no-arg constructor</li>
  * </ul>
  *
- * <h3>Writing:</h3>
+ * <h2>Writing:</h2>
  * <pre>{@code
  *   Map<Location, BaseBlock> blocks = new HashMap<>();
  *   blocks.put(someLocation, someBaseBlock);
@@ -36,7 +36,7 @@ import java.util.UUID;
  *   pdc.set(key, BlockMapPersistentDataType.INSTANCE, blocks);
  * }</pre>
  *
- * <h3>Reading:</h3>
+ * <h2>Reading:</h2>
  * <pre>{@code
  *   Map<Location, BaseBlock> blocks = pdc.get(key, BlockMapPersistentDataType.INSTANCE);
  *   if (blocks != null) {
@@ -44,7 +44,7 @@ import java.util.UUID;
  *   }
  * }</pre>
  *
- * <h3>BaseBlock contract:</h3>
+ * <h2>BaseBlock contract:</h2>
  * <p>Every concrete {@link BaseBlock} implementation <strong>must</strong> expose a
  * public no-arg constructor. The class is identified by its fully-qualified name;
  * renaming or moving the class will break existing stored data.</p>

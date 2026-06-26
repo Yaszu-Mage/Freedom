@@ -138,3 +138,7 @@ publishing {
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}

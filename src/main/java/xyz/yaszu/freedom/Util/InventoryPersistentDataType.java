@@ -24,13 +24,13 @@ import java.util.UUID;
  * rather than being stored as mutable singleton state, making this safe to use
  * across concurrent operations.</p>
  *
- * <h3>Writing:</h3>
+ * <h2>Writing:</h2>
  * <pre>{@code
  *   SaveContext ctx = new SaveContext(playerUUID, viewTitle);
  *   meta.getPersistentDataContainer().set(key, InventoryPersistentDataType.get(ctx), inventory);
  * }</pre>
  *
- * <h3>Reading:</h3>
+ * <h2>Reading:</h2>
  * <pre>{@code
  *   LoadResult result = InventoryPersistentDataType.load(pdc, key);
  *   if (result != null) {

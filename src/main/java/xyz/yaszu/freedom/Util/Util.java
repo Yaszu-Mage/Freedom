@@ -1386,7 +1386,7 @@ public class Util {
 
     /**
      * Gets a random point on a circle
-     * @param center {@Code Location} of the center of the circle
+     * @param center {@code Location} of the center of the circle
      * @param points How many points on the original Circle
      * @param radius The Radius of the Original Circle
      * @param particle Particle Type that you want to spawn as the little pillar thing
