@@ -33,6 +33,20 @@ import java.util.*;
 public class soulListener extends Util implements Listener {
     public static final Map<SoulTypes, Base_Soul> SOULS = new EnumMap<>(SoulTypes.class);
 
+    /**
+     * Registers all predefined soul-type instances to the SOULS map.
+     * Each soul type defined in the {@code SoulTypes} enumeration is
+     * associated with a corresponding instance of its specific implementation.
+     *
+     * This method is static and initializes the mapping of soul types to their
+     * respective implementations, such as {@code Red}, {@code Green}, and
+     * {@code Blue}, among others. The mapping includes both base variants
+     * (e.g., {@code BaseRed}, {@code BaseGreen}) and main variants of soul types.
+     *
+     * Once this method has been invoked, the {@code SOULS} map will contain
+     * all predefined relationship bindings between {@code SoulTypes} and their
+     * respective concrete implementations.
+     */
     public static void registerSouls() {
         SOULS.put(SoulTypes.Red, new Red());
         SOULS.put(SoulTypes.Cafe, new Cafe());
@@ -58,6 +72,20 @@ public class soulListener extends Util implements Listener {
         SOULS.put(SoulTypes.BaseCyan,new BaseCyan());
     }
     public static boolean canAbility = true;
+
+    /**
+     * Retrieves the soul associated with the given player based on their persistent data.
+     *
+     * This method attempts to find the player's soul by querying the {@code PersistentDataContainer}
+     * of the provided {@code Player} object for a stored soul identifier. If a valid soul identifier
+     * is found, it is used to determine the corresponding soul instance from the predefined
+     * {@code SOULS} map. If no identifier is found or if it cannot be resolved to a valid soul,
+     * the method returns {@code null}.
+     *
+     * @param player the player whose soul is to be retrieved; must not be {@code null}
+     * @return the {@code Base_Soul} instance associated with the player, or {@code null} if no valid
+     *         soul is found for the player
+     */
     public static Base_Soul getSoul(Player player) {
         String soulName = player.getPersistentDataContainer().get(FreedomKeys.soul(), PersistentDataType.STRING);
         if (soulName == null) return null;
@@ -68,6 +96,14 @@ public class soulListener extends Util implements Listener {
         }
     }
 
+    /**
+     * Handles the passive abilities for a player if they are alive and have an associated soul.
+     * This method checks whether the provided player is alive using {@code Life_and_Death.is_alive}.
+     * If the player is alive, their associated soul is obtained via {@code getSoul(Player)}.
+     * If a valid soul instance is found, the {@code Passive} method of the soul is invoked.
+     *
+     * @param player the player for whom the passive ability is executed; must not be null
+     */
     public void Passive(Player player) {
         if (!Life_and_Death.is_alive(player)) return;
         Base_Soul soul = getSoul(player);
