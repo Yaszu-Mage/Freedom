@@ -20,23 +20,45 @@ import xyz.yaszu.freedom.Util.Util;
 import static xyz.yaszu.freedom.Alchemy.SpellCompiler.*;
 import static xyz.yaszu.freedom.Items.Parts.SpellFocus.castFromOffhand;
 
+/**
+ * Arcanus is a soul that can cast spells and do other things
+ * BETA NOT FINISHED
+ * @author yaszu
+ * @since 1.0.0
+ * based off azuri here https://www.youtube.com/watch?v=mpt5UPAUEw4
+ */
 public class Arcanus extends Util implements Base_Soul {
-    //based off azuri here https://www.youtube.com/watch?v=mpt5UPAUEw4
+    /**
+     * Name Used in Components
+     * @return Name used in Components
+     */
     @Override
     public String Name_For_Container() {
         return "Arcanus";
     }
 
+    /**
+     * Name of the soul
+     * @return Name of the soul
+     */
     @Override
     public Component Name() {
         return dess("Arcanus");
     }
 
+    /**
+     * Description of the soul
+     * @return Description of the soul
+     */
     @Override
     public Component Description() {
         return dess("Magic, alchemy, whatever you call it");
     }
 
+    /**
+     * Icon of the soul used in GUI
+     * @return ItemStack of the soul
+     */
     @Override
     public ItemStack Icon() {
         //TODO make this special

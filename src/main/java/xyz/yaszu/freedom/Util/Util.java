@@ -87,6 +87,7 @@ public class Util {
      * @deprecated
      * @since 1.0.0
      */
+    @Deprecated
     public static Entity getTargetEntity(Player player) {
         int range = 10; // Detection range in blocks
         Entity target = null;

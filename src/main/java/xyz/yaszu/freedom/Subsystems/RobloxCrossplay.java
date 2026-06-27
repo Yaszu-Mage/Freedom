@@ -8,10 +8,18 @@ import com.sun.net.httpserver.HttpServer;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.*;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.Slab;
+import org.bukkit.block.data.type.Stairs;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.entity.*;
+import org.bukkit.entity.Ageable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Vine;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -35,9 +43,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static xyz.yaszu.freedom.Util.Util.*;
 
-public class RobloxCrossplay {
+public class RobloxCrossplay implements Listener {
     private HttpServer server;
-    int scale = 4;
+    double scale = 3.5;
     String beemovie = "According to all known laws of aviation, there is no way a bee should be able to fly.\n" +
             "Its wings are too small to get its fat little body off the ground.\n" +
             "The bee, of course, flies anyway because bees don't care what humans think is impossible.\n" +
@@ -1490,48 +1498,108 @@ public class RobloxCrossplay {
                         });
                         Freedom.get_plugin().getLogger().info("Started player: " + realName);
                         server.createContext("/player/" + realName + "/status", asyncHttpExchange -> {
-                           AtomicReference<JsonObject> jsonObjectAtomicReference = new AtomicReference<>();
-                           jsonObjectAtomicReference.set(new JsonObject());
-                           JsonObject statusJson = jsonObjectAtomicReference.get();
-                           CompletableFuture<JsonObject> future = new CompletableFuture<>();
-                           BukkitTask task = Bukkit.getScheduler().runTask(Freedom.get_plugin(), () -> {
-                               Entity display = entity.get();
-                               if (display != null) {
-                                   statusJson.addProperty("Living", !display.isDead());
-                                   statusJson.addProperty("velocityX", display.getVelocity().getX());
-                                   statusJson.addProperty("velocityY", display.getVelocity().getY());
-                                   statusJson.addProperty("velocityZ", display.getVelocity().getZ());
-                                   //Decode and encode format for every nearby entity and what you can get by looking at them
-                                   JsonArray nearbyEntities = new JsonArray();
-                                   for (Entity e : display.getNearbyEntities(10, 10, 10)) {
-                                       JsonObject entityJson = new JsonObject();
-                                       entityJson.addProperty("type", e.getType().toString());
-                                       entityJson.addProperty("x", e.getLocation().getX() * scale);
-                                       entityJson.addProperty("y", e.getLocation().getY() * scale);
-                                       entityJson.addProperty("z", e.getLocation().getZ() * scale);
-                                       entityJson.addProperty("pitch", Math.toRadians(-e.getLocation().getPitch()));
-                                       entityJson.addProperty("yaw", Math.toRadians(-e.getLocation().getYaw()));
-                                       entityJson.addProperty("UniqueID",e.getUniqueId().toString());
-                                       nearbyEntities.add(entityJson);
-                                   }
-                                   statusJson.add("nearbyEntities", nearbyEntities);
-                               }
-                               future.complete(statusJson);
+//                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("GET")) {
+//                                asyncHttpExchange.sendResponseHeaders(405, -1);
+//                                return;
+//                            }
 
+                            Entity display = entity.get();
+                            if (display == null || display.isDead()) {
+                                asyncHttpExchange.sendResponseHeaders(404, -1);
+                                return;
+                            }
 
-                           });
-                           future.thenAccept(jsonObject -> {
-                               String response = statusJson.toString();
-                               try {
-                                   byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-                                   asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
-                                   try (OutputStream os = asyncHttpExchange.getResponseBody()) {
-                                       os.write(responseBytes);
-                                   }
-                               } catch (IOException e) {
-                                   e.printStackTrace();
-                               }
-                           });
+                            CompletableFuture<String> future = new CompletableFuture<>();
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                Location loc = display.getLocation();
+                                int radius = 32;
+                                JsonArray blocks = new JsonArray();
+                                World w = loc.getWorld();
+                                if (w != null) {
+                                    for (int x = (int) (loc.getX() - radius); x <= (int) (loc.getX() + radius); x++) {
+                                        for (int y = (int) (loc.getY() - radius); y <= (int) (loc.getY() + radius); y++) {
+                                            for (int z = (int) (loc.getZ() - radius); z <= (int) (loc.getZ() + radius); z++) {
+                                                Block block = w.getBlockAt(x, y, z);
+                                                Material material = block.getType();
+
+                                                if (!material.isAir()) {
+                                                    JsonObject b = new JsonObject();
+                                                    b.addProperty("x", x);
+                                                    b.addProperty("y", y);
+                                                    b.addProperty("z", z);
+                                                    b.addProperty("type", material.name());
+
+                                                    BlockData data = block.getBlockData();
+
+                                                    JsonObject properties = new JsonObject();
+
+                                                    if (data instanceof Directional directional)
+                                                        properties.addProperty("facing", directional.getFacing().name());
+
+                                                    if (data instanceof Bisected bisected)
+                                                        properties.addProperty("half", bisected.getHalf().name());
+
+                                                    if (data instanceof Waterlogged waterlogged)
+                                                        properties.addProperty("waterlogged", waterlogged.isWaterlogged());
+
+                                                    if (data instanceof Openable openable)
+                                                        properties.addProperty("open", openable.isOpen());
+
+                                                    if (data instanceof Powerable powerable)
+                                                        properties.addProperty("powered", powerable.isPowered());
+
+                                                    if (data instanceof org.bukkit.block.data.Ageable ageable)
+                                                        properties.addProperty("age", ageable.getAge());
+                                                    if (data instanceof Levelled levelled)
+                                                        properties.addProperty("level", levelled.getLevel());
+
+                                                    if (data instanceof Slab slab)
+                                                        properties.addProperty("slabType", slab.getType().name());
+
+                                                    if (data instanceof Stairs stairs) {
+                                                        properties.addProperty("shape", stairs.getShape().name());
+                                                        properties.addProperty("half", stairs.getHalf().name());
+                                                        properties.addProperty("facing", stairs.getFacing().name());
+                                                    }
+
+                                                    if (data instanceof TrapDoor trapdoor) {
+                                                        properties.addProperty("half", trapdoor.getHalf().name());
+                                                        properties.addProperty("facing", trapdoor.getFacing().name());
+                                                        properties.addProperty("open", trapdoor.isOpen());
+                                                    }
+
+                                                    if (data instanceof Door door) {
+                                                        properties.addProperty("half", door.getHalf().name());
+                                                        properties.addProperty("hinge", door.getHinge().name());
+                                                        properties.addProperty("facing", door.getFacing().name());
+                                                        properties.addProperty("open", door.isOpen());
+                                                    }
+
+                                                    b.add("properties", properties);
+
+                                                    blocks.add(b);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                JsonObject response = new JsonObject();
+                                response.add("nearbyBlocks", blocks);
+                                future.complete(response.toString());
+                            });
+
+                            try {
+                                String response = future.get();
+                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                                asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
+                                try (OutputStream os = asyncHttpExchange.getResponseBody()) {
+                                    os.write(responseBytes);
+                                }
+                            } catch (InterruptedException | ExecutionException | IOException e) {
+                                try {
+                                    asyncHttpExchange.sendResponseHeaders(500, -1);
+                                } catch (IOException ignored) {}
+                            }
                         });
                         server.createContext("/player/" + realName, asyncHttpExchange -> {
                             if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -1606,44 +1674,7 @@ public class RobloxCrossplay {
                                         }
                                         future.complete(statusJson);
                             });
-                            future.thenAcceptAsync(jsonObject -> {
-                                //Get all nearby Chunks
-                                JsonArray nearbyChunks = new JsonArray();
-                                Entity display = entity.get();
-                                Location location = display.getLocation();
-                                Chunk[] chunks = null;
-                                int range = 3 * 16;
-                                int centerX = location.getChunk().getX();
-                                int centerZ = location.getChunk().getZ();
-                                List<Chunk> nearbyChunkList = new ArrayList<>();
-                                try {
-                                    for (int xCord = centerX - range; xCord <= centerX + range; xCord++) {
-                                        for (int zCord = centerZ - range; zCord <= centerZ + range; zCord++) {
-                                            nearbyChunkList.add(world.getChunkAtAsync(xCord, zCord).get(1000, TimeUnit.MILLISECONDS));
-                                        }
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                                for (Chunk chunk : nearbyChunkList) {
-                                    //Now iterate through all blocks within chunks
-                                    for (int xCord = 0; xCord < 4; xCord++) {
-                                        for (int yCord = -64; yCord < 0; yCord++) {
-                                            for (int zCord = 0; zCord < 4; zCord++) {
-                                                Block block = chunk.getBlock(xCord, yCord, zCord);
-                                                JsonObject blockJson = new JsonObject();
-                                                blockJson.addProperty("type", block.getType().toString());
-                                                blockJson.addProperty("x", block.getLocation().getX() * scale);
-                                                blockJson.addProperty("y", block.getLocation().getY() * scale);
-                                                blockJson.addProperty("z", block.getLocation().getZ() * scale);
-                                                nearbyChunks.add(blockJson);
-                                            }
-                                        }
-                                    }
-                                    jsonObject.add("nearbyChunks", nearbyChunks);
-                                }
-                            }).thenAccept(jsonObject -> {
+                            future.thenAccept(jsonObject -> {
 
                                 String response = statusJson.toString();
                                 try {

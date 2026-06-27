@@ -73,6 +73,10 @@ public final class Freedom extends JavaPlugin implements Listener {
     public static int version = 6942067;
     private BlockHandler blockHandler;
 
+    /**
+     * Main Initialization for Reapplying Curse Weakness
+     * @param player
+     */
     public void reapplyCurseWeakness(Player player) {
         if (player == null || !player.isOnline()) return;
 
@@ -339,6 +343,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new CustomSongHandler(), this);
         Bukkit.getPluginManager().registerEvents(new Grapple_Hook(), this);
         Bukkit.getPluginManager().registerEvents(new GatewayListener(), this);
+        Bukkit.getPluginManager().registerEvents(new RobloxCrossplay(), this);
         soulImbueManager = new SoulImbueManager();
         Bukkit.getPluginManager().registerEvents(soulImbueManager, this);
         DuelManager duelManager = new DuelManager();
