@@ -135,7 +135,6 @@ public final class Freedom extends JavaPlugin implements Listener {
             }
             AdminEffects(!event.getPlayer().getName().equals("TheAntiClock"), event.getPlayer().getLocation().getWorld(), event.getPlayer().getLocation(), event.getPlayer());
         }
-        AdminManager.handleQuit(event.getPlayer());
         clearAura(event.getPlayer().getUniqueId());
         Util.clearPlayerCache(event.getPlayer().getUniqueId());
         cachedPdcValues.remove(event.getPlayer().getUniqueId());

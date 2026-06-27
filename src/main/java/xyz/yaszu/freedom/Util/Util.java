@@ -495,7 +495,7 @@ public class Util {
      * @param sound Sound to make while pulsing the circle
      * @param options Whatever freaking particle options you want to use
      */
-    public void pulseCircle(Location center, double radius, int points, Particle particle, double smallestRadius, int pulsingTime, int pulses,Sound sound,Object options) {
+    public static void pulseCircle(Location center, double radius, int points, Particle particle, double smallestRadius, int pulsingTime, int pulses,Sound sound,Object options) {
             new BukkitRunnable() {
                 double ticks = 0;
                 double currentRadius = smallestRadius;
