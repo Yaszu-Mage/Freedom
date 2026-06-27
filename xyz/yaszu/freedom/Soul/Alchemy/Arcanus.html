@@ -99,6 +99,13 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Arcanus</span>
 <span class="extends-implements">extends <a href="../../Util/Util.html" title="class in xyz.yaszu.freedom.Util">Util</a>
 implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></span></div>
+<div class="block">Arcanus is a soul that can cast spells and do other things
+ BETA NOT FINISHED</div>
+<dl class="notes">
+<dt>Since:</dt>
+<dd>1.0.0
+ based off azuri here https://www.youtube.com/watch?v=mpt5UPAUEw4</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -198,17 +205,17 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Description()" class="member-name-link">Description</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Description Used in UI</div>
+<div class="block">Description of the soul</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.bukkit.inventory.ItemStack</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Icon()" class="member-name-link">Icon</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Icon Used in UI</div>
+<div class="block">Icon of the soul used in GUI</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Name()" class="member-name-link">Name</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">//Name Used in UI / Nametag</div>
+<div class="block">Name of the soul</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Name_For_Container()" class="member-name-link">Name_For_Container</a>()</code></div>
@@ -272,11 +279,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Name_For_Container()">
 <h3>Name_For_Container</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">Name_For_Container</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Name_For_Container()">Base_Soul</a></code></span></div>
 <div class="block">Name Used in Components</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Name_For_Container()">Name_For_Container</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
+<dt>Returns:</dt>
+<dd>Name used in Components</dd>
 </dl>
 </section>
 </li>
@@ -284,13 +292,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Name()">
 <h3>Name</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Name</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Name()">Base_Soul</a></code></span></div>
-<div class="block">//Name Used in UI / Nametag</div>
+<div class="block">Name of the soul</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Name()">Name</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI and Nametag</dd>
+<dd>Name of the soul</dd>
 </dl>
 </section>
 </li>
@@ -298,13 +305,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Description()">
 <h3>Description</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Description</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Description()">Base_Soul</a></code></span></div>
-<div class="block">Description Used in UI</div>
+<div class="block">Description of the soul</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Description()">Description</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>Description of the soul</dd>
 </dl>
 </section>
 </li>
@@ -312,13 +318,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Icon()">
 <h3>Icon</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.bukkit.inventory.ItemStack</span>&nbsp;<span class="element-name">Icon</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Icon()">Base_Soul</a></code></span></div>
-<div class="block">Icon Used in UI</div>
+<div class="block">Icon of the soul used in GUI</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Icon()">Icon</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>ItemStack used in UI</dd>
+<dd>ItemStack of the soul</dd>
 </dl>
 </section>
 </li>
