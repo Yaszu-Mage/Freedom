@@ -92,6 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">AdminManager</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">Class to manage the Admins within the Server this makes it so we can seperate admin and player profiles to prevent cheating, if it's just a little harder and a bit more public people are less likely to cheat</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -106,7 +107,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="AdminManager.AdminProfile.html" class="type-name-link" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Record of a sudo name, skin source, and signature</div>
+</div>
 </div>
 </section>
 </li>
@@ -136,30 +139,39 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="AdminManager.AdminProfile.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getProfile(java.util.UUID)" class="member-name-link">getProfile</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;uuid)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns the AdminProfile for a given UUID.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#handleJoin(org.bukkit.entity.Player)" class="member-name-link">handleJoin</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#handleQuit(org.bukkit.entity.Player)" class="member-name-link">handleQuit</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isSudo(org.bukkit.entity.Player)" class="member-name-link">isSudo</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Restores admin status on join if the player was in sudo mode.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isSystemAdmin(java.util.UUID)" class="member-name-link">isSystemAdmin</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;uuid)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isSudo(org.bukkit.entity.Player)" class="member-name-link">isSudo</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns true if the given UUID is a recognized system admin and is in admin mode.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isSystemAdmin(java.util.UUID)" class="member-name-link">isSystemAdmin</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;uuid)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns true if the given UUID is a recognized system admin.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadPlayerState(org.bukkit.entity.Player,org.bukkit.NamespacedKey)" class="member-name-link">loadPlayerState</a><wbr>(org.bukkit.entity.Player&nbsp;player,
+ org.bukkit.NamespacedKey&nbsp;key)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Loading a players state after swapping from sudo mode or into sudo mode</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadPlayerState(org.bukkit.entity.Player,org.bukkit.NamespacedKey)" class="member-name-link">loadPlayerState</a><wbr>(org.bukkit.entity.Player&nbsp;player,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#savePlayerState(org.bukkit.entity.Player,org.bukkit.NamespacedKey)" class="member-name-link">savePlayerState</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  org.bukkit.NamespacedKey&nbsp;key)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#savePlayerState(org.bukkit.entity.Player,org.bukkit.NamespacedKey)" class="member-name-link">savePlayerState</a><wbr>(org.bukkit.entity.Player&nbsp;player,
- org.bukkit.NamespacedKey&nbsp;key)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#toggleSudo(org.bukkit.entity.Player)" class="member-name-link">toggleSudo</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#toggleSudo(org.bukkit.entity.Player)" class="member-name-link">toggleSudo</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Toggles sudo mode for the given player.</div>
+</div>
 </div>
 </div>
 </div>
@@ -195,36 +207,61 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getProfile(java.util.UUID)">
 <h3>getProfile</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="AdminManager.AdminProfile.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a></span>&nbsp;<span class="element-name">getProfile</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;uuid)</span></div>
+<div class="block">Returns the AdminProfile for a given UUID.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>uuid</code> - of a given player</dd>
+<dt>Returns:</dt>
+<dd><code>null</code> if UUID does not have an admin profile or <a href="AdminManager.AdminProfile.html" title="class in xyz.yaszu.freedom.Subsystems"><code>AdminManager.AdminProfile</code></a> if it does</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="isSystemAdmin(java.util.UUID)">
 <h3>isSystemAdmin</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isSystemAdmin</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;uuid)</span></div>
+<div class="block">Returns true if the given UUID is a recognized system admin.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>uuid</code> - of a given player</dd>
+<dt>Returns:</dt>
+<dd>true if UUID is a recognized system admin, false otherwise</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="isSudo(org.bukkit.entity.Player)">
 <h3>isSudo</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isSudo</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">Returns true if the given UUID is a recognized system admin and is in admin mode.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - of a given player</dd>
+<dt>Returns:</dt>
+<dd>true if UUID is a recognized system admin and is in admin mode, false otherwise</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="toggleSudo(org.bukkit.entity.Player)">
 <h3>toggleSudo</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">toggleSudo</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">Toggles sudo mode for the given player.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - of a given player</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="handleJoin(org.bukkit.entity.Player)">
 <h3>handleJoin</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">handleJoin</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
-</section>
-</li>
-<li>
-<section class="detail" id="handleQuit(org.bukkit.entity.Player)">
-<h3>handleQuit</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">handleQuit</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">Restores admin status on join if the player was in sudo mode.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - Player to restore admin status for</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -239,6 +276,12 @@ loadScripts(document, 'script');</script>
 <h3>loadPlayerState</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadPlayerState</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player,
  org.bukkit.NamespacedKey&nbsp;key)</span></div>
+<div class="block">Loading a players state after swapping from sudo mode or into sudo mode</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - Player to load the state for</dd>
+<dd><code>key</code> - Key to load the state from</dd>
+</dl>
 </section>
 </li>
 </ul>

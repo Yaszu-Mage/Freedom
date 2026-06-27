@@ -92,12 +92,19 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
+<dt>Record Components:</dt>
+<dd><code><span id="param-sudoName">sudoName</span></code> - Name that the admin wants to go by when in "sudo" mode</dd>
+<dd><code><span id="param-skinSource">skinSource</span></code> - Source of the skin must be a url</dd>
+<dd><code><span id="param-skinSignature">skinSignature</span></code> - this can be <code>null</code></dd>
+</dl>
+<dl class="notes">
 <dt>Enclosing class:</dt>
 <dd><code><a href="AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">AdminManager.AdminProfile</span>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sudoName, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;skinSource, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;skinSignature)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
+<div class="block">Record of a sudo name, skin source, and signature</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -142,17 +149,17 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#skinSignature()" class="member-name-link">skinSignature</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>skinSignature</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-skinSignature"><code>skinSignature</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#skinSource()" class="member-name-link">skinSource</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>skinSource</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-skinSource"><code>skinSource</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#sudoName()" class="member-name-link">sudoName</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>sudoName</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-sudoName"><code>sudoName</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
@@ -185,9 +192,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Creates an instance of a <code>AdminProfile</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>sudoName</code> - the value for the <code>sudoName</code> record component</dd>
-<dd><code>skinSource</code> - the value for the <code>skinSource</code> record component</dd>
-<dd><code>skinSignature</code> - the value for the <code>skinSignature</code> record component</dd>
+<dd><code>sudoName</code> - the value for the <a href="#param-sudoName"><code>sudoName</code></a> record component</dd>
+<dd><code>skinSource</code> - the value for the <a href="#param-skinSource"><code>skinSource</code></a> record component</dd>
+<dd><code>skinSignature</code> - the value for the <a href="#param-skinSignature"><code>skinSignature</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -244,10 +251,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="sudoName()">
 <h3>sudoName</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">sudoName</span>()</div>
-<div class="block">Returns the value of the <code>sudoName</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-sudoName"><code>sudoName</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>sudoName</code> record component</dd>
+<dd>the value of the <a href="#param-sudoName"><code>sudoName</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -255,10 +262,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="skinSource()">
 <h3>skinSource</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">skinSource</span>()</div>
-<div class="block">Returns the value of the <code>skinSource</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-skinSource"><code>skinSource</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>skinSource</code> record component</dd>
+<dd>the value of the <a href="#param-skinSource"><code>skinSource</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -266,10 +273,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="skinSignature()">
 <h3>skinSignature</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">skinSignature</span>()</div>
-<div class="block">Returns the value of the <code>skinSignature</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-skinSignature"><code>skinSignature</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>skinSignature</code> record component</dd>
+<dd>the value of the <a href="#param-skinSignature"><code>skinSignature</code></a> record component</dd>
 </dl>
 </section>
 </li>

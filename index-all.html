@@ -734,11 +734,15 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Subsystems/DuelManager.html#adminKits" class="member-name-link">adminKits</a> - Static variable in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/DuelManager.html" title="class in xyz.yaszu.freedom.Subsystems">DuelManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" class="type-name-link" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a> - Class in <a href="xyz/yaszu/freedom/Subsystems/package-summary.html">xyz.yaszu.freedom.Subsystems</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Class to manage the Admins within the Server this makes it so we can seperate admin and player profiles to prevent cheating, if it's just a little harder and a bit more public people are less likely to cheat</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#%3Cinit%3E()" class="member-name-link">AdminManager()</a> - Constructor for class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html" class="type-name-link" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a> - Record Class in <a href="xyz/yaszu/freedom/Subsystems/package-summary.html">xyz.yaszu.freedom.Subsystems</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Record of a sudo name, skin source, and signature</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">AdminProfile(String, String, String)</a> - Constructor for record class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>AdminProfile</code> record class.</div>
@@ -2564,7 +2568,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Util/InventoryPersistentDataType.html#getPrimitiveType()" class="member-name-link">getPrimitiveType()</a> - Method in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/InventoryPersistentDataType.html" title="class in xyz.yaszu.freedom.Util">InventoryPersistentDataType</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#getProfile(java.util.UUID)" class="member-name-link">getProfile(UUID)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Returns the AdminProfile for a given UUID.</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/PacketManager.SkyType.html#getRainLevel()" class="member-name-link">getRainLevel()</a> - Method in enum class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/PacketManager.SkyType.html" title="enum class in xyz.yaszu.freedom.Subsystems">PacketManager.SkyType</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/GamblingManager.Gambling.Deck.html#getRandomCard()" class="member-name-link">getRandomCard()</a> - Method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/GamblingManager.Gambling.Deck.html" title="class in xyz.yaszu.freedom.Subsystems">GamblingManager.Gambling.Deck</a></dt>
@@ -2876,9 +2882,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Soul/Ultra/Red.html#handleFireball(org.bukkit.entity.Player)" class="member-name-link">handleFireball(Player)</a> - Method in class xyz.yaszu.freedom.Soul.Ultra.<a href="xyz/yaszu/freedom/Soul/Ultra/Red.html" title="class in xyz.yaszu.freedom.Soul.Ultra">Red</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#handleJoin(org.bukkit.entity.Player)" class="member-name-link">handleJoin(Player)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#handleQuit(org.bukkit.entity.Player)" class="member-name-link">handleQuit(Player)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Restores admin status on join if the player was in sudo mode.</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Soul/Base/BasePurple.html#handleSnipe(org.bukkit.entity.Player)" class="member-name-link">handleSnipe(Player)</a> - Method in class xyz.yaszu.freedom.Soul.Base.<a href="xyz/yaszu/freedom/Soul/Base/BasePurple.html" title="class in xyz.yaszu.freedom.Soul.Base">BasePurple</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Soul/Ultra/Purple.html#handleSnipe(org.bukkit.entity.Player)" class="member-name-link">handleSnipe(Player)</a> - Method in class xyz.yaszu.freedom.Soul.Ultra.<a href="xyz/yaszu/freedom/Soul/Ultra/Purple.html" title="class in xyz.yaszu.freedom.Soul.Ultra">Purple</a></dt>
@@ -3326,9 +3332,13 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Util/FreedomKeys.html#isSudo()" class="member-name-link">isSudo()</a> - Static method in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/FreedomKeys.html" title="class in xyz.yaszu.freedom.Util">FreedomKeys</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#isSudo(org.bukkit.entity.Player)" class="member-name-link">isSudo(Player)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Returns true if the given UUID is a recognized system admin and is in admin mode.</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#isSystemAdmin(java.util.UUID)" class="member-name-link">isSystemAdmin(UUID)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Returns true if the given UUID is a recognized system admin.</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Entities/BaseEntity.html#isThis(org.bukkit.entity.Entity)" class="member-name-link">isThis(Entity)</a> - Method in interface xyz.yaszu.freedom.Entities.<a href="xyz/yaszu/freedom/Entities/BaseEntity.html" title="interface in xyz.yaszu.freedom.Entities">BaseEntity</a></dt>
 <dd>
 <div class="block">Checks whether a given entity is tagged as this custom entity type.</div>
@@ -3645,7 +3655,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Subsystems/DuelManager.html#loadKits()" class="member-name-link">loadKits()</a> - Method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/DuelManager.html" title="class in xyz.yaszu.freedom.Subsystems">DuelManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#loadPlayerState(org.bukkit.entity.Player,org.bukkit.NamespacedKey)" class="member-name-link">loadPlayerState(Player, NamespacedKey)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Loading a players state after swapping from sudo mode or into sudo mode</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/ProvinceManager.html#loadProvinces()" class="member-name-link">loadProvinces()</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/ProvinceManager.html" title="class in xyz.yaszu.freedom.Subsystems">ProvinceManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/SkinLoader.html#loadRandomSkin()" class="member-name-link">loadRandomSkin()</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/SkinLoader.html" title="class in xyz.yaszu.freedom.Subsystems">SkinLoader</a></dt>
@@ -3738,7 +3750,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Util/BulletSystem.BulletConfig.html#maxRange(double)" class="member-name-link">maxRange(double)</a> - Method in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/BulletSystem.BulletConfig.html" title="class in xyz.yaszu.freedom.Util">BulletSystem.BulletConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AlcoholManager.html#maxSeconds" class="member-name-link">maxSeconds</a> - Static variable in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AlcoholManager.html" title="class in xyz.yaszu.freedom.Subsystems">AlcoholManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Maximum seconds for alcohol to expire</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Commands/MazeCommand.html#mazeCommand()" class="member-name-link">mazeCommand()</a> - Static method in class xyz.yaszu.freedom.Commands.<a href="xyz/yaszu/freedom/Commands/MazeCommand.html" title="class in xyz.yaszu.freedom.Commands">MazeCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Commands/MazeCommand.html" class="type-name-link" title="class in xyz.yaszu.freedom.Commands">MazeCommand</a> - Class in <a href="xyz/yaszu/freedom/Commands/package-summary.html">xyz.yaszu.freedom.Commands</a></dt>
@@ -3786,7 +3800,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Enchantments/Enchant/SmeltingEnchant.html#minEnchantCost()" class="member-name-link">minEnchantCost()</a> - Method in class xyz.yaszu.freedom.Enchantments.Enchant.<a href="xyz/yaszu/freedom/Enchantments/Enchant/SmeltingEnchant.html" title="class in xyz.yaszu.freedom.Enchantments.Enchant">SmeltingEnchant</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AlcoholManager.html#minSeconds" class="member-name-link">minSeconds</a> - Static variable in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AlcoholManager.html" title="class in xyz.yaszu.freedom.Subsystems">AlcoholManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Minimum seconds for alcohol to expire</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Util/ConfigManager.html#mobSpawnsEnabled()" class="member-name-link">mobSpawnsEnabled()</a> - Method in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/ConfigManager.html" title="class in xyz.yaszu.freedom.Util">ConfigManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Soul/Ultra/Mocha.html" class="type-name-link" title="class in xyz.yaszu.freedom.Soul.Ultra">Mocha</a> - Class in <a href="xyz/yaszu/freedom/Soul/Ultra/package-summary.html">xyz.yaszu.freedom.Soul.Ultra</a></dt>
@@ -4116,9 +4132,7 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Items/Relics/SoulGlass.html#onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">onInventoryClick(InventoryClickEvent)</a> - Method in class xyz.yaszu.freedom.Items.Relics.<a href="xyz/yaszu/freedom/Items/Relics/SoulGlass.html" title="class in xyz.yaszu.freedom.Items.Relics">SoulGlass</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/BackpackManager.html#onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">onInventoryClick(InventoryClickEvent)</a> - Method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/BackpackManager.html" title="class in xyz.yaszu.freedom.Subsystems">BackpackManager</a></dt>
-<dd>
-<div class="block">Comprehensive click guard.</div>
-</dd>
+<dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/CustomBrewListener.html#onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">onInventoryClick(InventoryClickEvent)</a> - Method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/CustomBrewListener.html" title="class in xyz.yaszu.freedom.Subsystems">CustomBrewListener</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/TradeManager.html#onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">onInventoryClick(InventoryClickEvent)</a> - Method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/TradeManager.html" title="class in xyz.yaszu.freedom.Subsystems">TradeManager</a></dt>
@@ -4651,7 +4665,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/ProvinceManager.Province.html" class="type-name-link" title="class in xyz.yaszu.freedom.Subsystems">ProvinceManager.Province</a> - Class in <a href="xyz/yaszu/freedom/Subsystems/package-summary.html">xyz.yaszu.freedom.Subsystems</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="xyz/yaszu/freedom/Util/Util.html#pulseCircle(org.bukkit.Location,double,int,org.bukkit.Particle,double,int,int,org.bukkit.Sound,java.lang.Object)" class="member-name-link">pulseCircle(Location, double, int, Particle, double, int, int, Sound, Object)</a> - Method in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/Util.html" title="class in xyz.yaszu.freedom.Util">Util</a></dt>
+<dt><a href="xyz/yaszu/freedom/Util/Util.html#pulseCircle(org.bukkit.Location,double,int,org.bukkit.Particle,double,int,int,org.bukkit.Sound,java.lang.Object)" class="member-name-link">pulseCircle(Location, double, int, Particle, double, int, int, Sound, Object)</a> - Static method in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/Util.html" title="class in xyz.yaszu.freedom.Util">Util</a></dt>
 <dd>
 <div class="block">Creates a Particle Pulse Circle, which is a circle that expands a couple times from a center point</div>
 </dd>
@@ -5450,11 +5464,11 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html#skinSignature()" class="member-name-link">skinSignature()</a> - Method in record class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>skinSignature</code> record component.</div>
+<div class="block">Returns the value of the <a href="./xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html#param-skinSignature"><code>skinSignature</code></a> record component.</div>
 </dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html#skinSource()" class="member-name-link">skinSource()</a> - Method in record class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>skinSource</code> record component.</div>
+<div class="block">Returns the value of the <a href="./xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html#param-skinSource"><code>skinSource</code></a> record component.</div>
 </dd>
 <dt><a href="xyz/yaszu/freedom/Util/Util.html#skinsRestorerAPI" class="member-name-link">skinsRestorerAPI</a> - Static variable in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/Util.html" title="class in xyz.yaszu.freedom.Util">Util</a></dt>
 <dd>&nbsp;</dd>
@@ -5644,7 +5658,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html#sudoName()" class="member-name-link">sudoName()</a> - Method in record class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager.AdminProfile</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>sudoName</code> record component.</div>
+<div class="block">Returns the value of the <a href="./xyz/yaszu/freedom/Subsystems/AdminManager.AdminProfile.html#param-sudoName"><code>sudoName</code></a> record component.</div>
 </dd>
 <dt><a href="xyz/yaszu/freedom/Util/FreedomKeys.html#sudoState()" class="member-name-link">sudoState()</a> - Static method in class xyz.yaszu.freedom.Util.<a href="xyz/yaszu/freedom/Util/FreedomKeys.html" title="class in xyz.yaszu.freedom.Util">FreedomKeys</a></dt>
 <dd>&nbsp;</dd>
@@ -5764,7 +5778,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="xyz/yaszu/freedom/Commands/Trust.html#toggleSit()" class="member-name-link">toggleSit()</a> - Static method in class xyz.yaszu.freedom.Commands.<a href="xyz/yaszu/freedom/Commands/Trust.html" title="class in xyz.yaszu.freedom.Commands">Trust</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/AdminManager.html#toggleSudo(org.bukkit.entity.Player)" class="member-name-link">toggleSudo(Player)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/AdminManager.html" title="class in xyz.yaszu.freedom.Subsystems">AdminManager</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Toggles sudo mode for the given player.</div>
+</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/TrustManager.html#toggleTrust(org.bukkit.entity.Player,org.bukkit.entity.Player)" class="member-name-link">toggleTrust(Player, Player)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/TrustManager.html" title="class in xyz.yaszu.freedom.Subsystems">TrustManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="xyz/yaszu/freedom/Subsystems/TrustManager.html#toggleTrustFlag(java.util.UUID,java.util.UUID,xyz.yaszu.freedom.Subsystems.TrustManager.ProvinceTrustFlag)" class="member-name-link">toggleTrustFlag(UUID, UUID, TrustManager.ProvinceTrustFlag)</a> - Static method in class xyz.yaszu.freedom.Subsystems.<a href="xyz/yaszu/freedom/Subsystems/TrustManager.html" title="class in xyz.yaszu.freedom.Subsystems">TrustManager</a></dt>
