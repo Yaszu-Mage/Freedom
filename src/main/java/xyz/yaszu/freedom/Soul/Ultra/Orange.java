@@ -39,7 +39,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
-public class Orange extends Util implements Base_Soul, Listener {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class Orange implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {
         return "Orange";

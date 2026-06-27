@@ -16,7 +16,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class BajaBlast extends Util implements BaseItem {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class BajaBlast implements BaseItem {
 
     @Override
     public ItemStack item() {

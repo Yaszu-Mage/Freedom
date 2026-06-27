@@ -20,9 +20,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Class to manage the Admins within the Server this makes it so we can seperate admin and player profiles to prevent cheating, if it's just a little harder and a bit more public people are less likely to cheat
+ */
 public class AdminManager {
-
+    /**
+     * Record of a sudo name, skin source, and signature
+     * @param sudoName Name that the admin wants to go by when in "sudo" mode
+     * @param skinSource Source of the skin must be a url
+     * @param skinSignature this can be {@code null}
+     */
     public record AdminProfile(String sudoName, String skinSource, String skinSignature) {}
+
+    /**
+     * We hardCode the Admins, with their Unique ID to tell them apart, along with an Admin Profile constructor
+     * @see AdminProfile
+     */
     private static final Map<UUID, AdminProfile> ADMINS = Map.of(
             // Example: TheMoonLady (Source can be a skin name or a URL)
             UUID.fromString("83849cc9-677d-4599-8a2d-09d1c0469038"), new AdminProfile("Gr4ndMage", "https://s.namemc.com/i/7c2b160450e0839c.png", null),
@@ -36,20 +49,42 @@ public class AdminManager {
     );
 
     // Track sudo players within the current server session to differentiate across restarts
+    /**
+     * Track sudo players within the current server session to differentiate across restarts
+     */
     private static final Set<UUID> sessionSudoPlayers = Collections.synchronizedSet(new HashSet<>());
 
+    /**
+     * Returns the AdminProfile for a given UUID.
+     * @param uuid of a given player
+     * @return {@code null} if UUID does not have an admin profile or {@link AdminProfile} if it does
+     */
     public static AdminProfile getProfile(UUID uuid) {
         return ADMINS.get(uuid);
     }
 
+    /**
+     * Returns true if the given UUID is a recognized system admin.
+     * @param uuid of a given player
+     * @return true if UUID is a recognized system admin, false otherwise
+     */
     public static boolean isSystemAdmin(UUID uuid) {
         return ADMINS.containsKey(uuid);
     }
 
+    /**
+     * Returns true if the given UUID is a recognized system admin and is in admin mode.
+     * @param player of a given player
+     * @return true if UUID is a recognized system admin and is in admin mode, false otherwise
+     */
     public static boolean isSudo(Player player) {
         return player.getPersistentDataContainer().has(FreedomKeys.isSudo(), PersistentDataType.BOOLEAN);
     }
 
+    /**
+     * Toggles sudo mode for the given player.
+     * @param player of a given player
+     */
     public static void toggleSudo(Player player) {
         UUID uuid = player.getUniqueId();
         if (!isSystemAdmin(uuid)) {
@@ -64,6 +99,11 @@ public class AdminManager {
         }
     }
 
+    /**
+     * Enables sudo mode for the given player with the given profile.
+     * @param player of a given player
+     * @param profile of a given player
+     */
     private static void enableSudo(Player player, AdminProfile profile) {
         UUID uuid = player.getUniqueId();
 
@@ -87,6 +127,11 @@ public class AdminManager {
         player.sendRichMessage("<green>Sudo mode ENABLED. You are now " + profile.sudoName() + ".</green>");
     }
 
+    /**
+     * Disables sudo mode for the given player.
+     * @param player of a given player
+     * @param broadcast if it should tell the whole server that the player has left
+     */
     private static void disableSudo(Player player, boolean broadcast) {
         UUID uuid = player.getUniqueId();
 
@@ -125,6 +170,11 @@ public class AdminManager {
         player.sendRichMessage("<yellow>Sudo mode DISABLED. Identity restored.</yellow>");
     }
 
+    /**
+     * Applies the sudo identity to the given player. This is for vanity ONLY
+     * @param player Player to apply the identity to
+     * @param profile AdminProfile of the player to apply the identity to
+     */
     private static void applySudoIdentity(Player player, AdminProfile profile) {
         player.displayName(Component.text(profile.sudoName()));
         player.playerListName(Component.text(profile.sudoName()));
@@ -147,7 +197,11 @@ public class AdminManager {
             player.sendRichMessage("<red>Failed to apply sudo identity: " + e.getMessage() + "</red>");
         }
     }
-    
+
+    /**
+     * Restores admin status on join if the player was in sudo mode.
+     * @param player Player to restore admin status for
+     */
     public static void handleJoin(Player player) {
         UUID uuid = player.getUniqueId();
         if (isSudo(player)) {
@@ -164,9 +218,7 @@ public class AdminManager {
         PacketManager.sendAllSudoTeams(player);
     }
 
-    public static void handleQuit(Player player) {
-        // We don't necessarily need to clear on quit if we use PDC for persistence.
-    }
+
 
     public static void savePlayerState(Player player, NamespacedKey key) {
         try {
@@ -196,6 +248,12 @@ public class AdminManager {
         }
     }
 
+
+    /**
+     * Loading a players state after swapping from sudo mode or into sudo mode
+     * @param player Player to load the state for
+     * @param key Key to load the state from
+     */
     public static void loadPlayerState(Player player, NamespacedKey key) {
         if (!player.getPersistentDataContainer().has(key, PersistentDataType.BYTE_ARRAY)) {
             // If no state saved (first time sudo), just clear for sudo

@@ -23,7 +23,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChatManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.getSoulType;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class ChatManager implements Listener {
 
     private static final Map<UUID, UUID> echoMap = new ConcurrentHashMap<>();
     public Arcanus arcanus = new Arcanus();

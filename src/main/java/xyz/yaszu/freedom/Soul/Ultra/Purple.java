@@ -24,8 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static xyz.yaszu.freedom.Util.Util.*;
 
-public class Purple extends Util implements Base_Soul {
+
+public class Purple implements Base_Soul {
 
 
 

@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-public class CustomBrewListener extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.isItemNull;
+
+public class CustomBrewListener implements Listener {
 
     public HashMap<ItemStack, BaseDrink> customDrinks = new HashMap<>();
     public static ArrayList<Location> activeBrewingStands = new ArrayList<>();

@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class ArtifactManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+
+public class ArtifactManager implements Listener {
 
     public static final Map<String, Base_Artifact> ARTIFACTS = new HashMap<>();
 

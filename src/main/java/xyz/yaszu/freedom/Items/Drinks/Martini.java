@@ -16,7 +16,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class Martini extends Util implements BaseItem,BaseDrink {
+import static xyz.yaszu.freedom.Util.Util.constructColoredBottle;
+
+public class Martini implements BaseItem,BaseDrink {
     @Override
     public ItemStack item() {
         ItemStack itemStack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("martini"), Color.LIME);

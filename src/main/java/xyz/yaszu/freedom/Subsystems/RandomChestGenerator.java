@@ -26,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class RandomChestGenerator extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class RandomChestGenerator implements Listener {
 
     private static final double CHEST_FILL_CHANCE = 0.35;
     private static final double RELIC_CHANCE = 0.03;

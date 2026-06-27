@@ -23,7 +23,10 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class CustomSongHandler extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class CustomSongHandler implements Listener {
 
     private static final float SOUND_VOLUME = 4.0F; // Controls broadcast radius (~64 blocks at 4.0)
     private static final float SOUND_PITCH  = 1.0F;

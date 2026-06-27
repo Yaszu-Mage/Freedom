@@ -8,7 +8,10 @@ import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Subsystems.GamblingManager;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Card extends Util {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Card {
     String cardID = "cardS1";
     public static enum Suit {
         Spades, Clubs, Hearts, Diamonds,Red,Green,Blue,Yellow, Wild

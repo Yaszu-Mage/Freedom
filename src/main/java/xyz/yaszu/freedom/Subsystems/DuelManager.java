@@ -42,7 +42,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class DuelManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+
+public class DuelManager implements Listener {
     public static final Map<UUID, Location> playerInDuelArena = new HashMap<>();
 
 

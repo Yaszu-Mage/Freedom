@@ -28,7 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Grapple_Hook extends Util implements Listener, BaseItem {
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Grapple_Hook implements Listener, BaseItem {
 
     @Override
     public ItemStack item() {

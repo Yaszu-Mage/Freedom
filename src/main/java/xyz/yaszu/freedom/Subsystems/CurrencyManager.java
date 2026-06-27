@@ -8,8 +8,10 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
 import static xyz.yaszu.freedom.Alchemy.SpellCompiler.getItemValue;
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
 
-public class CurrencyManager extends Util {
+public class CurrencyManager {
 
     public static void addCurrency(int amount, Player player) {
         Freedom.get_plugin().getLogger().info("ADDING " + amount);

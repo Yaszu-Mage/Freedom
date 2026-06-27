@@ -28,15 +28,53 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AlcoholManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.random;
+import static xyz.yaszu.freedom.Util.Util.secondsToTicks;
 
+public class AlcoholManager implements Listener {
+    /**
+     * Minimum seconds for alcohol to expire
+     */
     public static int minSeconds = (int) secondsToTicks(4);
+    /**
+     * Maximum seconds for alcohol to expire
+     */
     public static int maxSeconds = (int) secondsToTicks(120);
+    /**
+     * Literally just 2 PI
+     */
     private static final double TWO_PI = Math.PI * 2.0D;
+    /**
+     * Map of player UUIDs to their current sway state.
+     */
     private static final ConcurrentHashMap<UUID, DrunkSwayState> swayStates = new ConcurrentHashMap<>();
 
+    /**
+     * Represents the state of a player's drunk sway effect. This class is used to manage
+     * and calculate various properties related to the swaying motion a player exhibits
+     * while under the influence of alcohol in the game.
+     *
+     * The state is initialized with a specific phase offset and starting location,
+     * and it maintains data about the player's swaying behavior, including current
+     * and target passive offsets, anchor points, the player's world, and the timing
+     * for the next passive target recalculation.
+     *
+     * Instances of this class are intended to be managed internally in association
+     * with the overarching alcohol system.
+     */
     private static final class DrunkSwayState {
+        /**
+         * Represents the phase offset for the swaying motion. This value is used to offset the phases so they aren't the same
+         */
         private final double phaseOffset;
+        /**
+         * Acts as the smoothed value for the offset in the player's drunk sway motion.
+         * This variable represents a continuously interpolated offset, which helps
+         * to create a more natural and fluid swaying effect, avoiding abrupt changes.
+         *
+         * The value is updated over time to transition smoothly between the current
+         * offset and target values during the sway simulation.
+         */
         private double smoothedOffset;
         private double anchorX;
         private double anchorZ;

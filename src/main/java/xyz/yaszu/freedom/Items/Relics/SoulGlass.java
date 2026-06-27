@@ -24,7 +24,9 @@ import xyz.yaszu.freedom.Subsystems.Life_and_Death;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class SoulGlass extends Util implements BaseItem, Listener {
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class SoulGlass implements BaseItem, Listener {
     @Override
     public ItemStack item() {
         ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);

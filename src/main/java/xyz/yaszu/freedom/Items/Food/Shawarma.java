@@ -15,7 +15,10 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Shawarma extends Util implements BaseItem {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Shawarma implements BaseItem {
     @Override
     public ItemStack item() {
         ItemStack item  = ItemStack.of(Material.RECOVERY_COMPASS);

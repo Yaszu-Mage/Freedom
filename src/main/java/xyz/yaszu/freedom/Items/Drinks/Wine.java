@@ -17,7 +17,10 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class Wine extends Util implements BaseItem, BaseDrink {
+import static xyz.yaszu.freedom.Util.Util.constructColoredBottle;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Wine implements BaseItem, BaseDrink {
     @Override
     public ItemStack item() {
         ItemStack itemStack = constructColoredBottle(List.of(FreedomKeys.itemId()),List.of("ale"), Color.fromRGB(150,75,0));

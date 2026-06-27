@@ -52,7 +52,9 @@ import java.io.IOException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.potion.PotionEffect;
 
-public class SoulImbueManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class SoulImbueManager  implements Listener {
 
 
     @EventHandler

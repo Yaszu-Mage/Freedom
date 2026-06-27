@@ -63,6 +63,8 @@ public class Arcanus extends Util implements Base_Soul {
     public ItemStack Icon() {
         //TODO make this special
         ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
+        //pls pls pls make this special
+        //
         return stack;
     }
 
@@ -195,18 +197,15 @@ public class Arcanus extends Util implements Base_Soul {
             var errors = validate(ast);
             if (errors.isEmpty()) {
                 //actually cast
-
-                //FIXME FIX MOBILE CASTING
+                //FIXME FIX MOBILE CASTING  nonnono
                 castMobileSpell(msg, player, 0);
             }
         }
     }
-
     @Override
     public Component ActivePassive_Description() {
         return dess("Arcanus: Generate cost passively");
     }
-
     @Override
     public long AbilityTwo_Cooldown() {
         return 300000;

@@ -42,8 +42,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static xyz.yaszu.freedom.Subsystems.SoulImbueManager.getWhoImbued;
 import static xyz.yaszu.freedom.Subsystems.SoulImbueManager.isImbued;
+import static xyz.yaszu.freedom.Util.Util.*;
 
-public class Black extends Util implements Base_Soul, Listener {
+public class Black implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {

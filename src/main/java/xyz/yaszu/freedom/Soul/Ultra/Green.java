@@ -30,7 +30,9 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
-public class Green extends Util implements Base_Soul {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class Green implements Base_Soul {
 
     @Override
     public String Name_For_Container() {

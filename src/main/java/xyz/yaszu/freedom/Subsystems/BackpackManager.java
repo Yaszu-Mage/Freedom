@@ -19,26 +19,14 @@ import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.InventoryPersistentDataType;
 import xyz.yaszu.freedom.Util.Util;
 
-public class BackpackManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class BackpackManager implements Listener {
 
     // -------------------------------------------------------------------------
     // InventoryClickEvent
     // -------------------------------------------------------------------------
-
-    /**
-     * Comprehensive click guard. Runs at HIGH priority so it fires after most
-     * other plugins but before MONITOR listeners.
-     *
-     * <p>Blocks:</p>
-     * <ul>
-     *   <li>Placing ANY backpack into a BackpackGui slot.</li>
-     *   <li>Picking up a backpack from inside a BackpackGui.</li>
-     *   <li>Two backpacks occupying the same player-inventory slot (stacking).</li>
-     *   <li>Shift-clicking a backpack from *any* open inventory into the player inventory.</li>
-     *   <li>Number-key (hotbar swap) moves that would combine two backpacks.</li>
-     *   <li>Drag-splitting a backpack stack (see {@link #onDrag}).</li>
-     * </ul>
-     */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
 

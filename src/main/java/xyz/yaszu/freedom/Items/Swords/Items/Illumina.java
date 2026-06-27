@@ -23,7 +23,9 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.HashMap;
 import java.util.List;
 
-public class Illumina extends Util implements BaseItem, Sword {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class Illumina implements BaseItem, Sword {
     @Override
     public ItemStack item() {
         ItemStack stack = ItemStack.of(Material.DIAMOND_SWORD);

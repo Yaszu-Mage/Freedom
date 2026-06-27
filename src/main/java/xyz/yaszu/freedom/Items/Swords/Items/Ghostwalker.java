@@ -19,7 +19,9 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.List;
 import java.util.Objects;
 
-public class Ghostwalker extends Util implements BaseItem, Sword {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class Ghostwalker implements BaseItem, Sword {
     @Override
     public ItemStack item() {
         ItemStack stack = ItemStack.of(Material.DIAMOND_SWORD);

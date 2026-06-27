@@ -19,7 +19,10 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Base_Artifact extends Util implements Listener, BaseItem {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Base_Artifact implements Listener, BaseItem {
 
     private final String id;
     private final Component name;

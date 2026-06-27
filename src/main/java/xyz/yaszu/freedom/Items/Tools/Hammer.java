@@ -21,7 +21,10 @@ import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Hammer extends Util implements BaseItem, Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Hammer implements BaseItem, Listener {
     @Override
     public ItemStack item() {
         ItemStack item = ItemStack.of(Material.DIAMOND_PICKAXE);

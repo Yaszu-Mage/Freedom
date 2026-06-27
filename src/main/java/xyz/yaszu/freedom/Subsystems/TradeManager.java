@@ -33,7 +33,10 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
-public class TradeManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.emptyItem;
+import static xyz.yaszu.freedom.Util.Util.getSkull;
+
+public class TradeManager implements Listener {
 
     private static final Map<UUID, TradeRequest> pendingRequests = new HashMap<>();
     private static final Map<UUID, TradeSession> activeSessions = new HashMap<>();

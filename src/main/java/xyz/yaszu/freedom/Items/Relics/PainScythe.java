@@ -29,7 +29,10 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.*;
 
-public class PainScythe extends Util implements BaseItem, Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class PainScythe implements BaseItem, Listener {
     @Override
     public ItemStack item() {
         ItemStack itemStack = ItemStack.of(Material.DIAMOND_SWORD);
@@ -37,7 +40,7 @@ public class PainScythe extends Util implements BaseItem, Listener {
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"painscythe");
         meta.getPersistentDataContainer().set(painKey, PersistentDataType.INTEGER, 0);
         meta.setItemModel(NamespacedKey.minecraft("jx1dx1"));
-        meta.displayName(Util.dess("<shadow:#000000FF><b><red>Pain Scythe</red>"));
+        meta.displayName(dess("<shadow:#000000FF><b><red>Pain Scythe</red>"));
         meta.setUnbreakable(true);
         meta.addAttributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(keygen("PainScythe"),-1.25,AttributeModifier.Operation.ADD_NUMBER));
         meta.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(keygen("PainScythe"), 16, AttributeModifier.Operation.ADD_NUMBER));

@@ -17,7 +17,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class Windforce extends Util implements BaseItem, Sword {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class Windforce implements BaseItem, Sword {
     @Override
     public ItemStack item() {
         ItemStack stack = ItemStack.of(Material.DIAMOND_SWORD);

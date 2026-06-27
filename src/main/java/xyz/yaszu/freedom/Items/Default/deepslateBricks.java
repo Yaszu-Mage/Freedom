@@ -10,7 +10,9 @@ import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
 import xyz.yaszu.freedom.Util.Util;
 
-public class deepslateBricks extends Util implements BaseItem {
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class deepslateBricks implements BaseItem {
     @Override
     public ItemStack item() {
         return ItemStack.of(Material.DEEPSLATE_BRICKS);

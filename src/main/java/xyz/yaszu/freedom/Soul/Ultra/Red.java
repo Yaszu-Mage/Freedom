@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class Red extends Util implements Base_Soul {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class Red implements Base_Soul {
 
 
 

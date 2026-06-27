@@ -14,7 +14,10 @@ import xyz.yaszu.freedom.Subsystems.AlcoholManager;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class Weed extends Util implements BaseItem {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Weed implements BaseItem {
     @Override
     public ItemStack item() {
         ItemStack stack = ItemStack.of(Material.FERN);

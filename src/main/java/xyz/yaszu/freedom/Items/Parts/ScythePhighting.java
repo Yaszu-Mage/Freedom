@@ -24,12 +24,15 @@ import xyz.yaszu.freedom.Util.BulletSystem;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
-public class ScythePhighting extends Util implements BaseItem, Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class ScythePhighting implements BaseItem, Listener {
     @Override
     public ItemStack item() {
         ItemStack item = ItemStack.of(Material.NETHERITE_SWORD);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Util.dess("<shadow:#000000FF><b>Scythe</b>"));
+        meta.displayName(dess("<shadow:#000000FF><b>Scythe</b>"));
         meta.getPersistentDataContainer().set(FreedomKeys.itemId(), PersistentDataType.STRING,"scythephighting");
         meta.getPersistentDataContainer().set(keygen("scythephighting"), PersistentDataType.BOOLEAN, false);
         meta.setItemModel(NamespacedKey.minecraft("scythephightinga"));

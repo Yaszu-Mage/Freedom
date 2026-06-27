@@ -21,7 +21,10 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class CurseManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class CurseManager implements Listener {
     private static final HashMap<UUID, MobDisguise> activeCurses = new HashMap<>();
     private static final long CURSE_DURATION_TICKS = 3600; // 3 minutes = 3600 ticks
 

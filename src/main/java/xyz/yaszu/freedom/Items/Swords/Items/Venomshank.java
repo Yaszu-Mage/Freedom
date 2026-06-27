@@ -19,7 +19,10 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.List;
 
-public class Venomshank extends Util implements BaseItem, Sword {
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class Venomshank implements BaseItem, Sword {
     @Override
     public ItemStack item() {
         ItemStack stack = ItemStack.of(Material.DIAMOND_SWORD);

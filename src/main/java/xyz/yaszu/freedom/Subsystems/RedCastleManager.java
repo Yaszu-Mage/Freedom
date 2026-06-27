@@ -65,7 +65,7 @@ import static org.bukkit.Bukkit.createChunkData;
  *   Since we add to enqueuedChunks BEFORE calling getChunkAt(), the event's enqueue
  *   call returns immediately without adding a duplicate.
  */
-public class RedCastleManager extends Util {
+public class RedCastleManager {
 
     // ─────────────────────────────────────────────────────────────────────────
     // CONSTANTS — all verified against actual schematic files

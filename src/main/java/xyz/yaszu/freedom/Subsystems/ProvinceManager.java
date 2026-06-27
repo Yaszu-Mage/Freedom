@@ -29,7 +29,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProvinceManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.createMinMagicCircle;
+import static xyz.yaszu.freedom.Util.Util.getSoulType;
+
+public class ProvinceManager implements Listener {
 
     private static final Map<Location, Province> provinces = new ConcurrentHashMap<>();
 
@@ -157,7 +160,7 @@ public class ProvinceManager extends Util implements Listener {
             province.fireSpreadAllowed = config.getBoolean(path + ".fireSpreadAllowed", false);
             province.explosionsAllowed = config.getBoolean(path + ".explosionsAllowed", false);
             provinces.put(center, province);
-            Util.createMinMagicCircle(center.clone().add(0.5,0,0.5),15, SoulTypes.BaseBlack);
+            createMinMagicCircle(center.clone().add(0.5,0,0.5),15, SoulTypes.BaseBlack);
             // Re-start visual/integrity tasks
             startIntegrityTask(province);
         }

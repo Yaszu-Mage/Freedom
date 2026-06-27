@@ -17,7 +17,9 @@ import xyz.yaszu.freedom.Util.Util;
 
 import java.util.Random;
 
-public class VisionHandler extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
+public class VisionHandler implements Listener {
 
 
     public static final VisionHandler instance = new VisionHandler();

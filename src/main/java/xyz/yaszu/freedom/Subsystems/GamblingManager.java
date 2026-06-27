@@ -19,7 +19,9 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GamblingManager extends Util implements Listener {
+import static xyz.yaszu.freedom.Util.Util.*;
+
+public class GamblingManager implements Listener {
     public static HashMap<Location, Gambling> gamblingLocations = new HashMap<>();
     @EventHandler
     public void InventoryInteract(InventoryClickEvent event) {

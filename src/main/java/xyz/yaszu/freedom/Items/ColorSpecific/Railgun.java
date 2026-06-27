@@ -19,8 +19,10 @@ import xyz.yaszu.freedom.Util.BulletSystem;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
+import static xyz.yaszu.freedom.Util.Util.keygen;
 
-public class Railgun extends Util implements BaseItem {
+
+public class Railgun implements BaseItem {
     private final Purple purple = new Purple();
 
     @Override

@@ -22,10 +22,13 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
+import static xyz.yaszu.freedom.Util.Util.dess;
+import static xyz.yaszu.freedom.Util.Util.keygen;
+
 public class SpellFocus implements Listener {
 
 
-    public static class Orb extends Util implements BaseItem {
+    public static class Orb implements BaseItem {
 
         @Override
         public ItemStack item() {
@@ -64,7 +67,7 @@ public class SpellFocus implements Listener {
         }
     }
 
-    public static class Staff extends Util implements BaseItem {
+    public static class Staff implements BaseItem {
 
         @Override
         public ItemStack item() {
@@ -103,7 +106,7 @@ public class SpellFocus implements Listener {
         }
     }
 
-    public static class Grimoire extends Util implements BaseItem {
+    public static class Grimoire implements BaseItem {
 
         @Override
         public ItemStack item() {

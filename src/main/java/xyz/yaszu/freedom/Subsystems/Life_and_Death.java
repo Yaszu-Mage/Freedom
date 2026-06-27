@@ -31,7 +31,7 @@ import static xyz.yaszu.freedom.Freedom.clearPlayerPersistentData;
 import static xyz.yaszu.freedom.Util.Util.*;
 
 
-public class Life_and_Death extends Util implements org.bukkit.event.Listener{
+public class Life_and_Death implements org.bukkit.event.Listener{
     @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event) {
         if (!event.getPlayer().getPersistentDataContainer().has(keygen("life"))) {
