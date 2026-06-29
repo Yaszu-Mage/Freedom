@@ -101,6 +101,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">BaseBlack.InventoryGui</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements org.bukkit.inventory.InventoryHolder</span></div>
+<div class="block">Represents a graphical user interface (GUI) for inventory customization or management.
+ Implements the <code>InventoryHolder</code> interface to encapsulate and manage inventory interactions.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -115,7 +117,9 @@ implements org.bukkit.inventory.InventoryHolder</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>org.bukkit.inventory.Inventory</code></div>
 <div class="col-second even-row-color"><code><a href="#inventory" class="member-name-link">inventory</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Represents the inventory associated with the <code>InventoryGui</code> instance.</div>
+</div>
 </div>
 </section>
 </li>
@@ -145,10 +149,14 @@ implements org.bukkit.inventory.InventoryHolder</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull org.bukkit.inventory.Inventory</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInventory()" class="member-name-link">getInventory</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Retrieves the inventory associated with this <code>InventoryGui</code> instance.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setInventory(org.bukkit.entity.Player)" class="member-name-link">setInventory</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Configures and initializes the inventory associated with the <code>InventoryGui</code> instance.</div>
+</div>
 </div>
 </div>
 </div>
@@ -170,6 +178,11 @@ implements org.bukkit.inventory.InventoryHolder</span></div>
 <section class="detail" id="inventory">
 <h3>inventory</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.bukkit.inventory.Inventory</span>&nbsp;<span class="element-name">inventory</span></div>
+<div class="block">Represents the inventory associated with the <code>InventoryGui</code> instance.
+ This inventory is customized to display items based on the current context,
+ such as skulls representing online players, with metadata for further interaction handling.
+ The inventory size is dynamically adjusted based on the maximum number of players
+ allowed by the server, ensuring compatibility with Minecraft's inventory slot constraints.</div>
 </section>
 </li>
 </ul>
@@ -199,9 +212,14 @@ implements org.bukkit.inventory.InventoryHolder</span></div>
 <h3>getInventory</h3>
 <div class="member-signature"><span class="annotations">@NotNull
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull org.bukkit.inventory.Inventory</span>&nbsp;<span class="element-name">getInventory</span>()</div>
+<div class="block">Retrieves the inventory associated with this <code>InventoryGui</code> instance.
+ The inventory is dynamically generated and customized to display relevant
+ items, such as player-specific skulls, based on the current context.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code>getInventory</code>&nbsp;in interface&nbsp;<code>org.bukkit.inventory.InventoryHolder</code></dd>
+<dt>Returns:</dt>
+<dd>A non-null <code>Inventory</code> instance managed by this <code>InventoryGui</code>.</dd>
 </dl>
 </section>
 </li>
@@ -209,6 +227,15 @@ implements org.bukkit.inventory.InventoryHolder</span></div>
 <section class="detail" id="setInventory(org.bukkit.entity.Player)">
 <h3>setInventory</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setInventory</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">Configures and initializes the inventory associated with the <code>InventoryGui</code> instance.
+ The inventory is dynamically populated with skull items that represent other online players,
+ excluding the player who triggered the inventory setup. Each skull contains metadata for
+ further interactions, such as the UUID of the represented player.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - The player for whom the inventory is being set up. This player is excluded
+               from the inventory's displayed items.</dd>
+</dl>
 </section>
 </li>
 </ul>

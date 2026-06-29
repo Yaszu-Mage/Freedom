@@ -101,6 +101,14 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public static class </span><span class="element-name type-name-label">BaseBlack.BlackInformation.BlackMenu</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements org.bukkit.inventory.InventoryHolder</span></div>
+<div class="block">Represents a custom inventory implementation for managing "Black Locations".
+
+ This class creates a specialized inventory with 18 slots divided into two rows:
+ - The first row (slots 0–8) is used to display saved locations or placeholders for empty slots.
+ - The second row (slots 9–17) consists of delete buttons for clearing saved locations.
+
+ Each slot and button carries metadata for identification, ensuring reliable interaction handling.
+ Persistence Data Container (PDC) tags are used to associate specific behaviors with inventory items.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -137,7 +145,9 @@ implements org.bukkit.inventory.InventoryHolder</span></div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull org.bukkit.inventory.Inventory</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInventory()" class="member-name-link">getInventory</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Retrieves the inventory associated with this menu.</div>
+</div>
 </div>
 </div>
 </div>
@@ -188,9 +198,13 @@ implements org.bukkit.inventory.InventoryHolder</span></div>
 <h3>getInventory</h3>
 <div class="member-signature"><span class="annotations">@NotNull
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull org.bukkit.inventory.Inventory</span>&nbsp;<span class="element-name">getInventory</span>()</div>
+<div class="block">Retrieves the inventory associated with this menu.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code>getInventory</code>&nbsp;in interface&nbsp;<code>org.bukkit.inventory.InventoryHolder</code></dd>
+<dt>Returns:</dt>
+<dd>the inventory containing the menu items and placeholders
+         structured according to the menu's design.</dd>
 </dl>
 </section>
 </li>

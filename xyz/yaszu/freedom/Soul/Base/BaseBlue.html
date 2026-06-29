@@ -97,6 +97,10 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">BaseBlue</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a>, org.bukkit.event.Listener</span></div>
+<div class="block">The BaseBlue class represents a derived implementation of the Base_Soul class
+ providing specific functionality related to abilities, descriptions, and interactions
+ for a particular type of resource or ability container. This class might be designed
+ for use in a game or application involving player-based or item-based actions.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -127,13 +131,13 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOne(org.bukkit.entity.Player)" class="member-name-link">AbilityOne</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability One - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Triggers the first ability for the specified player.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOne(org.bukkit.entity.Player,boolean)" class="member-name-link">AbilityOne</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  boolean&nbsp;is_imbue)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability One - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Handles the execution of the first ability for a player.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOne_Cooldown(java.lang.Object)" class="member-name-link">AbilityOne_Cooldown</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</code></div>
@@ -143,12 +147,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOneDescription()" class="member-name-link">AbilityOneDescription</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Description for Ability One</div>
+<div class="block">Constructs and returns a descriptive component for the first ability.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOneName()" class="member-name-link">AbilityOneName</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability One Name</div>
+<div class="block">Constructs and returns a labeled component representing the name of the first ability.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack)" class="member-name-link">AbilityTwo</a><wbr>(org.bukkit.entity.Player&nbsp;player,
@@ -171,12 +175,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwoDescription()" class="member-name-link">AbilityTwoDescription</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Description for Ability Two</div>
+<div class="block">Constructs and returns a descriptive component for the second ability.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwoName()" class="member-name-link">AbilityTwoName</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability Two Name</div>
+<div class="block">Returns the name of the second ability.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ActivePassive(org.bukkit.entity.Player)" class="member-name-link">ActivePassive</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
@@ -191,12 +195,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Description()" class="member-name-link">Description</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Description Used in UI</div>
+<div class="block">Constructs a descriptive component based on a predefined reverse-encoded message.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.bukkit.inventory.ItemStack</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Icon()" class="member-name-link">Icon</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Icon Used in UI</div>
+<div class="block">Returns an ItemStack representing the icon associated with this instance.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#load(org.bukkit.entity.Player)" class="member-name-link">load</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
@@ -204,12 +208,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Name()" class="member-name-link">Name</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">//Name Used in UI / Nametag</div>
+<div class="block">Returns a formatted component representing the name, constructed using MiniMessage.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Name_For_Container()" class="member-name-link">Name_For_Container</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Name Used in Components</div>
+<div class="block">Returns the name of the container associated with this instance.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Passive(org.bukkit.entity.Player,java.lang.Object)" class="member-name-link">Passive</a><wbr>(org.bukkit.entity.Player&nbsp;player,
@@ -225,7 +229,7 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.bukkit.inventory.ItemStack</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Related_Item()" class="member-name-link">Related_Item</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Related Item - An item that is required to use this ability</div>
+<div class="block">Returns the related item for this instance.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#save(org.bukkit.entity.Player)" class="member-name-link">save</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
@@ -271,11 +275,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Name_For_Container()">
 <h3>Name_For_Container</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">Name_For_Container</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Name_For_Container()">Base_Soul</a></code></span></div>
-<div class="block">Name Used in Components</div>
+<div class="block">Returns the name of the container associated with this instance.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Name_For_Container()">Name_For_Container</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
+<dt>Returns:</dt>
+<dd>A string representing the name of the container, in this case "BaseBlue".</dd>
 </dl>
 </section>
 </li>
@@ -283,13 +288,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Name()">
 <h3>Name</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Name</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Name()">Base_Soul</a></code></span></div>
-<div class="block">//Name Used in UI / Nametag</div>
+<div class="block">Returns a formatted component representing the name, constructed using MiniMessage.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Name()">Name</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI and Nametag</dd>
+<dd>A Component instance representing the name, in this case formatted as "Blue".</dd>
 </dl>
 </section>
 </li>
@@ -297,13 +301,13 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Description()">
 <h3>Description</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Description</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Description()">Base_Soul</a></code></span></div>
-<div class="block">Description Used in UI</div>
+<div class="block">Constructs a descriptive component based on a predefined reverse-encoded message.
+ The message is processed and returned as a formatted text component using the MiniMessage system.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Description()">Description</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>A Component object representing the formatted description derived from the encoded message.</dd>
 </dl>
 </section>
 </li>
@@ -311,13 +315,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Icon()">
 <h3>Icon</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.bukkit.inventory.ItemStack</span>&nbsp;<span class="element-name">Icon</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Icon()">Base_Soul</a></code></span></div>
-<div class="block">Icon Used in UI</div>
+<div class="block">Returns an ItemStack representing the icon associated with this instance.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Icon()">Icon</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>ItemStack used in UI</dd>
+<dd>An ItemStack of type Material.CLOCK.</dd>
 </dl>
 </section>
 </li>
@@ -325,13 +328,13 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityOneName()">
 <h3>AbilityOneName</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityOneName</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOneName()">Base_Soul</a></code></span></div>
-<div class="block">Ability One Name</div>
+<div class="block">Constructs and returns a labeled component representing the name of the first ability.
+ The label is formatted using the MiniMessage system, styled as "<Blue>Ability One</Blue> - Strings Attached".</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityOneName()">AbilityOneName</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>A Component object containing the formatted name of the first ability.</dd>
 </dl>
 </section>
 </li>
@@ -339,13 +342,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityOneDescription()">
 <h3>AbilityOneDescription</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityOneDescription</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOneDescription()">Base_Soul</a></code></span></div>
-<div class="block">Description for Ability One</div>
+<div class="block">Constructs and returns a descriptive component for the first ability.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityOneDescription()">AbilityOneDescription</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>A Component object containing the formatted description of the first ability.</dd>
 </dl>
 </section>
 </li>
@@ -353,13 +355,13 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityOne(org.bukkit.entity.Player)">
 <h3>AbilityOne</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">AbilityOne</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOne(org.bukkit.entity.Player)">Base_Soul</a></code></span></div>
-<div class="block">Ability One - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Triggers the first ability for the specified player. Primarily serves as a simplified version
+ of the overloaded method, delegating its execution.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityOne(org.bukkit.entity.Player)">AbilityOne</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Parameters:</dt>
-<dd><code>player</code> - Player to handle Ability One for</dd>
+<dd><code>player</code> - The player who will activate the first ability.</dd>
 </dl>
 </section>
 </li>
@@ -368,8 +370,7 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <h3>AbilityOne</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">AbilityOne</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player,
  boolean&nbsp;is_imbue)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOne(org.bukkit.entity.Player,boolean)">Base_Soul</a></code></span></div>
-<div class="block">Ability One - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Handles the execution of the first ability for a player.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityOne(org.bukkit.entity.Player,boolean)">AbilityOne</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
@@ -383,13 +384,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Related_Item()">
 <h3>Related_Item</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.bukkit.inventory.ItemStack</span>&nbsp;<span class="element-name">Related_Item</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Related_Item()">Base_Soul</a></code></span></div>
-<div class="block">Related Item - An item that is required to use this ability</div>
+<div class="block">Returns the related item for this instance.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Related_Item()">Related_Item</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>ItemStack used in ability usage</dd>
+<dd>An ItemStack representing the related item, in this case Material.CLOCK.</dd>
 </dl>
 </section>
 </li>
@@ -397,13 +397,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityTwoName()">
 <h3>AbilityTwoName</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityTwoName</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwoName()">Base_Soul</a></code></span></div>
-<div class="block">Ability Two Name</div>
+<div class="block">Returns the name of the second ability.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityTwoName()">AbilityTwoName</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>A Component representing the name of the second ability.</dd>
 </dl>
 </section>
 </li>
@@ -411,13 +410,14 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityTwoDescription()">
 <h3>AbilityTwoDescription</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityTwoDescription</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwoDescription()">Base_Soul</a></code></span></div>
-<div class="block">Description for Ability Two</div>
+<div class="block">Constructs and returns a descriptive component for the second ability.
+ The description provides details about the ability triggered by the anti clock item,
+ where Blue can set a teleport location.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityTwoDescription()">AbilityTwoDescription</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>A Component object containing the formatted description of the second ability.</dd>
 </dl>
 </section>
 </li>

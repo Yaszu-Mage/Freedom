@@ -96,6 +96,11 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public static class </span><span class="element-name type-name-label">BaseBlack.BlackInformation</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">The BlackInformation class is used to store and manage information about specific player-related
+ items and locations within the game. It aims to organize and serialize information for persistent
+ storage and retrieval. Instances of this class can be used to save player-specific data related
+ to saved locations and associated items, including functionality for loading and saving from a
+ serialized string format.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -110,7 +115,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static class&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="BaseBlack.BlackInformation.BlackMenu.html" class="type-name-link" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.BlackInformation.BlackMenu</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Represents a custom inventory implementation for managing "Black Locations".</div>
+</div>
 </div>
 </section>
 </li>
@@ -125,13 +132,20 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html" title="class or interface in java.util" class="external-link">ArrayList</a><wbr>&lt;org.bukkit.inventory.ItemStack&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#items" class="member-name-link">items</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">A list containing multiple ItemStack objects.</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html" title="class or interface in java.util" class="external-link">ArrayList</a><wbr>&lt;org.bukkit.Location&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#locations" class="member-name-link">locations</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">A list of Location objects associated with this instance.</div>
+</div>
 <div class="col-first even-row-color"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>,<wbr><a href="BaseBlack.BlackInformation.html" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.BlackInformation</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#people" class="member-name-link">people</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">A static map that associates unique identifiers (UUIDs) with instances
+ of BlackInformation.</div>
+</div>
 </div>
 </section>
 </li>
@@ -144,9 +158,13 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">BlackInformation</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Default constructor for the BlackInformation class.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(org.bukkit.entity.Player)" class="member-name-link">BlackInformation</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs a new instance of BlackInformation for the specified player.</div>
+</div>
 </div>
 </section>
 </li>
@@ -163,10 +181,14 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BaseBlack.BlackInformation.html" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.BlackInformation</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fromString(java.lang.String)" class="member-name-link">fromString</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;string)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Deserializes a string into a <code>BlackInformation</code> object.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Converts the state of the object into a string representation.</div>
+</div>
 </div>
 </div>
 </div>
@@ -188,18 +210,28 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="people">
 <h3>people</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>,<wbr><a href="BaseBlack.BlackInformation.html" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.BlackInformation</a>&gt;</span>&nbsp;<span class="element-name">people</span></div>
+<div class="block">A static map that associates unique identifiers (UUIDs) with instances
+ of BlackInformation. This can be used to store and retrieve information
+ related to specific entities identified by their UUID.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="items">
 <h3>items</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html" title="class or interface in java.util" class="external-link">ArrayList</a>&lt;org.bukkit.inventory.ItemStack&gt;</span>&nbsp;<span class="element-name">items</span></div>
+<div class="block">A list containing multiple ItemStack objects. This collection is primarily used
+ to store and manage a set of item stacks within the context of the BlackInformation class.
+ Each ItemStack represents an individual stackable unit that can contain quantities of a specific item.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="locations">
 <h3>locations</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html" title="class or interface in java.util" class="external-link">ArrayList</a>&lt;org.bukkit.Location&gt;</span>&nbsp;<span class="element-name">locations</span></div>
+<div class="block">A list of Location objects associated with this instance.
+ This field represents various locations that are relevant within the context
+ of the containing class.
+ It is initialized as an empty ArrayList and can be modified or accessed as needed.</div>
 </section>
 </li>
 </ul>
@@ -214,12 +246,23 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;(org.bukkit.entity.Player)">
 <h3>BlackInformation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BlackInformation</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">Constructs a new instance of BlackInformation for the specified player.
+ If the player's persistent data contains a valid serialized BlackInformation object,
+ it will be deserialized and used to initialize this instance. Otherwise, a fresh
+ instance will be created.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - The Player whose persistent data should be used to attempt to initialize
+               the BlackInformation object.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="&lt;init&gt;()">
 <h3>BlackInformation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BlackInformation</span>()</div>
+<div class="block">Default constructor for the BlackInformation class.
+ Initializes a new instance of BlackInformation with the `isFresh` field set to true.</div>
 </section>
 </li>
 </ul>
@@ -234,15 +277,31 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="fromString(java.lang.String)">
 <h3>fromString</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BaseBlack.BlackInformation.html" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.BlackInformation</a></span>&nbsp;<span class="element-name">fromString</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;string)</span></div>
+<div class="block">Deserializes a string into a <code>BlackInformation</code> object.
+ The input string is expected to contain location and item data separated by a <code>'|'</code> character.
+ Location data consists of up to 9 entries, each formatted as <code>worldName,x,y,z</code>, separated by <code>';'</code>.
+ Item data consists of up to 9 entries separated by <code>';;'</code>.
+
+ Entries that are missing or invalid will result in <code>null</code> values for the corresponding locations or</div>
 </section>
 </li>
 <li>
 <section class="detail" id="toString()">
 <h3>toString</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">toString</span>()</div>
+<div class="block">Converts the state of the object into a string representation.
+ The resulting string includes serialized location and item data, separated by a `|` character.
+
+ Locations are serialized as up to 9 entries, each formatted as `worldName,x,y,z` and separated by `;`.
+ If a location or its world is null, the corresponding entry will be skipped or represented as empty.
+
+ Items are serialized as up to 9 entries, each separated by `;;`. The serialization format for each
+ item is determined by the `itemToString` method.</div>
 <dl class="notes">
 <dt>Overrides:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a></code>&nbsp;in class&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></dd>
+<dt>Returns:</dt>
+<dd>A string representation of the object, comprising serialized locations and item data.</dd>
 </dl>
 </section>
 </li>

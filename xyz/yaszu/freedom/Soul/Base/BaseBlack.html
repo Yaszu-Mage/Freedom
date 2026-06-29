@@ -97,6 +97,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">BaseBlack</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a>, org.bukkit.event.Listener</span></div>
+<div class="block">Black Moveset</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -111,10 +112,15 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static class&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="BaseBlack.BlackInformation.html" class="type-name-link" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.BlackInformation</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">The BlackInformation class is used to store and manage information about specific player-related
+ items and locations within the game.</div>
+</div>
 <div class="col-first odd-row-color"><code>class&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="BaseBlack.InventoryGui.html" class="type-name-link" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.InventoryGui</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Represents a graphical user interface (GUI) for inventory customization or management.</div>
+</div>
 </div>
 </section>
 </li>
@@ -129,13 +135,19 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a><wbr>&lt;org.bukkit.entity.Player,<wbr><a href="BaseBlack.InventoryGui.html" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.InventoryGui</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#inventoryGui" class="member-name-link">inventoryGui</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">A mapping of players to their respective InventoryGui instances.</div>
+</div>
 <div class="col-first odd-row-color"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>,<wbr>me.libraryaddict.disguise.disguisetypes.PlayerDisguise&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#originalProfiles" class="member-name-link">originalProfiles</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">A mapping that associates unique player identifiers (UUIDs) with their respective PlayerDisguise instances.</div>
+</div>
 <div class="col-first even-row-color"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a></code></div>
 <div class="col-second even-row-color"><code><a href="#random" class="member-name-link">random</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">A shared Random instance used to generate random numbers throughout the application.</div>
+</div>
 </div>
 </section>
 </li>
@@ -157,7 +169,7 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button><button id="method-summary-table-tab6" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab6', 3)" class="table-tab">Deprecated Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -239,16 +251,26 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#InventoryClickEvent(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">InventoryClickEvent</a><wbr>(org.bukkit.event.inventory.InventoryClickEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Event Handler for Inventory Click Event
+ Allows for Disguise <span class="invalid-tag">invalid input: '&amp;'</span> Undisguise</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isMultipleofTwenty(int)" class="member-name-link">isMultipleofTwenty</a><wbr>(int&nbsp;num)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Boolean to Check if the number given is a multiple of twenty</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#join(org.bukkit.entity.Player)" class="member-name-link">join</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#load(org.bukkit.entity.Player)" class="member-name-link">load</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Handles the process of allowing a player to join with specific configurations
+ and attributes based on their persistent data and soul type.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#load(org.bukkit.entity.Player)" class="member-name-link">load</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">Deprecated.</span>&nbsp;</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Name()" class="member-name-link">Name</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -261,16 +283,26 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onBlackInformationClose(org.bukkit.event.inventory.InventoryCloseEvent)" class="member-name-link">onBlackInformationClose</a><wbr>(org.bukkit.event.inventory.InventoryCloseEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Handles the inventory close event for the BlackInformation menu.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerClickInventory(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">onPlayerClickInventory</a><wbr>(org.bukkit.event.inventory.InventoryClickEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Handles the event when a player interacts with a custom inventory menu.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent)" class="member-name-link">onPlayerJoin</a><wbr>(org.bukkit.event.player.PlayerJoinEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Event handler for the PlayerJoinEvent that processes the player's data,
+ sets their skin, and updates their attributes or other configurations based
+ on their persistent data and soul type.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerLeave(org.bukkit.event.player.PlayerQuitEvent)" class="member-name-link">onPlayerLeave</a><wbr>(org.bukkit.event.player.PlayerQuitEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Handles the PlayerQuitEvent when a player leaves the server.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Passive(org.bukkit.entity.Player,java.lang.Object)" class="member-name-link">Passive</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;event)</code></div>
@@ -285,7 +317,8 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playerSneakEvent(org.bukkit.entity.Player)" class="member-name-link">playerSneakEvent</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Active Passive - A passive that requires a condition to activate (like sneaking or specific stats)</div>
+<div class="block">Handles the sneaking behavior of a player by deducting Soul Points and
+ applying specific effects based on the player's SoulType.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.bukkit.inventory.ItemStack</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Related_Item()" class="member-name-link">Related_Item</a>()</code></div>
@@ -294,10 +327,15 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Respawnevent(org.bukkit.event.player.PlayerRespawnEvent)" class="member-name-link">Respawnevent</a><wbr>(org.bukkit.event.player.PlayerRespawnEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#save(org.bukkit.entity.Player)" class="member-name-link">save</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Handles the PlayerRespawnEvent by applying certain effects to the player
+ based on their SoulType, which is retrieved from their PersistentDataContainer.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#save(org.bukkit.entity.Player)" class="member-name-link">save</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">Deprecated.</span>&nbsp;</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#threes(int)" class="member-name-link">threes</a><wbr>(int&nbsp;num)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
@@ -325,18 +363,27 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="random">
 <h3>random</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a></span>&nbsp;<span class="element-name">random</span></div>
+<div class="block">A shared Random instance used to generate random numbers throughout the application.
+ This is a static variable,</div>
 </section>
 </li>
 <li>
 <section class="detail" id="originalProfiles">
 <h3>originalProfiles</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>,<wbr>me.libraryaddict.disguise.disguisetypes.PlayerDisguise&gt;</span>&nbsp;<span class="element-name">originalProfiles</span></div>
+<div class="block">A mapping that associates unique player identifiers (UUIDs) with their respective PlayerDisguise instances.
+ This map is used to store and manage the original disguise profiles of players.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="inventoryGui">
 <h3>inventoryGui</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a>&lt;org.bukkit.entity.Player,<wbr><a href="BaseBlack.InventoryGui.html" title="class in xyz.yaszu.freedom.Soul.Base">BaseBlack.InventoryGui</a>&gt;</span>&nbsp;<span class="element-name">inventoryGui</span></div>
+<div class="block">A mapping of players to their respective InventoryGui instances.
+
+ This field is used to store and manage GUI inventories tied to individual players.
+ The key in the map represents a player, while the value is an InventoryGui object
+ which holds the custom inventory associated with that player.</div>
 </section>
 </li>
 </ul>
@@ -365,7 +412,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Name_For_Container()">
 <h3>Name_For_Container</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">Name_For_Container</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Name_For_Container()">Base_Soul</a></code></span></div>
 <div class="block">Name Used in Components</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -377,7 +423,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Name()">
 <h3>Name</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Name</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Name()">Base_Soul</a></code></span></div>
 <div class="block">//Name Used in UI / Nametag</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -391,7 +436,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Description()">
 <h3>Description</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Description</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Description()">Base_Soul</a></code></span></div>
 <div class="block">Description Used in UI</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -405,7 +449,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="Icon()">
 <h3>Icon</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.bukkit.inventory.ItemStack</span>&nbsp;<span class="element-name">Icon</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Icon()">Base_Soul</a></code></span></div>
 <div class="block">Icon Used in UI</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -419,7 +462,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityOneName()">
 <h3>AbilityOneName</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityOneName</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOneName()">Base_Soul</a></code></span></div>
 <div class="block">Ability One Name</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -433,7 +475,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityOneDescription()">
 <h3>AbilityOneDescription</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityOneDescription</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOneDescription()">Base_Soul</a></code></span></div>
 <div class="block">Description for Ability One</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -447,7 +488,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityOne(org.bukkit.entity.Player)">
 <h3>AbilityOne</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">AbilityOne</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOne(org.bukkit.entity.Player)">Base_Soul</a></code></span></div>
 <div class="block">Ability One - An ability that can be triggered using an ITEM and/or with Inputs</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -462,21 +502,29 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <h3>AbilityOne</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">AbilityOne</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player,
  boolean&nbsp;is_imbue)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOne(org.bukkit.entity.Player,boolean)">Base_Soul</a></code></span></div>
 <div class="block">Ability One - An ability that can be triggered using an ITEM and/or with Inputs</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityOne(org.bukkit.entity.Player,boolean)">AbilityOne</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>player</code> - Player to handle Ability One for</dd>
-<dd><code>is_imbue</code> - checking if it's imbued</dd>
+<dd><code>is_imbue</code> - If the ability is imbued, it will not be triggered by a player input.
+ Constructs a Menu, that has 9 slots to allow for saving and deleting saved locations, and teleporting to said locations</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="load(org.bukkit.entity.Player)">
 <h3>load</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">load</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Deprecated.html" title="class or interface in java.lang" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">load</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
+<div class="block">Load Function for OLD Ability one
+ Loads COORDINATES saved within the Persistent Data Container</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - to load location from</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -489,19 +537,32 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="isMultipleofTwenty(int)">
 <h3>isMultipleofTwenty</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isMultipleofTwenty</span><wbr><span class="parameters">(int&nbsp;num)</span></div>
+<div class="block">Boolean to Check if the number given is a multiple of twenty</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>num</code> - Number to check if it is a multiple of twenty</dd>
+<dt>Returns:</dt>
+<dd>if the number is a multiple of twenty</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="save(org.bukkit.entity.Player)">
 <h3>save</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">save</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Deprecated.html" title="class or interface in java.lang" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">save</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
+<div class="block">Saves the player's location to the persistent data container.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - Player to save the location to.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="Related_Item()">
 <h3>Related_Item</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.bukkit.inventory.ItemStack</span>&nbsp;<span class="element-name">Related_Item</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Related_Item()">Base_Soul</a></code></span></div>
 <div class="block">Related Item - An item that is required to use this ability</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -515,7 +576,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityTwoName()">
 <h3>AbilityTwoName</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityTwoName</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwoName()">Base_Soul</a></code></span></div>
 <div class="block">Ability Two Name</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -529,7 +589,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="AbilityTwoDescription()">
 <h3>AbilityTwoDescription</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">AbilityTwoDescription</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwoDescription()">Base_Soul</a></code></span></div>
 <div class="block">Description for Ability Two</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -546,7 +605,6 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
  org.bukkit.inventory.ItemStack&nbsp;ability_item)</span>
                 throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack)">Base_Soul</a></code></span></div>
 <div class="block">Ability Two - An ability that can be triggered using an ITEM and/or with Inputs</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -568,7 +626,6 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
  boolean&nbsp;is_imbue)</span>
                 throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack,boolean)">Base_Soul</a></code></span></div>
 <div class="block">Ability Two - An ability that can be triggered using an ITEM and/or with Inputs</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -579,7 +636,8 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <dd><code>is_imbue</code> - checking if it's imbued</dd>
 <dt>Throws:</dt>
 <dd><code>net.skinsrestorer.api.exception.MineSkinException</code> - if there's an error with MineSkin</dd>
-<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - if there's an error with the data request</dd>
+<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - if there's an error with data request
+ Disguise as any player online on the server</dd>
 </dl>
 </section>
 </li>
@@ -589,10 +647,14 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">InventoryClickEvent</span><wbr><span class="parameters">(org.bukkit.event.inventory.InventoryClickEvent&nbsp;event)</span>
                          throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
+<div class="block">Event Handler for Inventory Click Event
+ Allows for Disguise <span class="invalid-tag">invalid input: '&amp;'</span> Undisguise</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - InventoryClickEvent</dd>
 <dt>Throws:</dt>
-<dd><code>net.skinsrestorer.api.exception.MineSkinException</code></dd>
-<dd><code>net.skinsrestorer.api.exception.DataRequestException</code></dd>
+<dd><code>net.skinsrestorer.api.exception.MineSkinException</code> - if there's an error with MineSkin</dd>
+<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - if there's an error with data request</dd>
 </dl>
 </section>
 </li>
@@ -602,10 +664,14 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">join</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span>
                  throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
+<div class="block">Handles the process of allowing a player to join with specific configurations
+ and attributes based on their persistent data and soul type.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - The player who is attempting to join.</dd>
 <dt>Throws:</dt>
-<dd><code>net.skinsrestorer.api.exception.MineSkinException</code></dd>
-<dd><code>net.skinsrestorer.api.exception.DataRequestException</code></dd>
+<dd><code>net.skinsrestorer.api.exception.MineSkinException</code> - If an error occurs while processing the player's skin data.</dd>
+<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - If an error occurs while requesting or handling data.</dd>
 </dl>
 </section>
 </li>
@@ -613,6 +679,14 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="Respawnevent(org.bukkit.event.player.PlayerRespawnEvent)">
 <h3>Respawnevent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">Respawnevent</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerRespawnEvent&nbsp;event)</span></div>
+<div class="block">Handles the PlayerRespawnEvent by applying certain effects to the player
+ based on their SoulType, which is retrieved from their PersistentDataContainer.
+ If the player's SoulType is `None`, they are given Strength, Speed, and Health Boost
+ potion effects with infinite duration.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - The PlayerRespawnEvent triggered when a player respawns.</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -621,10 +695,16 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onPlayerJoin</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerJoinEvent&nbsp;event)</span>
                   throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
+<div class="block">Event handler for the PlayerJoinEvent that processes the player's data,
+ sets their skin, and updates their attributes or other configurations based
+ on their persistent data and soul type. It also ensures inventory GUI synchronization
+ for relevant players.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - The PlayerJoinEvent triggered when a player joins the server.</dd>
 <dt>Throws:</dt>
-<dd><code>net.skinsrestorer.api.exception.MineSkinException</code></dd>
-<dd><code>net.skinsrestorer.api.exception.DataRequestException</code></dd>
+<dd><code>net.skinsrestorer.api.exception.MineSkinException</code> - If there is an error while processing the player's skin data.</dd>
+<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - If there is an error while requesting or handling data.</dd>
 </dl>
 </section>
 </li>
@@ -632,19 +712,29 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="onPlayerLeave(org.bukkit.event.player.PlayerQuitEvent)">
 <h3>onPlayerLeave</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onPlayerLeave</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerQuitEvent&nbsp;event)</span></div>
+<div class="block">Handles the PlayerQuitEvent when a player leaves the server.
+ This method ensures that the player's inventory GUI is properly
+ removed from the internal tracking map to avoid memory leaks
+ or inconsistent data.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - The PlayerQuitEvent triggered when a player quits the server.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="playerSneakEvent(org.bukkit.entity.Player)">
 <h3>playerSneakEvent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">playerSneakEvent</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#playerSneakEvent(org.bukkit.entity.Player)">Base_Soul</a></code></span></div>
-<div class="block">Active Passive - A passive that requires a condition to activate (like sneaking or specific stats)</div>
+<div class="block">Handles the sneaking behavior of a player by deducting Soul Points and
+ applying specific effects based on the player's SoulType.
+ If the player's SoulType is `Black` or `BaseBlack`, the player gains
+ temporary invisibility while sneaking.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#playerSneakEvent(org.bukkit.entity.Player)">playerSneakEvent</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Parameters:</dt>
-<dd><code>player</code> - Player to handle active passive for</dd>
+<dd><code>player</code> - The player who triggered the sneaking event.</dd>
 </dl>
 </section>
 </li>
@@ -652,7 +742,6 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="Passive_Description()">
 <h3>Passive_Description</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Passive_Description</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Passive_Description()">Base_Soul</a></code></span></div>
 <div class="block">Passive Description</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -667,7 +756,6 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <h3>Passive</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">Passive</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;event)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Passive(org.bukkit.entity.Player,java.lang.Object)">Base_Soul</a></code></span></div>
 <div class="block">Passive - A passive that is active no matter what</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -682,7 +770,6 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="ActivePassive_Description()">
 <h3>ActivePassive_Description</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">ActivePassive_Description</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#ActivePassive_Description()">Base_Soul</a></code></span></div>
 <div class="block">Active Passive Description</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -696,7 +783,6 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="AbilityTwo_Cooldown()">
 <h3>AbilityTwo_Cooldown</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">AbilityTwo_Cooldown</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwo_Cooldown()">Base_Soul</a></code></span></div>
 <div class="block">Ability Two Cooldown Time</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -710,7 +796,6 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="AbilityOne_Cooldown(java.lang.Object)">
 <h3>AbilityOne_Cooldown</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">AbilityOne_Cooldown</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOne_Cooldown(java.lang.Object)">Base_Soul</a></code></span></div>
 <div class="block">Ability One Cooldown Time</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -726,7 +811,6 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="ActivePassive(org.bukkit.entity.Player)">
 <h3>ActivePassive</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">ActivePassive</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#ActivePassive(org.bukkit.entity.Player)">Base_Soul</a></code></span></div>
 <div class="block">Active Passive - A passive that requires a condition to activate (like sneaking or specific stats)</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -740,12 +824,30 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="onPlayerClickInventory(org.bukkit.event.inventory.InventoryClickEvent)">
 <h3>onPlayerClickInventory</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onPlayerClickInventory</span><wbr><span class="parameters">(org.bukkit.event.inventory.InventoryClickEvent&nbsp;event)</span></div>
+<div class="block">Handles the event when a player interacts with a custom inventory menu.
+
+ This method is responsible for controlling actions such as deleting saved locations,
+ saving the player's current location into a slot, or teleporting the player to a saved location,
+ depending on the slot and item clicked within the inventory. The interaction logic ensures
+ that changes are persisted and the inventory appearance is updated dynamically to reflect actions taken.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - The <code>InventoryClickEvent</code> triggered when a player interacts with an inventory.
+              It provides information about the click, the inventory, and the player involved.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onBlackInformationClose(org.bukkit.event.inventory.InventoryCloseEvent)">
 <h3>onBlackInformationClose</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onBlackInformationClose</span><wbr><span class="parameters">(org.bukkit.event.inventory.InventoryCloseEvent&nbsp;event)</span></div>
+<div class="block">Handles the inventory close event for the BlackInformation menu.
+ Ensures that player-specific BlackInformation data is saved to the
+ player's PersistentDataContainer when the inventory is closed.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - the InventoryCloseEvent triggered when a player closes an inventory.</dd>
+</dl>
 </section>
 </li>
 </ul>
