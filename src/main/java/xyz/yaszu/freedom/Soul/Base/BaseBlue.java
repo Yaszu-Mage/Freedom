@@ -26,43 +26,91 @@ import java.util.UUID;
 
 import static xyz.yaszu.freedom.Util.Util.*;
 
-public class
-BaseBlue implements Base_Soul, Listener {
+/**
+ * The BaseBlue class represents a derived implementation of the Base_Soul class
+ * providing specific functionality related to abilities, descriptions, and interactions
+ * for a particular type of resource or ability container. This class might be designed
+ * for use in a game or application involving player-based or item-based actions.
+ * @author yaszu
+ */
+public class BaseBlue implements Base_Soul, Listener {
+    /**
+     * Returns the name of the container associated with this instance.
+     *
+     * @return A string representing the name of the container, in this case "BaseBlue".
+     */
     @Override
     public String Name_For_Container() {
         return "BaseBlue";
     }
 
+    /**
+     * Returns a formatted component representing the name, constructed using MiniMessage.
+     *
+     * @return A Component instance representing the name, in this case formatted as "Blue".
+     */
     @Override
     public Component Name() {
         return dess("<Blue>Blue</Blue>");
     }
 
+    /**
+     * Constructs a descriptive component based on a predefined reverse-encoded message.
+     * The message is processed and returned as a formatted text component using the MiniMessage system.
+     *
+     * @return A Component object representing the formatted description derived from the encoded message.
+     */
     @Override
     public Component Description() {
         return dess("?em1t tub ti si tahW");
     }
 
+    /**
+     * Returns an ItemStack representing the icon associated with this instance.
+     *
+     * @return An ItemStack of type Material.CLOCK.
+     */
     @Override
     public ItemStack Icon() {
         return ItemStack.of(Material.CLOCK);
     }
 
+    /**
+     * Constructs and returns a labeled component representing the name of the first ability.
+     * The label is formatted using the MiniMessage system, styled as "<Blue>Ability One</Blue> - Strings Attached".
+     *
+     * @return A Component object containing the formatted name of the first ability.
+     */
     @Override
     public Component AbilityOneName() {
         return dess("<Blue>Ability One</Blue> - Strings Attached");
     }
 
+    /**
+     * Constructs and returns a descriptive component for the first ability.
+     * @return A Component object containing the formatted description of the first ability.
+     */
     @Override
     public Component AbilityOneDescription() {
         return dess("Using your Custom Item, you can freeze your enemies in time");
     }
 
+    /**
+     * Triggers the first ability for the specified player. Primarily serves as a simplified version
+     * of the overloaded method, delegating its execution.
+     *
+     * @param player The player who will activate the first ability.
+     */
     @Override
  public void AbilityOne(Player player) {
         AbilityOne(player, false);
     }
 
+    /**
+     * Handles the execution of the first ability for a player.
+      * @param player Player to handle Ability One for
+     * @param is_imbue checking if it's imbued
+     */
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         if (can_ability(AbilityOne_Cooldown(null), abilityOneCooldowns, player.getUniqueId()) == false) {
@@ -121,16 +169,31 @@ BaseBlue implements Base_Soul, Listener {
 
     }
 
+    /**
+     * Returns the related item for this instance.
+     * @return An ItemStack representing the related item, in this case Material.CLOCK.
+     */
     @Override
     public ItemStack Related_Item() {
         return ItemStack.of(Material.CLOCK);
     }
 
+    /**
+     * Returns the name of the second ability.
+     * @return A Component representing the name of the second ability.
+     */
     @Override
     public Component AbilityTwoName() {
         return dess("<Blue>Ability Two</Blue> - Rewind");
     }
 
+    /**
+     * Constructs and returns a descriptive component for the second ability.
+     * The description provides details about the ability triggered by the anti clock item,
+     * where Blue can set a teleport location.
+     *
+     * @return A Component object containing the formatted description of the second ability.
+     */
     @Override
     public Component AbilityTwoDescription() {
         return dess("While triggering the anti clock item, Blue is able to set a teleport location.");

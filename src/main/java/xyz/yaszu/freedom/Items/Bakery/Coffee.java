@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Items.BaseFood;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
@@ -27,6 +28,7 @@ public class Coffee implements BaseItem, BaseFood {
     @Override
     public void effect(Player player, PlayerInteractEvent event, ItemStack item) {
         eat(player);
+        player.addPotionEffect(PotionEffectType.SPEED.createEffect(100,8));
     }
 
     @Override

@@ -1659,7 +1659,7 @@ public class RobloxCrossplay implements Listener {
                                             //Decode and encode format for every nearby entity and what you can get by looking at them
                                             JsonArray nearbyEntities = new JsonArray();
 
-                                            for (Entity e : display.getNearbyEntities(10, 10, 10)) {
+                                            for (Entity e : display.getNearbyEntities(32, 32, 32)) {
                                                 JsonObject entityJson = new JsonObject();
                                                 entityJson.addProperty("type", e.getType().toString());
                                                 entityJson.addProperty("x", e.getLocation().getX() * scale);

@@ -36,42 +36,71 @@ import xyz.yaszu.freedom.Util.Util;
 import static xyz.yaszu.freedom.Util.Util.*;
 import java.util.*;
 
+/**
+ * Black Moveset
+ */
 public class BaseBlack implements Base_Soul, Listener {
-
+    /**
+     * Name Used in Components
+     */
     @Override
     public String Name_For_Container() {
         return "BaseBlack";
     }
-
+    /**
+     * //Name Used in UI / Nametag
+     * @return Component used in UI and Nametag
+     */
     @Override
     public Component Name() {
         return dess("<shadow:#000000FF><b><yellow><gradient:#0f000f:#555555:#aa00aa>Black</gradient>");
     }
-
+    /**
+     * Description Used in UI
+     * @return Component used in UI
+     */
     @Override
     public Component Description() {
         return dess("Your appearance is as malleable as clay");
     }
-
+    /**
+     * Icon Used in UI
+     * @return ItemStack used in UI
+     */
     @Override
     public ItemStack Icon() {
         return ItemStack.of(Material.WOODEN_SHOVEL);
     }
-
+    /**
+     * Ability One Name
+     * @return Component used in UI
+     */
     @Override
     public Component AbilityOneName() {
         return dess("<gradient:#0f000f:#555555:#aa00aa>Ability One</gradient>Trickster");
     }
-
+    /**
+     * Description for Ability One
+     * @return Component used in UI
+     */
     @Override
     public Component AbilityOneDescription() {
         return dess("Teleport to a saved location, it will take you 5 seconds.");
     }
-
+    /**
+     * Ability One - An ability that can be triggered using an ITEM and/or with Inputs
+     * @param player Player to handle Ability One for
+     */
     @Override
  public void AbilityOne(Player player) {
         AbilityOne(player, false);
     }
+    /**
+     * Ability One - An ability that can be triggered using an ITEM and/or with Inputs
+     * @param player Player to handle Ability One for
+     * @param is_imbue If the ability is imbued, it will not be triggered by a player input.
+     * Constructs a Menu, that has 9 slots to allow for saving and deleting saved locations, and teleporting to said locations
+     */
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         BlackInformation blackInformation = BlackInformation.people.getOrDefault(player.getUniqueId(),new BlackInformation());
@@ -88,6 +117,13 @@ public class BaseBlack implements Base_Soul, Listener {
 //        }
     }
 
+    /**
+     * Load Function for OLD Ability one
+     * Loads COORDINATES saved within the Persistent Data Container
+     * @param player to load location from
+     * @deprecated
+     */
+    @Deprecated
     public void load(Player player) {
 
         //VFX
@@ -218,10 +254,22 @@ public class BaseBlack implements Base_Soul, Listener {
         return 1;
     }
 
+    /**
+     * Boolean to Check if the number given is a multiple of twenty
+     * @param num Number to check if it is a multiple of twenty
+     * @return if the number is a multiple of twenty
+     */
     public static boolean isMultipleofTwenty(int num) {
         // The condition (num % 10 == 0) is true if the remainder is 0.
         return (num % 20 == 0);
     }
+
+    /**
+     * Saves the player's location to the persistent data container.
+     * @param player Player to save the location to.
+     * @deprecated
+     */
+    @Deprecated
     public void save(Player player) {
         player.getPersistentDataContainer().set(keygen("black_save"), PersistentDataType.BOOLEAN, true);
         player.getPersistentDataContainer().set(keygen("blacksaveX"), PersistentDataType.DOUBLE, player.getLocation().getX());
@@ -247,30 +295,55 @@ public class BaseBlack implements Base_Soul, Listener {
             }
         }.runTaskTimer(Freedom.get_plugin(),0,1);
     }
+
+    /**
+     * Related Item - An item that is required to use this ability
+     * @return ItemStack used in ability usage
+     */
     @Override
     public ItemStack Related_Item() {
         return ItemStack.of(Material.ACACIA_HANGING_SIGN);
     }
 
+    /**
+     * Ability Two Name
+     * @return Component used in UI
+     */
     @Override
     public Component AbilityTwoName() {
         return dess("<gradient:#0f000f:#555555:#aa00aa>Ability Two:<gradient>Mimicry");
     }
-
+    /**
+     * Description for Ability Two
+     * @return Component used in UI
+     */
     @Override
     public Component AbilityTwoDescription() {
         return dess("Take mimic the Apearance and name of a player.");
     }
 
 
-
-
-
+    /**
+     * Ability Two - An ability that can be triggered using an ITEM and/or with Inputs
+     * @param player Player to handle Ability Two for
+     * @param ability_item ItemStack used in ability usage
+     * @throws MineSkinException if there's an error with MineSkin
+     * @throws DataRequestException if there's an error with data request
+     */
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         AbilityTwo(player, ability_item, false);
     }
 
+    /**
+     * Ability Two - An ability that can be triggered using an ITEM and/or with Inputs
+     * @param player Player to handle Ability Two for
+     * @param ability_item ItemStack used in ability usage
+     * @param is_imbue checking if it's imbued
+     * @throws MineSkinException if there's an error with MineSkin
+     * @throws DataRequestException if there's an error with data request
+     * Disguise as any player online on the server
+     */
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (can_ability(AbilityTwo_Cooldown(),abilityTwoCooldowns,player.getUniqueId()) && !player.getPersistentDataContainer().has(keygen("disguised"), PersistentDataType.BOOLEAN)) {
@@ -314,8 +387,24 @@ public class BaseBlack implements Base_Soul, Listener {
             player.sendActionBar(dess("Disguise Removed."));
         }
     }
+
+    /**
+     * A shared Random instance used to generate random numbers throughout the application.
+     * This is a static variable,*/
     public static Random random = new Random();
+    /**
+     * A mapping that associates unique player identifiers (UUIDs) with their respective PlayerDisguise instances.
+     * This map is used to store and manage the original disguise profiles of players.
+     */
     public static HashMap<UUID,PlayerDisguise> originalProfiles = Black.originalProfiles;
+
+    /**
+     * Event Handler for Inventory Click Event
+     * Allows for Disguise & Undisguise
+     * @param event InventoryClickEvent
+     * @throws MineSkinException if there's an error with MineSkin
+     * @throws DataRequestException if there's an error with data request
+     */
     @EventHandler
     public void InventoryClickEvent (InventoryClickEvent event) throws MineSkinException, DataRequestException {
         Inventory inventory = event.getInventory();
@@ -376,17 +465,50 @@ public class BaseBlack implements Base_Soul, Listener {
     }
 
 
-
-
+    /**
+     * A mapping of players to their respective InventoryGui instances.
+     *
+     * This field is used to store and manage GUI inventories tied to individual players.
+     * The key in the map represents a player, while the value is an InventoryGui object
+     * which holds the custom inventory associated with that player.
+     */
     public HashMap<Player,InventoryGui> inventoryGui = new HashMap<>();
 
+    /**
+     * Represents a graphical user interface (GUI) for inventory customization or management.
+     * Implements the {@code InventoryHolder} interface to encapsulate and manage inventory interactions.
+     */
     public class InventoryGui implements InventoryHolder {
+        /**
+         * Represents the inventory associated with the {@code InventoryGui} instance.
+         * This inventory is customized to display items based on the current context,
+         * such as skulls representing online players, with metadata for further interaction handling.
+         * The inventory size is dynamically adjusted based on the maximum number of players
+         * allowed by the server, ensuring compatibility with Minecraft's inventory slot constraints.
+         */
         public Inventory inventory;
+
+        /**
+         * Retrieves the inventory associated with this {@code InventoryGui} instance.
+         * The inventory is dynamically generated and customized to display relevant
+         * items, such as player-specific skulls, based on the current context.
+         *
+         * @return A non-null {@code Inventory} instance managed by this {@code InventoryGui}.
+         */
         @Override
         public @NotNull Inventory getInventory() {
             return inventory;
         }
 
+        /**
+         * Configures and initializes the inventory associated with the {@code InventoryGui} instance.
+         * The inventory is dynamically populated with skull items that represent other online players,
+         * excluding the player who triggered the inventory setup. Each skull contains metadata for
+         * further interactions, such as the UUID of the represented player.
+         *
+         * @param player The player for whom the inventory is being set up. This player is excluded
+         *               from the inventory's displayed items.
+         */
         public void setInventory(Player player) {
             int max_players = Bukkit.getMaxPlayers();
             int remainder = max_players % 9;
@@ -415,6 +537,14 @@ public class BaseBlack implements Base_Soul, Listener {
 
     }
 
+    /**
+     * Handles the process of allowing a player to join with specific configurations
+     * and attributes based on their persistent data and soul type.
+     *
+     * @param player The player who is attempting to join.
+     * @throws MineSkinException If an error occurs while processing the player's skin data.
+     * @throws DataRequestException If an error occurs while requesting or handling data.
+     */
     public static void join (Player player) throws MineSkinException, DataRequestException {
         setSkinByName(player,player.getName());
         if (player.getPersistentDataContainer().has(keygen("soul"))) {
@@ -444,6 +574,15 @@ public class BaseBlack implements Base_Soul, Listener {
     }
 
 // reviewers SOS why expand this system
+
+    /**
+     * Handles the PlayerRespawnEvent by applying certain effects to the player
+     * based on their SoulType, which is retrieved from their PersistentDataContainer.
+     * If the player's SoulType is `None`, they are given Strength, Speed, and Health Boost
+     * potion effects with infinite duration.
+     *
+     * @param event The PlayerRespawnEvent triggered when a player respawns.
+     */
     @EventHandler
     public void Respawnevent(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
@@ -454,6 +593,17 @@ public class BaseBlack implements Base_Soul, Listener {
             player.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(PotionEffect.INFINITE_DURATION,1));
         }
     }
+
+    /**
+     * Event handler for the PlayerJoinEvent that processes the player's data,
+     * sets their skin, and updates their attributes or other configurations based
+     * on their persistent data and soul type. It also ensures inventory GUI synchronization
+     * for relevant players.
+     *
+     * @param event The PlayerJoinEvent triggered when a player joins the server.
+     * @throws MineSkinException If there is an error while processing the player's skin data.
+     * @throws DataRequestException If there is an error while requesting or handling data.
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) throws MineSkinException, DataRequestException {
         setSkinByName(event.getPlayer(),event.getPlayer().getName());
@@ -479,6 +629,14 @@ public class BaseBlack implements Base_Soul, Listener {
     }
     }
 
+    /**
+     * Handles the PlayerQuitEvent when a player leaves the server.
+     * This method ensures that the player's inventory GUI is properly
+     * removed from the internal tracking map to avoid memory leaks
+     * or inconsistent data.
+     *
+     * @param event The PlayerQuitEvent triggered when a player quits the server.
+     */
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         if (!inventoryGui.isEmpty()) {
@@ -492,6 +650,14 @@ public class BaseBlack implements Base_Soul, Listener {
         }
     }
 
+    /**
+     * Handles the sneaking behavior of a player by deducting Soul Points and
+     * applying specific effects based on the player's SoulType.
+     * If the player's SoulType is `Black` or `BaseBlack`, the player gains
+     * temporary invisibility while sneaking.
+     *
+     * @param player The player who triggered the sneaking event.
+     */
     public void playerSneakEvent(Player player) {
         Freedom.get_plugin().getLogger().info("RAN");
         SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
@@ -511,32 +677,53 @@ public class BaseBlack implements Base_Soul, Listener {
 
         }
     }
-
+    /**
+     * Passive Description
+     * @return Component used in UI
+     */
     @Override
     public Component Passive_Description() {
         return dess("You are slightly shorter");
     }
 
+    /**
+     * Passive - A passive that is active no matter what
+     * @param player Player to handle passive for
+     * @param event Event that triggered the passive
+     */
     @Override
     public void Passive(Player player, Object event) {
 
     }
-
+    /**
+     * Active Passive Description
+     * @return Component used in UI
+     */
     @Override
     public Component ActivePassive_Description() {
         return dess("When you sneak you are invisible");
     }
-
+    /**
+     * Ability Two Cooldown Time
+     * @return Cooldown time in milliseconds
+     */
     @Override
     public long AbilityTwo_Cooldown() {
         return 30000;
     }
-
+    /**
+     * Ability One Cooldown Time
+     * @param obj Given object, depends on the moveset, could be a player
+     * @return Cooldown time in milliseconds
+     */
     @Override
     public long AbilityOne_Cooldown(Object obj) {
         return 0;
     }
-
+    /**
+     * Active Passive - A passive that requires a condition to activate (like sneaking or specific stats)
+     * @param player Player to handle active passive for
+     */
     @Override
     public void ActivePassive(Player player) {
 
@@ -544,13 +731,35 @@ public class BaseBlack implements Base_Soul, Listener {
     // ─── PDC key ─────────────────────────────────────────────────────────────────
 
     // Must match the `self` key inside BlackInformation.
+    /**
+     * Represents a unique identifier for the "blackinformation" key within the
+     * namespace system. This key is typically used for storing or accessing
+     * information related to the "blackinformation" entity in a structured
+     * data context.
+     */
     NamespacedKey blackInformationKey = keygen("blackinformation");
 
     // PDC tag stamped on delete-button ItemStacks so we can identify them by slot.
+    /**
+     * A NamespacedKey representing the identifier for the delete slot functionality,
+     * used to designate the key associated with the removal or deletion slot in the system.
+     * The key is generated with the namespace "black" and the key name "delete_slot".
+     */
     NamespacedKey deleteSlotKey = keygen("black_delete_slot");
 
     // ─── Inventory click handler ──────────────────────────────────────────────────
 
+    /**
+     * Handles the event when a player interacts with a custom inventory menu.
+     *
+     * This method is responsible for controlling actions such as deleting saved locations,
+     * saving the player's current location into a slot, or teleporting the player to a saved location,
+     * depending on the slot and item clicked within the inventory. The interaction logic ensures
+     * that changes are persisted and the inventory appearance is updated dynamically to reflect actions taken.
+     *
+     * @param event The {@link InventoryClickEvent} triggered when a player interacts with an inventory.
+     *              It provides information about the click, the inventory, and the player involved.
+     */
     @EventHandler
     public void onPlayerClickInventory(InventoryClickEvent event) {
         if (!(event.getInventory().getHolder() instanceof BlackInformation.BlackMenu)) return;
@@ -733,6 +942,13 @@ public class BaseBlack implements Base_Soul, Listener {
 
     // ─── Inventory close handler ──────────────────────────────────────────────────
 
+    /**
+     * Handles the inventory close event for the BlackInformation menu.
+     * Ensures that player-specific BlackInformation data is saved to the
+     * player's PersistentDataContainer when the inventory is closed.
+     *
+     * @param event the InventoryCloseEvent triggered when a player closes an inventory.
+     */
     @EventHandler
     public void onBlackInformationClose(InventoryCloseEvent event) {
         if (!(event.getInventory().getHolder() instanceof BlackInformation.BlackMenu)) return;
@@ -746,16 +962,56 @@ public class BaseBlack implements Base_Soul, Listener {
 
     // ─── BlackInformation data class ──────────────────────────────────────────────
 
+    /**
+     * The BlackInformation class is used to store and manage information about specific player-related
+     * items and locations within the game. It aims to organize and serialize information for persistent
+     * storage and retrieval. Instances of this class can be used to save player-specific data related
+     * to saved locations and associated items, including functionality for loading and saving from a
+     * serialized string format.
+     */
     public static class BlackInformation {
+        /**
+         * A static map that associates unique identifiers (UUIDs) with instances
+         * of BlackInformation. This can be used to store and retrieve information
+         * related to specific entities identified by their UUID.
+         */
         public static HashMap<UUID, BlackInformation> people = new HashMap<>();
-
+        /**
+         * A list containing multiple ItemStack objects. This collection is primarily used
+         * to store and manage a set of item stacks within the context of the BlackInformation class.
+         * Each ItemStack represents an individual stackable unit that can contain quantities of a specific item.
+         */
         public ArrayList<ItemStack> items    = new ArrayList<>();
+        /**
+         * A list of Location objects associated with this instance.
+         * This field represents various locations that are relevant within the context
+         * of the containing class.
+         * It is initialized as an empty ArrayList and can be modified or accessed as needed.
+         */
         public ArrayList<Location>  locations = new ArrayList<>();
+        /**
+         * Indicates whether the current state or condition is fresh.
+         * This variable typically represents a recent or unaltered state.
+         */
         boolean isFresh = false;
 
         // Must match blackInformationKey in the outer class.
+        /**
+         * Represents a unique identifier for the current context of the {@code BlackInformation} class.
+         * This variable is initialized with a {@code NamespacedKey} generated using the key "blackinformation".
+         * It serves as the internal representation or marker for this class instance.
+         */
         NamespacedKey self = keygen("blackinformation");
 
+        /**
+         * Constructs a new instance of BlackInformation for the specified player.
+         * If the player's persistent data contains a valid serialized BlackInformation object,
+         * it will be deserialized and used to initialize this instance. Otherwise, a fresh
+         * instance will be created.
+         *
+         * @param player The Player whose persistent data should be used to attempt to initialize
+         *               the BlackInformation object.
+         */
         public BlackInformation(Player player) {
             String construct = player.getPersistentDataContainer().getOrDefault(self, PersistentDataType.STRING, "");
             if (!construct.isEmpty()) {
@@ -770,10 +1026,21 @@ public class BaseBlack implements Base_Soul, Listener {
             isFresh = true;
         }
 
+        /**
+         * Default constructor for the BlackInformation class.
+         * Initializes a new instance of BlackInformation with the `isFresh` field set to true.
+         */
         public BlackInformation() {
             isFresh = true;
         }
 
+        /**
+         * Deserializes a string into a {@code BlackInformation} object.
+         * The input string is expected to contain location and item data separated by a {@code '|'} character.
+         * Location data consists of up to 9 entries, each formatted as {@code worldName,x,y,z}, separated by {@code ';'}.
+         * Item data consists of up to 9 entries separated by {@code ';;'}.
+         *
+         * Entries that are missing or invalid will result in {@code null} values for the corresponding locations or*/
         public BlackInformation fromString(String string) {
             BlackInformation output = new BlackInformation();
 
@@ -818,6 +1085,18 @@ public class BaseBlack implements Base_Soul, Listener {
             return output;
         }
 
+        /**
+         * Converts the state of the object into a string representation.
+         * The resulting string includes serialized location and item data, separated by a `|` character.
+         *
+         * Locations are serialized as up to 9 entries, each formatted as `worldName,x,y,z` and separated by `;`.
+         * If a location or its world is null, the corresponding entry will be skipped or represented as empty.
+         *
+         * Items are serialized as up to 9 entries, each separated by `;;`. The serialization format for each
+         * item is determined by the `itemToString` method.
+         *
+         * @return A string representation of the object, comprising serialized locations and item data.
+         */
         public String toString() {
             StringBuilder locBuilder = new StringBuilder();
             for (int i = 0; i < 9; i++) {
@@ -843,6 +1122,16 @@ public class BaseBlack implements Base_Soul, Listener {
 
         // ─── BlackMenu ────────────────────────────────────────────────────────────
 
+        /**
+         * Represents a custom inventory implementation for managing "Black Locations".
+         *
+         * This class creates a specialized inventory with 18 slots divided into two rows:
+         * - The first row (slots 0–8) is used to display saved locations or placeholders for empty slots.
+         * - The second row (slots 9–17) consists of delete buttons for clearing saved locations.
+         *
+         * Each slot and button carries metadata for identification, ensuring reliable interaction handling.
+         * Persistence Data Container (PDC) tags are used to associate specific behaviors with inventory items.
+         */
         public static class BlackMenu implements InventoryHolder {
             Inventory inventory;
 
@@ -912,6 +1201,12 @@ public class BaseBlack implements Base_Soul, Listener {
                 }
             }
 
+            /**
+             * Retrieves the inventory associated with this menu.
+             *
+             * @return the inventory containing the menu items and placeholders
+             *         structured according to the menu's design.
+             */
             @Override
             public @NotNull Inventory getInventory() {
                 return inventory;
