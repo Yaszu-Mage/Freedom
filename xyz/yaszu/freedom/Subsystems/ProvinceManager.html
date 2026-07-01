@@ -97,6 +97,9 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ProvinceManager</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements org.bukkit.event.Listener</span></div>
+<div class="block">a system that allows for players to create provinces to prevent greifing.
+ the system prevents other players from breaking or placing blocks as well as using explosions.
+ this is done through a ritual.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -144,49 +147,77 @@ implements org.bukkit.event.Listener</span></div>
  org.bukkit.Location&nbsp;rawCenter,
  int&nbsp;range,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;org.bukkit.Location&gt;&nbsp;structureBlocks)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">claims a province for player</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#interruptRitual(org.bukkit.entity.Player)" class="member-name-link">interruptRitual</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">used for stoping ritual</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadProvinces()" class="member-name-link">loadProvinces</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">load province</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onBlockBreak(org.bukkit.event.block.BlockBreakEvent)" class="member-name-link">onBlockBreak</a><wbr>(org.bukkit.event.block.BlockBreakEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onBlockBurn(org.bukkit.event.block.BlockBurnEvent)" class="member-name-link">onBlockBurn</a><wbr>(org.bukkit.event.block.BlockBurnEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onBlockExplosion(org.bukkit.event.block.BlockExplodeEvent)" class="member-name-link">onBlockExplosion</a><wbr>(org.bukkit.event.block.BlockExplodeEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onBlockPlace(org.bukkit.event.block.BlockPlaceEvent)" class="member-name-link">onBlockPlace</a><wbr>(org.bukkit.event.block.BlockPlaceEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onEntityDamage(org.bukkit.event.entity.EntityDamageByEntityEvent)" class="member-name-link">onEntityDamage</a><wbr>(org.bukkit.event.entity.EntityDamageByEntityEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onExplosion(org.bukkit.event.entity.EntityExplodeEvent)" class="member-name-link">onExplosion</a><wbr>(org.bukkit.event.entity.EntityExplodeEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onFireSpread(org.bukkit.event.block.BlockIgniteEvent)" class="member-name-link">onFireSpread</a><wbr>(org.bukkit.event.block.BlockIgniteEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onInteract(org.bukkit.event.player.PlayerInteractEvent)" class="member-name-link">onInteract</a><wbr>(org.bukkit.event.player.PlayerInteractEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#saveProvinces()" class="member-name-link">saveProvinces</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">saves a province</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#unclaim(org.bukkit.Location,java.lang.String)" class="member-name-link">unclaim</a><wbr>(org.bukkit.Location&nbsp;center,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;reason)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">unclaim province</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#updatePlayerSettings(java.util.UUID,org.bukkit.NamespacedKey,boolean)" class="member-name-link">updatePlayerSettings</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;owner,
  org.bukkit.NamespacedKey&nbsp;key,
  boolean&nbsp;value)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">updates setings of players province</div>
+</div>
 </div>
 </div>
 </div>
@@ -225,18 +256,28 @@ implements org.bukkit.event.Listener</span></div>
  org.bukkit.Location&nbsp;rawCenter,
  int&nbsp;range,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;org.bukkit.Location&gt;&nbsp;structureBlocks)</span></div>
+<div class="block">claims a province for player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>owner</code> - player claiming province</dd>
+<dd><code>rawCenter</code> - center of province</dd>
+<dd><code>range</code> - size of province</dd>
+<dd><code>structureBlocks</code> - structure blocks</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="saveProvinces()">
 <h3>saveProvinces</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">saveProvinces</span>()</div>
+<div class="block">saves a province</div>
 </section>
 </li>
 <li>
 <section class="detail" id="loadProvinces()">
 <h3>loadProvinces</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadProvinces</span>()</div>
+<div class="block">load province</div>
 </section>
 </li>
 <li>
@@ -244,60 +285,111 @@ implements org.bukkit.event.Listener</span></div>
 <h3>unclaim</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">unclaim</span><wbr><span class="parameters">(org.bukkit.Location&nbsp;center,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;reason)</span></div>
+<div class="block">unclaim province</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>center</code> - center of province</dd>
+<dd><code>reason</code> - reason province was lost</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onBlockBreak(org.bukkit.event.block.BlockBreakEvent)">
 <h3>onBlockBreak</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onBlockBreak</span><wbr><span class="parameters">(org.bukkit.event.block.BlockBreakEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="interruptRitual(org.bukkit.entity.Player)">
 <h3>interruptRitual</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">interruptRitual</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">used for stoping ritual</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player performing ritual</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onBlockPlace(org.bukkit.event.block.BlockPlaceEvent)">
 <h3>onBlockPlace</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onBlockPlace</span><wbr><span class="parameters">(org.bukkit.event.block.BlockPlaceEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onInteract(org.bukkit.event.player.PlayerInteractEvent)">
 <h3>onInteract</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onInteract</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerInteractEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onEntityDamage(org.bukkit.event.entity.EntityDamageByEntityEvent)">
 <h3>onEntityDamage</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onEntityDamage</span><wbr><span class="parameters">(org.bukkit.event.entity.EntityDamageByEntityEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onExplosion(org.bukkit.event.entity.EntityExplodeEvent)">
 <h3>onExplosion</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onExplosion</span><wbr><span class="parameters">(org.bukkit.event.entity.EntityExplodeEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onBlockExplosion(org.bukkit.event.block.BlockExplodeEvent)">
 <h3>onBlockExplosion</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onBlockExplosion</span><wbr><span class="parameters">(org.bukkit.event.block.BlockExplodeEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onFireSpread(org.bukkit.event.block.BlockIgniteEvent)">
 <h3>onFireSpread</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onFireSpread</span><wbr><span class="parameters">(org.bukkit.event.block.BlockIgniteEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onBlockBurn(org.bukkit.event.block.BlockBurnEvent)">
 <h3>onBlockBurn</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onBlockBurn</span><wbr><span class="parameters">(org.bukkit.event.block.BlockBurnEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -306,6 +398,13 @@ implements org.bukkit.event.Listener</span></div>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updatePlayerSettings</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;owner,
  org.bukkit.NamespacedKey&nbsp;key,
  boolean&nbsp;value)</span></div>
+<div class="block">updates setings of players province</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>owner</code> - owner of province</dd>
+<dd><code>key</code> - setting changed</dd>
+<dd><code>value</code> - value changed by</dd>
+</dl>
 </section>
 </li>
 </ul>

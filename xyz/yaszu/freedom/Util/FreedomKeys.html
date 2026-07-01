@@ -92,6 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">FreedomKeys</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">holder for keys across the plugin</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -121,16 +122,24 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#activeArtifact()" class="member-name-link">activeArtifact</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">weather a player has an artifact enabled</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#alcohol()" class="member-name-link">alcohol</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">used to set the alcohol status of a player</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#comorAction()" class="member-name-link">comorAction</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">check weather a player has set their abilities to be used on command or action</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isSudo()" class="member-name-link">isSudo</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">weather a player is in sudo mode</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#itemId()" class="member-name-link">itemId</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
@@ -139,43 +148,73 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#moveset()" class="member-name-link">moveset</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">the moveset of abilities a player has</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#originalState()" class="member-name-link">originalState</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">the saved state of a player
+
+ used in both the sudo system and arena system</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#provinceBlockBreak()" class="member-name-link">provinceBlockBreak</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">weather player is allowed block breaking inside the province</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#provinceBlockPlace()" class="member-name-link">provinceBlockPlace</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">weather player is allowed block placing inside the province</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#provinceExplosions()" class="member-name-link">provinceExplosions</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">weather a province has  explosions enabled</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#provinceFireSpread()" class="member-name-link">provinceFireSpread</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">weather a province has fire spread enabled</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#silence()" class="member-name-link">silence</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">a check for if a player has had ablitlies disabled</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#soul()" class="member-name-link">soul</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#soulPoint()" class="member-name-link">soulPoint</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">amount of soul points that a player has
+ (soul points are the currency used for using color based abilities)</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#spellFocus()" class="member-name-link">spellFocus</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">used to show if an item is a focus</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#spriteActive()" class="member-name-link">spriteActive</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">used to enable / disable sprite
+ (no longer used)</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#sudoState()" class="member-name-link">sudoState</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">the sudo state of an admin</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.NamespacedKey</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#trustedBy()" class="member-name-link">trustedBy</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">check for if a player has been added to trust</div>
+</div>
 </div>
 </div>
 </div>
@@ -217,102 +256,191 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="soulPoint()">
 <h3>soulPoint</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">soulPoint</span>()</div>
+<div class="block">amount of soul points that a player has
+ (soul points are the currency used for using color based abilities)</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>number of soulpoints held by a player</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="spriteActive()">
 <h3>spriteActive</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">spriteActive</span>()</div>
+<div class="block">used to enable / disable sprite
+ (no longer used)</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if sprite is active</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="silence()">
 <h3>silence</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">silence</span>()</div>
+<div class="block">a check for if a player has had ablitlies disabled</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if silenced</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="comorAction()">
 <h3>comorAction</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">comorAction</span>()</div>
+<div class="block">check weather a player has set their abilities to be used on command or action</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of command / action</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="trustedBy()">
 <h3>trustedBy</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">trustedBy</span>()</div>
+<div class="block">check for if a player has been added to trust</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if trusted</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="soul()">
 <h3>soul</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">soul</span>()</div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>--unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="moveset()">
 <h3>moveset</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">moveset</span>()</div>
+<div class="block">the moveset of abilities a player has</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>moveset of player</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="provinceBlockBreak()">
 <h3>provinceBlockBreak</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">provinceBlockBreak</span>()</div>
+<div class="block">weather player is allowed block breaking inside the province</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if player is allowed to break blocks</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="provinceBlockPlace()">
 <h3>provinceBlockPlace</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">provinceBlockPlace</span>()</div>
+<div class="block">weather player is allowed block placing inside the province</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if player is allowed to place blocks</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="provinceFireSpread()">
 <h3>provinceFireSpread</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">provinceFireSpread</span>()</div>
+<div class="block">weather a province has fire spread enabled</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if fire spread is allowed</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="provinceExplosions()">
 <h3>provinceExplosions</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">provinceExplosions</span>()</div>
+<div class="block">weather a province has  explosions enabled</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if explosions is allowed</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="activeArtifact()">
 <h3>activeArtifact</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">activeArtifact</span>()</div>
+<div class="block">weather a player has an artifact enabled</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if active on player</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="isSudo()">
 <h3>isSudo</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">isSudo</span>()</div>
+<div class="block">weather a player is in sudo mode</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>boolean of if in sudo or not</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="originalState()">
 <h3>originalState</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">originalState</span>()</div>
+<div class="block">the saved state of a player
+
+ used in both the sudo system and arena system</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>saved state of a player</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="alcohol()">
 <h3>alcohol</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">alcohol</span>()</div>
+<div class="block">used to set the alcohol status of a player</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>alcohol status of a player</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="sudoState()">
 <h3>sudoState</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">sudoState</span>()</div>
+<div class="block">the sudo state of an admin</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the state of the admin's sudo</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="spellFocus()">
 <h3>spellFocus</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.NamespacedKey</span>&nbsp;<span class="element-name">spellFocus</span>()</div>
+<div class="block">used to show if an item is a focus</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>if an item is a focus</dd>
+</dl>
 </section>
 </li>
 <li>

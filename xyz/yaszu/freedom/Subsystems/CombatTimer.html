@@ -97,6 +97,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CombatTimer</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements org.bukkit.event.Listener</span></div>
+<div class="block">a system that keeps track of if a player is in combat.
+ functions as a timer of 30 seconds and is reset until the end of combat.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -144,19 +146,27 @@ implements org.bukkit.event.Listener</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#combatcheck(org.bukkit.entity.Player)" class="member-name-link">combatcheck</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">checks for a combat timer on player</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.bukkit.scheduler.BukkitRunnable</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#futureCheck(org.bukkit.entity.Player)" class="member-name-link">futureCheck</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">does something, probably</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isCombat(org.bukkit.entity.Player)" class="member-name-link">isCombat</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">creates a combat timer for player when in combat</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#PlayerDamagePlayer(org.bukkit.event.entity.EntityDamageByEntityEvent)" class="member-name-link">PlayerDamagePlayer</a><wbr>(org.bukkit.event.entity.EntityDamageByEntityEvent&nbsp;event)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#PlayerJoinEvent(org.bukkit.event.player.PlayerJoinEvent)" class="member-name-link">PlayerJoinEvent</a><wbr>(org.bukkit.event.player.PlayerJoinEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">removes combat timer on join</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#PlayerLeaveEvent(org.bukkit.event.player.PlayerQuitEvent)" class="member-name-link">PlayerLeaveEvent</a><wbr>(org.bukkit.event.player.PlayerQuitEvent&nbsp;event)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -221,6 +231,13 @@ implements org.bukkit.event.Listener</span></div>
 <section class="detail" id="isCombat(org.bukkit.entity.Player)">
 <h3>isCombat</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isCombat</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">creates a combat timer for player when in combat</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player</dd>
+<dt>Returns:</dt>
+<dd>combat timer for player</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -233,18 +250,35 @@ implements org.bukkit.event.Listener</span></div>
 <section class="detail" id="PlayerJoinEvent(org.bukkit.event.player.PlayerJoinEvent)">
 <h3>PlayerJoinEvent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">PlayerJoinEvent</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerJoinEvent&nbsp;event)</span></div>
+<div class="block">removes combat timer on join</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - player join event</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="combatcheck(org.bukkit.entity.Player)">
 <h3>combatcheck</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">combatcheck</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">checks for a combat timer on player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="futureCheck(org.bukkit.entity.Player)">
 <h3>futureCheck</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.bukkit.scheduler.BukkitRunnable</span>&nbsp;<span class="element-name">futureCheck</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">does something, probably</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player</dd>
+<dt>Returns:</dt>
+<dd>honestly don't know, its 4am and i haven't slept in days</dd>
+</dl>
 </section>
 </li>
 </ul>

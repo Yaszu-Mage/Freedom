@@ -92,6 +92,9 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CurrencyManager</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">a system of currency that allows for easy transfer.
+ the currency is stored on the player and can be changed through transfer.
+ transfer of currency works through commands.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -106,7 +109,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="CurrencyManager.SellType.html" class="type-name-link" title="enum class in xyz.yaszu.freedom.Subsystems">CurrencyManager.SellType</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">weather selling from inventory or hand</div>
+</div>
 </div>
 </section>
 </li>
@@ -137,30 +142,44 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#addCurrency(int,org.bukkit.entity.Player)" class="member-name-link">addCurrency</a><wbr>(int&nbsp;amount,
  org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">adds currency to a player</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getCurrency(org.bukkit.entity.Player)" class="member-name-link">getCurrency</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">gets the currency of a player</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#pay(org.bukkit.entity.Player,org.bukkit.entity.Player,int)" class="member-name-link">pay</a><wbr>(org.bukkit.entity.Player&nbsp;p1,
  org.bukkit.entity.Player&nbsp;p2,
  int&nbsp;value)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">transfer money from player 1 to player 2</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeCurrency(int,org.bukkit.entity.Player)" class="member-name-link">removeCurrency</a><wbr>(int&nbsp;amount,
  org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">removes currency from a player</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resetCurrency(org.bukkit.entity.Player)" class="member-name-link">resetCurrency</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#sell(org.bukkit.entity.Player,xyz.yaszu.freedom.Subsystems.CurrencyManager.SellType)" class="member-name-link">sell</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  <a href="CurrencyManager.SellType.html" title="enum class in xyz.yaszu.freedom.Subsystems">CurrencyManager.SellType</a>&nbsp;type)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">sells item</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#setCurrency(int,org.bukkit.entity.Player)" class="member-name-link">setCurrency</a><wbr>(int&nbsp;amount,
  org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">sets a players currency</div>
+</div>
 </div>
 </div>
 </div>
@@ -197,6 +216,12 @@ loadScripts(document, 'script');</script>
 <h3>addCurrency</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addCurrency</span><wbr><span class="parameters">(int&nbsp;amount,
  org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">adds currency to a player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - amount of currency added</dd>
+<dd><code>player</code> - player to add to</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -204,12 +229,25 @@ loadScripts(document, 'script');</script>
 <h3>removeCurrency</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeCurrency</span><wbr><span class="parameters">(int&nbsp;amount,
  org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">removes currency from a player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - amount of currency removed</dd>
+<dd><code>player</code> - player to remove from</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="getCurrency(org.bukkit.entity.Player)">
 <h3>getCurrency</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getCurrency</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">gets the currency of a player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player checked</dd>
+<dt>Returns:</dt>
+<dd>amount of currency owned</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -217,12 +255,23 @@ loadScripts(document, 'script');</script>
 <h3>setCurrency</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setCurrency</span><wbr><span class="parameters">(int&nbsp;amount,
  org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">sets a players currency</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - amount set to</dd>
+<dd><code>player</code> - player set</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="resetCurrency(org.bukkit.entity.Player)">
 <h3>resetCurrency</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetCurrency</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -231,6 +280,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">pay</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;p1,
  org.bukkit.entity.Player&nbsp;p2,
  int&nbsp;value)</span></div>
+<div class="block">transfer money from player 1 to player 2</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>p1</code> - player 1 / sender</dd>
+<dd><code>p2</code> - player 2 / sender</dd>
+<dd><code>value</code> - amount sent</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -238,6 +294,12 @@ loadScripts(document, 'script');</script>
 <h3>sell</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">sell</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player,
  <a href="CurrencyManager.SellType.html" title="enum class in xyz.yaszu.freedom.Subsystems">CurrencyManager.SellType</a>&nbsp;type)</span></div>
+<div class="block">sells item</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player selling</dd>
+<dd><code>type</code> - sell type between inventory and hand</dd>
+</dl>
 </section>
 </li>
 </ul>

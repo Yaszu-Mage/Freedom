@@ -97,6 +97,10 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CurseManager</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements org.bukkit.event.Listener</span></div>
+<div class="block">a system allowing players to apply curses to others.
+ curses last for 3 minutes or until uncursed.
+ curse makes players turn into an animal of choice restricting their chat messages.
+ the messages will also play sounds when attempting to speak in chat.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -126,30 +130,46 @@ implements org.bukkit.event.Listener</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#applyDisguise(org.bukkit.entity.Player)" class="member-name-link">applyDisguise</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">changes players apearance to a player or entity</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#curse(org.bukkit.entity.Player,org.bukkit.entity.Player)" class="member-name-link">curse</a><wbr>(org.bukkit.entity.Player&nbsp;victim,
  org.bukkit.entity.Player&nbsp;curser)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">apply curse to player</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#handleChat(org.bukkit.entity.Player,java.lang.String)" class="member-name-link">handleChat</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;message)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">changes what player says acording to curse type</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isCursed(org.bukkit.entity.Player)" class="member-name-link">isCursed</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">boolean for if player is cursed</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerDeath(org.bukkit.event.entity.PlayerDeathEvent)" class="member-name-link">onPlayerDeath</a><wbr>(org.bukkit.event.entity.PlayerDeathEvent&nbsp;event)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent)" class="member-name-link">onPlayerJoin</a><wbr>(org.bukkit.event.player.PlayerJoinEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeDisguise(org.bukkit.entity.Player)" class="member-name-link">removeDisguise</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">removes disguise from player</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#uncurse(org.bukkit.entity.Player)" class="member-name-link">uncurse</a><wbr>(org.bukkit.entity.Player&nbsp;victim)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">removes curse from player</div>
+</div>
 </div>
 </div>
 </div>
@@ -186,18 +206,36 @@ implements org.bukkit.event.Listener</span></div>
 <h3>curse</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">curse</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;victim,
  org.bukkit.entity.Player&nbsp;curser)</span></div>
+<div class="block">apply curse to player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>victim</code> - player cursed</dd>
+<dd><code>curser</code> - player aplieing curse</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="uncurse(org.bukkit.entity.Player)">
 <h3>uncurse</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">uncurse</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;victim)</span></div>
+<div class="block">removes curse from player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>victim</code> - player uncursed</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="isCursed(org.bukkit.entity.Player)">
 <h3>isCursed</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isCursed</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">boolean for if player is cursed</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player checked</dd>
+<dt>Returns:</dt>
+<dd>if or if not cursed</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -205,30 +243,58 @@ implements org.bukkit.event.Listener</span></div>
 <h3>handleChat</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">handleChat</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;message)</span></div>
+<div class="block">changes what player says acording to curse type</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player sending message</dd>
+<dd><code>message</code> - message attempted to be sent</dd>
+<dt>Returns:</dt>
+<dd>message sent</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="applyDisguise(org.bukkit.entity.Player)">
 <h3>applyDisguise</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyDisguise</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">changes players apearance to a player or entity</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player disguising</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="removeDisguise(org.bukkit.entity.Player)">
 <h3>removeDisguise</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeDisguise</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">removes disguise from player</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player no longer disguised</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent)">
 <h3>onPlayerJoin</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onPlayerJoin</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerJoinEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="onPlayerDeath(org.bukkit.event.entity.PlayerDeathEvent)">
 <h3>onPlayerDeath</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onPlayerDeath</span><wbr><span class="parameters">(org.bukkit.event.entity.PlayerDeathEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 </ul>

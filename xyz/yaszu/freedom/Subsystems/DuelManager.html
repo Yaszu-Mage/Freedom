@@ -97,6 +97,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DuelManager</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements org.bukkit.event.Listener</span></div>
+<div class="block">a system for duels that adds the ability to challenge other players with.
+  players can create custom kits as well as choosing the arena type.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -111,7 +113,9 @@ implements org.bukkit.event.Listener</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static class&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="DuelManager.Kit.html" class="type-name-link" title="class in xyz.yaszu.freedom.Subsystems">DuelManager.Kit</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">layout of a kit</div>
+</div>
 </div>
 </section>
 </li>
@@ -189,15 +193,21 @@ implements org.bukkit.event.Listener</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>com.mojang.brigadier.tree.LiteralCommandNode<wbr>&lt;io.papermc.paper.command.brigadier.CommandSourceStack&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#duel()" class="member-name-link">duel</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">command to start duel</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#duel(org.bukkit.entity.Player,org.bukkit.entity.Player,xyz.yaszu.freedom.Subsystems.DuelManager.Kit)" class="member-name-link">duel</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  org.bukkit.entity.Player&nbsp;target,
  <a href="DuelManager.Kit.html" title="class in xyz.yaszu.freedom.Subsystems">DuelManager.Kit</a>&nbsp;kit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#loadKits()" class="member-name-link">loadKits</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">load a saved kit config</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerDeath(org.bukkit.event.entity.PlayerDeathEvent)" class="member-name-link">onPlayerDeath</a><wbr>(org.bukkit.event.entity.PlayerDeathEvent&nbsp;event)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -206,13 +216,19 @@ implements org.bukkit.event.Listener</span></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>com.mojang.brigadier.tree.LiteralCommandNode<wbr>&lt;io.papermc.paper.command.brigadier.CommandSourceStack&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#saveAdminkit()" class="member-name-link">saveAdminkit</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">save a kit as admin kit through command</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>com.mojang.brigadier.tree.LiteralCommandNode<wbr>&lt;io.papermc.paper.command.brigadier.CommandSourceStack&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#savekit()" class="member-name-link">savekit</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">save a kit through a command</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#saveKits()" class="member-name-link">saveKits</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">saves kit to a duel kit slot</div>
+</div>
 </div>
 </div>
 </div>
@@ -328,24 +344,36 @@ implements org.bukkit.event.Listener</span></div>
 <section class="detail" id="saveKits()">
 <h3>saveKits</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">saveKits</span>()</div>
+<div class="block">saves kit to a duel kit slot</div>
 </section>
 </li>
 <li>
 <section class="detail" id="loadKits()">
 <h3>loadKits</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadKits</span>()</div>
+<div class="block">load a saved kit config</div>
 </section>
 </li>
 <li>
 <section class="detail" id="saveAdminkit()">
 <h3>saveAdminkit</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">com.mojang.brigadier.tree.LiteralCommandNode&lt;io.papermc.paper.command.brigadier.CommandSourceStack&gt;</span>&nbsp;<span class="element-name">saveAdminkit</span>()</div>
+<div class="block">save a kit as admin kit through command</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>success</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="savekit()">
 <h3>savekit</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">com.mojang.brigadier.tree.LiteralCommandNode&lt;io.papermc.paper.command.brigadier.CommandSourceStack&gt;</span>&nbsp;<span class="element-name">savekit</span>()</div>
+<div class="block">save a kit through a command</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>success</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -364,6 +392,11 @@ implements org.bukkit.event.Listener</span></div>
 <section class="detail" id="duel()">
 <h3>duel</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">com.mojang.brigadier.tree.LiteralCommandNode&lt;io.papermc.paper.command.brigadier.CommandSourceStack&gt;</span>&nbsp;<span class="element-name">duel</span>()</div>
+<div class="block">command to start duel</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>success</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -372,6 +405,13 @@ implements org.bukkit.event.Listener</span></div>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">duel</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player,
  org.bukkit.entity.Player&nbsp;target,
  <a href="DuelManager.Kit.html" title="class in xyz.yaszu.freedom.Subsystems">DuelManager.Kit</a>&nbsp;kit)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - --unused--</dd>
+<dd><code>target</code> - --unused--</dd>
+<dd><code>kit</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 </ul>

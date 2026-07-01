@@ -97,6 +97,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CustomSongHandler</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements org.bukkit.event.Listener</span></div>
+<div class="block">a system adding custom music to the game.
+ the songs each have a respective music disc and function the same as a vanilla disc.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -111,7 +113,9 @@ implements org.bukkit.event.Listener</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="CustomSongHandler.CustomSong.html" class="type-name-link" title="enum class in xyz.yaszu.freedom.Subsystems">CustomSongHandler.CustomSong</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">handles names authors and descriptions of songs</div>
+</div>
 </div>
 </section>
 </li>
@@ -156,10 +160,14 @@ implements org.bukkit.event.Listener</span></div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.bukkit.inventory.ItemStack</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#constructSong(xyz.yaszu.freedom.Subsystems.CustomSongHandler.CustomSong)" class="member-name-link">constructSong</a><wbr>(<a href="CustomSongHandler.CustomSong.html" title="enum class in xyz.yaszu.freedom.Subsystems">CustomSongHandler.CustomSong</a>&nbsp;song)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">creates music disc item</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerInputJukebox(org.bukkit.event.player.PlayerInteractEvent)" class="member-name-link">onPlayerInputJukebox</a><wbr>(org.bukkit.event.player.PlayerInteractEvent&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">--unused--</div>
+</div>
 </div>
 </div>
 </div>
@@ -209,12 +217,24 @@ implements org.bukkit.event.Listener</span></div>
 <section class="detail" id="onPlayerInputJukebox(org.bukkit.event.player.PlayerInteractEvent)">
 <h3>onPlayerInputJukebox</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onPlayerInputJukebox</span><wbr><span class="parameters">(org.bukkit.event.player.PlayerInteractEvent&nbsp;event)</span></div>
+<div class="block">--unused--</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>event</code> - --unused--</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="constructSong(xyz.yaszu.freedom.Subsystems.CustomSongHandler.CustomSong)">
 <h3>constructSong</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.bukkit.inventory.ItemStack</span>&nbsp;<span class="element-name">constructSong</span><wbr><span class="parameters">(<a href="CustomSongHandler.CustomSong.html" title="enum class in xyz.yaszu.freedom.Subsystems">CustomSongHandler.CustomSong</a>&nbsp;song)</span></div>
+<div class="block">creates music disc item</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>song</code> - song created</dd>
+<dt>Returns:</dt>
+<dd>item</dd>
+</dl>
 </section>
 </li>
 </ul>
