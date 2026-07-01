@@ -24,10 +24,22 @@ import java.util.UUID;
 import static xyz.yaszu.freedom.Util.Util.dess;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
+/**
+ * a system allowing players to apply curses to others.
+ * curses last for 3 minutes or until uncursed.
+ * curse makes players turn into an animal of choice restricting their chat messages.
+ * the messages will also play sounds when attempting to speak in chat.
+ */
 public class CurseManager implements Listener {
     private static final HashMap<UUID, MobDisguise> activeCurses = new HashMap<>();
     private static final long CURSE_DURATION_TICKS = 3600; // 3 minutes = 3600 ticks
 
+    /**
+     * apply curse to player
+     *
+     * @param victim player cursed
+     * @param curser player aplieing curse
+     */
     public static void curse(Player victim, Player curser) {
         victim.getPersistentDataContainer().set(keygen("cursed"), PersistentDataType.STRING, "Frog");
         victim.getPersistentDataContainer().set(keygen("cursedby"), PersistentDataType.STRING, curser.getName());
@@ -48,6 +60,11 @@ public class CurseManager implements Listener {
         }.runTaskLater(Freedom.get_plugin(), CURSE_DURATION_TICKS);
     }
 
+    /**
+     * removes curse from player
+     *
+     * @param victim player uncursed
+     */
     public static void uncurse(Player victim) {
         if (victim.isOnline()) {
             removeDisguise(victim);
@@ -83,10 +100,23 @@ public class CurseManager implements Listener {
         }
     }
 
+    /**
+     * boolean for if player is cursed
+     *
+     * @param player player checked
+     * @return if or if not cursed
+     */
     public static boolean isCursed(Player player) {
         return player.getPersistentDataContainer().has(keygen("cursed"));
     }
 
+    /**
+     * changes what player says acording to curse type
+     *
+     * @param player player sending message
+     * @param message message attempted to be sent
+     * @return message sent
+     */
     public static String handleChat(Player player, String message) {
         if (player.getName().equals("TheAntiClock")) return new StringBuilder(message).reverse().toString().toLowerCase();
         if (!isCursed(player)) return message;
@@ -110,6 +140,11 @@ public class CurseManager implements Listener {
         return newmsg.toString().trim();
     }
 
+    /**
+     * changes players apearance to a player or entity
+     *
+     * @param player player disguising
+     */
     public static void applyDisguise(Player player) {
         if (!activeCurses.containsKey(player.getUniqueId())) {
             MobDisguise mobDisguise = new MobDisguise(DisguiseType.FROG);
@@ -122,6 +157,11 @@ public class CurseManager implements Listener {
         }
     }
 
+    /**
+     * removes disguise from player
+     *
+     * @param player player no longer disguised
+     */
     public static void removeDisguise(Player player) {
         MobDisguise disguise = activeCurses.remove(player.getUniqueId());
         if (disguise != null) {
@@ -129,6 +169,10 @@ public class CurseManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -163,6 +207,10 @@ public class CurseManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player deadPlayer = event.getEntity();

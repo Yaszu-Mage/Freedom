@@ -32,6 +32,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import static xyz.yaszu.freedom.Util.Util.createMinMagicCircle;
 import static xyz.yaszu.freedom.Util.Util.getSoulType;
 
+/**
+ * a system that allows for players to create provinces to prevent greifing.
+ * the system prevents other players from breaking or placing blocks as well as using explosions.
+ * this is done through a ritual.
+ */
 public class ProvinceManager implements Listener {
 
     private static final Map<Location, Province> provinces = new ConcurrentHashMap<>();
@@ -47,6 +52,13 @@ public class ProvinceManager implements Listener {
         public boolean fireSpreadAllowed = false;
         public boolean explosionsAllowed = false;
 
+        /**
+         *
+         * @param owner owner of province
+         * @param center center coordinates of province
+         * @param range size of province from center
+         * @param structureBlocks structure blocks
+         */
         public Province(UUID owner, Location center, int range, Set<Location> structureBlocks) {
             this.owner = owner;
             this.center = center;
@@ -55,6 +67,12 @@ public class ProvinceManager implements Listener {
             this.startTime = System.currentTimeMillis();
         }
 
+        /**
+         * boolean for if location is protected
+         *
+         * @param loc location checked
+         * @return return true / false
+         */
         public boolean isProtected(Location loc) {
             if (loc.getWorld() != center.getWorld()) return false;
 
@@ -81,6 +99,14 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * claims a province for player
+     *
+     * @param owner player claiming province
+     * @param rawCenter center of province
+     * @param range size of province
+     * @param structureBlocks structure blocks
+     */
     public static void claimProvince(Player owner, Location rawCenter, int range, Set<Location> structureBlocks) {
         Location center = rawCenter.getBlock().getLocation();
         // Remove any existing province at this center
@@ -105,6 +131,9 @@ public class ProvinceManager implements Listener {
         saveProvinces(); // Save when a new province is claimed
     }
 
+    /**
+     * saves a province
+     */
     public static void saveProvinces() {
         File file = new File(Freedom.get_plugin().getDataFolder(), "provinces.yml");
         YamlConfiguration config = new YamlConfiguration();
@@ -134,6 +163,9 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     *  load province
+     */
     public static void loadProvinces() {
         File file = new File(Freedom.get_plugin().getDataFolder(), "provinces.yml");
         if (!file.exists()) return;
@@ -166,6 +198,10 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * check if province is still created
+     * @param province province checked
+     */
     private static void startIntegrityTask(Province province) {
         new BukkitRunnable() {
             @Override
@@ -193,6 +229,11 @@ public class ProvinceManager implements Listener {
         }.runTaskTimer(Freedom.get_plugin(), 0, 20);
     }
 
+    /**
+     * shows visuals for province
+     *
+     * @param province province visuals are aplied for
+     */
     private static void showProvinceVisuals(Province province) {
         // Display ritual circle in the center of EACH protected chunk
         int centerX = province.center.getBlockX() >> 4;
@@ -208,6 +249,12 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * unclaim province
+     *
+     * @param center center of province
+     * @param reason reason province was lost
+     */
     public static void unclaim(Location center, String reason) {
         Province p = provinces.remove(center);
         if (p != null) {
@@ -219,6 +266,10 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent event) {
         Location loc = event.getBlock().getLocation();
@@ -248,6 +299,11 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * used for stoping ritual
+     *
+     * @param player player performing ritual
+     */
     public static void interruptRitual(Player player) {
         Location playerLoc = player.getLocation();
         Province closest = null;
@@ -270,6 +326,10 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockPlace(BlockPlaceEvent event) {
         Location loc = event.getBlock().getLocation();
@@ -290,6 +350,10 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInteract(PlayerInteractEvent event) {
         if (event.isCancelled()) return;
@@ -327,6 +391,10 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDamage(org.bukkit.event.entity.EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) return;
@@ -347,16 +415,28 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onExplosion(EntityExplodeEvent event) {
         handleExplosion(event.blockList());
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockExplosion(BlockExplodeEvent event) {
         handleExplosion(event.blockList());
     }
 
+    /**
+     * unclaims ritual due to explosion
+     * @param blocks blocks
+     */
     private void handleExplosion(List<Block> blocks) {
         Iterator<Block> it = blocks.iterator();
         while (it.hasNext()) {
@@ -379,6 +459,10 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFireSpread(org.bukkit.event.block.BlockIgniteEvent event) {
         Location loc = event.getBlock().getLocation();
@@ -392,6 +476,10 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBurn(org.bukkit.event.block.BlockBurnEvent event) {
         Location loc = event.getBlock().getLocation();
@@ -405,6 +493,13 @@ public class ProvinceManager implements Listener {
         }
     }
 
+    /**
+     * updates setings of players province
+     *
+     * @param owner owner of province
+     * @param key setting changed
+     * @param value value changed by
+     */
     public static void updatePlayerSettings(UUID owner, org.bukkit.NamespacedKey key, boolean value) {
         for (Province p : provinces.values()) {
             if (p.owner.equals(owner)) {

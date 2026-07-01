@@ -20,6 +20,10 @@ import java.util.UUID;
 import static xyz.yaszu.freedom.Util.Util.dess;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
+/**
+ * a system that keeps track of if a player is in combat.
+ * functions as a timer of 30 seconds and is reset until the end of combat.
+ */
 public class CombatTimer implements Listener {
     public static HashMap<UUID,Long> combatTimer = new HashMap<>();
     public static long combatTime = 30000;
@@ -43,7 +47,12 @@ public class CombatTimer implements Listener {
         }
     }
 
-
+    /**
+     * creates a combat timer for player when in combat
+     *
+     * @param player player
+     * @return combat timer for player
+     */
     public static boolean isCombat(Player player) {
         return combatTimer.containsKey(player.getUniqueId());
     }
@@ -56,6 +65,11 @@ public class CombatTimer implements Listener {
 
     }
 
+    /**
+     * removes combat timer on join
+     *
+     * @param event player join event
+     */
     @EventHandler
     public void PlayerJoinEvent(PlayerJoinEvent event) {
         if (event.getPlayer().getPersistentDataContainer().has(keygen("combattimer"))) {
@@ -63,7 +77,11 @@ public class CombatTimer implements Listener {
         }
     }
 
-
+    /**
+     * checks for a combat timer on player
+     *
+     * @param player player
+     */
     public void combatcheck(Player player) {
         if (xyz.yaszu.freedom.Subsystems.AdminManager.isSudo(player)) return;
         if (!player.getPersistentDataContainer().has(keygen("combattimer"))) {
@@ -75,6 +93,12 @@ public class CombatTimer implements Listener {
         }
     }
 
+    /**
+     * does something, probably
+     *
+     * @param player player
+     * @return honestly don't know, its 4am and i haven't slept in days
+     */
     public BukkitRunnable futureCheck(Player player) {
         return new BukkitRunnable() {
             @Override

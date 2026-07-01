@@ -22,6 +22,9 @@ import xyz.yaszu.freedom.Util.Util;
 import static xyz.yaszu.freedom.Util.Util.dess;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
+/**
+ * a simple backpack system that stores contents in a persistent inventory.
+ */
 public class BackpackManager implements Listener {
 
     // -------------------------------------------------------------------------

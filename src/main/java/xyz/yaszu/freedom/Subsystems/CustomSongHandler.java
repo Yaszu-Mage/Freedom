@@ -26,11 +26,18 @@ import java.util.HashMap;
 import static xyz.yaszu.freedom.Util.Util.dess;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
+/**
+ * a system adding custom music to the game.
+ * the songs each have a respective music disc and function the same as a vanilla disc.
+ */
 public class CustomSongHandler implements Listener {
 
     private static final float SOUND_VOLUME = 4.0F; // Controls broadcast radius (~64 blocks at 4.0)
     private static final float SOUND_PITCH  = 1.0F;
 
+    /**
+     * handles names authors and descriptions of songs
+     */
     public enum CustomSong {
         sarajinae_gregor("Project Moon", "A song sung by gregor"),
         sarajinae_donquixote("Project Moon", "A song sung by Don Quixote"),
@@ -70,6 +77,10 @@ public class CustomSongHandler implements Listener {
 
     public static final HashMap<Location, CustomSong> jukes = new HashMap<>();
 
+    /**
+     * --unused--
+     * @param event --unused--
+     */
     @EventHandler
     public void onPlayerInputJukebox(PlayerInteractEvent event) {
 
@@ -157,6 +168,11 @@ public class CustomSongHandler implements Listener {
         event.setCancelled(true);
     }
 
+    /**
+     * creates music disc item
+     * @param song song created
+     * @return item
+     */
     public static ItemStack constructSong(CustomSong song) {
         ItemStack stack = ItemStack.of(Material.CARROT_ON_A_STICK);
         ItemMeta meta = stack.getItemMeta();

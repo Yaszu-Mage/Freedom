@@ -17,6 +17,9 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+/**
+ * REDO NOTES
+ */
 public class PacketManager extends PacketListenerAbstract {
 
     private static final String TEAM_NAME_PREFIX = "hide_";

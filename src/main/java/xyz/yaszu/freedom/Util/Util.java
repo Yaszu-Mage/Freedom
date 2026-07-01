@@ -72,6 +72,10 @@ import java.util.concurrent.TimeoutException;
 import static xyz.yaszu.freedom.Blocks.BlockHandler.restoreRotation;
 import static xyz.yaszu.freedom.Soul.soulListener.getSoul;
 import static xyz.yaszu.freedom.Subsystems.CurrencyManager.getCurrency;
+/**
+ * class for containing misc methods for reference inside other classes.
+ *
+ */
 /*
 Dear Reviewers,
 I apologize in advance, this file is hell. It's a bunch of methods I made,and used throughout the entire project

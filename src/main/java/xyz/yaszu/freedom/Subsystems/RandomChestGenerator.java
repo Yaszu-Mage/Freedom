@@ -28,6 +28,9 @@ import java.util.Random;
 
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
+/**
+ * system for generating chests
+ */
 public class RandomChestGenerator implements Listener {
 
     private static final double CHEST_FILL_CHANCE = 0.35;
@@ -66,6 +69,10 @@ public class RandomChestGenerator implements Listener {
         processChest(chest, true);
     }
 
+    /**
+     * processes if chunk has chest to generate
+     * @param chunk
+     */
     private void processChunk(Chunk chunk) {
         if (chunk == null || !chunk.isLoaded()) {
             return;
@@ -84,6 +91,11 @@ public class RandomChestGenerator implements Listener {
         }
     }
 
+    /**
+     * processes chest for if generated loot yet
+     * @param chest chest checked
+     * @param forceGenerate if force generating
+     */
     private void processChest(Chest chest, boolean forceGenerate) {
         if (chest == null) {
             return;
@@ -136,6 +148,11 @@ public class RandomChestGenerator implements Listener {
         chest.update(true, false);
     }
 
+    /**
+     * checks if loot is added
+     *
+     * @return what loot is generated
+     */
     private ItemStack nextLoot() {
         ItemStack relic = nextRelic();
         if (relic != null) {
@@ -168,6 +185,11 @@ public class RandomChestGenerator implements Listener {
         return lootPool.get(random.nextInt(lootPool.size())).clone();
     }
 
+    /**
+     * checks if relic is added to loot
+     *
+     * @return if relic is generated
+     */
     private ItemStack nextRelic() {
         if (ItemListener.RELICS.isEmpty() || random.nextDouble() > RELIC_CHANCE) {
             return null;
@@ -194,12 +216,22 @@ public class RandomChestGenerator implements Listener {
         return relic.clone();
     }
 
+    /**
+     * checks if a relic is spawned
+     *
+     * @param id relic id
+     * @return
+     */
     private boolean isRelicSpawned(String id) {
         return ItemListener.getTrackedWorld()
                 .getPersistentDataContainer()
                 .has(keygen(ItemListener.RELIC_SPAWNED_PREFIX + id), PersistentDataType.BYTE);
     }
 
+    /**
+     * marks a relic as spawned
+     * @param id id of spawned relic
+     */
     private void markRelicSpawned(String id) {
         ItemListener.getTrackedWorld()
                 .getPersistentDataContainer()

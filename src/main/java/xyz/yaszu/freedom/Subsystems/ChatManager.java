@@ -26,6 +26,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import static xyz.yaszu.freedom.Util.Util.getSoulType;
 import static xyz.yaszu.freedom.Util.Util.keygen;
 
+/**
+ * manager for chat events
+ */
 public class ChatManager implements Listener {
 
     private static final Map<UUID, UUID> echoMap = new ConcurrentHashMap<>();
@@ -156,8 +159,14 @@ public class ChatManager implements Listener {
         }
     }
 
+    /**
+     * plays a sound when spesific keywords are said
+     *
+     * @param recipient players hearing the sound
+     * @param message message being checked for keywords
+     */
     private void playProximitySound(Player recipient, String message) {
-        if (message.contains("Meow")) {
+        if (message.contains("Meow") || message.contains("Femboy")) {
             recipient.playSound(recipient.getLocation(), Sound.ENTITY_CAT_PURREOW, 1, 1);
         } else if (message.contains("Ribbit")) {
             recipient.playSound(recipient.getLocation(), Sound.ENTITY_FROG_AMBIENT, 1, 1);

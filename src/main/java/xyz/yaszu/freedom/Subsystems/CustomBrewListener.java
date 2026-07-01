@@ -21,6 +21,9 @@ import java.util.Random;
 
 import static xyz.yaszu.freedom.Util.Util.isItemNull;
 
+/**
+ * --unused--
+ */
 public class CustomBrewListener implements Listener {
 
     public HashMap<ItemStack, BaseDrink> customDrinks = new HashMap<>();

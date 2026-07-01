@@ -5,6 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+/**
+ * --unused--
+ */
 public class GatewayListener implements Listener {
     @EventHandler
     public void onGatewayEnter(EntityTeleportEndGatewayEvent event) {

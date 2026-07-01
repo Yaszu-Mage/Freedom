@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * processes chunks to add loot to natural new chests.
+ * the loot is added to chest on chunk load and will on fill natural unloaded chests.
+ */
 public class ChunkLootManager implements Listener {
     private final Random random = new Random();
 

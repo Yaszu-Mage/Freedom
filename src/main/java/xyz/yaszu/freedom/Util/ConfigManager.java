@@ -8,6 +8,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
+/**
+ * the configs of server file.
+ */
+
 public class ConfigManager {
 
     private final FileConfiguration config;

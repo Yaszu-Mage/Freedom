@@ -30,6 +30,12 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * a System for all processes needed aligning and placing structures.
+ * Works with both custom and vanilla structures.
+ * Custom structures work via loading world edit schematics and aligning to corners of a chunk before pasting.
+ */
+
 public class StructureUtil {
 
     /**

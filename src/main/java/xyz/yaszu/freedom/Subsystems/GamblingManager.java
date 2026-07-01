@@ -21,6 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static xyz.yaszu.freedom.Util.Util.*;
 
+/**
+ * a system for GAMBLING YAY
+ */
 public class GamblingManager implements Listener {
     public static HashMap<Location, Gambling> gamblingLocations = new HashMap<>();
     @EventHandler
@@ -30,6 +33,9 @@ public class GamblingManager implements Listener {
         }
     }
 
+    /**
+     * inventory of gambling menu
+     */
     public static class GamblingInventory implements InventoryHolder {
         private final Inventory inventory;
         public void setInventory(Location location) {
@@ -51,6 +57,11 @@ public class GamblingManager implements Listener {
 
         }
 
+        /**
+         * creates inventory for gambking menu
+         *
+         * @param inventory inventory
+         */
         public GamblingInventory(Inventory inventory) {
             this.inventory = Bukkit.createInventory(this, 27, dess("Gambling Inventory"));
         }
@@ -59,6 +70,10 @@ public class GamblingManager implements Listener {
             return inventory;
         }
 
+        /**
+         * selection icon
+         * @return item stack for item
+         */
         public ItemStack selectIcon() {
             ItemStack stack = ItemStack.of(Material.RECOVERY_COMPASS);
             ItemMeta meta = stack.getItemMeta();
@@ -68,6 +83,12 @@ public class GamblingManager implements Listener {
             return stack;
         }
 
+        /**
+         * generate random card
+         *
+         * @param name name
+         * @return item stack of card
+         */
         public ItemStack randomStandardCard(String name) {
             String suit = "";
             switch (random.nextInt(0,4)) {
@@ -84,6 +105,11 @@ public class GamblingManager implements Listener {
             return cardItem;
         }
 
+        /**
+         * --unused--
+         * @param name --unused--
+         * @return --unused--
+         */
         public ItemStack randomUnoCard(String name) {
             String suit = "";
             switch (random.nextInt(0,4)) {
@@ -102,6 +128,12 @@ public class GamblingManager implements Listener {
         }
 
 
+        /**
+         * updates inventory of menu
+         * @param state menu state
+         * @param hand card hand
+         * @param extraData extra data
+         */
         public void updateInventory(MenuState state, @Nullable List<Card> hand, @Nullable Object extraData) {
             switch (state) {
                 case MainMenu -> {
@@ -136,6 +168,9 @@ public class GamblingManager implements Listener {
             }
         }
 
+        /**
+         * menu states
+         */
         public enum MenuState {
             MainMenu,
             GameSelect,
@@ -203,12 +238,19 @@ public class GamblingManager implements Listener {
             displays.put(player.getUniqueId(),inventory);
         }
 
+        /**
+         * boolean checking for active games
+         * @return active / inactive
+         */
         @Override
         public boolean isGameActive() {
             return isActive;
         }
         boolean isActive = false;
 
+        /**
+         * starts the game
+         */
         @Override
         public void startGame() {
             isActive = true;
@@ -216,6 +258,9 @@ public class GamblingManager implements Listener {
 
         }
 
+        /**
+         * ends game
+         */
         @Override
         public void endGame() {
             isActive = false;
@@ -248,6 +293,9 @@ public class GamblingManager implements Listener {
             });
         }
 
+        /**
+         * updates game
+         */
         @Override
         public void updateGame() {
             if (revealed.size() < handSize) {
@@ -278,6 +326,9 @@ public class GamblingManager implements Listener {
         }
     }
 
+    /**
+     * game interface
+     */
     public interface Game {
         public HashMap<UUID, Integer> playerBalance = new HashMap<>();
         public HashMap<UUID, List<Card>> playerHands = new HashMap<>();
@@ -309,6 +360,9 @@ public class GamblingManager implements Listener {
         }
     }
 
+    /**
+     * gambling data
+     */
     public static class Gambling {
         public Gambling(Location location,Inventory inventory) {
             deck.reset();
@@ -435,12 +489,23 @@ public class GamblingManager implements Listener {
                 }
             }
 
+            /**
+             * gets random card
+             * @return card gotten
+             */
             public Card getRandomCard() {
                 int rand = random.nextInt(0,cards.size());
                 Card card = cards.get(rand);
                 cards.remove(rand);
                 return card;
             }
+
+            /**
+             * --unused--
+             * @param hand --unused--
+             * @param amount --unused--
+             * @return --unused--
+             */
             public List<Card> drawCard(List<Card> hand, int amount) {
                 List<Card> cards = new ArrayList<>();
                 for (int x = 0; x < amount; x++) {
@@ -449,6 +514,12 @@ public class GamblingManager implements Listener {
                 hand.addAll(cards);
                 return cards;
             }
+
+            /**
+             * creates a hand
+             * @param handSize size of created hand
+             * @return hand created
+             */
             public List<Card> createHand(byte handSize) {
                 List<Card> hand = new ArrayList<>();
                 for (int x = 0; x < handSize; x++) {

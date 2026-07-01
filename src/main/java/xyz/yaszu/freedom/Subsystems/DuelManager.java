@@ -44,6 +44,10 @@ import java.util.UUID;
 
 import static xyz.yaszu.freedom.Util.Util.dess;
 
+/**
+ *  a system for duels that adds the ability to challenge other players with.
+ *  players can create custom kits as well as choosing the arena type.
+ */
 public class DuelManager implements Listener {
     public static final Map<UUID, Location> playerInDuelArena = new HashMap<>();
 
@@ -72,6 +76,9 @@ public class DuelManager implements Listener {
         loadKits();
     }
 
+    /**
+     * saves kit to a duel kit slot
+     */
     public void saveKits() {
         File file = new File(Freedom.get_plugin().getDataFolder(), "kits.yml");
         YamlConfiguration config = new YamlConfiguration();
@@ -97,6 +104,13 @@ public class DuelManager implements Listener {
         }
     }
 
+    /**
+     * saves a players kit to a players config
+     *
+     * @param config config of player
+     * @param slotName name of kit slot
+     * @param kits kits player has
+     */
     private void savePlayerKitsToConfig(YamlConfiguration config, String slotName, Map<UUID, Kit> kits) {
         for (Map.Entry<UUID, Kit> entry : kits.entrySet()) {
             String path = "playerKits." + slotName + "." + entry.getKey().toString();
@@ -104,6 +118,13 @@ public class DuelManager implements Listener {
         }
     }
 
+    /**
+     * saves kit to config
+     *
+     * @param config config of player
+     * @param path
+     * @param kit kits of player
+     */
     private void saveKitToConfig(YamlConfiguration config, String path, Kit kit) {
         config.set(path + ".items", kit.items);
         config.set(path + ".helmet", kit.helmet);
@@ -112,6 +133,9 @@ public class DuelManager implements Listener {
         config.set(path + ".boots", kit.boots);
     }
 
+    /**
+     * load a saved kit config
+     */
     public void loadKits() {
         File file = new File(Freedom.get_plugin().getDataFolder(), "kits.yml");
         if (!file.exists()) return;
@@ -133,6 +157,13 @@ public class DuelManager implements Listener {
         loadPlayerKitsFromConfig(config, "slot4", duelsKitsSlot4);
     }
 
+    /**
+     * loads a player kit from config
+     *
+     * @param config config of player
+     * @param slotName name of kits slot
+     * @param kits kits of player
+     */
     private void loadPlayerKitsFromConfig(YamlConfiguration config, String slotName, Map<UUID, Kit> kits) {
         String basePath = "playerKits." + slotName;
         if (config.contains(basePath)) {
@@ -145,6 +176,13 @@ public class DuelManager implements Listener {
         }
     }
 
+    /**
+     * loads a kit from config
+     *
+     * @param config config of player
+     * @param path
+     * @return kit being loaded
+     */
     private Kit loadKitFromConfig(YamlConfiguration config, String path) {
         ItemStack[] items;
         List<?> itemsList = config.getList(path + ".items");
@@ -160,6 +198,11 @@ public class DuelManager implements Listener {
         return new Kit(items, helmet, chestplate, leggings, boots);
     }
 
+    /**
+     * save a kit as admin kit through command
+     *
+     * @return success
+     */
     public LiteralCommandNode<CommandSourceStack> saveAdminkit() {
         return Commands.literal("saveadminkit").then(Commands.argument("kitslot", StringArgumentType.word())
                 .executes(ctx -> {
@@ -181,6 +224,11 @@ public class DuelManager implements Listener {
                 })).build();
     };
 
+    /**
+     * save a kit through a command
+     *
+     * @return success
+     */
     public LiteralCommandNode<CommandSourceStack> savekit() {
         return Commands.literal("savekit").then(Commands.argument("kitslot", IntegerArgumentType.integer(1,5))
                 .executes(ctx -> {
@@ -224,8 +272,14 @@ public class DuelManager implements Listener {
     };
 
 
-
-
+    /**
+     * start a duel between to people with a spesific arena size and kit
+     *
+     * @param player player initiating duel
+     * @param target second player
+     * @param kit kit of the duel
+     * @param size arena size
+     */
     private void startDuel(Player player, Player target, Kit kit, DuelArena size) {
         Location arenaLoc = new Location(Bukkit.getWorld("DoubleVoid"), 0, 0, 0);
         while (duelsArenas.containsKey(arenaLoc)) {
@@ -283,6 +337,12 @@ public class DuelManager implements Listener {
         target.sendRichMessage("<green>Duel started against " + player.getName() + "!</green>");
     }
 
+    /**
+     * apply kit to a player
+     *
+     * @param player player that kit is applied to
+     * @param kit kit being applied
+     */
     private void applyKit(Player player, Kit kit) {
         player.getInventory().clear();
         player.getInventory().setHelmet(kit.helmet);
@@ -293,6 +353,9 @@ public class DuelManager implements Listener {
     }
 
     @EventHandler
+    /**
+     * --unused--
+     */
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player victim = event.getPlayer();
         if (playerInDuelArena.containsKey(victim.getUniqueId())) {
@@ -323,6 +386,9 @@ public class DuelManager implements Listener {
     }
 
     @EventHandler
+    /**
+     * --unused--
+     */
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (playerInDuelArena.containsKey(player.getUniqueId())) {
@@ -332,6 +398,11 @@ public class DuelManager implements Listener {
         }
     }
 
+    /**
+     * remove arena
+     *
+     * @param arenaLoc location of arena
+     */
     private void endDuel(Location arenaLoc) {
         List<UUID> playersToRemove = playerInDuelArena.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(arenaLoc))
@@ -362,6 +433,11 @@ public class DuelManager implements Listener {
         }
     }
 
+    /**
+     * command to start duel
+     *
+     * @return success
+     */
     public LiteralCommandNode<CommandSourceStack> duel() {
         LiteralArgumentBuilder<CommandSourceStack> duel = Commands.literal("duel");
 
@@ -444,6 +520,14 @@ public class DuelManager implements Listener {
         return duel.build();
     }
 
+    /**
+     * sends duel request to a player
+     *
+     * @param challenger player sending request
+     * @param target person being challenged to duel
+     * @param kit kit of duel
+     * @param size arena size of duel
+     */
     private void sendDuelRequest(Player challenger, Player target, Kit kit, DuelArena size) {
         if (challenger.equals(target)) {
             challenger.sendRichMessage("<red>You cannot duel yourself!</red>");
@@ -470,17 +554,33 @@ public class DuelManager implements Listener {
         target.sendMessage(message);
     }
 
+    /**
+     * --unused--
+     * @param player --unused--
+     * @param target --unused--
+     * @param kit --unused--
+     */
     public void duel(Player player, Player target, Kit kit) {
         sendDuelRequest(player, target, kit, DuelArena.Medium);
     }
 
+    /**
+     * records all duel challenges
+     *
+     * @param challengerId id of player challenging
+     * @param kit kit of duel request
+     * @param size size of duel in request
+     * @param expiry time
+     */
     private record DuelRequest(UUID challengerId, Kit kit, DuelArena size, long expiry) {
         public boolean isExpired() {
             return System.currentTimeMillis() > expiry;
         }
     }
 
-
+    /**
+     * layout of a kit
+     */
     public static class Kit {
 
         public ItemStack[] items;

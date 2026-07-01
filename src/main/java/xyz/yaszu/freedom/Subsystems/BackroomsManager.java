@@ -18,6 +18,8 @@ import java.util.Random;
 
 /**
  * Manages Backrooms specific features: protection and ambience.
+ * the backrooms is a custom dimension used as a form of punishment to players.
+ * the ambiance is a collection of vanilla sounds that play randomly.
  */
 public class BackroomsManager implements Listener {
 
@@ -46,6 +48,11 @@ public class BackroomsManager implements Listener {
         }
     }
 
+    /**
+     * plays scary ambiance at a random chance every 10 seconds
+     *
+     * @param plugin runs timer on plugin
+     */
     private void startAmbienceTask(Freedom plugin) {
         new BukkitRunnable() {
             @Override
@@ -62,6 +69,11 @@ public class BackroomsManager implements Listener {
         }.runTaskTimer(plugin, 200L, 200L); // Every 10 seconds (200 ticks)
     }
 
+    /**
+     * list of scary sounds to play
+     *
+     * @param player player that hears the sound
+     */
     private void playScarySound(Player player) {
         Sound[] sounds = {
             Sound.AMBIENT_CAVE,

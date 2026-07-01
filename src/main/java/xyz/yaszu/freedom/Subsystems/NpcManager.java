@@ -38,6 +38,9 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * empty / unused
+ */
 public class NpcManager extends Util implements Listener {
 
 }

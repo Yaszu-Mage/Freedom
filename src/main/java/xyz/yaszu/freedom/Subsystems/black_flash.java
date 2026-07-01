@@ -17,6 +17,9 @@ import xyz.yaszu.freedom.Freedom;
 
 import java.util.Random;
 
+/**
+ * no longer in use
+ */
 public class black_flash implements Listener {
     Random random = new Random();
 
