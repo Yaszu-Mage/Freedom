@@ -29,6 +29,7 @@ import xyz.yaszu.freedom.Blocks.Silly.Duck;
 import xyz.yaszu.freedom.Commands.Arguments.CustomItemArgument;
 import xyz.yaszu.freedom.Commands.Arguments.SellArguments;
 import xyz.yaszu.freedom.Commands.Arguments.SoulArguments;
+import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Information.Information_Handler;
 import xyz.yaszu.freedom.Items.BaseItem;
 import xyz.yaszu.freedom.Items.CustomItemType;
@@ -517,8 +518,9 @@ public class Trust {
                                     return Command.SINGLE_SUCCESS;
                                 }
                                 Location location = backrooms.getSpawnLocation().clone();
-                                location.setY(65);
-                                target.teleport(location);
+                                Location teleport = new Location(backrooms, location.getX(), 65, location.getZ());
+                                target.teleport(teleport);
+                                Freedom.get_plugin().getLogger().info("Teleporting " + target.getName() + " to the backrooms." + teleport.toString());
                                 target.setRespawnLocation(location);
                                 sender.sendRichMessage("<green>Teleported " + target.getName() + " to the backrooms.</green>");
                                 target.sendRichMessage("<red>You have been sent to the backrooms.</red>");
@@ -538,8 +540,9 @@ public class Trust {
                             sender.sendRichMessage("<red>Backrooms world not found!</red>");
                             return Command.SINGLE_SUCCESS;
                         }
-
-                        sender.teleport(backrooms.getSpawnLocation());
+                        Location location = backrooms.getSpawnLocation().clone();
+                        location.setY(65);
+                        sender.teleport(location);
                         sender.sendRichMessage("<green>Welcome to the backrooms.</green>");
                     }
                     return Command.SINGLE_SUCCESS;

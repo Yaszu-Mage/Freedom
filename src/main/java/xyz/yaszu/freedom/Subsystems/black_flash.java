@@ -18,7 +18,7 @@ import xyz.yaszu.freedom.Freedom;
 import java.util.Random;
 
 /**
- * no longer in use
+ * Mechanic from Jujutsu Kaisen where you can hit a critical hit
  */
 public class black_flash implements Listener {
     Random random = new Random();

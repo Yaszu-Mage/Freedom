@@ -1,5 +1,6 @@
 package xyz.yaszu.freedom.Subsystems;
 
+import jdk.jfr.Experimental;
 import org.bukkit.*;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,57 +22,12 @@ import static org.bukkit.Bukkit.createChunkData;
 /**
  * RedCastleManager — infinite procedural dungeon generator.
  *
- * ═══════════════════════════════════════════════════════════
- * GROUND TRUTH (measured from actual .schem files)
- * ═══════════════════════════════════════════════════════════
  *
- * VALID PIECES (W=16, H=14, L=16 unless noted):
- *   dungeon1        — ALL 4 horizontal faces open, solid floor, open ceiling
- *   hallwayall1     — ALL 4 horizontal faces open, solid floor, open ceiling
- *   hallwayEastWest1— ALL 4 horizontal faces open, solid floor, open ceiling
- *   NorthHallway    — ALL 4 horizontal faces open, solid floor, open ceiling
- *   Stair1 (H=20)   — ALL 4 horizontal faces open, bridges 2 levels vertically
  *
- * REMOVED (broken schematics):
- *   hallwayEastWest2 — H=13, broken floor (142 air at Y=0), broken ceiling
- *   Tree1            — H=13, broken floor (15 air at Y=0), broken ceiling
- *   Library1         — W=1, single-column schematic, unusable
- *
- * ARCHITECTURAL FACTS:
- *   • Every valid schematic has ALL 4 horizontal faces open (air Y=1..12).
- *   • Floor (Y=0) is solid in every piece — never touch it.
- *   • Ceiling (Y=13) is fully air — the level ABOVE provides the ceiling via its floor.
- *   • All walls between rooms come entirely from sealFace() RED_NETHER_BRICKS.
- *   • Rotation is cosmetic only — all pieces open on all 4 sides regardless.
- *   • Stair1 (H=20) occupies 2 level slots; it bridges level N and level N+1.
- *
- * COORDINATE SYSTEM:
- *   chunkX/chunkZ             — Minecraft chunk coords  (÷16)
- *   spawnStructureStatic()    — takes CHUNK coords, multiplies by 16 internally
- *   world.getBlockAt()        — takes BLOCK coords (cx*16 + offset)
- *   LEVEL_HEIGHT = 14         — floor-to-floor distance matching schematic H=14
- *   Level N floor Y           — LEVEL_BASE_Y + N * LEVEL_HEIGHT
- *
- * TIMING FIX (critical):
- *   FAWE pastes asynchronously. Operations.complete() returns before blocks land.
- *   sealFace() called immediately after paste gets overwritten by FAWE air blocks.
- *   FIX: seal runs in TWO passes — SEAL_PASS1_TICKS and SEAL_PASS2_TICKS after paste.
- *   Pass 1 catches normal FAWE completion. Pass 2 catches slow/lagging servers.
- *   Both passes write the same blocks so double-writing is harmless.
- *
- * DOUBLE-GENERATION FIX:
- *   enqueuedChunks tracks every chunk added to queue OR already generated.
- *   world.getChunkAt() (force-load) fires ChunkLoadEvent → generateCastle → enqueue.
- *   Since we add to enqueuedChunks BEFORE calling getChunkAt(), the event's enqueue
- *   call returns immediately without adding a duplicate.
- */
+ * **/
+@Experimental
 public class RedCastleManager {
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // CONSTANTS — all verified against actual schematic files
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /** Number of vertical dungeon levels (0 to MAX_LEVELS-1). */
     public static final int MAX_LEVELS = 5;
 
     /** Y coordinate of level 0 floor. */
@@ -159,9 +115,6 @@ public class RedCastleManager {
         public int dl() { return switch(this){case Up->1;case Down->-1;default->0;}; }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // PIECE DEFINITION
-    // ─────────────────────────────────────────────────────────────────────────
 
     public static class Piece {
         public final String name;
@@ -196,9 +149,6 @@ public class RedCastleManager {
 
     private static final Piece STAIR_PIECE = new Piece("Stair1", 2, 0);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // RUNTIME STATE
-    // ─────────────────────────────────────────────────────────────────────────
 
     private static final Queue<SlotNode>           queue           = new ConcurrentLinkedQueue<>();
     /** Keys of slots that are in the queue OR have been generated — prevents duplicates. */
@@ -215,9 +165,6 @@ public class RedCastleManager {
     /** A slot = one (chunkX, chunkZ, level) position to generate. */
     private record SlotNode(World world, int cx, int cz, int level) {}
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // KEY HELPERS
-    // ─────────────────────────────────────────────────────────────────────────
 
     private static String key(int cx, int cz, int level) {
         return level + ":" + cx + ":" + cz;
@@ -227,9 +174,6 @@ public class RedCastleManager {
         return LEVEL_BASE_Y + level * LEVEL_HEIGHT;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // PUBLIC API
-    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Called by WorldManager on every ChunkLoadEvent for redcastle worlds.
@@ -240,9 +184,7 @@ public class RedCastleManager {
         ensureTask(world);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // WORKER TASK — one per world, never cancels
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private static void ensureTask(World world) {
         if (worldTasks.containsKey(world.getName())) return;
@@ -259,9 +201,6 @@ public class RedCastleManager {
         dbg("Worker started for world '%s' taskId=%d", world.getName(), id);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // ENQUEUE — add to queue IFF not already seen
-    // ─────────────────────────────────────────────────────────────────────────
 
     private static void enqueue(World world, int cx, int cz, int level) {
         if (level < 0 || level >= MAX_LEVELS) return;
@@ -270,9 +209,6 @@ public class RedCastleManager {
         queue.add(new SlotNode(world, cx, cz, level));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // EDGE CONNECTIVITY — symmetric hash
-    // ─────────────────────────────────────────────────────────────────────────
 
     /** Returns true if the edge between (cx,cz,level) and its neighbor in dir is open. */
     private static boolean edgeOpen(World world, int cx, int cz, int level, Dir dir) {
@@ -302,9 +238,6 @@ public class RedCastleManager {
         return new Random(s).nextInt(100) < VERTICAL_EDGE_CHANCE;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // CORE PROCESSING
-    // ─────────────────────────────────────────────────────────────────────────
 
     private static void process(SlotNode node) {
         World world = node.world;

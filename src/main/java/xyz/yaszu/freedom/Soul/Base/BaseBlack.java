@@ -1153,7 +1153,7 @@ public class BaseBlack implements Base_Soul, Listener {
                     Location loc = (i < information.locations.size()) ? information.locations.get(i) : null;
                     ItemStack savedItem  = (i < information.items.size())    ? information.items.get(i)    : null;
 
-                    if (loc != null && savedItem != null) {
+                    if (loc != null && savedItem != null && savedItem.getItemMeta() != null) {
                         // Clone the stored item so we never mutate the live BlackInformation.items
                         // reference. Without this, setItemMeta() would write the display lore back
                         // into the stored object, which then gets serialized with the extra lore

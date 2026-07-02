@@ -7,12 +7,15 @@ import kr.toxicity.model.api.bukkit.platform.BukkitAdapter;
 import kr.toxicity.model.api.platform.PlatformEntity;
 import kr.toxicity.model.api.tracker.EntityTracker;
 import net.kyori.adventure.text.Component;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -31,7 +34,7 @@ import java.util.*;
 
 import static xyz.yaszu.freedom.Util.Util.*;
 
-public class BaseGreen implements Base_Soul {
+public class BaseGreen implements Base_Soul, Listener {
 
     @Override
     public String Name_For_Container() {
@@ -68,6 +71,14 @@ public class BaseGreen implements Base_Soul {
         AbilityOne(player, false);
     }
 
+    /**
+     * Executes the first ability of the player, applying various effects based on
+     * the provided parameters. This method redirects to {@link #AbilityOneRedo(Player, boolean, int)}
+     * for additional logic and processing.
+     *
+     * @param player    The player who is using the ability.
+     * @param is_imbue  Indicates whether the ability is being imbued with additional effects.
+     */
     @Override
  public void AbilityOne(Player player, boolean is_imbue) {
         AbilityOneRedo(player, is_imbue,0);
@@ -78,7 +89,8 @@ public class BaseGreen implements Base_Soul {
 //                if (ray.getHitEntity() != null) {
 //                    Entity looking_at = ray.getHitEntity();
 //                    if (looking_at instanceof Player target && target != player) {
-//                        if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
+//
+//          if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING) != null) {
 //                            if (target.getPersistentDataContainer().get(keygen("trustedby"), PersistentDataType.STRING).contains(player.getName())) {
 //                                registerSprite(target, player);
 //                            }
@@ -109,7 +121,12 @@ public class BaseGreen implements Base_Soul {
         }
     }
 
-
+    /**
+     * Recreation of the original ability one for green because the models were not done
+     * @param player Player to apply ability to
+     * @param is_imbue if it is an imbuement or not
+     * @param modifier modifier to add
+     */
     public void AbilityOneRedo(Player player, boolean is_imbue, @Nullable int modifier) {
         //--------------- VFX -----------------\\
         Location playerLocation = player.getLocation();
@@ -151,6 +168,16 @@ public class BaseGreen implements Base_Soul {
         }
     }
 
+    /**
+     * Registers a sprite for the target player by applying a health boost effect,
+     * displaying particles and sounds, spawning a custom entity, and setting up
+     * entity tracking and behavior as a follower for the target.
+     *
+     * @param target The player who is the target of the sprite registration.
+     *               Effects, sounds, particles, and a tamed wolf are applied/spawned for this player.
+     * @param player The player who owns the sprite. The wolf entity is named after this player,
+     *               and their name is displayed above the sprite.
+     */
     public void registerSprite(Player target, Player player) {
         target.addPotionEffect(PotionEffectType.HEALTH_BOOST.createEffect(80, 2));
         Location location = target.getLocation();
@@ -172,7 +199,23 @@ public class BaseGreen implements Base_Soul {
         follower(tracker,wolf,target,player).runTaskTimer(Bukkit.getPluginManager().getPlugin("Freedom"),0,40);
     }
 
+    /**
+     * A Random object used to generate pseudo-random numbers in the class.
+     * This field provides utility for various randomized operations
+     * within the functionality of the containing class.
+     */
     Random random = new Random();
+
+    /**
+     * Creates a BukkitRunnable responsible for tracking and managing the behavior of an entity
+     * that acts as a follower for a player. The follower's behavior includes periodic particle
+     * and sound effects, ensuring the entity follows its owner, and applying status effects.
+     * The runnable also monitors certain conditions to cancel the task and despawn the follower
+     * when required.
+     *
+     * @param tracker  The {@link EntityTracker} object responsible for tracking and managing the follower entity.
+     * @param entity   The {@link Entity} acting as the follower. Typically, this is a tamed {@link Wolf}.
+     * @param player   The {@link Player} that*/
     public BukkitRunnable follower(EntityTracker tracker, Entity entity,Player player, Player summoner) {
         return new BukkitRunnable() {
             @Override
@@ -206,10 +249,28 @@ public class BaseGreen implements Base_Soul {
         };
     }
 
+    /**
+     * Provides the related item associated with this class or functionality.
+     * This method is overridden to define the specific ItemStack that represents
+     * the corresponding item, which is meant to symbolize or identify certain
+     * behavior or characteristics within the context of the system.
+     *
+     * @return An {@link ItemStack} instance of type {@link Material#STICK},
+     *         representing the related item defined for the implementing class.
+     */
     @Override
     public ItemStack Related_Item() {
         return ItemStack.of(Material.STICK);
     }
+
+    /**
+     * Handles the EntityDeath event and performs specific operations when certain conditions are met.
+     * This method checks if the entity that died has a persistent data tag with the key "sprite" and,
+     * if so, updates relevant data for the player associated with the entity.
+     *
+     * @param event The EntityDeathEvent triggered when an entity dies. Provides access
+     *              to the entity and other event-related data.
+     */
     @EventHandler
     public void EntityDeath(EntityDeathEvent event) {
         Entity entity = event.getEntity();
@@ -218,24 +279,50 @@ public class BaseGreen implements Base_Soul {
             player.getPersistentDataContainer().set(keygen("sprite_active"),PersistentDataType.BOOLEAN,false);
         }
     }
+
+    /**
+     * Provides the name of the second ability associated with this class or functionality.
+     * The returned name is styled using MiniMessage formatting and includes details about
+     * the ability's nature, indicating it is a short-range healing ability.
+     *
+     * @return A {@link Component} representing the formatted name of Ability Two.
+     */
     @Override
     public Component AbilityTwoName() {
         return dess("<green>Ability Two</green> - Short Range Healing");
     }
 
+    /**
+     * Provides the description of the second ability associated with this class or functionality.
+     * The description highlights the ability's feature of quickly healing trusted individuals.
+     *
+     * @return A {@link Component} representing the formatted description of Ability Two.
+     */
     @Override
     public Component AbilityTwoDescription() {
         return dess("Heal those you trust quickly");
     }
 
 
-
-
+    /**
+     * Ability Two - An ability that can be triggered using an ITEM and/or with Inputs
+     * @param player Player to handle Ability Two for
+     * @param ability_item ItemStack used in ability usage
+     * @throws MineSkinException if there's an error with MineSkin
+     * @throws DataRequestException if there's an error with the data request
+     * links back to ability two
+     */
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item) {
         AbilityTwo(player, ability_item, false);
     }
 
+    /**
+     * Ability Two - An ability that can be triggered using an ITEM and/or with Inputs
+     * @param player Player to handle Ability Two for
+     * @param ability_item ItemStack used in ability usage
+     * @param is_imbue checking if it's imbued
+     */
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) {
         //
@@ -275,6 +362,10 @@ public class BaseGreen implements Base_Soul {
     }
     }
 
+    /**
+     * Passive Description - Provides a description of the passive ability associated with this class or functionality.
+     * @return A {@link Component} representing the formatted description of the Passive.
+     */
     @Override
     public Component Passive_Description() {
         return dess("You heal all people you trust in a 10 block radius");

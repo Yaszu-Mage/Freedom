@@ -1,6 +1,7 @@
 package xyz.yaszu.freedom.Soul.Base;
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
+import jdk.jfr.Experimental;
 import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
@@ -21,7 +22,7 @@ import xyz.yaszu.freedom.Util.Util;
 import java.util.Random;
 
 import static xyz.yaszu.freedom.Util.Util.*;
-
+@Experimental
 public class BaseCyan implements Base_Soul, Listener {
     @Override
     public String Name_For_Container() {

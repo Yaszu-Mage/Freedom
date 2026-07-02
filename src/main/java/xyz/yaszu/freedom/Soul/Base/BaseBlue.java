@@ -198,6 +198,17 @@ public class BaseBlue implements Base_Soul, Listener {
     public Component AbilityTwoDescription() {
         return dess("While triggering the anti clock item, Blue is able to set a teleport location.");
     }
+
+    /**
+     * Initiates a teleportation process for the specified player to a saved location.
+     * This method implements visual effects during the loading process and allows
+     * nearby trusted players to be teleported with the initiating player.
+     * The teleportation is canceled if certain conditions fail, such as player movement,
+     * exceeding the allowed distance, or health increase during the process.
+     *
+     * @param player The player who is initiating the teleportation, whose persistent data
+     *               container holds the saved location and necessary data for teleportation.
+     */
     public void load(Player player) {
         //VFX
         new BukkitRunnable() {
@@ -383,6 +394,12 @@ public class BaseBlue implements Base_Soul, Listener {
 
 
     }
+
+    /**
+     * Checks if a number is a multiple of 3, 2, or 1.
+     * @param num The number to check.
+     * @return 3 if the number is a multiple of 3, 2 if it is a multiple of 2, and 1 otherwise.
+     */
     public static double threes(int num) {
         if (num % 3 == 0) {
             return 3;
@@ -392,6 +409,11 @@ public class BaseBlue implements Base_Soul, Listener {
         }
         return 1;
     }
+
+    /**
+     * Saves the current location of the player to a persistent data container.
+     * @param player The player whose location is to be saved.
+     */
     public void save(Player player) {
         player.getPersistentDataContainer().set(keygen("blue_save"), PersistentDataType.BOOLEAN, true);
         player.getPersistentDataContainer().set(keygen("bluesaveX"), PersistentDataType.DOUBLE, player.getLocation().getX());
@@ -419,11 +441,27 @@ public class BaseBlue implements Base_Soul, Listener {
             }
         }.runTaskTimer(Freedom.get_plugin(),0,1);
     }
+
+    /**
+     * Handles the ability two usage for a player.
+     * @param player Player to handle Ability Two for
+     * @param ability_item ItemStack used in ability usage
+     * @throws MineSkinException
+     * @throws DataRequestException
+     */
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item) throws MineSkinException, DataRequestException {
         AbilityTwo(player, ability_item, false);
     }
 
+    /**
+     * Handles the ability two usage for a player.
+     * @param player Player to handle Ability Two for
+     * @param ability_item ItemStack used in ability usage
+     * @param is_imbue checking if it's imbued
+     * @throws MineSkinException
+     * @throws DataRequestException
+     */
     @Override
  public void AbilityTwo(Player player, ItemStack ability_item, boolean is_imbue) throws MineSkinException, DataRequestException {
         if (!player.getPersistentDataContainer().has(keygen("blue_save"), PersistentDataType.BOOLEAN)) {
@@ -436,31 +474,57 @@ public class BaseBlue implements Base_Soul, Listener {
         }
     }
 
+    /**
+     * Component description of the Passive Ability
+     * @return Component constructed from the description
+     * @see Component
+     * @see Util
+     */
     @Override
     public Component Passive_Description() {
         return dess("Linked in Park: You can link with another player, when that player is killed, you are enraged.");
     }
-BaseYellow yellow = new BaseYellow();
+
+    /**
+     * Creates a new BaseYellow instance to recycle passives
+     */
+    BaseYellow yellow = new BaseYellow();
     @Override
     public void Passive(Player player, Object event) {
         yellow.Passive(player,event);
     }
 
+    /**
+     * Component description of the Active Ability
+     * @return Component constructed from the description
+     */
     @Override
     public Component ActivePassive_Description() {
         return dess("Light Mend: Using soul points, you can rewind time and heal 25 durability of the Item you are holding");
     }
 
+    /**
+     * Returns the cooldown duration for the second ability.
+     * This is the amount of time (in milliseconds)*/
     @Override
     public long AbilityTwo_Cooldown() {
         return 30000;
     }
 
+    /**
+     * Ability one Cooldown measured in milliseconds
+     * @param obj Given object, depends on the moveset, could be a player
+     * @return Cooldown time in milliseconds
+     */
     @Override
     public long AbilityOne_Cooldown(Object obj) {
         return 30000;
     }
 
+    /**
+     * Ability two Cooldown measured in milliseconds
+     * @param player Player to handle active passive for
+     */
     @Override
     public void ActivePassive(Player player) {
         if (!player.getPersistentDataContainer().has(FreedomKeys.soulPoint())) return;

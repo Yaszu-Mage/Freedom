@@ -13,13 +13,14 @@ import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.data.type.TrapDoor;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Ageable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Vine;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -27,6 +28,7 @@ import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -34,6 +36,7 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -45,7 +48,438 @@ import static xyz.yaszu.freedom.Util.Util.*;
 
 public class RobloxCrossplay implements Listener {
     private HttpServer server;
-    double scale = 3.5;
+    double scale = 3.52;
+
+    public HashMap<String, Inventory> inventory = new HashMap<>();
+//    YamlConfiguration data = YamlConfiguration.loadConfiguration(new File(Freedom.get_plugin().getDataFolder(), "RobloxData.yml"));
+
+
+    String ok = "Okay!";
+    public void init() {
+        Plugin plugin = Freedom.get_plugin();
+        //LOAD
+//        File file = new File(plugin.getDataFolder(), "RobloxData.yml");
+//        //Convert File into JSON object
+//        if (!file.exists()) {
+//            try {
+//                file.createNewFile();
+//                Freedom.get_plugin().getLogger().info("Created RobloxData.yml");
+//            } catch (IOException e) {
+//                Freedom.get_plugin().getLogger().severe("Could not create RobloxData.yml");
+//            }
+//        } else {
+//            //Get information and convert into JSON object
+//            data = YamlConfiguration.loadConfiguration(file);
+//        }
+
+
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                server = HttpServer.create(new InetSocketAddress(8080),0);
+
+                //create endpoints
+                server.createContext("/beemovie", httpExchange -> {
+                    String response = beemovie;
+
+                    httpExchange.sendResponseHeaders(200, response.length());
+
+                    OutputStream os = httpExchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+
+                });
+                server.createContext("/startPlayer", httpExchange -> {
+                    if (!httpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                        httpExchange.sendResponseHeaders(405, -1);
+                        return;
+                    }
+                    String body = new String(httpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                    Freedom.get_plugin().getLogger().info("Received startPlayer request: " + body);
+
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    String playerName = json.get("player").getAsString();
+                    Freedom.get_plugin().getLogger().info("Received startPlayer request for player: " + playerName);
+                    String realName = playerName;
+                    playerName = "R_" + playerName;
+                    World world = Bukkit.getWorld("world");
+                    if (!isGlobalPlayerValid(playerName)) {
+                        Freedom.get_plugin().getLogger().info("Starting player: " + playerName);
+                        String finalPlayerName = playerName;
+                        AtomicReference<Entity> entity = new AtomicReference<>();
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            
+                            ItemDisplay sheep = world.spawn(world.getSpawnLocation(), ItemDisplay.class);
+                            sheep.setItemStack(ItemStack.of(Material.DIAMOND));
+                            sheep.customName(dess(finalPlayerName));
+                            sheep.getPersistentDataContainer().set(keygen("rblx"), PersistentDataType.BOOLEAN,true);
+                            PlayerDisguise disguise = new PlayerDisguise(finalPlayerName, "Yaszu");
+                            disguise.setEntity(sheep);
+                            disguise.startDisguise();
+                            entity.set(sheep);
+                            // JSON Format:
+                            // {
+                            //   "player": "PlayerName",
+                            //   "world": "WorldName",
+                            //   "position": {
+                            //     "x": 0.0,
+                            //     "y": 0.0,
+                            //     "z": 0.0
+                            //   },
+                            //   "chunk": {
+                            //     "x": 0,
+                            //     "z": 0
+                            //   }
+                            // }
+                            try {
+                                JsonObject jsonResponse = new JsonObject();
+                                jsonResponse.addProperty("player", finalPlayerName);
+                                jsonResponse.addProperty("world", world.getName());
+                                JsonObject position = new JsonObject();
+                                position.addProperty("x", sheep.getLocation().getX());
+                                position.addProperty("y", sheep.getLocation().getY());
+                                position.addProperty("z", sheep.getLocation().getZ());
+                                jsonResponse.add("position", position);
+                                JsonObject chunk = new JsonObject();
+                                chunk.addProperty("x", sheep.getChunk().getX());
+                                chunk.addProperty("z", sheep.getChunk().getZ());
+                                jsonResponse.add("chunk", chunk);
+                                
+                                String response = jsonResponse.toString();
+
+                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                                httpExchange.sendResponseHeaders(200, responseBytes.length);
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    os.write(responseBytes);
+                                }
+                                
+                            } catch (IOException e) {
+
+                            }
+                        });
+                        server.createContext("/player/" + realName + "/chat", asyncHttpExchange -> {});
+                        server.createContext("/player/end/" + realName, asyncHttpExchange -> {
+                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                                asyncHttpExchange.sendResponseHeaders(405, -1);
+                                Freedom.get_plugin().getLogger().info("Received invalid request method: " + asyncHttpExchange.getRequestMethod());
+                                return;
+                            }
+                            //END PLAYER SESSION
+                            server.removeContext("/player/" + realName);
+                            server.removeContext("/player/" + realName + "/chat");
+                            server.removeContext("/player/" + realName + "/blockUpdate");
+                            server.removeContext("/player/" + realName + "/status");
+                            Freedom.get_plugin().getLogger().info("Removed player: " + realName);
+                            BukkitTask task = Bukkit.getScheduler().runTask(plugin,() ->{
+                               entity.get().remove();
+
+                            });
+                        });
+                        server.createContext("/player/" + realName + "/blockUpdate", asyncHttpExchange -> {
+                             if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                                asyncHttpExchange.sendResponseHeaders(405, -1);
+                                Freedom.get_plugin().getLogger().info("Received invalid request method: " + asyncHttpExchange.getRequestMethod());
+                                return;
+                            }
+                             try {
+
+
+                                 String Information = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+
+                                 Freedom.get_plugin().getLogger().info("Received block update request: " + Information);
+                                 JsonObject givenJson = JsonParser.parseString(Information).getAsJsonObject();
+
+                                 double x = givenJson.get("Xcord").getAsDouble();
+
+                                 double y = givenJson.get("Ycord").getAsDouble();
+                                 double z = givenJson.get("Zcord").getAsDouble();
+                                 Freedom.get_plugin().getLogger().info("UPDATEEEE");
+                                 String actionType = givenJson.get("actionType").getAsString().toLowerCase();
+                                 BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                                     Freedom.get_plugin().getLogger().info(actionType + " " + actionType.equals("update"));
+                                     Block block = world.getBlockAt(new Location(world, x, y, z));
+                                     if (actionType.equalsIgnoreCase("break")) {
+                                         block.setType(Material.AIR);
+                                     } else if (actionType.equalsIgnoreCase("place")) {
+                                         String materialName = givenJson.get("material").getAsString();
+                                         Material material = Material.getMaterial(materialName.toUpperCase());
+                                         if (material != null) {
+                                             block.setType(material);
+                                         } else {
+                                         }
+                                     } else if (actionType.equals("update")) {
+                                         Freedom.get_plugin().getLogger().info("Received block: " + Information);
+                                         Freedom.get_plugin().getLogger().info("Block type: " + block.getType());
+                                         Freedom.get_plugin().getLogger().info("CORDS" + x + " " + y + " " + z);
+                                         if (block.getBlockData() instanceof Door door) {
+                                             Freedom.get_plugin().getLogger().info("Door update: " + door.isOpen());
+                                             door.setOpen(!door.isOpen());
+                                             block.setBlockData(door);
+                                         }
+                                         if (block.getBlockData() instanceof TrapDoor trapDoor) {
+                                             Freedom.get_plugin().getLogger().info("Trapdoor update: " + trapDoor.isOpen());
+                                             trapDoor.setOpen(!trapDoor.isOpen());
+                                             block.setBlockData(trapDoor);
+                                         }
+                                     }
+
+
+                                 }, 1);
+                                 Freedom.get_plugin().getLogger().info("Block update task started: " + task.getTaskId());
+                             } catch (Exception e) {
+                                 Freedom.get_plugin().getLogger().info("Error processing block update request: " + e.getMessage());
+                             }
+                             asyncHttpExchange.sendResponseHeaders(404, -1);
+                             return;
+
+                        });
+                        Freedom.get_plugin().getLogger().info("Started player: " + realName);
+                        server.createContext("/player/" + realName + "/status", asyncHttpExchange -> {
+//                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("GET")) {
+//                                asyncHttpExchange.sendResponseHeaders(405, -1);
+//                                return;
+//                            }
+
+                            Entity display = entity.get();
+                            if (display == null || display.isDead()) {
+                                asyncHttpExchange.sendResponseHeaders(404, -1);
+                                return;
+                            }
+
+                            CompletableFuture<String> future = new CompletableFuture<>();
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                Location loc = display.getLocation();
+                                int radius = 32;
+                                JsonArray blocks = new JsonArray();
+                                World w = loc.getWorld();
+                                if (w != null) {
+                                    for (int x = (int) (loc.getX() - radius); x <= (int) (loc.getX() + radius); x++) {
+                                        for (int y = (int) (loc.getY() - radius); y <= (int) (loc.getY() + radius); y++) {
+                                            for (int z = (int) (loc.getZ() - radius); z <= (int) (loc.getZ() + radius); z++) {
+                                                Block block = w.getBlockAt(x, y, z);
+                                                Material material = block.getType();
+
+                                                if (!material.isAir()) {
+                                                    JsonObject b = new JsonObject();
+                                                    b.addProperty("x", x);
+                                                    b.addProperty("y", y);
+                                                    b.addProperty("z", z);
+                                                    b.addProperty("type", material.name());
+
+                                                    BlockData data = block.getBlockData();
+
+                                                    JsonObject properties = new JsonObject();
+
+                                                    if (data instanceof Directional directional)
+                                                        properties.addProperty("facing", directional.getFacing().name());
+
+                                                    if (data instanceof Bisected bisected)
+                                                        properties.addProperty("half", bisected.getHalf().name());
+
+                                                    if (data instanceof Waterlogged waterlogged)
+                                                        properties.addProperty("waterlogged", waterlogged.isWaterlogged());
+
+                                                    if (data instanceof Openable openable)
+                                                        properties.addProperty("open", openable.isOpen());
+
+                                                    if (data instanceof Powerable powerable)
+                                                        properties.addProperty("powered", powerable.isPowered());
+
+                                                    if (data instanceof org.bukkit.block.data.Ageable ageable)
+                                                        properties.addProperty("age", ageable.getAge());
+                                                    if (data instanceof Levelled levelled)
+                                                        properties.addProperty("level", levelled.getLevel());
+
+                                                    if (data instanceof Slab slab)
+                                                        properties.addProperty("slabType", slab.getType().name());
+
+                                                    if (data instanceof Stairs stairs) {
+                                                        properties.addProperty("shape", stairs.getShape().name());
+                                                        properties.addProperty("half", stairs.getHalf().name());
+                                                        properties.addProperty("facing", stairs.getFacing().name());
+                                                    }
+
+                                                    if (data instanceof TrapDoor trapdoor) {
+                                                        properties.addProperty("half", trapdoor.getHalf().name());
+                                                        properties.addProperty("facing", trapdoor.getFacing().name());
+                                                        properties.addProperty("open", trapdoor.isOpen());
+                                                    }
+
+                                                    if (data instanceof Door door) {
+                                                        properties.addProperty("half", door.getHalf().name());
+                                                        properties.addProperty("hinge", door.getHinge().name());
+                                                        properties.addProperty("facing", door.getFacing().name());
+                                                        properties.addProperty("open", door.isOpen());
+                                                    }
+
+                                                    b.add("properties", properties);
+
+                                                    blocks.add(b);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                JsonObject response = new JsonObject();
+                                response.add("nearbyBlocks", blocks);
+                                future.complete(response.toString());
+                            });
+
+                            try {
+                                String response = future.get();
+                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                                asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
+                                try (OutputStream os = asyncHttpExchange.getResponseBody()) {
+                                    os.write(responseBytes);
+                                }
+                            } catch (InterruptedException | ExecutionException | IOException e) {
+                                try {
+                                    asyncHttpExchange.sendResponseHeaders(500, -1);
+                                } catch (IOException ignored) {}
+                            }
+                        });
+                        server.createContext("/player/" + realName, asyncHttpExchange -> {
+                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                                asyncHttpExchange.sendResponseHeaders(405, -1);
+                                return;
+                            }
+
+                            String newBody = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+
+                            JsonObject information = JsonParser.parseString(newBody).getAsJsonObject();
+                            double x = information.get("xCord").getAsDouble();
+                            double y = information.get("yCord").getAsDouble();
+                            double z = information.get("zCord").getAsDouble();
+//                            Freedom.get_plugin().getLogger().info(
+//                                    String.format("Position: %.2f %.2f %.2f", x/scale, y/scale, z/scale)
+//                            );
+                            double velX = information.get("velX").getAsDouble();
+                            double velY = information.get("velY").getAsDouble();
+                            double velZ = information.get("velZ").getAsDouble();
+                            double yaw = information.get("yaw").getAsDouble();
+                            double pitch = information.get("pitch").getAsDouble();
+
+                            if (entity.get() == null || entity.get().isDead()) {
+                                BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
+                                    entity.set(world.spawn(new Location(world, x / scale, y / scale, z / scale), ItemDisplay.class));
+                                    ItemDisplay sheep = (ItemDisplay) entity.get();
+                                    sheep.customName(dess(finalPlayerName));
+                                    sheep.setItemStack(ItemStack.of(Material.DIAMOND));
+                                    PlayerDisguise disguise =
+                                            new PlayerDisguise(finalPlayerName, "Yaszu");
+
+                                    disguise.setEntity(sheep);
+                                    disguise.startDisguise();
+                                });
+                            }
+                            entity.get().teleportAsync(new Location(world, x/scale, y/scale, z/scale, (float) Math.clamp(Math.toDegrees(pitch*-1),0,360), (float) Math.clamp(Math.toDegrees(yaw*-1),-90,90)));
+                            entity.get().setVelocity(new Vector(velX, velY, velZ));
+                            //ENTITY PACKET
+                            /*
+                             {entity : {positionX : 0,positionY : 0, positionZ : 0, velocityX, velocityY, velocityZ,type}
+                             */
+                            CompletableFuture<JsonObject> future = new CompletableFuture<>();
+                            AtomicReference<JsonObject> jsonObjectAtomicReference = new AtomicReference<>();
+                            jsonObjectAtomicReference.set(new JsonObject());
+                            JsonObject statusJson = jsonObjectAtomicReference.get();
+                            BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
+                                        Entity display = entity.get();
+                                        if (display != null) {
+                                            statusJson.addProperty("Living", !display.isDead());
+                                            statusJson.addProperty("velocityX", display.getVelocity().getX());
+                                            statusJson.addProperty("velocityY", display.getVelocity().getY());
+                                            statusJson.addProperty("velocityZ", display.getVelocity().getZ());
+                                            //Decode and encode format for every nearby entity and what you can get by looking at them
+                                            JsonArray nearbyEntities = new JsonArray();
+
+                                            for (Entity e : display.getNearbyEntities(32, 32, 32)) {
+                                                JsonObject entityJson = new JsonObject();
+                                                entityJson.addProperty("type", e.getType().toString());
+                                                entityJson.addProperty("x", e.getLocation().getX() * scale);
+                                                entityJson.addProperty("y", e.getLocation().getY() * scale);
+                                                entityJson.addProperty("z", e.getLocation().getZ() * scale);
+                                                entityJson.addProperty("pitch", Math.toRadians(e.getLocation().getPitch() * -1));
+                                                entityJson.addProperty("yaw", Math.toRadians(e.getLocation().getYaw() * -1));
+                                                entityJson.addProperty("UniqueID", e.getUniqueId().toString());
+                                                nearbyEntities.add(entityJson);
+                                            }
+
+                                            statusJson.add("nearbyEntities", nearbyEntities);
+                                        }
+                                        future.complete(statusJson);
+                            });
+                            future.thenAccept(jsonObject -> {
+
+                                String response = statusJson.toString();
+                                try {
+                                    byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                                    asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
+                                    try (OutputStream os = asyncHttpExchange.getResponseBody()) {
+                                        os.write(responseBytes);
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+
+                        });
+                    } else {
+                        Freedom.get_plugin().getLogger().info("Invalid player: " + playerName);
+                        String response = "Player already exists or is invalid";
+                        byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                        httpExchange.sendResponseHeaders(400, responseBytes.length);
+                        try (OutputStream os = httpExchange.getResponseBody()) {
+                            os.write(responseBytes);
+                        }
+
+                    }
+                    httpExchange.getResponseBody().close();
+                });
+
+                server.setExecutor(null);
+                server.start();
+                plugin.getLogger().info("HTTP server started!");
+
+            } catch (IOException e) {
+                plugin.getLogger().severe("Could not start HTTP server!");
+            }
+
+
+        });
+    }
+
+
+
+    @EventHandler
+    public void onChunkLoadEvent(ChunkLoadEvent event) {
+        for (Entity entity: event.getChunk().getEntities()) {
+            if (entity instanceof ItemDisplay) {
+                ItemDisplay sheep = (ItemDisplay) entity;
+                if (sheep.getPersistentDataContainer().has(keygen("rblx"), PersistentDataType.BOOLEAN)) {
+                    sheep.remove();
+                }
+            }
+        }
+    }
+
+    public boolean isGlobalPlayerValid(String username) {
+        try {
+            URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + username);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+
+            // HTTP 200 means the user exists, HTTP 204 means the user is completely invalid
+            return responseCode == HttpURLConnection.HTTP_OK;
+
+        } catch (Exception e) {
+            // Handle API timeouts or Mojang downtime safely
+            return false;
+        }
+    }
     String beemovie = "According to all known laws of aviation, there is no way a bee should be able to fly.\n" +
             "Its wings are too small to get its fat little body off the ground.\n" +
             "The bee, of course, flies anyway because bees don't care what humans think is impossible.\n" +
@@ -1409,341 +1843,5 @@ public class RobloxCrossplay implements Listener {
             "I'm not making a major life decision during a production number!\n" +
             "All right. Take ten, everybody. Wrap it up, guys.\n" +
             "I had virtually no rehearsal for that.";
-    String ok = "Okay!";
-    public void init() {
-        Plugin plugin = Freedom.get_plugin();
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                server = HttpServer.create(new InetSocketAddress(8080),0);
-
-                //create endpoints
-                server.createContext("/beemovie", httpExchange -> {
-                    String response = beemovie;
-
-                    httpExchange.sendResponseHeaders(200, response.length());
-
-                    OutputStream os = httpExchange.getResponseBody();
-                    os.write(response.getBytes());
-                    os.close();
-
-                });
-                server.createContext("/startPlayer", httpExchange -> {
-                    if (!httpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
-                        httpExchange.sendResponseHeaders(405, -1);
-                        return;
-                    }
-                    String body = new String(httpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                    Freedom.get_plugin().getLogger().info("Received startPlayer request: " + body);
-
-                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    String playerName = json.get("player").getAsString();
-                    Freedom.get_plugin().getLogger().info("Received startPlayer request for player: " + playerName);
-                    String realName = playerName;
-                    playerName = "R_" + playerName;
-                    World world = Bukkit.getWorld("world");
-                    if (!isGlobalPlayerValid(playerName)) {
-                        Freedom.get_plugin().getLogger().info("Starting player: " + playerName);
-                        String finalPlayerName = playerName;
-                        AtomicReference<Entity> entity = new AtomicReference<>();
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            
-                            ItemDisplay sheep = world.spawn(world.getSpawnLocation(), ItemDisplay.class);
-                            sheep.setItemStack(ItemStack.of(Material.DIAMOND));
-                            sheep.customName(dess(finalPlayerName));
-                            sheep.getPersistentDataContainer().set(keygen("rblx"), PersistentDataType.BOOLEAN,true);
-                            PlayerDisguise disguise = new PlayerDisguise(finalPlayerName, "Yaszu");
-                            disguise.setEntity(sheep);
-                            disguise.startDisguise();
-                            entity.set(sheep);
-                            // JSON Format:
-                            // {
-                            //   "player": "PlayerName",
-                            //   "world": "WorldName",
-                            //   "position": {
-                            //     "x": 0.0,
-                            //     "y": 0.0,
-                            //     "z": 0.0
-                            //   },
-                            //   "chunk": {
-                            //     "x": 0,
-                            //     "z": 0
-                            //   }
-                            // }
-                            try {
-                                JsonObject jsonResponse = new JsonObject();
-                                jsonResponse.addProperty("player", finalPlayerName);
-                                jsonResponse.addProperty("world", world.getName());
-                                JsonObject position = new JsonObject();
-                                position.addProperty("x", sheep.getLocation().getX());
-                                position.addProperty("y", sheep.getLocation().getY());
-                                position.addProperty("z", sheep.getLocation().getZ());
-                                jsonResponse.add("position", position);
-                                JsonObject chunk = new JsonObject();
-                                chunk.addProperty("x", sheep.getChunk().getX());
-                                chunk.addProperty("z", sheep.getChunk().getZ());
-                                jsonResponse.add("chunk", chunk);
-                                
-                                String response = jsonResponse.toString();
-
-                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-                                httpExchange.sendResponseHeaders(200, responseBytes.length);
-
-                                try (OutputStream os = httpExchange.getResponseBody()) {
-                                    os.write(responseBytes);
-                                }
-                                
-                            } catch (IOException e) {
-
-                            }
-                        });
-                        Freedom.get_plugin().getLogger().info("Started player: " + realName);
-                        server.createContext("/player/" + realName + "/status", asyncHttpExchange -> {
-//                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("GET")) {
-//                                asyncHttpExchange.sendResponseHeaders(405, -1);
-//                                return;
-//                            }
-
-                            Entity display = entity.get();
-                            if (display == null || display.isDead()) {
-                                asyncHttpExchange.sendResponseHeaders(404, -1);
-                                return;
-                            }
-
-                            CompletableFuture<String> future = new CompletableFuture<>();
-                            Bukkit.getScheduler().runTask(plugin, () -> {
-                                Location loc = display.getLocation();
-                                int radius = 32;
-                                JsonArray blocks = new JsonArray();
-                                World w = loc.getWorld();
-                                if (w != null) {
-                                    for (int x = (int) (loc.getX() - radius); x <= (int) (loc.getX() + radius); x++) {
-                                        for (int y = (int) (loc.getY() - radius); y <= (int) (loc.getY() + radius); y++) {
-                                            for (int z = (int) (loc.getZ() - radius); z <= (int) (loc.getZ() + radius); z++) {
-                                                Block block = w.getBlockAt(x, y, z);
-                                                Material material = block.getType();
-
-                                                if (!material.isAir()) {
-                                                    JsonObject b = new JsonObject();
-                                                    b.addProperty("x", x);
-                                                    b.addProperty("y", y);
-                                                    b.addProperty("z", z);
-                                                    b.addProperty("type", material.name());
-
-                                                    BlockData data = block.getBlockData();
-
-                                                    JsonObject properties = new JsonObject();
-
-                                                    if (data instanceof Directional directional)
-                                                        properties.addProperty("facing", directional.getFacing().name());
-
-                                                    if (data instanceof Bisected bisected)
-                                                        properties.addProperty("half", bisected.getHalf().name());
-
-                                                    if (data instanceof Waterlogged waterlogged)
-                                                        properties.addProperty("waterlogged", waterlogged.isWaterlogged());
-
-                                                    if (data instanceof Openable openable)
-                                                        properties.addProperty("open", openable.isOpen());
-
-                                                    if (data instanceof Powerable powerable)
-                                                        properties.addProperty("powered", powerable.isPowered());
-
-                                                    if (data instanceof org.bukkit.block.data.Ageable ageable)
-                                                        properties.addProperty("age", ageable.getAge());
-                                                    if (data instanceof Levelled levelled)
-                                                        properties.addProperty("level", levelled.getLevel());
-
-                                                    if (data instanceof Slab slab)
-                                                        properties.addProperty("slabType", slab.getType().name());
-
-                                                    if (data instanceof Stairs stairs) {
-                                                        properties.addProperty("shape", stairs.getShape().name());
-                                                        properties.addProperty("half", stairs.getHalf().name());
-                                                        properties.addProperty("facing", stairs.getFacing().name());
-                                                    }
-
-                                                    if (data instanceof TrapDoor trapdoor) {
-                                                        properties.addProperty("half", trapdoor.getHalf().name());
-                                                        properties.addProperty("facing", trapdoor.getFacing().name());
-                                                        properties.addProperty("open", trapdoor.isOpen());
-                                                    }
-
-                                                    if (data instanceof Door door) {
-                                                        properties.addProperty("half", door.getHalf().name());
-                                                        properties.addProperty("hinge", door.getHinge().name());
-                                                        properties.addProperty("facing", door.getFacing().name());
-                                                        properties.addProperty("open", door.isOpen());
-                                                    }
-
-                                                    b.add("properties", properties);
-
-                                                    blocks.add(b);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                JsonObject response = new JsonObject();
-                                response.add("nearbyBlocks", blocks);
-                                future.complete(response.toString());
-                            });
-
-                            try {
-                                String response = future.get();
-                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-                                asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
-                                try (OutputStream os = asyncHttpExchange.getResponseBody()) {
-                                    os.write(responseBytes);
-                                }
-                            } catch (InterruptedException | ExecutionException | IOException e) {
-                                try {
-                                    asyncHttpExchange.sendResponseHeaders(500, -1);
-                                } catch (IOException ignored) {}
-                            }
-                        });
-                        server.createContext("/player/" + realName, asyncHttpExchange -> {
-                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
-                                asyncHttpExchange.sendResponseHeaders(405, -1);
-                                return;
-                            }
-
-                            String newBody = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                            Freedom.get_plugin().getLogger().info("Received player request: " + newBody);
-
-                            JsonObject information = JsonParser.parseString(newBody).getAsJsonObject();
-                            double x = information.get("xCord").getAsDouble();
-                            double y = information.get("yCord").getAsDouble();
-                            double z = information.get("zCord").getAsDouble();
-                            Freedom.get_plugin().getLogger().info(
-                                    String.format("Position: %.2f %.2f %.2f", x/scale, y/scale, z/scale)
-                            );
-                            double velX = information.get("velX").getAsDouble();
-                            double velY = information.get("velY").getAsDouble();
-                            double velZ = information.get("velZ").getAsDouble();
-                            double yaw = information.get("yaw").getAsDouble();
-                            double pitch = information.get("pitch").getAsDouble();
-                            Freedom.get_plugin().getLogger().info("Before scheduler");
-
-                            if (entity.get() == null || entity.get().isDead()) {
-                                BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                    entity.set(world.spawn(new Location(world, x / scale, y / scale, z / scale), ItemDisplay.class));
-                                    ItemDisplay sheep = (ItemDisplay) entity.get();
-                                    sheep.customName(dess(finalPlayerName));
-                                    sheep.setItemStack(ItemStack.of(Material.DIAMOND));
-                                    PlayerDisguise disguise =
-                                            new PlayerDisguise(finalPlayerName, "Yaszu");
-
-                                    disguise.setEntity(sheep);
-                                    disguise.startDisguise();
-                                });
-                            }
-                            Freedom.get_plugin().getLogger().info("PITCH: " + pitch + " YAW " + yaw);
-                            entity.get().teleportAsync(new Location(world, x/scale, y/scale, z/scale, (float) Math.clamp(Math.toDegrees(pitch*-1),0,360), (float) Math.clamp(Math.toDegrees(yaw*-1),-90,90)));
-                            entity.get().setVelocity(new Vector(velX, velY, velZ));
-                            Freedom.get_plugin().getLogger().info("AFTER scheduler");
-                            //ENTITY PACKET
-                            /*
-                             {entity : {positionX : 0,positionY : 0, positionZ : 0, velocityX, velocityY, velocityZ,type}
-                             */
-                            CompletableFuture<JsonObject> future = new CompletableFuture<>();
-                            AtomicReference<JsonObject> jsonObjectAtomicReference = new AtomicReference<>();
-                            jsonObjectAtomicReference.set(new JsonObject());
-                            JsonObject statusJson = jsonObjectAtomicReference.get();
-                            BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                        Entity display = entity.get();
-                                        if (display != null) {
-                                            statusJson.addProperty("Living", !display.isDead());
-                                            statusJson.addProperty("velocityX", display.getVelocity().getX());
-                                            statusJson.addProperty("velocityY", display.getVelocity().getY());
-                                            statusJson.addProperty("velocityZ", display.getVelocity().getZ());
-                                            //Decode and encode format for every nearby entity and what you can get by looking at them
-                                            JsonArray nearbyEntities = new JsonArray();
-
-                                            for (Entity e : display.getNearbyEntities(32, 32, 32)) {
-                                                JsonObject entityJson = new JsonObject();
-                                                entityJson.addProperty("type", e.getType().toString());
-                                                entityJson.addProperty("x", e.getLocation().getX() * scale);
-                                                entityJson.addProperty("y", e.getLocation().getY() * scale);
-                                                entityJson.addProperty("z", e.getLocation().getZ() * scale);
-                                                entityJson.addProperty("pitch", Math.toRadians(e.getLocation().getPitch() * -1));
-                                                entityJson.addProperty("yaw", Math.toRadians(e.getLocation().getYaw() * -1));
-                                                entityJson.addProperty("UniqueID", e.getUniqueId().toString());
-                                                nearbyEntities.add(entityJson);
-                                            }
-                                            statusJson.add("nearbyEntities", nearbyEntities);
-                                        }
-                                        future.complete(statusJson);
-                            });
-                            future.thenAccept(jsonObject -> {
-
-                                String response = statusJson.toString();
-                                try {
-                                    byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-                                    asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
-                                    try (OutputStream os = asyncHttpExchange.getResponseBody()) {
-                                        os.write(responseBytes);
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            });
-
-                        });
-                    } else {
-                        Freedom.get_plugin().getLogger().info("Invalid player: " + playerName);
-                        String response = "Player already exists or is invalid";
-                        byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-                        httpExchange.sendResponseHeaders(400, responseBytes.length);
-                        try (OutputStream os = httpExchange.getResponseBody()) {
-                            os.write(responseBytes);
-                        }
-
-                    }
-                    httpExchange.getResponseBody().close();
-                });
-
-                server.setExecutor(null);
-                server.start();
-                plugin.getLogger().info("HTTP server started!");
-
-            } catch (IOException e) {
-                plugin.getLogger().severe("Could not start HTTP server!");
-            }
-
-
-        });
-    }
-
-    @EventHandler
-    public void onChunkLoadEvent(ChunkLoadEvent event) {
-        for (Entity entity: event.getChunk().getEntities()) {
-            if (entity instanceof ItemDisplay) {
-                ItemDisplay sheep = (ItemDisplay) entity;
-                if (sheep.getPersistentDataContainer().has(keygen("rblx"), PersistentDataType.BOOLEAN)) {
-                    sheep.remove();
-                }
-            }
-        }
-    }
-
-    public boolean isGlobalPlayerValid(String username) {
-        try {
-            URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + username);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-
-            int responseCode = connection.getResponseCode();
-
-            // HTTP 200 means the user exists, HTTP 204 means the user is completely invalid
-            return responseCode == HttpURLConnection.HTTP_OK;
-
-        } catch (Exception e) {
-            // Handle API timeouts or Mojang downtime safely
-            return false;
-        }
-    }
-
 
 }
