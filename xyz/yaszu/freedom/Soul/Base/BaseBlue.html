@@ -142,7 +142,7 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOne_Cooldown(java.lang.Object)" class="member-name-link">AbilityOne_Cooldown</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability One Cooldown Time</div>
+<div class="block">Ability one Cooldown measured in milliseconds</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityOneDescription()" class="member-name-link">AbilityOneDescription</a>()</code></div>
@@ -158,19 +158,19 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack)" class="member-name-link">AbilityTwo</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  org.bukkit.inventory.ItemStack&nbsp;ability_item)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability Two - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Handles the ability two usage for a player.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack,boolean)" class="member-name-link">AbilityTwo</a><wbr>(org.bukkit.entity.Player&nbsp;player,
  org.bukkit.inventory.ItemStack&nbsp;ability_item,
  boolean&nbsp;is_imbue)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability Two - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Handles the ability two usage for a player.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwo_Cooldown()" class="member-name-link">AbilityTwo_Cooldown</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ability Two Cooldown Time</div>
+<div class="block">Returns the cooldown duration for the second ability.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#AbilityTwoDescription()" class="member-name-link">AbilityTwoDescription</a>()</code></div>
@@ -185,12 +185,12 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ActivePassive(org.bukkit.entity.Player)" class="member-name-link">ActivePassive</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Active Passive - A passive that requires a condition to activate (like sneaking or specific stats)</div>
+<div class="block">Ability two Cooldown measured in milliseconds</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ActivePassive_Description()" class="member-name-link">ActivePassive_Description</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Active Passive Description</div>
+<div class="block">Component description of the Active Ability</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Description()" class="member-name-link">Description</a>()</code></div>
@@ -204,7 +204,9 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#load(org.bukkit.entity.Player)" class="member-name-link">load</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Initiates a teleportation process for the specified player to a saved location.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Name()" class="member-name-link">Name</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -224,7 +226,7 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>net.kyori.adventure.text.Component</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Passive_Description()" class="member-name-link">Passive_Description</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Passive Description</div>
+<div class="block">Component description of the Passive Ability</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.bukkit.inventory.ItemStack</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#Related_Item()" class="member-name-link">Related_Item</a>()</code></div>
@@ -233,10 +235,14 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#save(org.bukkit.entity.Player)" class="member-name-link">save</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Saves the current location of the player to a persistent data container.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#threes(int)" class="member-name-link">threes</a><wbr>(int&nbsp;num)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Checks if a number is a multiple of 3, 2, or 1.</div>
+</div>
 </div>
 </div>
 </div>
@@ -425,18 +431,40 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
 <section class="detail" id="load(org.bukkit.entity.Player)">
 <h3>load</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">load</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">Initiates a teleportation process for the specified player to a saved location.
+ This method implements visual effects during the loading process and allows
+ nearby trusted players to be teleported with the initiating player.
+ The teleportation is canceled if certain conditions fail, such as player movement,
+ exceeding the allowed distance, or health increase during the process.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - The player who is initiating the teleportation, whose persistent data
+               container holds the saved location and necessary data for teleportation.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="threes(int)">
 <h3>threes</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">threes</span><wbr><span class="parameters">(int&nbsp;num)</span></div>
+<div class="block">Checks if a number is a multiple of 3, 2, or 1.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>num</code> - The number to check.</dd>
+<dt>Returns:</dt>
+<dd>3 if the number is a multiple of 3, 2 if it is a multiple of 2, and 1 otherwise.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="save(org.bukkit.entity.Player)">
 <h3>save</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">save</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
+<div class="block">Saves the current location of the player to a persistent data container.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - The player whose location is to be saved.</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -446,8 +474,7 @@ implements <a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Sou
  org.bukkit.inventory.ItemStack&nbsp;ability_item)</span>
                 throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack)">Base_Soul</a></code></span></div>
-<div class="block">Ability Two - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Handles the ability two usage for a player.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack)">AbilityTwo</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
@@ -455,8 +482,8 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <dd><code>player</code> - Player to handle Ability Two for</dd>
 <dd><code>ability_item</code> - ItemStack used in ability usage</dd>
 <dt>Throws:</dt>
-<dd><code>net.skinsrestorer.api.exception.MineSkinException</code> - if there's an error with MineSkin</dd>
-<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - if there's an error with data request</dd>
+<dd><code>net.skinsrestorer.api.exception.MineSkinException</code></dd>
+<dd><code>net.skinsrestorer.api.exception.DataRequestException</code></dd>
 </dl>
 </section>
 </li>
@@ -468,8 +495,7 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
  boolean&nbsp;is_imbue)</span>
                 throws <span class="exceptions">net.skinsrestorer.api.exception.MineSkinException,
 net.skinsrestorer.api.exception.DataRequestException</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack,boolean)">Base_Soul</a></code></span></div>
-<div class="block">Ability Two - An ability that can be triggered using an ITEM and/or with Inputs</div>
+<div class="block">Handles the ability two usage for a player.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityTwo(org.bukkit.entity.Player,org.bukkit.inventory.ItemStack,boolean)">AbilityTwo</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
@@ -478,8 +504,8 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <dd><code>ability_item</code> - ItemStack used in ability usage</dd>
 <dd><code>is_imbue</code> - checking if it's imbued</dd>
 <dt>Throws:</dt>
-<dd><code>net.skinsrestorer.api.exception.MineSkinException</code> - if there's an error with MineSkin</dd>
-<dd><code>net.skinsrestorer.api.exception.DataRequestException</code> - if there's an error with the data request</dd>
+<dd><code>net.skinsrestorer.api.exception.MineSkinException</code></dd>
+<dd><code>net.skinsrestorer.api.exception.DataRequestException</code></dd>
 </dl>
 </section>
 </li>
@@ -487,13 +513,19 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="Passive_Description()">
 <h3>Passive_Description</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">Passive_Description</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#Passive_Description()">Base_Soul</a></code></span></div>
-<div class="block">Passive Description</div>
+<div class="block">Component description of the Passive Ability</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#Passive_Description()">Passive_Description</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>Component constructed from the description</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><code>Component</code></li>
+<li><a href="../../Util/Util.html" title="class in xyz.yaszu.freedom.Util"><code>Util</code></a></li>
+</ul>
+</dd>
 </dl>
 </section>
 </li>
@@ -517,13 +549,12 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="ActivePassive_Description()">
 <h3>ActivePassive_Description</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">net.kyori.adventure.text.Component</span>&nbsp;<span class="element-name">ActivePassive_Description</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#ActivePassive_Description()">Base_Soul</a></code></span></div>
-<div class="block">Active Passive Description</div>
+<div class="block">Component description of the Active Ability</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#ActivePassive_Description()">ActivePassive_Description</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
 <dt>Returns:</dt>
-<dd>Component used in UI</dd>
+<dd>Component constructed from the description</dd>
 </dl>
 </section>
 </li>
@@ -531,8 +562,8 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="AbilityTwo_Cooldown()">
 <h3>AbilityTwo_Cooldown</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">AbilityTwo_Cooldown</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityTwo_Cooldown()">Base_Soul</a></code></span></div>
-<div class="block">Ability Two Cooldown Time</div>
+<div class="block">Returns the cooldown duration for the second ability.
+ This is the amount of time (in milliseconds)</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityTwo_Cooldown()">AbilityTwo_Cooldown</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
@@ -545,8 +576,7 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="AbilityOne_Cooldown(java.lang.Object)">
 <h3>AbilityOne_Cooldown</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">AbilityOne_Cooldown</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#AbilityOne_Cooldown(java.lang.Object)">Base_Soul</a></code></span></div>
-<div class="block">Ability One Cooldown Time</div>
+<div class="block">Ability one Cooldown measured in milliseconds</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#AbilityOne_Cooldown(java.lang.Object)">AbilityOne_Cooldown</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
@@ -561,8 +591,7 @@ net.skinsrestorer.api.exception.DataRequestException</span></div>
 <section class="detail" id="ActivePassive(org.bukkit.entity.Player)">
 <h3>ActivePassive</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">ActivePassive</span><wbr><span class="parameters">(org.bukkit.entity.Player&nbsp;player)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Base_Soul.html#ActivePassive(org.bukkit.entity.Player)">Base_Soul</a></code></span></div>
-<div class="block">Active Passive - A passive that requires a condition to activate (like sneaking or specific stats)</div>
+<div class="block">Ability two Cooldown measured in milliseconds</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Base_Soul.html#ActivePassive(org.bukkit.entity.Player)">ActivePassive</a></code>&nbsp;in interface&nbsp;<code><a href="../Base_Soul.html" title="interface in xyz.yaszu.freedom.Soul">Base_Soul</a></code></dd>
