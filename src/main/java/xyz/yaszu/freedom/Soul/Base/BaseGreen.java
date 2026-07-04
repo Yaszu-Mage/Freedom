@@ -1,6 +1,5 @@
 package xyz.yaszu.freedom.Soul.Base;
 
-import com.arakelian.core.feature.Nullable;
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
 import kr.toxicity.model.api.bukkit.platform.BukkitAdapter;
@@ -30,6 +29,7 @@ import xyz.yaszu.freedom.Subsystems.SoulImbueManager;
 import xyz.yaszu.freedom.Subsystems.TrustManager;
 import xyz.yaszu.freedom.Util.Util;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static xyz.yaszu.freedom.Util.Util.*;

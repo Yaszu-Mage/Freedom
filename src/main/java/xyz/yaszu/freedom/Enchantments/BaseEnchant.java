@@ -1,6 +1,5 @@
 package xyz.yaszu.freedom.Enchantments;
 
-import com.arakelian.core.feature.Nullable;
 import io.papermc.paper.registry.keys.tags.ItemTypeTagKeys;
 import io.papermc.paper.registry.tag.TagKey;
 import org.bukkit.Tag;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 

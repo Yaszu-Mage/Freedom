@@ -3,6 +3,7 @@ plugins {
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id 'com.gradleup.shadow' version '8.3.5'
     id 'maven-publish'
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
 }
 
 group = 'xyz.yaszu'
@@ -56,38 +57,32 @@ repositories {
 
 dependencies {
     compileOnly("com.github.retrooper:packetevents-spigot:2.11.2")
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
-        exclude group: "org.yaml", module: "snakeyaml"
-    }
+    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.0.1")
     compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.15")
     compileOnly('net.skinsrestorer:skinsrestorer-api:15.11.0')
     compileOnly('com.sk89q.worldedit:worldedit-bukkit:7.4.0')
     implementation 'com.github.bsommerfeld.pathetic-bukkit:core:5.4.7-a'
-    implementation 'com.github.javafaker:javafaker:1.0.2'
-    implementation('com.arakelian:faker:4.0.1')
     implementation("com.ibm.icu:icu4j:76.1")
-    compileOnly 'net.dmulloy2:ProtocolLib:5.4.0'
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testCompileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
-        exclude group: "org.yaml", module: "snakeyaml"
-    }
-    testRuntimeOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT") {
-        exclude group: "org.yaml", module: "snakeyaml"
-    }
+    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
+    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
+    paperweight.paperDevBundle("26.1.2.build.+")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
-
+tasks.assemble {
+    dependsOn(tasks.reobfJar)
+}
 tasks {
     // Configure the Minecraft version for the runServer task
     shadowJar

@@ -12,6 +12,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import it.unimi.dsi.fastutil.Hash;
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.BetterModelPlatform;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -182,6 +183,8 @@ public class Trust {
         return root.build();
     }
 
+
+    public static HashMap<UUID, FakePlayerHandle> fakePlayers = new HashMap<>();
     public static LiteralCommandNode<CommandSourceStack> test() {
         return Commands.literal("test").executes(
                 ctx -> {
@@ -191,8 +194,12 @@ public class Trust {
                             target.sendMessage(dess("<shadow:#000000FF><b><Red>Error</Red>:</b> YOU CANNOT USE THIS COMMAND ; YOU NEED TO BE OP"));
                             return Command.SINGLE_SUCCESS;
                         }
-                        target.give(CustomSongHandler.constructSong(CustomSongHandler.CustomSong.third_sanctuary));
-                        target.give(new Duck().block());
+                        if (fakePlayers.containsKey(target.getUniqueId())) {
+                            fakePlayers.get(target.getUniqueId()).moveFakePlayer(target.getLocation().getX(), target.getLocation().getY(), target.getLocation().getZ(), target.getLocation().getYaw(), target.getLocation().getPitch());
+                        } else {
+                            FakePlayerHandle fakePlayerHandle = new FakePlayerHandle("Anonymous",target.getLocation());
+                            fakePlayers.put(target.getUniqueId(),fakePlayerHandle);
+                        }
 //                        Location loc = target.getLocation().add(target.getLocation().getDirection().multiply(4));
 //                        loc.setY(target.getLocation().getY());
 //                        Double soulpoints = target.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE);

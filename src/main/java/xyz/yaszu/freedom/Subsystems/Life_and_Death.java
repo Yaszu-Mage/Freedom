@@ -191,11 +191,7 @@ public class Life_and_Death implements org.bukkit.event.Listener{
          }
         if (display == null) {
             return;}
-        if (viewerCanSeeGhosts) {
-            showEntityToPlayer(viewer,display);
-        } else {
-            hideEntityFromPlayer(viewer,display);
-        }
+
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (viewer.equals(target)) continue;
 
@@ -206,28 +202,20 @@ public class Life_and_Death implements org.bukkit.event.Listener{
                 if (viewerCanSeeGhosts || target.getWorld().getName().equals("doublevoid") || viewerInDoubleVoid) {
                     viewer.showPlayer(Freedom.get_plugin(), target);
                     // Show target's aura if it exists
-                    if (targetAura != null) {
-                        showEntityToPlayer(viewer, targetAura);
-                    }
+
                 } else {
                     viewer.hidePlayer(Freedom.get_plugin(), target);
                     // Hide target's aura if it exists
-                    if (targetAura != null) {
-                        hideEntityFromPlayer(viewer, targetAura);
-                    }
+
                 }
             } else {
                 viewer.showPlayer(Freedom.get_plugin(), target);
                 if (viewerCanSeeGhosts) {
                     // Show target's aura if it exists
-                    if (targetAura != null) {
-                        showEntityToPlayer(viewer, targetAura);
-                    }
+
                 } else {
                     // Hide target's aura if it exists
-                    if (targetAura != null) {
-                        hideEntityFromPlayer(viewer, targetAura);
-                    }
+
                 }
 
             }

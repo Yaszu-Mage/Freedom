@@ -769,6 +769,7 @@ public class soulListener implements Listener {
                     le.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 60, amp));
                 }
             }
+
         }
     }
 

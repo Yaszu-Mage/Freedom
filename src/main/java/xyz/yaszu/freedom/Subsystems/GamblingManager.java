@@ -1,6 +1,5 @@
 package xyz.yaszu.freedom.Subsystems;
 
-import com.arakelian.core.feature.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import xyz.yaszu.freedom.Items.Gambling.Card;
 import xyz.yaszu.freedom.Util.Util;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 

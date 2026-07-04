@@ -1,11 +1,6 @@
 package xyz.yaszu.freedom;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
+
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -72,7 +67,7 @@ public final class Freedom extends JavaPlugin implements Listener {
 
     public static int version = 6942067;
     private BlockHandler blockHandler;
-
+    public ArrayList<FakePlayerHandle> fakePlayers = new ArrayList<>();
     /**
      * Main Initialization for Reapplying Curse Weakness
      * @param player
@@ -135,7 +130,7 @@ public final class Freedom extends JavaPlugin implements Listener {
             }
             AdminEffects(!event.getPlayer().getName().equals("TheAntiClock"), event.getPlayer().getLocation().getWorld(), event.getPlayer().getLocation(), event.getPlayer());
         }
-        clearAura(event.getPlayer().getUniqueId());
+//        clearAura(event.getPlayer().getUniqueId());
         Util.clearPlayerCache(event.getPlayer().getUniqueId());
         cachedPdcValues.remove(event.getPlayer().getUniqueId());
         lastPdcRead.remove(event.getPlayer().getUniqueId());
@@ -154,7 +149,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         removeOldFollowers();
         event.getPlayer().performCommand("rules");
         event.getPlayer().getPersistentDataContainer().set(FreedomKeys.spriteActive(),PersistentDataType.BOOLEAN,false);
-        ensureAura(event.getPlayer());
+//        ensureAura(event.getPlayer());
     }
 
     private static void AdminEffects(boolean event, org.bukkit.World event1, Location event2, Player event3) {
@@ -218,10 +213,6 @@ public final class Freedom extends JavaPlugin implements Listener {
             display.setPersistent(false);
             soulAuras.put(uuid, display);
 
-            Util.hideEntityFromPlayer(player, display);
-            for (Player viewer : Bukkit.getOnlinePlayers()) {
-                Util.hideEntityFromPlayer(viewer, display);
-            }
         }
 
         if (!auraTasks.containsKey(uuid)) {
@@ -279,7 +270,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         if (AdminManager.isSudo(event.getPlayer())) {
             AdminEffects(!event.getPlayer().getName().equals("TheAntiClock"), event.getPlayer().getLocation().getWorld(), event.getPlayer().getLocation(), event.getPlayer());
         }
-        ensureAura(event.getPlayer());
+//        ensureAura(event.getPlayer());
         Life_and_Death.updateAllVisibility(event.getPlayer());
     }
 
@@ -423,22 +414,7 @@ public final class Freedom extends JavaPlugin implements Listener {
         }.runTaskTimer(this, 0, 100);
         MazeManager.createMazeWorld("backrooms");
         randomVisions();
-        protocolManager = ProtocolLibrary.getProtocolManager();
-        protocolManager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL,
-                PacketType.Play.Server.SPAWN_ENTITY,
-                PacketType.Play.Server.NAMED_ENTITY_SPAWN,
-                PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
-            @Override
-            public void onPacketSending(PacketEvent event) {
-                Player receiver = event.getPlayer();
-                Entity entity = event.getPacket().getEntityModifier(event).read(0);
 
-                if (entity != null && Util.hiddenEntities.contains(entity.getUniqueId())) {
-                    // Hide this entity from this specific player
-                    event.setCancelled(true);
-                }
-            }
-        });
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -455,7 +431,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         crossplay.init();
     }
     public static RobloxCrossplay crossplay = new RobloxCrossplay();
-    private ProtocolManager protocolManager;
 
     public static Util util = new Util();
     private SoulImbueManager soulImbueManager;
@@ -478,23 +453,23 @@ public final class Freedom extends JavaPlugin implements Listener {
     public void onDisable() {
         PacketEvents.getAPI().terminate();
         xyz.yaszu.freedom.Subsystems.ProvinceManager.saveProvinces();
-
+        fakePlayers.forEach(FakePlayerHandle::remove);
         if (soulImbueManager != null) {
             soulImbueManager.saveVisits();
             // End all visits visually before shutting down to avoid floating mannequins if persistence fails
             // Actually, we want persistence, so we leave them and hope loadVisits handles it.
             // But WorldEdit sessions are in-memory.
         }
-        for (BukkitRunnable task : new ArrayList<>(auraTasks.values())) {
-            task.cancel();
-        }
-        auraTasks.clear();
-        for (ItemDisplay display : new ArrayList<>(soulAuras.values())) {
-            if (display != null && display.isValid()) {
-                display.remove();
-            }
-        }
-        soulAuras.clear();
+//        for (BukkitRunnable task : new ArrayList<>(auraTasks.values())) {
+//            task.cancel();
+//        }
+//        auraTasks.clear();
+//        for (ItemDisplay display : new ArrayList<>(soulAuras.values())) {
+//            if (display != null && display.isValid()) {
+//                display.remove();
+//            }
+//        }
+//        soulAuras.clear();
         Bukkit.getScheduler().cancelTasks(this);
         // Plugin shutdown logic
     }

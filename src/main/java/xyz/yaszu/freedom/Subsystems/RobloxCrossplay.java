@@ -1,11 +1,10 @@
 package xyz.yaszu.freedom.Subsystems;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.*;
@@ -13,35 +12,28 @@ import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.data.type.TrapDoor;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
-import org.bukkit.entity.Ageable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
-import xyz.yaszu.freedom.Util.Util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static xyz.yaszu.freedom.Util.Util.*;
@@ -93,6 +85,7 @@ public class RobloxCrossplay implements Listener {
                         httpExchange.sendResponseHeaders(405, -1);
                         return;
                     }
+
                     String body = new String(httpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                     Freedom.get_plugin().getLogger().info("Received startPlayer request: " + body);
 
@@ -105,17 +98,19 @@ public class RobloxCrossplay implements Listener {
                     if (!isGlobalPlayerValid(playerName)) {
                         Freedom.get_plugin().getLogger().info("Starting player: " + playerName);
                         String finalPlayerName = playerName;
-                        AtomicReference<Entity> entity = new AtomicReference<>();
+                        AtomicReference<FakePlayerHandle> entity = new AtomicReference<>();
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             
-                            ItemDisplay sheep = world.spawn(world.getSpawnLocation(), ItemDisplay.class);
-                            sheep.setItemStack(ItemStack.of(Material.DIAMOND));
-                            sheep.customName(dess(finalPlayerName));
-                            sheep.getPersistentDataContainer().set(keygen("rblx"), PersistentDataType.BOOLEAN,true);
-                            PlayerDisguise disguise = new PlayerDisguise(finalPlayerName, "Yaszu");
-                            disguise.setEntity(sheep);
-                            disguise.startDisguise();
-                            entity.set(sheep);
+//                            ItemDisplay sheep = world.spawn(world.getSpawnLocation(), ItemDisplay.class);
+//                            sheep.setItemStack(ItemStack.of(Material.DIAMOND));
+//                            sheep.customName(dess(finalPlayerName));
+//                            sheep.getPersistentDataContainer().set(keygen("rblx"), PersistentDataType.BOOLEAN,true);
+//                            PlayerDisguise disguise = new PlayerDisguise(finalPlayerName, "Yaszu");
+//                            disguise.setEntity(sheep);
+//                            disguise.startDisguise();
+//                            entity.set(sheep);
+                            FakePlayerHandle fakePlayerHandle = new FakePlayerHandle(realName,world.getSpawnLocation());
+                            entity.set(fakePlayerHandle);
                             // JSON Format:
                             // {
                             //   "player": "PlayerName",
@@ -135,13 +130,13 @@ public class RobloxCrossplay implements Listener {
                                 jsonResponse.addProperty("player", finalPlayerName);
                                 jsonResponse.addProperty("world", world.getName());
                                 JsonObject position = new JsonObject();
-                                position.addProperty("x", sheep.getLocation().getX());
-                                position.addProperty("y", sheep.getLocation().getY());
-                                position.addProperty("z", sheep.getLocation().getZ());
+                                position.addProperty("x", fakePlayerHandle.getLocation().getX());
+                                position.addProperty("y", fakePlayerHandle.getLocation().getY());
+                                position.addProperty("z", fakePlayerHandle.getLocation().getZ());
                                 jsonResponse.add("position", position);
                                 JsonObject chunk = new JsonObject();
-                                chunk.addProperty("x", sheep.getChunk().getX());
-                                chunk.addProperty("z", sheep.getChunk().getZ());
+                                chunk.addProperty("x", fakePlayerHandle.getChunk().getX());
+                                chunk.addProperty("z", fakePlayerHandle.getChunk().getZ());
                                 jsonResponse.add("chunk", chunk);
                                 
                                 String response = jsonResponse.toString();
@@ -169,11 +164,13 @@ public class RobloxCrossplay implements Listener {
                             server.removeContext("/player/" + realName + "/chat");
                             server.removeContext("/player/" + realName + "/blockUpdate");
                             server.removeContext("/player/" + realName + "/status");
+                            server.removeContext("/player/end/" + realName);
                             Freedom.get_plugin().getLogger().info("Removed player: " + realName);
                             BukkitTask task = Bukkit.getScheduler().runTask(plugin,() ->{
-                               entity.get().remove();
+                                entity.get().remove();
 
                             });
+                            asyncHttpExchange.sendResponseHeaders(200, -1);
                         });
                         server.createContext("/player/" + realName + "/blockUpdate", asyncHttpExchange -> {
                              if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -211,16 +208,17 @@ public class RobloxCrossplay implements Listener {
                                          Freedom.get_plugin().getLogger().info("Received block: " + Information);
                                          Freedom.get_plugin().getLogger().info("Block type: " + block.getType());
                                          Freedom.get_plugin().getLogger().info("CORDS" + x + " " + y + " " + z);
-                                         if (block.getBlockData() instanceof Door door) {
-                                             Freedom.get_plugin().getLogger().info("Door update: " + door.isOpen());
-                                             door.setOpen(!door.isOpen());
-                                             block.setBlockData(door);
-                                         }
-                                         if (block.getBlockData() instanceof TrapDoor trapDoor) {
-                                             Freedom.get_plugin().getLogger().info("Trapdoor update: " + trapDoor.isOpen());
-                                             trapDoor.setOpen(!trapDoor.isOpen());
-                                             block.setBlockData(trapDoor);
-                                         }
+                                         entity.get().fakePlayerInteract(true,new Vec3(x,y,z));
+//                                         if (block.getBlockData() instanceof Door door) {
+//                                             Freedom.get_plugin().getLogger().info("Door update: " + door.isOpen());
+//                                             door.setOpen(!door.isOpen());
+//                                             block.setBlockData(door);
+//                                         }
+//                                         if (block.getBlockData() instanceof TrapDoor trapDoor) {
+//                                             Freedom.get_plugin().getLogger().info("Trapdoor update: " + trapDoor.isOpen());
+//                                             trapDoor.setOpen(!trapDoor.isOpen());
+//                                             block.setBlockData(trapDoor);
+//                                         }
                                      }
 
 
@@ -240,7 +238,7 @@ public class RobloxCrossplay implements Listener {
 //                                return;
 //                            }
 
-                            Entity display = entity.get();
+                            FakePlayerHandle display = entity.get();
                             if (display == null || display.isDead()) {
                                 asyncHttpExchange.sendResponseHeaders(404, -1);
                                 return;
@@ -356,24 +354,27 @@ public class RobloxCrossplay implements Listener {
                             double velX = information.get("velX").getAsDouble();
                             double velY = information.get("velY").getAsDouble();
                             double velZ = information.get("velZ").getAsDouble();
-                            double yaw = information.get("yaw").getAsDouble();
-                            double pitch = information.get("pitch").getAsDouble();
-
-                            if (entity.get() == null || entity.get().isDead()) {
+                            double yaw = Math.toDegrees(information.get("yaw").getAsDouble() * -1);
+                            double pitch = Math.clamp(Math.toDegrees(information.get("pitch").getAsDouble() * -1),-90,90);
+                            AtomicBoolean isAlive = new AtomicBoolean(information.get("isAlive").getAsBoolean());
+                            if ((entity.get() == null || entity.get().isDead()) || !isAlive.get()) {
                                 BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                    entity.set(world.spawn(new Location(world, x / scale, y / scale, z / scale), ItemDisplay.class));
-                                    ItemDisplay sheep = (ItemDisplay) entity.get();
-                                    sheep.customName(dess(finalPlayerName));
-                                    sheep.setItemStack(ItemStack.of(Material.DIAMOND));
-                                    PlayerDisguise disguise =
-                                            new PlayerDisguise(finalPlayerName, "Yaszu");
-
-                                    disguise.setEntity(sheep);
-                                    disguise.startDisguise();
+                                    //Either the Roblox Player is Dead, or the FakePlayer is dead so respawn fake player and send that the player is alive
+                                    entity.get().respawnPlayer(net.minecraft.world.entity.Entity.RemovalReason.KILLED, PlayerRespawnEvent.RespawnReason.DEATH);
+                                    isAlive.set(true);
                                 });
                             }
-                            entity.get().teleportAsync(new Location(world, x/scale, y/scale, z/scale, (float) Math.clamp(Math.toDegrees(pitch*-1),0,360), (float) Math.clamp(Math.toDegrees(yaw*-1),-90,90)));
-                            entity.get().setVelocity(new Vector(velX, velY, velZ));
+                            Location loc = new Location(world, x / scale, y / scale, z / scale);
+                            if (entity.get() != null && !entity.get().isDead()) {
+                                BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
+                                    if (entity.get().getLocation().distance(loc) < 1.5) {
+                                        entity.get().moveFakePlayer(x/scale, y/scale, z/scale, (float) Math.clamp(Math.toDegrees(yaw*-1),-90,90), (float) Math.clamp(Math.toDegrees(pitch*-1),0,360));
+                                        entity.get().bukkit().setVelocity(new Vector(velX, velY, velZ));
+                                    }
+                                });
+
+                            }
+
                             //ENTITY PACKET
                             /*
                              {entity : {positionX : 0,positionY : 0, positionZ : 0, velocityX, velocityY, velocityZ,type}
@@ -383,9 +384,9 @@ public class RobloxCrossplay implements Listener {
                             jsonObjectAtomicReference.set(new JsonObject());
                             JsonObject statusJson = jsonObjectAtomicReference.get();
                             BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                        Entity display = entity.get();
+                                        FakePlayerHandle display = entity.get();
                                         if (display != null) {
-                                            statusJson.addProperty("Living", !display.isDead());
+                                            statusJson.addProperty("Living", isAlive.get());
                                             statusJson.addProperty("velocityX", display.getVelocity().getX());
                                             statusJson.addProperty("velocityY", display.getVelocity().getY());
                                             statusJson.addProperty("velocityZ", display.getVelocity().getZ());
@@ -405,12 +406,18 @@ public class RobloxCrossplay implements Listener {
                                             }
 
                                             statusJson.add("nearbyEntities", nearbyEntities);
+                                            JsonObject playerJson = new JsonObject();
+                                            playerJson.addProperty("x", display.getLocation().getX() * scale);
+                                            playerJson.addProperty("y", display.getLocation().getY() * scale);
+                                            playerJson.addProperty("z", display.getLocation().getZ() * scale);
+                                            playerJson.addProperty("distance",display.getLocation().distance(loc));
+                                            statusJson.add("currentPos", playerJson);
                                         }
                                         future.complete(statusJson);
                             });
                             future.thenAccept(jsonObject -> {
 
-                                String response = statusJson.toString();
+                                String response = jsonObject.toString();
                                 try {
                                     byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
                                     asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);

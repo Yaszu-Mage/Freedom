@@ -1,6 +1,5 @@
 package xyz.yaszu.freedom.Enchantments.Enchant;
 
-import com.arakelian.core.feature.Nullable;
 import io.papermc.paper.registry.keys.tags.ItemTypeTagKeys;
 import io.papermc.paper.registry.tag.TagKey;
 import org.bukkit.entity.Entity;
@@ -11,6 +10,8 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import xyz.yaszu.freedom.Enchantments.BaseEnchant;
+
+import javax.annotation.Nullable;
 
 import static xyz.yaszu.freedom.Util.Util.getSmeltingResult;
 import static xyz.yaszu.freedom.Util.Util.isSmeltable;
@@ -71,7 +72,7 @@ public class SmeltingEnchant implements BaseEnchant {
     }
 
     @Override
-    public void effect(@Nullable ItemStack itemStack, @Nullable Entity entity,int level) {
+    public void effect(@Nullable ItemStack itemStack, @Nullable Entity entity, int level) {
         if (isSmeltable(itemStack.getType())) {
             if (entity instanceof Player player) {
                 player.give(getSmeltingResult(itemStack));
