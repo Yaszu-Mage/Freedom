@@ -41,7 +41,7 @@ import java.util.UUID;
  * the first byte {@code 0xAC} signals a legacy ObjectOutputStream stream (v1); anything
  * else is treated as the lightweight DataOutputStream format (v2).</p>
  *
- * <h2>Writing:</h2>
+ * <strong>Writing:</strong>
  * <pre>{@code
  *   Map<String, Object> data = new HashMap<>();
  *   data.put("home",    someLocation);
@@ -53,7 +53,7 @@ import java.util.UUID;
  *   pdc.set(key, HashMapPersistentDataType.get(ctx), data);
  * }</pre>
  *
- * <h2>Reading:</h2>
+ * <strong>Reading:</strong>
  * <pre>{@code
  *   LoadResult result = HashMapPersistentDataType.load(pdc, key);
  *   if (result != null) {
@@ -68,7 +68,7 @@ import java.util.UUID;
  *   }
  * }</pre>
  *
- * <h2>BaseBlock contract:</h2>
+ * <strong>BaseBlock contract:</strong>
  * <p>Every concrete {@link BaseBlock} implementation <strong>must</strong> expose a
  * public no-arg constructor so it can be reconstructed during deserialization.
  * The class is identified by its fully-qualified name; renaming or moving the
