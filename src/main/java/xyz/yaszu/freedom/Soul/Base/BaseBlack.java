@@ -400,7 +400,7 @@ public class BaseBlack implements Base_Soul, Listener {
 
     /**
      * Event Handler for Inventory Click Event
-     * Allows for Disguise & Undisguise
+     * Allows for Disguise and Undisguise
      * @param event InventoryClickEvent
      * @throws MineSkinException if there's an error with MineSkin
      * @throws DataRequestException if there's an error with data request

@@ -461,4 +461,17 @@ public class FakePlayerHandle {
 //        nmsServer.getPlayerList().remove(nmsPlayer);
 
     }
+
+    private static Map<String, Object> recordFields(Object record) {
+        Map<String, Object> map = new HashMap<>();
+        if (record == null || !record.getClass().isRecord()) return map;
+        for (RecordComponent component : record.getClass().getRecordComponents()) {
+            try {
+                map.put(component.getName(), component.getAccessor().invoke(record));
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        return map;
+    }
 }
