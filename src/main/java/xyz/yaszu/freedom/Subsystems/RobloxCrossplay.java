@@ -12,12 +12,15 @@ import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.data.type.TrapDoor;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -152,7 +155,9 @@ public class RobloxCrossplay implements Listener {
 
                             }
                         });
-                        server.createContext("/player/" + realName + "/chat", asyncHttpExchange -> {});
+                        server.createContext("/player/" + realName + "/chat", asyncHttpExchange -> {
+
+                        });
                         server.createContext("/player/end/" + realName, asyncHttpExchange -> {
                             if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
                                 asyncHttpExchange.sendResponseHeaders(405, -1);
@@ -164,6 +169,8 @@ public class RobloxCrossplay implements Listener {
                             server.removeContext("/player/" + realName + "/chat");
                             server.removeContext("/player/" + realName + "/blockUpdate");
                             server.removeContext("/player/" + realName + "/status");
+                            server.removeContext("/player/" + realName + "/dialog");
+                            server.removeContext("/player/" + realName + "/dialogAction");
                             server.removeContext("/player/end/" + realName);
                             Freedom.get_plugin().getLogger().info("Removed player: " + realName);
                             BukkitTask task = Bukkit.getScheduler().runTask(plugin,() ->{
@@ -336,6 +343,78 @@ public class RobloxCrossplay implements Listener {
                                 } catch (IOException ignored) {}
                             }
                         });
+                        server.createContext("/player/" + realName + "/dialogAction", asyncHttpExchange -> {
+                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                                asyncHttpExchange.sendResponseHeaders(405, -1);
+                                return;
+                            }
+
+                            String reqbod = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                            int buttonIndex;
+                            try {
+                                JsonObject payload = JsonParser.parseString(reqbod).getAsJsonObject();
+                                buttonIndex = payload.get("buttonIndex").getAsInt();
+                            } catch (Exception e) {
+                                asyncHttpExchange.sendResponseHeaders(400, -1);
+                                return;
+                            }
+
+                            CompletableFuture<JsonObject> future = new CompletableFuture<>();
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                FakePlayerHandle display = entity.get();
+                                if (display == null || display.isDead()) {
+                                    JsonObject err = new JsonObject();
+                                    err.addProperty("ok", false);
+                                    err.addProperty("reason", "player_not_active");
+                                    future.complete(err);
+                                    return;
+                                }
+                                // Touches NMS/command state - must run on the main thread,
+                                // same reasoning as the block-update handler above.
+                                future.complete(display.clickDialogButton(buttonIndex));
+                            });
+
+                            try {
+                                String response = future.get().toString();
+                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                                asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
+                                try (OutputStream os = asyncHttpExchange.getResponseBody()) {
+                                    os.write(responseBytes);
+                                }
+                            } catch (InterruptedException | ExecutionException | IOException e) {
+                                try {
+                                    asyncHttpExchange.sendResponseHeaders(500, -1);
+                                } catch (IOException ignored) {}
+                            }
+                        });
+//                        server.createContext("/player/" + realName + "/dialog", asyncHttpExchange -> {
+//                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("GET")) {
+//                                asyncHttpExchange.sendResponseHeaders(405, -1);
+//                                return;
+//                            }
+//
+//                            FakePlayerHandle display = entity.get();
+//                            if (display == null || display.isDead()) {
+//                                asyncHttpExchange.sendResponseHeaders(404, -1);
+//                                return;
+//                            }
+//
+//                            // getDialogJson() just returns a cached snapshot (updated once,
+//                            // on the Netty pipeline thread, whenever a ClientboundShowDialogPacket
+//                            // arrives) so this is cheap enough to poll frequently, unlike /status.
+//                            String response = display.getDialogJson().toString();
+//                            try {
+//                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+//                                asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
+//                                try (OutputStream os = asyncHttpExchange.getResponseBody()) {
+//                                    os.write(responseBytes);
+//                                }
+//                            } catch (IOException e) {
+//                                try {
+//                                    asyncHttpExchange.sendResponseHeaders(500, -1);
+//                                } catch (IOException ignored) {}
+//                            }
+//                        });
                         server.createContext("/player/" + realName, asyncHttpExchange -> {
                             if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
                                 asyncHttpExchange.sendResponseHeaders(405, -1);
@@ -356,6 +435,12 @@ public class RobloxCrossplay implements Listener {
                             double velZ = information.get("velZ").getAsDouble();
                             double yaw = Math.toDegrees(information.get("yaw").getAsDouble() * -1);
                             double pitch = Math.clamp(Math.toDegrees(information.get("pitch").getAsDouble() * -1),-90,90);
+                            int buttonIndex;
+                            try {
+                                buttonIndex = information.get("buttonIndex").getAsInt();
+                            } catch (Exception e) {
+                                buttonIndex = -1;
+                            }
                             AtomicBoolean isAlive = new AtomicBoolean(information.get("isAlive").getAsBoolean());
                             if ((entity.get() == null || entity.get().isDead()) || !isAlive.get()) {
                                 BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
@@ -372,9 +457,7 @@ public class RobloxCrossplay implements Listener {
                                         entity.get().bukkit().setVelocity(new Vector(velX, velY, velZ));
                                     }
                                 });
-
                             }
-
                             //ENTITY PACKET
                             /*
                              {entity : {positionX : 0,positionY : 0, positionZ : 0, velocityX, velocityY, velocityZ,type}
@@ -390,6 +473,44 @@ public class RobloxCrossplay implements Listener {
                                             statusJson.addProperty("velocityX", display.getVelocity().getX());
                                             statusJson.addProperty("velocityY", display.getVelocity().getY());
                                             statusJson.addProperty("velocityZ", display.getVelocity().getZ());
+                                            statusJson.addProperty("dialog",display.getDialogJson().toString());
+
+                                            JsonArray currentInventory = new JsonArray();
+                                            for (ItemStack itemStack : display.getInventory().getContents()) {
+                                                if (itemStack != null) {
+
+
+                                                    JsonObject item = new JsonObject();
+                                                    item.addProperty("name", itemStack.getType().name());
+                                                    item.addProperty("count", itemStack.getAmount());
+                                                    item.addProperty("type", itemStack.getType().name());
+                                                    JsonObject properties = new JsonObject();
+                                                    if (itemStack.getItemMeta() != null) {
+                                                        ItemMeta meta = itemStack.getItemMeta();
+                                                        if (meta.hasDisplayName()) {
+                                                            properties.addProperty("name", meta.displayName().toString());
+                                                        }
+                                                        if (meta.hasLore()) {
+                                                            properties.addProperty("lore", meta.lore().toString());
+                                                        }
+                                                        if (!meta.getEnchants().isEmpty()) {
+                                                            JsonArray enchantments = new JsonArray();
+                                                            for (Enchantment enchantment : meta.getEnchants().keySet()) {
+                                                                enchantments.add(enchantment.getKey().getKey().toString());
+                                                            }
+                                                            properties.add("enchantments", enchantments);
+                                                        }
+                                                        if (meta.hasItemModel()) {
+                                                            properties.addProperty("model", meta.getItemModel().toString());
+                                                        }
+                                                    }
+                                                    item.add("properties", properties);
+                                                    currentInventory.add(item);
+                                                }
+
+                                            }
+                                            statusJson.add("currentInventory", currentInventory);
+
                                             //Decode and encode format for every nearby entity and what you can get by looking at them
                                             JsonArray nearbyEntities = new JsonArray();
 

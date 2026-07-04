@@ -1,5 +1,7 @@
 package xyz.yaszu.freedom.Subsystems;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -8,19 +10,24 @@ import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,12 +49,19 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.util.Vector;
 import xyz.yaszu.freedom.Freedom;
 
+import java.lang.reflect.RecordComponent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-
+import java.util.concurrent.atomic.AtomicLong;
 import static xyz.yaszu.freedom.Util.Util.dess;
 
 /**
@@ -90,6 +104,15 @@ public class FakePlayerHandle {
     public Vector getVelocity() {
         return bukkitPlayer.getVelocity();
     }
+
+    public Inventory getInventory() {
+        return bukkitPlayer.getInventory();
+    }
+
+    public void setVelocity(Vector velocity) {
+        bukkitPlayer.setVelocity(velocity);
+    }
+
     public List<Entity> getNearbyEntities(double rx, double ry, double rz) {
         return bukkitPlayer.getNearbyEntities(rx, ry, rz);
     }
@@ -105,7 +128,7 @@ public class FakePlayerHandle {
     /**
      * Respawns the FakePlayer
      * @param Removalreason Reason for removal
-     * @param RespawnReason Reson for respawn
+     * @param RespawnReason Reason for respawn
      */
     public void respawnPlayer(net.minecraft.world.entity.Entity.RemovalReason Removalreason, PlayerRespawnEvent.RespawnReason RespawnReason) {
         ServerLevel world = nmsPlayer.level();
@@ -212,13 +235,210 @@ public class FakePlayerHandle {
                             new ServerboundAcceptTeleportationPacket(positionPacket.id())
                     );
                 }
+                if (packet instanceof ClientboundShowDialogPacket(Holder<Dialog> dialog)) {
+                    // Handle dialog packets if needed
+                    Dialog dialogValue = dialog.value();
+                    getDialog = dialogValue;
 
+                    List<DialogButton> buttons = new ArrayList<>();
+                    collectButtons(dialogValue, buttons, new IdentityHashMap<>());
+                    dialogButtons = buttons;
+
+                    String title = plainText(findNamedField(dialogValue, "title", new IdentityHashMap<>()));
+                    dialogSnapshot = buildDialogSnapshot(dialogVersion.incrementAndGet(), title, buttons);
+                }
             }
         });
     }
 
+    private final AtomicLong dialogVersion = new AtomicLong(0);
+    private volatile List<DialogButton> dialogButtons = List.of();
+    private volatile JsonObject dialogSnapshot = buildDialogSnapshot(0L, null, List.of());
+    public Dialog getDialog = null;
     public Player bukkit() {
         return bukkitPlayer;
+    }
+    private record DialogButton(Object label, Object action) {}
+    public JsonObject getDialogJson() {
+        return dialogSnapshot;
+    }
+
+    public JsonObject clickDialogButton(int buttonIndex) {
+        JsonObject result = new JsonObject();
+        List<DialogButton> buttons = this.dialogButtons;
+
+        if (getDialog == null || buttons.isEmpty()) {
+            result.addProperty("ok", false);
+            result.addProperty("reason", "no_dialog_open");
+            return result;
+        }
+        if (buttonIndex < 0 || buttonIndex >= buttons.size()) {
+            result.addProperty("ok", false);
+            result.addProperty("reason", "button_out_of_range");
+            return result;
+        }
+
+        Object action = buttons.get(buttonIndex).action();
+        Map<String, Object> fields = recordFields(action);
+        // Dialog click actions reuse the same click-event variants as text
+        // components (run_command / suggest_command / open_url /
+        // copy_to_clipboard / show_dialog / change_page), plus a "custom"
+        // variant for server-plugin-defined interactivity. We don't know the
+        // exact fully-qualified class per Minecraft version, but Mojang's
+        // record names for these are consistently self-descriptive, so
+        // matching on the simple class name is more reliable here than
+        // guessing field names (both RunCommand and SuggestCommand records
+        // hold a "command" field, for instance - only the class name tells
+        // them apart).
+        String kind = action == null ? "" : action.getClass().getSimpleName().toLowerCase();
+
+        try {
+            if (kind.contains("suggestcommand")) {
+                // Client-side only in vanilla: prefills the chat box, never
+                // runs anything server-side. Hand the text back so the
+                // Roblox LocalScript can display/prefill it instead.
+                result.addProperty("ok", true);
+                result.addProperty("clientOnly", true);
+                result.addProperty("suggestedCommand", String.valueOf(fields.getOrDefault("command", "")));
+            } else if (kind.contains("runcommand")) {
+                String command = String.valueOf(fields.getOrDefault("command", ""));
+                if (command.startsWith("/")) command = command.substring(1);
+                // Mirrors moveFakePlayer()/handleMovePlayer() above: hand-build the
+                // serverbound packet a real client would have sent when it processed
+                // this click event, and feed it straight into the connection.
+                // NOTE: ServerboundChatCommandPacket's constructor arity has moved
+                // around between versions (signed-chat args were added then trimmed
+                // again) - if this doesn't compile, check what your mapped
+                // ServerGamePacketListenerImpl#handleChatCommand actually expects.
+                nmsPlayer.connection.handleChatCommand(new ServerboundChatCommandPacket(command));
+                result.addProperty("ok", true);
+                result.addProperty("ran", command);
+            } else if (kind.contains("openurl")) {
+                result.addProperty("ok", true);
+                result.addProperty("clientOnly", true);
+                result.addProperty("url", String.valueOf(fields.getOrDefault("uri", fields.getOrDefault("url", ""))));
+            } else if (kind.contains("clipboard")) {
+                result.addProperty("ok", true);
+                result.addProperty("clientOnly", true);
+                result.addProperty("copyText", String.valueOf(fields.getOrDefault("value", "")));
+            } else if (kind.contains("changepage")) {
+                result.addProperty("ok", true);
+                result.addProperty("clientOnly", true);
+                result.addProperty("page", String.valueOf(fields.getOrDefault("page", "")));
+            } else if (kind.contains("showdialog")) {
+                result.addProperty("ok", false);
+                result.addProperty("reason", "show_dialog_not_wired");
+            } else if (kind.contains("custom")) {
+                result.addProperty("ok", false);
+                result.addProperty("reason", "custom_action_not_wired");
+                if (fields.containsKey("id")) {
+                    result.addProperty("id", String.valueOf(fields.get("id")));
+                }
+            } else {
+                result.addProperty("ok", false);
+                result.addProperty("reason", "unrecognized_action_type");
+                result.addProperty("javaClass", action == null ? "null" : action.getClass().getName());
+            }
+        } catch (Throwable t) {
+            result.addProperty("ok", false);
+            result.addProperty("reason", "exception: " + t);
+        }
+
+        // Default after_action is "close" - clear our copy so the next
+        // /dialog poll reports present=false and Roblox hides the window.
+        getDialog = null;
+        this.dialogButtons = List.of();
+        this.dialogSnapshot = buildDialogSnapshot(dialogVersion.incrementAndGet(), null, List.of());
+        return result;
+    }
+
+    private static JsonObject buildDialogSnapshot(long version, String title, List<DialogButton> buttons) {
+        JsonObject json = new JsonObject();
+        json.addProperty("version", version);
+        json.addProperty("present", title != null);
+        if (title != null) {
+            json.addProperty("title", title);
+            JsonArray buttonArray = new JsonArray();
+            for (int i = 0; i < buttons.size(); i++) {
+                JsonObject b = new JsonObject();
+                b.addProperty("index", i);
+                b.addProperty("label", plainText(buttons.get(i).label()));
+                buttonArray.add(b);
+            }
+            json.add("buttons", buttonArray);
+        }
+        return json;
+    }
+
+    private static void collectButtons(Object node, List<DialogButton> found, Map<Object, Boolean> seen) {
+        if (node == null || seen.containsKey(node)) return;
+        if (node instanceof Optional<?> opt) {
+            opt.ifPresent(v -> collectButtons(v, found, seen));
+            return;
+        }
+        if (node instanceof List<?> list) {
+            for (Object o : list) collectButtons(o, found, seen);
+            return;
+        }
+        if (node instanceof Holder<?> holder) {
+            collectButtons(holder.value(), found, seen);
+            return;
+        }
+        if (!node.getClass().isRecord()) return;
+        seen.put(node, true);
+
+        Map<String, Object> fields = recordFields(node);
+        if (fields.containsKey("label") && fields.containsKey("action")) {
+            found.add(new DialogButton(fields.get("label"), fields.get("action")));
+        }
+        for (Object value : fields.values()) {
+            collectButtons(value, found, seen);
+        }
+    }
+
+    private static Object findNamedField(Object node, String fieldName, Map<Object, Boolean> seen) {
+        if (node == null || seen.containsKey(node)) return null;
+        if (node instanceof Optional<?> opt) {
+            return opt.isPresent() ? findNamedField(opt.get(), fieldName, seen) : null;
+        }
+        if (node instanceof List<?> list) {
+            for (Object o : list) {
+                Object r = findNamedField(o, fieldName, seen);
+                if (r != null) return r;
+            }
+            return null;
+        }
+        if (node instanceof Holder<?> holder) {
+            return findNamedField(holder.value(), fieldName, seen);
+        }
+        if (!node.getClass().isRecord()) return null;
+        seen.put(node, true);
+
+        Map<String, Object> fields = recordFields(node);
+        for (Map.Entry<String, Object> e : fields.entrySet()) {
+            if (e.getKey().equalsIgnoreCase(fieldName)) return e.getValue();
+        }
+        for (Object value : fields.values()) {
+            Object r = findNamedField(value, fieldName, seen);
+            if (r != null) return r;
+        }
+        return null;
+    }
+
+    private static String plainText(Object value) {
+        if (value == null) return "";
+        if (value instanceof Optional<?> opt) return opt.map(FakePlayerHandle::plainText).orElse("");
+        if (value instanceof Holder<?> holder) return plainText(holder.value());
+        if (value instanceof Component component) return component.toString();
+        if (value instanceof List<?> list) {
+            StringBuilder sb = new StringBuilder();
+            for (Object o : list) {
+                if (sb.length() > 0) sb.append("\n");
+                sb.append(plainText(o));
+            }
+            return sb.toString();
+        }
+        return String.valueOf(value);
     }
 
     public boolean isRemoved() {

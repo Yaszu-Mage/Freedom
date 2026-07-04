@@ -586,7 +586,7 @@ public class BaseBlack implements Base_Soul, Listener {
     @EventHandler
     public void Respawnevent(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        SoulTypes soulType = SoulTypes.valueOf(player.getPersistentDataContainer().get(keygen("soul"), PersistentDataType.STRING));
+        SoulTypes soulType = getSoulType(player);
         if (soulType == SoulTypes.None) {
             player.addPotionEffect(PotionEffectType.STRENGTH.createEffect(PotionEffect.INFINITE_DURATION,1));
             player.addPotionEffect(PotionEffectType.SPEED.createEffect(PotionEffect.INFINITE_DURATION,1));
