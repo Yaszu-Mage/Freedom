@@ -24,6 +24,7 @@ import xyz.yaszu.freedom.Soul.Alchemy.Leaf;
 import xyz.yaszu.freedom.Soul.Base.*;
 import xyz.yaszu.freedom.Soul.Ultra.*;
 import xyz.yaszu.freedom.Subsystems.Life_and_Death;
+import xyz.yaszu.freedom.Subsystems.NPCS.TrainingDataLogger;
 import xyz.yaszu.freedom.Util.FreedomKeys;
 import xyz.yaszu.freedom.Util.Util;
 
@@ -120,6 +121,7 @@ public class soulListener implements Listener {
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        TrainingDataLogger.log(event.getPlayer().getName(), "PLAYER_JOIN", "Player joined the server");
         Player player = event.getPlayer();
         // Send resource pack after a delay to ensure player network is ready
         new org.bukkit.scheduler.BukkitRunnable() {
@@ -228,6 +230,7 @@ public class soulListener implements Listener {
     @EventHandler
     public void onPlayerDamagedEntity(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player player) {
+            TrainingDataLogger.log(player.getName(), "PLAYER_ATTACK", "Damaged entity: " + event.getEntity().getType());
             if (player.getPersistentDataContainer().get(keygen("SoulPoint"),PersistentDataType.DOUBLE) < 10 && !player.isInsideVehicle()) {
                 player.getPersistentDataContainer().set(keygen("SoulPoint"), PersistentDataType.DOUBLE, player.getPersistentDataContainer().get(keygen("SoulPoint"), PersistentDataType.DOUBLE) + 1);
                 showSoulPoints(player);
@@ -305,6 +308,7 @@ public class soulListener implements Listener {
     public void enableActivePassives(PlayerArmSwingEvent event) {
         if (!Life_and_Death.is_alive(event.getPlayer()) || canAbility == false) return;
         Player player = event.getPlayer();
+        TrainingDataLogger.log(player.getName(), "PLAYER_ARM_SWING", "Swung arm");
         if (!player.getPersistentDataContainer().getOrDefault(FreedomKeys.comorAction(), PersistentDataType.BOOLEAN, true)) {
             return;
         }

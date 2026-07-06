@@ -169,8 +169,6 @@ public class RobloxCrossplay implements Listener {
                             server.removeContext("/player/" + realName + "/chat");
                             server.removeContext("/player/" + realName + "/blockUpdate");
                             server.removeContext("/player/" + realName + "/status");
-                            server.removeContext("/player/" + realName + "/dialog");
-                            server.removeContext("/player/" + realName + "/dialogAction");
                             server.removeContext("/player/end/" + realName);
                             Freedom.get_plugin().getLogger().info("Removed player: " + realName);
                             BukkitTask task = Bukkit.getScheduler().runTask(plugin,() ->{
@@ -185,6 +183,7 @@ public class RobloxCrossplay implements Listener {
                                 Freedom.get_plugin().getLogger().info("Received invalid request method: " + asyncHttpExchange.getRequestMethod());
                                 return;
                             }
+                             Freedom.get_plugin().getLogger().info("Received block update request");
                              try {
 
 
@@ -343,50 +342,50 @@ public class RobloxCrossplay implements Listener {
                                 } catch (IOException ignored) {}
                             }
                         });
-                        server.createContext("/player/" + realName + "/dialogAction", asyncHttpExchange -> {
-                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
-                                asyncHttpExchange.sendResponseHeaders(405, -1);
-                                return;
-                            }
-
-                            String reqbod = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                            int buttonIndex;
-                            try {
-                                JsonObject payload = JsonParser.parseString(reqbod).getAsJsonObject();
-                                buttonIndex = payload.get("buttonIndex").getAsInt();
-                            } catch (Exception e) {
-                                asyncHttpExchange.sendResponseHeaders(400, -1);
-                                return;
-                            }
-
-                            CompletableFuture<JsonObject> future = new CompletableFuture<>();
-                            Bukkit.getScheduler().runTask(plugin, () -> {
-                                FakePlayerHandle display = entity.get();
-                                if (display == null || display.isDead()) {
-                                    JsonObject err = new JsonObject();
-                                    err.addProperty("ok", false);
-                                    err.addProperty("reason", "player_not_active");
-                                    future.complete(err);
-                                    return;
-                                }
-                                // Touches NMS/command state - must run on the main thread,
-                                // same reasoning as the block-update handler above.
-                                future.complete(display.clickDialogButton(buttonIndex));
-                            });
-
-                            try {
-                                String response = future.get().toString();
-                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-                                asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
-                                try (OutputStream os = asyncHttpExchange.getResponseBody()) {
-                                    os.write(responseBytes);
-                                }
-                            } catch (InterruptedException | ExecutionException | IOException e) {
-                                try {
-                                    asyncHttpExchange.sendResponseHeaders(500, -1);
-                                } catch (IOException ignored) {}
-                            }
-                        });
+//                        server.createContext("/player/" + realName + "/dialogAction", asyncHttpExchange -> {
+//                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+//                                asyncHttpExchange.sendResponseHeaders(405, -1);
+//                                return;
+//                            }
+//
+//                            String reqbod = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+//                            int buttonIndex;
+//                            try {
+//                                JsonObject payload = JsonParser.parseString(reqbod).getAsJsonObject();
+//                                buttonIndex = payload.get("buttonIndex").getAsInt();
+//                            } catch (Exception e) {
+//                                asyncHttpExchange.sendResponseHeaders(400, -1);
+//                                return;
+//                            }
+//
+//                            CompletableFuture<JsonObject> future = new CompletableFuture<>();
+//                            Bukkit.getScheduler().runTask(plugin, () -> {
+//                                FakePlayerHandle display = entity.get();
+//                                if (display == null || display.isDead()) {
+//                                    JsonObject err = new JsonObject();
+//                                    err.addProperty("ok", false);
+//                                    err.addProperty("reason", "player_not_active");
+//                                    future.complete(err);
+//                                    return;
+//                                }
+//                                // Touches NMS/command state - must run on the main thread,
+//                                // same reasoning as the block-update handler above.
+//                                future.complete(display.clickDialogButton(buttonIndex));
+//                            });
+//
+//                            try {
+//                                String response = future.get().toString();
+//                                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+//                                asyncHttpExchange.sendResponseHeaders(200, responseBytes.length);
+//                                try (OutputStream os = asyncHttpExchange.getResponseBody()) {
+//                                    os.write(responseBytes);
+//                                }
+//                            } catch (InterruptedException | ExecutionException | IOException e) {
+//                                try {
+//                                    asyncHttpExchange.sendResponseHeaders(500, -1);
+//                                } catch (IOException ignored) {}
+//                            }
+//                        });
 //                        server.createContext("/player/" + realName + "/dialog", asyncHttpExchange -> {
 //                            if (!asyncHttpExchange.getRequestMethod().equalsIgnoreCase("GET")) {
 //                                asyncHttpExchange.sendResponseHeaders(405, -1);
@@ -448,6 +447,25 @@ public class RobloxCrossplay implements Listener {
                                     entity.get().respawnPlayer(net.minecraft.world.entity.Entity.RemovalReason.KILLED, PlayerRespawnEvent.RespawnReason.DEATH);
                                     isAlive.set(true);
                                 });
+                            }
+                            CompletableFuture<JsonObject> buttonFuture = new CompletableFuture<>();
+                            if (buttonIndex != -1) {
+                                int finalButtonIndex = buttonIndex;
+                                Bukkit.getScheduler().runTask(plugin, () -> {
+                                    FakePlayerHandle display = entity.get();
+                                    if (display == null || display.isDead()) {
+                                        JsonObject err = new JsonObject();
+                                        err.addProperty("ok", false);
+                                        err.addProperty("reason", "player_not_active");
+                                        buttonFuture.complete(err);
+                                        return;
+                                    }
+                                    // Touches NMS/command state - must run on the main thread,
+                                    // same reasoning as the block-update handler above.
+                                    buttonFuture.complete(display.clickDialogButton(finalButtonIndex));
+                                });
+                            } else {
+                                buttonFuture.complete(new JsonObject());
                             }
                             Location loc = new Location(world, x / scale, y / scale, z / scale);
                             if (entity.get() != null && !entity.get().isDead()) {
@@ -534,10 +552,12 @@ public class RobloxCrossplay implements Listener {
                                             playerJson.addProperty("distance",display.getLocation().distance(loc));
                                             statusJson.add("currentPos", playerJson);
                                         }
-                                        future.complete(statusJson);
+                                        buttonFuture.thenAccept(buttonJson -> {
+                                            statusJson.add("button", buttonJson);
+                                            future.complete(statusJson);
+                                        });
                             });
                             future.thenAccept(jsonObject -> {
-
                                 String response = jsonObject.toString();
                                 try {
                                     byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
