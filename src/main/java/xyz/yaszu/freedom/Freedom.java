@@ -52,7 +52,6 @@ import xyz.yaszu.freedom.Soul.Ultra.Mocha;
 import xyz.yaszu.freedom.Soul.Ultra.Orange;
 import xyz.yaszu.freedom.Subsystems.*;
 import xyz.yaszu.freedom.Subsystems.FakePlayerHandle;
-import xyz.yaszu.freedom.Subsystems.NPCS.NpcManager;
 import xyz.yaszu.freedom.Subsystems.WorldManager;
 import xyz.yaszu.freedom.Soul.soulListener;
 import xyz.yaszu.freedom.Util.*;
@@ -329,7 +328,6 @@ public final class Freedom extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new WorldManager(), this);
         Bukkit.getPluginManager().registerEvents(new ScythePhighting(),this);
         Bukkit.getPluginManager().registerEvents(new BulletSystem(),this);
-        Bukkit.getPluginManager().registerEvents(new NpcManager(), this);
         Bukkit.getPluginManager().registerEvents(new CustomSongHandler(), this);
         Bukkit.getPluginManager().registerEvents(new Grapple_Hook(), this);
         Bukkit.getPluginManager().registerEvents(new GatewayListener(), this);

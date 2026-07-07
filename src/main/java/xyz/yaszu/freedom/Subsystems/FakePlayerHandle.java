@@ -32,17 +32,22 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.*;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.Slab;
+import org.bukkit.block.data.type.Stairs;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+import xyz.yaszu.freedom.Freedom;
 
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
@@ -52,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import static xyz.yaszu.freedom.Util.Util.dess;
 
@@ -107,11 +113,127 @@ public class FakePlayerHandle {
     public List<Entity> getNearbyEntities(double rx, double ry, double rz) {
         return bukkitPlayer.getNearbyEntities(rx, ry, rz);
     }
+
+    Plugin plugin = Freedom.get_plugin();
+    public String getNearbyInformation() {
+        try {
+            if (Bukkit.isPrimaryThread()) {
+                return computeNearbyInformation();
+            } else {
+                CompletableFuture<String> future = new CompletableFuture<>();
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    try {
+                        future.complete(computeNearbyInformation());
+                    } catch (Exception e) {
+                        future.completeExceptionally(e);
+                    }
+                });
+                return future.join();
+            }
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    private String computeNearbyInformation() {
+        Location loc = bukkitPlayer.getLocation();
+        int radius = 16;
+        JsonArray blocks = new JsonArray();
+        World w = loc.getWorld();
+        if (w != null) {
+            for (int x = (int) (loc.getX() - radius); x <= (int) (loc.getX() + radius); x++) {
+                for (int y = (int) (loc.getY() - radius); y <= (int) (loc.getY() + radius); y++) {
+                    for (int z = (int) (loc.getZ() - radius); z <= (int) (loc.getZ() + radius); z++) {
+                        Block block = w.getBlockAt(x, y, z);
+                        Material material = block.getType();
+
+                        if (!material.isAir()) {
+                            JsonObject b = new JsonObject();
+                            b.addProperty("x", x);
+                            b.addProperty("y", y);
+                            b.addProperty("z", z);
+                            b.addProperty("type", material.name());
+
+                            BlockData data = block.getBlockData();
+
+                            JsonObject properties = new JsonObject();
+
+                            if (data instanceof Directional directional)
+                                properties.addProperty("facing", directional.getFacing().name());
+
+                            if (data instanceof Bisected bisected)
+                                properties.addProperty("half", bisected.getHalf().name());
+
+                            if (data instanceof Waterlogged waterlogged)
+                                properties.addProperty("waterlogged", waterlogged.isWaterlogged());
+
+                            if (data instanceof Openable openable)
+                                properties.addProperty("open", openable.isOpen());
+
+                            if (data instanceof Powerable powerable)
+                                properties.addProperty("powered", powerable.isPowered());
+
+                            if (data instanceof org.bukkit.block.data.Ageable ageable)
+                                properties.addProperty("age", ageable.getAge());
+                            if (data instanceof Levelled levelled)
+                                properties.addProperty("level", levelled.getLevel());
+
+                            if (data instanceof Slab slab)
+                                properties.addProperty("slabType", slab.getType().name());
+
+                            if (data instanceof Stairs stairs) {
+                                properties.addProperty("shape", stairs.getShape().name());
+                                properties.addProperty("half", stairs.getHalf().name());
+                                properties.addProperty("facing", stairs.getFacing().name());
+                            }
+
+                            if (data instanceof TrapDoor trapdoor) {
+                                properties.addProperty("half", trapdoor.getHalf().name());
+                                properties.addProperty("facing", trapdoor.getFacing().name());
+                                properties.addProperty("open", trapdoor.isOpen());
+                            }
+
+                            if (data instanceof Door door) {
+                                properties.addProperty("half", door.getHalf().name());
+                                properties.addProperty("hinge", door.getHinge().name());
+                                properties.addProperty("facing", door.getFacing().name());
+                                properties.addProperty("open", door.isOpen());
+                            }
+
+                            b.add("properties", properties);
+
+                            blocks.add(b);
+                        }
+                    }
+                }
+            }
+        }
+        JsonObject response = new JsonObject();
+        response.add("nearbyBlocks", blocks);
+        JsonArray nearbyEntities = new JsonArray();
+        for (Entity e : getNearbyEntities(32, 32, 32)) {
+            JsonObject entityJson = new JsonObject();
+            entityJson.addProperty("type", e.getType().toString());
+            entityJson.addProperty("x", e.getLocation().getX());
+            entityJson.addProperty("y", e.getLocation().getY());
+            entityJson.addProperty("z", e.getLocation().getZ());
+            entityJson.addProperty("pitch", Math.toRadians(e.getLocation().getPitch() * -1));
+            entityJson.addProperty("yaw", Math.toRadians(e.getLocation().getYaw() * -1));
+            entityJson.addProperty("UniqueID", e.getUniqueId().toString());
+            nearbyEntities.add(entityJson);
+        }
+        response.add("nearbyEntities", nearbyEntities);
+        response.addProperty("nearbyPlayers", Bukkit.getOnlinePlayers().size());
+        return response.toString();
+    }
     public void moveFakePlayer(double x, double y, double z, float yRot, float xRot) {
-//        nmsPlayer.moveOrInterpolateTo(new Vec3(x, y, z));
-//        nmsPlayer.setKnownMovement(new Vec3(x,y,z));
-//        nmsPlayer.move(MoverType.PLAYER, new Vec3(Math.clamp(x,-1,1),Math.clamp(y,-1,1),Math.clamp(z,-1,1)));
-        nmsPlayer.teleportTo(x,y,z);
+        Vector currentPos = bukkitPlayer.getLocation().toVector();
+        Vector targetPos = new Vector(x, y, z);
+        Vector velocity = targetPos.subtract(currentPos);
+
+        bukkitPlayer.setVelocity(velocity);
+        bukkitPlayer.setRotation(yRot, xRot);
+        nmsPlayer.connection.teleport(x, y, z, yRot, xRot);
         ServerboundMovePlayerPacket.PosRot packet = new ServerboundMovePlayerPacket.PosRot(x, y, z, yRot, xRot, isOnGround(x,y,z), false);
         nmsPlayer.connection.handleMovePlayer(packet);
     }

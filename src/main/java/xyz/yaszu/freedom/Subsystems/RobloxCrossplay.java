@@ -251,84 +251,7 @@ public class RobloxCrossplay implements Listener {
                             }
 
                             CompletableFuture<String> future = new CompletableFuture<>();
-                            Bukkit.getScheduler().runTask(plugin, () -> {
-                                Location loc = display.getLocation();
-                                int radius = 32;
-                                JsonArray blocks = new JsonArray();
-                                World w = loc.getWorld();
-                                if (w != null) {
-                                    for (int x = (int) (loc.getX() - radius); x <= (int) (loc.getX() + radius); x++) {
-                                        for (int y = (int) (loc.getY() - radius); y <= (int) (loc.getY() + radius); y++) {
-                                            for (int z = (int) (loc.getZ() - radius); z <= (int) (loc.getZ() + radius); z++) {
-                                                Block block = w.getBlockAt(x, y, z);
-                                                Material material = block.getType();
-
-                                                if (!material.isAir()) {
-                                                    JsonObject b = new JsonObject();
-                                                    b.addProperty("x", x);
-                                                    b.addProperty("y", y);
-                                                    b.addProperty("z", z);
-                                                    b.addProperty("type", material.name());
-
-                                                    BlockData data = block.getBlockData();
-
-                                                    JsonObject properties = new JsonObject();
-
-                                                    if (data instanceof Directional directional)
-                                                        properties.addProperty("facing", directional.getFacing().name());
-
-                                                    if (data instanceof Bisected bisected)
-                                                        properties.addProperty("half", bisected.getHalf().name());
-
-                                                    if (data instanceof Waterlogged waterlogged)
-                                                        properties.addProperty("waterlogged", waterlogged.isWaterlogged());
-
-                                                    if (data instanceof Openable openable)
-                                                        properties.addProperty("open", openable.isOpen());
-
-                                                    if (data instanceof Powerable powerable)
-                                                        properties.addProperty("powered", powerable.isPowered());
-
-                                                    if (data instanceof org.bukkit.block.data.Ageable ageable)
-                                                        properties.addProperty("age", ageable.getAge());
-                                                    if (data instanceof Levelled levelled)
-                                                        properties.addProperty("level", levelled.getLevel());
-
-                                                    if (data instanceof Slab slab)
-                                                        properties.addProperty("slabType", slab.getType().name());
-
-                                                    if (data instanceof Stairs stairs) {
-                                                        properties.addProperty("shape", stairs.getShape().name());
-                                                        properties.addProperty("half", stairs.getHalf().name());
-                                                        properties.addProperty("facing", stairs.getFacing().name());
-                                                    }
-
-                                                    if (data instanceof TrapDoor trapdoor) {
-                                                        properties.addProperty("half", trapdoor.getHalf().name());
-                                                        properties.addProperty("facing", trapdoor.getFacing().name());
-                                                        properties.addProperty("open", trapdoor.isOpen());
-                                                    }
-
-                                                    if (data instanceof Door door) {
-                                                        properties.addProperty("half", door.getHalf().name());
-                                                        properties.addProperty("hinge", door.getHinge().name());
-                                                        properties.addProperty("facing", door.getFacing().name());
-                                                        properties.addProperty("open", door.isOpen());
-                                                    }
-
-                                                    b.add("properties", properties);
-
-                                                    blocks.add(b);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                JsonObject response = new JsonObject();
-                                response.add("nearbyBlocks", blocks);
-                                future.complete(response.toString());
-                            });
-
+                            future.complete(display.getNearbyInformation());
                             try {
                                 String response = future.get();
                                 byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
@@ -419,144 +342,146 @@ public class RobloxCrossplay implements Listener {
                                 asyncHttpExchange.sendResponseHeaders(405, -1);
                                 return;
                             }
+                            try {
 
-                            String newBody = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
 
-                            JsonObject information = JsonParser.parseString(newBody).getAsJsonObject();
-                            double x = information.get("xCord").getAsDouble();
-                            double y = information.get("yCord").getAsDouble();
-                            double z = information.get("zCord").getAsDouble();
+                                String newBody = new String(asyncHttpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+
+                                JsonObject information = JsonParser.parseString(newBody).getAsJsonObject();
+                                double x = information.get("xCord").getAsDouble();
+                                double y = information.get("yCord").getAsDouble();
+                                double z = information.get("zCord").getAsDouble();
 //                            Freedom.get_plugin().getLogger().info(
 //                                    String.format("Position: %.2f %.2f %.2f", x/scale, y/scale, z/scale)
 //                            );
-                            double velX = information.get("velX").getAsDouble();
-                            double velY = information.get("velY").getAsDouble();
-                            double velZ = information.get("velZ").getAsDouble();
-                            double yaw = Math.toDegrees(information.get("yaw").getAsDouble() * -1);
-                            double pitch = Math.clamp(Math.toDegrees(information.get("pitch").getAsDouble() * -1),-90,90);
-                            int buttonIndex;
-                            try {
-                                buttonIndex = information.get("buttonIndex").getAsInt();
-                            } catch (Exception e) {
-                                buttonIndex = -1;
-                            }
-                            AtomicBoolean isAlive = new AtomicBoolean(information.get("isAlive").getAsBoolean());
-                            if ((entity.get() == null || entity.get().isDead()) || !isAlive.get()) {
-                                BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                    //Either the Roblox Player is Dead, or the FakePlayer is dead so respawn fake player and send that the player is alive
-                                    entity.get().respawnPlayer(net.minecraft.world.entity.Entity.RemovalReason.KILLED, PlayerRespawnEvent.RespawnReason.DEATH);
-                                    isAlive.set(true);
-                                });
-                            }
-                            CompletableFuture<JsonObject> buttonFuture = new CompletableFuture<>();
-                            if (buttonIndex != -1) {
-                                int finalButtonIndex = buttonIndex;
-                                Bukkit.getScheduler().runTask(plugin, () -> {
-                                    FakePlayerHandle display = entity.get();
-                                    if (display == null || display.isDead()) {
-                                        JsonObject err = new JsonObject();
-                                        err.addProperty("ok", false);
-                                        err.addProperty("reason", "player_not_active");
-                                        buttonFuture.complete(err);
-                                        return;
-                                    }
-                                    // Touches NMS/command state - must run on the main thread,
-                                    // same reasoning as the block-update handler above.
-                                    buttonFuture.complete(display.clickDialogButton(finalButtonIndex));
-                                });
-                            } else {
-                                buttonFuture.complete(new JsonObject());
-                            }
-                            Location loc = new Location(world, x / scale, y / scale, z / scale);
-                            if (entity.get() != null && !entity.get().isDead()) {
-                                BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                    if (entity.get().getLocation().distance(loc) < 1.5) {
-                                        entity.get().moveFakePlayer(x/scale, y/scale, z/scale, (float) Math.clamp(Math.toDegrees(yaw*-1),-90,90), (float) Math.clamp(Math.toDegrees(pitch*-1),0,360));
-                                        entity.get().bukkit().setVelocity(new Vector(velX, velY, velZ));
-                                    }
-                                });
-                            }
-                            //ENTITY PACKET
+                                double velX = information.get("velX").getAsDouble();
+                                double velY = information.get("velY").getAsDouble();
+                                double velZ = information.get("velZ").getAsDouble();
+                                double yaw = Math.toDegrees(information.get("yaw").getAsDouble() * -1);
+                                double pitch = Math.clamp(Math.toDegrees(information.get("pitch").getAsDouble() * -1), -90, 90);
+                                int buttonIndex;
+                                try {
+                                    buttonIndex = information.get("buttonIndex").getAsInt();
+                                } catch (Exception e) {
+                                    buttonIndex = -1;
+                                }
+                                AtomicBoolean isAlive = new AtomicBoolean(information.get("isAlive").getAsBoolean());
+                                if ((entity.get() == null || entity.get().isDead()) || !isAlive.get()) {
+                                    BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
+                                        //Either the Roblox Player is Dead, or the FakePlayer is dead so respawn fake player and send that the player is alive
+                                        entity.get().respawnPlayer(net.minecraft.world.entity.Entity.RemovalReason.KILLED, PlayerRespawnEvent.RespawnReason.DEATH);
+                                        isAlive.set(true);
+                                    });
+                                }
+                                CompletableFuture<JsonObject> buttonFuture = new CompletableFuture<>();
+                                if (buttonIndex != -1) {
+                                    int finalButtonIndex = buttonIndex;
+                                    Bukkit.getScheduler().runTask(plugin, () -> {
+                                        FakePlayerHandle display = entity.get();
+                                        if (display == null || display.isDead()) {
+                                            JsonObject err = new JsonObject();
+                                            err.addProperty("ok", false);
+                                            err.addProperty("reason", "player_not_active");
+                                            buttonFuture.complete(err);
+                                            return;
+                                        }
+                                        // Touches NMS/command state - must run on the main thread,
+                                        // same reasoning as the block-update handler above.
+                                        buttonFuture.complete(display.clickDialogButton(finalButtonIndex));
+                                    });
+                                } else {
+                                    buttonFuture.complete(new JsonObject());
+                                }
+                                Location loc = new Location(world, x / scale, y / scale, z / scale);
+                                if (entity.get() != null && !entity.get().isDead()) {
+                                    BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
+                                        if (entity.get().getLocation().distance(loc) < 1.5) {
+                                            entity.get().moveFakePlayer(x / scale, (int) y / scale, z / scale, (float) Math.clamp(Math.toDegrees(yaw * -1), -90, 90), (float) Math.clamp(Math.toDegrees(pitch * -1), 0, 360));
+                                            entity.get().bukkit().setVelocity(new Vector(velX, velY, velZ));
+                                        }
+                                    });
+                                }
+                                //ENTITY PACKET
                             /*
                              {entity : {positionX : 0,positionY : 0, positionZ : 0, velocityX, velocityY, velocityZ,type}
                              */
-                            CompletableFuture<JsonObject> future = new CompletableFuture<>();
-                            AtomicReference<JsonObject> jsonObjectAtomicReference = new AtomicReference<>();
-                            jsonObjectAtomicReference.set(new JsonObject());
-                            JsonObject statusJson = jsonObjectAtomicReference.get();
-                            BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                        FakePlayerHandle display = entity.get();
-                                        if (display != null) {
-                                            statusJson.addProperty("Living", isAlive.get());
-                                            statusJson.addProperty("velocityX", display.getVelocity().getX());
-                                            statusJson.addProperty("velocityY", display.getVelocity().getY());
-                                            statusJson.addProperty("velocityZ", display.getVelocity().getZ());
-                                            statusJson.addProperty("dialog",display.getDialogJson().toString());
+                                CompletableFuture<JsonObject> future = new CompletableFuture<>();
+                                AtomicReference<JsonObject> jsonObjectAtomicReference = new AtomicReference<>();
+                                jsonObjectAtomicReference.set(new JsonObject());
+                                JsonObject statusJson = jsonObjectAtomicReference.get();
+                                BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
+                                    FakePlayerHandle display = entity.get();
+                                    if (display != null) {
+                                        statusJson.addProperty("Living", isAlive.get());
+                                        statusJson.addProperty("velocityX", display.getVelocity().getX());
+                                        statusJson.addProperty("velocityY", display.getVelocity().getY());
+                                        statusJson.addProperty("velocityZ", display.getVelocity().getZ());
+                                        statusJson.addProperty("dialog", display.getDialogJson().toString());
 
-                                            JsonArray currentInventory = new JsonArray();
-                                            for (ItemStack itemStack : display.getInventory().getContents()) {
-                                                if (itemStack != null) {
+                                        JsonArray currentInventory = new JsonArray();
+                                        for (ItemStack itemStack : display.getInventory().getContents()) {
+                                            if (itemStack != null) {
 
 
-                                                    JsonObject item = new JsonObject();
-                                                    item.addProperty("name", itemStack.getType().name());
-                                                    item.addProperty("count", itemStack.getAmount());
-                                                    item.addProperty("type", itemStack.getType().name());
-                                                    JsonObject properties = new JsonObject();
-                                                    if (itemStack.getItemMeta() != null) {
-                                                        ItemMeta meta = itemStack.getItemMeta();
-                                                        if (meta.hasDisplayName()) {
-                                                            properties.addProperty("name", meta.displayName().toString());
-                                                        }
-                                                        if (meta.hasLore()) {
-                                                            properties.addProperty("lore", meta.lore().toString());
-                                                        }
-                                                        if (!meta.getEnchants().isEmpty()) {
-                                                            JsonArray enchantments = new JsonArray();
-                                                            for (Enchantment enchantment : meta.getEnchants().keySet()) {
-                                                                enchantments.add(enchantment.getKey().getKey().toString());
-                                                            }
-                                                            properties.add("enchantments", enchantments);
-                                                        }
-                                                        if (meta.hasItemModel()) {
-                                                            properties.addProperty("model", meta.getItemModel().toString());
-                                                        }
+                                                JsonObject item = new JsonObject();
+                                                item.addProperty("name", itemStack.getType().name());
+                                                item.addProperty("count", itemStack.getAmount());
+                                                item.addProperty("type", itemStack.getType().name());
+                                                JsonObject properties = new JsonObject();
+                                                if (itemStack.getItemMeta() != null) {
+                                                    ItemMeta meta = itemStack.getItemMeta();
+                                                    if (meta.hasDisplayName()) {
+                                                        properties.addProperty("name", meta.displayName().toString());
                                                     }
-                                                    item.add("properties", properties);
-                                                    currentInventory.add(item);
+                                                    if (meta.hasLore()) {
+                                                        properties.addProperty("lore", meta.lore().toString());
+                                                    }
+                                                    if (!meta.getEnchants().isEmpty()) {
+                                                        JsonArray enchantments = new JsonArray();
+                                                        for (Enchantment enchantment : meta.getEnchants().keySet()) {
+                                                            enchantments.add(enchantment.getKey().getKey().toString());
+                                                        }
+                                                        properties.add("enchantments", enchantments);
+                                                    }
+                                                    if (meta.hasItemModel()) {
+                                                        properties.addProperty("model", meta.getItemModel().toString());
+                                                    }
                                                 }
-
-                                            }
-                                            statusJson.add("currentInventory", currentInventory);
-
-                                            //Decode and encode format for every nearby entity and what you can get by looking at them
-                                            JsonArray nearbyEntities = new JsonArray();
-
-                                            for (Entity e : display.getNearbyEntities(32, 32, 32)) {
-                                                JsonObject entityJson = new JsonObject();
-                                                entityJson.addProperty("type", e.getType().toString());
-                                                entityJson.addProperty("x", e.getLocation().getX() * scale);
-                                                entityJson.addProperty("y", e.getLocation().getY() * scale);
-                                                entityJson.addProperty("z", e.getLocation().getZ() * scale);
-                                                entityJson.addProperty("pitch", Math.toRadians(e.getLocation().getPitch() * -1));
-                                                entityJson.addProperty("yaw", Math.toRadians(e.getLocation().getYaw() * -1));
-                                                entityJson.addProperty("UniqueID", e.getUniqueId().toString());
-                                                nearbyEntities.add(entityJson);
+                                                item.add("properties", properties);
+                                                currentInventory.add(item);
                                             }
 
-                                            statusJson.add("nearbyEntities", nearbyEntities);
-                                            JsonObject playerJson = new JsonObject();
-                                            playerJson.addProperty("x", display.getLocation().getX() * scale);
-                                            playerJson.addProperty("y", display.getLocation().getY() * scale);
-                                            playerJson.addProperty("z", display.getLocation().getZ() * scale);
-                                            playerJson.addProperty("distance",display.getLocation().distance(loc));
-                                            statusJson.add("currentPos", playerJson);
                                         }
-                                        buttonFuture.thenAccept(buttonJson -> {
-                                            statusJson.add("button", buttonJson);
-                                            future.complete(statusJson);
-                                        });
-                            });
+                                        statusJson.add("currentInventory", currentInventory);
+
+                                        //Decode and encode format for every nearby entity and what you can get by looking at them
+                                        JsonArray nearbyEntities = new JsonArray();
+
+                                        for (Entity e : display.getNearbyEntities(32, 32, 32)) {
+                                            JsonObject entityJson = new JsonObject();
+                                            entityJson.addProperty("type", e.getType().toString());
+                                            entityJson.addProperty("x", e.getLocation().getX() * scale);
+                                            entityJson.addProperty("y", e.getLocation().getY() * scale);
+                                            entityJson.addProperty("z", e.getLocation().getZ() * scale);
+                                            entityJson.addProperty("pitch", Math.toRadians(e.getLocation().getPitch() * -1));
+                                            entityJson.addProperty("yaw", Math.toRadians(e.getLocation().getYaw() * -1));
+                                            entityJson.addProperty("UniqueID", e.getUniqueId().toString());
+                                            nearbyEntities.add(entityJson);
+                                        }
+
+                                        statusJson.add("nearbyEntities", nearbyEntities);
+                                        JsonObject playerJson = new JsonObject();
+                                        playerJson.addProperty("x", display.getLocation().getX() * scale);
+                                        playerJson.addProperty("y", display.getLocation().getY() * scale);
+                                        playerJson.addProperty("z", display.getLocation().getZ() * scale);
+                                        playerJson.addProperty("distance", display.getLocation().distance(loc));
+                                        statusJson.add("currentPos", playerJson);
+                                    }
+                                    buttonFuture.thenAccept(buttonJson -> {
+                                        statusJson.add("button", buttonJson);
+                                        future.complete(statusJson);
+                                    });
+                                });
                             future.thenAccept(jsonObject -> {
                                 String response = jsonObject.toString();
                                 try {
@@ -569,7 +494,9 @@ public class RobloxCrossplay implements Listener {
                                     e.printStackTrace();
                                 }
                             });
-
+                            } catch (Exception e) {
+                                Freedom.get_plugin().getLogger().info("Error processing player request: " + e.getMessage());
+                            }
                         });
                     } else {
                         Freedom.get_plugin().getLogger().info("Invalid player: " + playerName);
