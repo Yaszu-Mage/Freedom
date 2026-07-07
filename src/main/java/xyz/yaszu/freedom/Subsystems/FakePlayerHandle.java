@@ -29,6 +29,8 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -558,6 +560,16 @@ public class FakePlayerHandle {
         return removed || bukkitPlayer.isDead();
     }
 
+    public void breakBlock(Block block) {
+        Level level = nmsPlayer.level();
+        int xPos = block.getX();
+        int yPos = block.getY();
+        int zPos = block.getZ();
+        GameType gameType = GameType.SURVIVAL;
+        if (!nmsPlayer.blockActionRestricted(level,new BlockPos(xPos,yPos,zPos),gameType)) {
+            bukkitPlayer.breakBlock(block);
+        }
+    }
     /**
      * Tears the fake player down the same way a real disconnect would.
      * Call this instead of entity.remove() - the same class of bug as the

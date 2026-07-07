@@ -202,7 +202,7 @@ public class RobloxCrossplay implements Listener {
                                      Freedom.get_plugin().getLogger().info(actionType + " " + actionType.equals("update"));
                                      Block block = world.getBlockAt(new Location(world, x, y, z));
                                      if (actionType.equalsIgnoreCase("break")) {
-                                         block.setType(Material.AIR);
+                                         entity.get().breakBlock(block);
                                      } else if (actionType.equalsIgnoreCase("place")) {
                                          String materialName = givenJson.get("material").getAsString();
                                          Material material = Material.getMaterial(materialName.toUpperCase());

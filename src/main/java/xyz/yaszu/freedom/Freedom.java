@@ -69,7 +69,7 @@ public final class Freedom extends JavaPlugin implements Listener {
     public ArrayList<FakePlayerHandle> fakePlayers = new ArrayList<>();
     /**
      * Main Initialization for Reapplying Curse Weakness
-     * @param player
+     * @param player to re-apply
      */
     public void reapplyCurseWeakness(Player player) {
         if (player == null || !player.isOnline()) return;
