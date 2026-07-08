@@ -208,26 +208,15 @@ public class RobloxCrossplay implements Listener {
                                          Material material = Material.getMaterial(materialName.toUpperCase());
                                          if (material != null) {
                                              block.setType(material);
-                                         } else {
                                          }
                                      } else if (actionType.equals("update")) {
                                          Freedom.get_plugin().getLogger().info("Received block: " + Information);
                                          Freedom.get_plugin().getLogger().info("Block type: " + block.getType());
                                          Freedom.get_plugin().getLogger().info("CORDS" + x + " " + y + " " + z);
                                          entity.get().fakePlayerInteract(true,new Vec3(x,y,z));
-//                                         if (block.getBlockData() instanceof Door door) {
-//                                             Freedom.get_plugin().getLogger().info("Door update: " + door.isOpen());
-//                                             door.setOpen(!door.isOpen());
-//                                             block.setBlockData(door);
-//                                         }
-//                                         if (block.getBlockData() instanceof TrapDoor trapDoor) {
-//                                             Freedom.get_plugin().getLogger().info("Trapdoor update: " + trapDoor.isOpen());
-//                                             trapDoor.setOpen(!trapDoor.isOpen());
-//                                             block.setBlockData(trapDoor);
-//                                         }
+                                     } else if (actionType.equalsIgnoreCase("chat")) {
+                                         entity.get().chat(givenJson.get("message").getAsString());
                                      }
-
-
                                  }, 1);
                                  Freedom.get_plugin().getLogger().info("Block update task started: " + task.getTaskId());
                              } catch (Exception e) {
