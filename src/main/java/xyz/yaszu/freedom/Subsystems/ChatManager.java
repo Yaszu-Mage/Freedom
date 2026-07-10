@@ -19,6 +19,11 @@ import xyz.yaszu.freedom.Soul.SoulTypes;
 import xyz.yaszu.freedom.Soul.Ultra.Black;
 import xyz.yaszu.freedom.Util.Util;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +38,10 @@ public class ChatManager implements Listener {
 
     private static final Map<UUID, UUID> echoMap = new ConcurrentHashMap<>();
     public Arcanus arcanus = new Arcanus();
+
+
+
+
 
     @EventHandler
     public void PlayerChatEvent(AsyncPlayerChatEvent event) {
@@ -78,6 +87,7 @@ public class ChatManager implements Listener {
         //Yes, there is booze
         message = AlcoholManager.handleChat(realTypist, message);
         // If not an echo, process message and check for disguise
+
         if (!isEcho) {
             // Apply CurseManager modifications
             String processedMessage = CurseManager.handleChat(player, message);
@@ -107,6 +117,7 @@ public class ChatManager implements Listener {
                     }
                 }
             }
+
         }
         // This is hell, I am so sorry
         // Filtering logic (runs for non-disguised OR for the echoed event OR for offline disguise)
@@ -147,6 +158,8 @@ public class ChatManager implements Listener {
                     }
                 }
             }
+
+
         }
         
         // Ensure the real typist sees their own message
@@ -156,6 +169,13 @@ public class ChatManager implements Listener {
         // Ensure the identity player sees it too (if it's an echo)
         if (isEcho && !event.getRecipients().contains(player)) {
             event.getRecipients().add(player);
+        }
+        if (!isEcho) {
+            Freedom.fakePlayers.forEach(fakePlayer -> {
+                if (fakePlayer.bukkit().getName().equals(realTypist.getName())) return;
+                fakePlayer.outgoingChats.add(new FakePlayerHandle.ChatMessage(processedMessage,realTypist.getUniqueId()));
+            });
+            Freedom.get_plugin().getLogger().info("Echoing message to fake players");
         }
     }
 

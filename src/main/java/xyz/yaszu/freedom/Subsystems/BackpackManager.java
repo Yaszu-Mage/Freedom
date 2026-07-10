@@ -27,9 +27,6 @@ import static xyz.yaszu.freedom.Util.Util.keygen;
  */
 public class BackpackManager implements Listener {
 
-    // -------------------------------------------------------------------------
-    // InventoryClickEvent
-    // -------------------------------------------------------------------------
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
 
@@ -83,9 +80,6 @@ public class BackpackManager implements Listener {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // InventoryDragEvent – prevent splitting a backpack across multiple slots
-    // -------------------------------------------------------------------------
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onDrag(InventoryDragEvent event) {
@@ -94,9 +88,6 @@ public class BackpackManager implements Listener {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // InventoryCloseEvent – persist backpack contents back to the item
-    // -------------------------------------------------------------------------
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
@@ -131,9 +122,6 @@ public class BackpackManager implements Listener {
         backpackItem.setItemMeta(meta);
     }
 
-    // -------------------------------------------------------------------------
-    // BackpackGui (inner class)
-    // -------------------------------------------------------------------------
 
     public static class BackpackGui implements InventoryHolder {
 

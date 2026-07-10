@@ -8,7 +8,6 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
-import net.md_5.bungee.api.ChatMessageType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -41,8 +40,9 @@ import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
@@ -61,6 +61,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static xyz.yaszu.freedom.Util.Util.dess;
 
 /**
@@ -222,12 +224,6 @@ public class FakePlayerHandle {
             entityJson.addProperty("pitch", Math.toRadians(e.getLocation().getPitch() * -1));
             entityJson.addProperty("yaw", Math.toRadians(e.getLocation().getYaw() * -1));
             entityJson.addProperty("UniqueID", e.getUniqueId().toString());
-            if (e instanceof Slime slime) {
-                entityJson.addProperty("size",slime.getSize());
-            }
-            if (e instanceof MagmaCube magmaCube) {
-                entityJson.addProperty("size",magmaCube.getSize());
-            }
             nearbyEntities.add(entityJson);
         }
         response.add("nearbyEntities", nearbyEntities);
@@ -264,6 +260,41 @@ public class FakePlayerHandle {
         AABB probe = new AABB(feet.minX, y - GROUND_PROBE_DEPTH, feet.minZ,
                 feet.maxX, y, feet.maxZ);
         return !nmsPlayer.level().noCollision(nmsPlayer, probe);
+    }
+
+
+    public void chat(String message) {
+        BukkitTask task = Bukkit.getScheduler().runTask(Freedom.get_plugin(), () -> {
+            bukkitPlayer.chat(message);
+        });
+    }
+
+    public ArrayList<ChatMessage> outgoingChats = new ArrayList<>();
+
+    public static class ChatMessage {
+        private final String message;
+        private final UUID sender;
+        public ChatMessage(String message, UUID sender) {
+            Freedom.get_plugin().getLogger().info("MESSAGE LOGGED");
+            this.message = message;
+            this.sender = sender;
+        }
+        public String getMessage() {
+            return message;
+        }
+        public UUID getSender() {
+            return sender;
+        }
+        public Player getSenderPlayer() {
+            AtomicReference<Player> player = new AtomicReference<>();
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.set(Bukkit.getPlayer(sender));
+                }
+            }.runTask(Freedom.get_plugin());
+            return player.get();
+        }
     }
 
     public InteractionResult fakePlayerInteract(boolean isRight,Vec3 location) {
@@ -369,28 +400,15 @@ public class FakePlayerHandle {
                     dialogSnapshot = buildDialogSnapshot(dialogVersion.incrementAndGet(), title, buttons);
                 }
                 if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
+                    Freedom.get_plugin().getLogger().info("PACKET RECEIVED");
                     String text = chatPacket.unsignedContent().getString();
                     outgoingChats.add(new ChatMessage(text,chatPacket.sender()));
+                    return;
                 }
             }
         });
+        Freedom.fakePlayers.add(this);
     }
-
-    public ArrayList<ChatMessage> outgoingChats = new ArrayList<>();
-
-    public class ChatMessage {
-        private final String message;
-        private final UUID sender;
-        public ChatMessage(String message, UUID sender) {
-            this.message = message;
-            this.sender = sender;
-        }
-    }
-
-
-    private final AtomicLong dialogVersion = new AtomicLong(0);
-    private volatile List<DialogButton> dialogButtons = List.of();
-
     public void update() {
         double radius = 10;
         BukkitTask task = new BukkitRunnable() {
@@ -409,6 +427,8 @@ public class FakePlayerHandle {
             }
         }.runTask(Freedom.get_plugin());
     }
+    private final AtomicLong dialogVersion = new AtomicLong(0);
+    private volatile List<DialogButton> dialogButtons = List.of();
     private volatile JsonObject dialogSnapshot = buildDialogSnapshot(0L, null, List.of());
     public Dialog getDialog = null;
     public Player bukkit() {
@@ -581,7 +601,6 @@ public class FakePlayerHandle {
         return null;
     }
 
-
     private static String plainText(Object value) {
         if (value == null) return "";
         if (value instanceof Optional<?> opt) return opt.map(FakePlayerHandle::plainText).orElse("");
@@ -597,13 +616,9 @@ public class FakePlayerHandle {
         }
         return String.valueOf(value);
     }
+
     public boolean isRemoved() {
         return removed || bukkitPlayer.isDead();
-    }
-    public void chat(String message) {
-        BukkitTask task = Bukkit.getScheduler().runTask(Freedom.get_plugin(), () -> {
-            bukkitPlayer.chat(message);
-        });
     }
 
     public void breakBlock(Block block) {
@@ -612,7 +627,7 @@ public class FakePlayerHandle {
         int yPos = block.getY();
         int zPos = block.getZ();
         GameType gameType = GameType.SURVIVAL;
-        if (!nmsPlayer.blockActionRestricted(level,new BlockPos(xPos,yPos,zPos),gameType) ) {
+        if (!nmsPlayer.blockActionRestricted(level,new BlockPos(xPos,yPos,zPos),gameType)) {
             bukkitPlayer.breakBlock(block);
         }
     }

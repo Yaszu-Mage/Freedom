@@ -47,7 +47,7 @@ public class RobloxCrossplay implements Listener {
 
     public HashMap<String, Inventory> inventory = new HashMap<>();
 //    YamlConfiguration data = YamlConfiguration.loadConfiguration(new File(Freedom.get_plugin().getDataFolder(), "RobloxData.yml"));
-
+    public static ProfanityFilter filter = new ProfanityFilter();
 
     String ok = "Okay!";
     public void init() {
@@ -331,6 +331,7 @@ public class RobloxCrossplay implements Listener {
                                 asyncHttpExchange.sendResponseHeaders(405, -1);
                                 return;
                             }
+                            entity.get().update();
                             try {
 
 
@@ -384,7 +385,7 @@ public class RobloxCrossplay implements Listener {
                                 Location loc = new Location(world, x / scale, y / scale, z / scale);
                                 if (entity.get() != null && !entity.get().isDead()) {
                                     BukkitTask task = Bukkit.getScheduler().runTask(plugin, () -> {
-                                        if (entity.get().getLocation().distance(loc) < 1.5) {
+                                        if (entity.get().getLocation().distance(loc) < 3) {
                                             entity.get().moveFakePlayer(x / scale, (int) y / scale, z / scale, (float) Math.clamp(Math.toDegrees(yaw * -1), -90, 90), (float) Math.clamp(Math.toDegrees(pitch * -1), 0, 360));
                                             entity.get().bukkit().setVelocity(new Vector(velX, velY, velZ));
                                         }
@@ -406,12 +407,20 @@ public class RobloxCrossplay implements Listener {
                                         statusJson.addProperty("velocityY", display.getVelocity().getY());
                                         statusJson.addProperty("velocityZ", display.getVelocity().getZ());
                                         statusJson.addProperty("dialog", display.getDialogJson().toString());
-
+                                        JsonArray chats = new JsonArray();
+                                        entity.get().outgoingChats.forEach(chat -> {
+                                            Freedom.get_plugin().getLogger().info(chat.getMessage());
+                                            JsonObject chatJson = new JsonObject();
+                                            chatJson.addProperty("message",chat.getMessage());
+                                            chatJson.addProperty("playerName", Bukkit.getOfflinePlayer(chat.getSender()).getName());
+                                            chats.add(chatJson);
+                                            Freedom.get_plugin().getLogger().info(chat.getMessage());
+                                        });
+                                        statusJson.add("chats", chats);
+                                        entity.get().outgoingChats.clear();
                                         JsonArray currentInventory = new JsonArray();
                                         for (ItemStack itemStack : display.getInventory().getContents()) {
                                             if (itemStack != null) {
-
-
                                                 JsonObject item = new JsonObject();
                                                 item.addProperty("name", itemStack.getType().name());
                                                 item.addProperty("count", itemStack.getAmount());
@@ -442,10 +451,8 @@ public class RobloxCrossplay implements Listener {
 
                                         }
                                         statusJson.add("currentInventory", currentInventory);
-
                                         //Decode and encode format for every nearby entity and what you can get by looking at them
                                         JsonArray nearbyEntities = new JsonArray();
-
                                         for (Entity e : display.getNearbyEntities(32, 32, 32)) {
                                             JsonObject entityJson = new JsonObject();
                                             entityJson.addProperty("type", e.getType().toString());
@@ -457,7 +464,6 @@ public class RobloxCrossplay implements Listener {
                                             entityJson.addProperty("UniqueID", e.getUniqueId().toString());
                                             nearbyEntities.add(entityJson);
                                         }
-
                                         statusJson.add("nearbyEntities", nearbyEntities);
                                         JsonObject playerJson = new JsonObject();
                                         playerJson.addProperty("x", display.getLocation().getX() * scale);

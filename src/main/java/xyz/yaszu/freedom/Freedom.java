@@ -66,7 +66,7 @@ public final class Freedom extends JavaPlugin implements Listener {
 
     public static int version = 6942067;
     private BlockHandler blockHandler;
-    public ArrayList<FakePlayerHandle> fakePlayers = new ArrayList<>();
+    public static ArrayList<FakePlayerHandle> fakePlayers = new ArrayList<>();
     /**
      * Main Initialization for Reapplying Curse Weakness
      * @param player to re-apply
