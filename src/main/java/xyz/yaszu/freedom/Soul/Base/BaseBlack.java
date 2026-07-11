@@ -563,7 +563,6 @@ public class BaseBlack implements Base_Soul, Listener {
             if (player.getAttribute(Attribute.SCALE).getModifier(keygen("black")) != null) {
                 player.getAttribute(Attribute.SCALE).removeModifier(keygen("black"));
             }
-
         }
             if (soulType == SoulTypes.Orange) {
                 if (!player.getPersistentDataContainer().has(keygen("cancurse"))) {

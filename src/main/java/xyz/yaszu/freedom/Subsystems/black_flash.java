@@ -14,8 +14,11 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xyz.yaszu.freedom.Freedom;
+import xyz.yaszu.freedom.Util.Util;
 
 import java.util.Random;
+
+import static xyz.yaszu.freedom.Util.Util.pulseCircle;
 
 /**
  * Mechanic from Jujutsu Kaisen where you can hit a critical hit
@@ -28,29 +31,24 @@ public class black_flash implements Listener {
         Player attacker = event.getPlayer();
         if (!Life_and_Death.is_alive(event.getPlayer())) return;
         NamespacedKey key = new NamespacedKey(Bukkit.getPluginManager().getPlugin("Freedom"), "black_flash");
-
         Entity attacked = event.getAttacked();
-
         if (!attacker.equals(attacked)) {
             int value = random.nextInt(1001);
             if (value == 1) {
                 Bukkit.getPluginManager().getPlugin("Freedom").getLogger().info(attacker.getDisplayName() + " hit a black flash");
                 attacker.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#870700:#eb0c00>You hit a black flash!</gradient>"));
                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.7f);
-
                 // Spawn Black and Dark Red particles
                 attacker.getWorld().spawnParticle(Particle.LARGE_SMOKE, attacked.getLocation(), 50, 0.5, 0.5, 0.5, 0.02);
                 attacker.getWorld().spawnParticle(Particle.FLAME, attacked.getLocation(), 50, 0.5, 0.5, 0.5);
-
                 // Apply effects
                 attacker.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 10, 6));
                 PotionEffect fx = new PotionEffect(PotionEffectType.SLOWNESS,120,0);
                 PotionEffect fx2 = new PotionEffect(PotionEffectType.SLOWNESS,120,0);
                 ((LivingEntity) attacked).addPotionEffect(fx);
                 ((LivingEntity) attacked).addPotionEffect(fx2);
-
-
-
+                pulseCircle(attacker.getLocation(),2,16, Particle.DUST,0.5,1,2,Sound.ENTITY_ZOMBIE_VILLAGER_CURE,new Particle.DustOptions(Color.BLACK, 1.0f));
+                pulseCircle(attacker.getLocation(),2,16, Particle.DUST,0.5,1,2,Sound.ENTITY_ZOMBIE_VILLAGER_CURE,new Particle.DustOptions(Color.RED, 1.0f));
             }
         }
     }

@@ -23,11 +23,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.entity.EntityDismountEvent;
+import org.bukkit.persistence.PersistentDataType;
 import xyz.yaszu.freedom.Util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static xyz.yaszu.freedom.Util.Util.keygen;
 
 public class SitManager implements Listener {
 
@@ -40,21 +43,19 @@ public class SitManager implements Listener {
         }
     }
 
-
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.getClickedBlock() == null) return;
         if (event.getPlayer().isSneaking()) return;
         if (event.getPlayer().getVehicle() != null) return;
-        
         // Don't sit if holding a block to allow building
         if (event.getItem() != null && event.getItem().getType().isBlock()) return;
-
         Block block = event.getClickedBlock();
         BlockData data = block.getBlockData();
-
-        if (data instanceof Stairs || data instanceof Slab) {
+        Player player = event.getPlayer();
+        boolean disabledSit = player.getPersistentDataContainer().getOrDefault(keygen("seattoggle"), PersistentDataType.BOOLEAN, true);
+        if ((data instanceof Stairs || data instanceof Slab) && disabledSit) {
             double yOffset = 0.5;
             if (data instanceof Slab slab) {
                 if (slab.getType() == Slab.Type.TOP) yOffset = 1.0;
@@ -62,12 +63,12 @@ public class SitManager implements Listener {
             } else if (data instanceof Stairs stairs) {
                 if (stairs.getHalf() == Stairs.Half.TOP) yOffset = 1.0;
             }
-            
             Location sitLoc = block.getLocation().add(0.5, yOffset, 0.5);
             sit(event.getPlayer(), sitLoc);
             event.setCancelled(true);
         }
     }
+
 
     public static void sit(Player player, Location loc) {
         if (sittingPlayers.containsKey(player.getUniqueId())) return;

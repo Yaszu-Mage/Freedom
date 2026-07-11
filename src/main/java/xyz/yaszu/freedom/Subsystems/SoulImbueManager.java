@@ -55,8 +55,6 @@ import org.bukkit.potion.PotionEffect;
 import static xyz.yaszu.freedom.Util.Util.*;
 
 public class SoulImbueManager  implements Listener {
-
-
     @EventHandler
     public void ApplyBuff(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player player) {

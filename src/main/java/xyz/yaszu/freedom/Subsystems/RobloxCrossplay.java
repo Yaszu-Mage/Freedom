@@ -47,7 +47,6 @@ public class RobloxCrossplay implements Listener {
 
     public HashMap<String, Inventory> inventory = new HashMap<>();
 //    YamlConfiguration data = YamlConfiguration.loadConfiguration(new File(Freedom.get_plugin().getDataFolder(), "RobloxData.yml"));
-    public static ProfanityFilter filter = new ProfanityFilter();
 
     String ok = "Okay!";
     public void init() {
@@ -448,7 +447,6 @@ public class RobloxCrossplay implements Listener {
                                                 item.add("properties", properties);
                                                 currentInventory.add(item);
                                             }
-
                                         }
                                         statusJson.add("currentInventory", currentInventory);
                                         //Decode and encode format for every nearby entity and what you can get by looking at them
