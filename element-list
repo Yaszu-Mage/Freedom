@@ -34,9 +34,11 @@ xyz.yaszu.freedom.Items.Swords
 xyz.yaszu.freedom.Items.Swords.Items
 xyz.yaszu.freedom.Items.Tools
 xyz.yaszu.freedom.Items.Upgrades
+xyz.yaszu.freedom.Magic
 xyz.yaszu.freedom.Soul
 xyz.yaszu.freedom.Soul.Alchemy
 xyz.yaszu.freedom.Soul.Base
 xyz.yaszu.freedom.Soul.Ultra
 xyz.yaszu.freedom.Subsystems
 xyz.yaszu.freedom.Util
+xyz.yaszu.freedom.Worlds
