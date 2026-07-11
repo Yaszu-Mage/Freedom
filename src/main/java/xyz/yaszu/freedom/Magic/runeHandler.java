@@ -125,7 +125,7 @@ public class runeHandler {
         public Rune upSlot;
         public List<Rune> centerSlots;
         static List<BehaviorTypes> getBehavior() {
-
+            return List.of(BehaviorTypes.values());
         }
     }
 
