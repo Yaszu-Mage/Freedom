@@ -45,7 +45,11 @@ public class runeHandler {
         GLITCH,
         MOVE,
         BLIND,
-        AUDIO
+        AUDIO,
+        PURIFY,
+        SILENCE,
+        MIND,
+        NONE
     }
     public static enum Rune {
         FIRE("#ff9100",BehaviorType.DAMAGE,BehaviorType.EXPAND,BehaviorType.DAMAGE,BehaviorType.SHEILD,BehaviorType.FLY,new ParticleBuilder(Particle.FLAME).count(10)),
@@ -57,19 +61,18 @@ public class runeHandler {
         STEAM("", BehaviorType.EXPAND,BehaviorType.EXPAND,BehaviorType.EXPAND,BehaviorType.EXPAND,BehaviorType.EXPAND,new ParticleBuilder(Particle.CAMPFIRE_COSY_SMOKE).count(10)),
         ICE("",BehaviorType.FREEZE,BehaviorType.GROUND,BehaviorType.FREEZE,BehaviorType.FREEZE,BehaviorType.FREEZE,new ParticleBuilder(Particle.SNOWFLAKE).count(10)),
         LIGHT("",BehaviorType.BLIND,BehaviorType.FLY, BehaviorType.BLIND,BehaviorType.BLIND,BehaviorType.FLY,Particle.DUST.builder().color(Color.YELLOW).count(2)),
-        SYMPHONIC,
-        CYBER,
-        COSMIC,
-        HOLY,
-        ANTI,
-        PSYCHIC,
-        CHAOS,
-        DARK,
-        GRAVITY,
-        DEMONIC,
-        LIFE,
-        BLANK;
-
+        SYMPHONIC("",BehaviorType.AUDIO,BehaviorType.EXPAND,BehaviorType.AUDIO,BehaviorType.AUDIO,BehaviorType.AUDIO,Particle.NOTE.builder()),
+        CYBER("",BehaviorType.GLITCH,BehaviorType.GLITCH,BehaviorType.GLITCH,BehaviorType.GLITCH,BehaviorType.GLITCH,Particle.ENCHANT.builder()),
+        COSMIC("",BehaviorType.MOVE,BehaviorType.TELEPORT,BehaviorType.MOVE,BehaviorType.FLY,BehaviorType.TELEPORT,Particle.DRAGON_BREATH.builder()),
+        HOLY("",BehaviorType.PURIFY,BehaviorType.HEAL,BehaviorType.PURIFY,BehaviorType.PURIFY,BehaviorType.HEAL,Particle.DUST.builder().color(Color.GREEN).count(2)),
+        ANTI("",BehaviorType.SILENCE,BehaviorType.TIME,BehaviorType.SILENCE,BehaviorType.SILENCE,BehaviorType.TIME,Particle.DUST.builder().color(Color.BLUE).count(2)),
+        PSYCHIC("",BehaviorType.MOVE,BehaviorType.MIND,BehaviorType.MIND,BehaviorType.MIND,BehaviorType.MIND,Particle.DUST.builder().color(Color.PURPLE).count(2)),
+        CHAOS("",BehaviorType.NONE,BehaviorType.NONE,BehaviorType.NONE,BehaviorType.NONE,BehaviorType.NONE,new ParticleBuilder(Particle.PORTAL).count(10)),
+        DARK("",BehaviorType.MIND,BehaviorType.BLIND,BehaviorType.TELEPORT,BehaviorType.TELEPORT,BehaviorType.TELEPORT,Particle.DUST.builder().color(Color.GRAY).count(2)),
+        GRAVITY("",BehaviorType.GRAVITY,BehaviorType.GRAVITY,BehaviorType.GRAVITY,BehaviorType.GRAVITY,BehaviorType.GROUND,Particle.DUST.builder().color(Color.BLACK).count(2)),
+        DEMONIC("",BehaviorType.DAMAGE,BehaviorType.DAMAGE,BehaviorType.DAMAGE,BehaviorType.DAMAGE,BehaviorType.DAMAGE,Particle.DUST.builder().color(Color.ORANGE).count(2)),
+        LIFE("",BehaviorType.EXPAND,BehaviorType.HEAL,BehaviorType.EXPAND,BehaviorType.HEAL,BehaviorType.HEAL,Particle.DUST.builder().color(Color.LIME).count(2)),
+        BLANK("",BehaviorType.NONE,BehaviorType.NONE,BehaviorType.NONE,BehaviorType.NONE,BehaviorType.NONE,new ParticleBuilder(Particle.BLOCK).data(Material.AIR.createBlockData()));
         private String color;
         private BehaviorType cornerBehavior;
         private BehaviorType centerBehavior;
@@ -268,14 +271,7 @@ public class runeHandler {
             runes.add(bottomRightCorner);
             runes.add(upSlot);
             runes.add(downSlot);
-
-
-
-
-
         }
-
-
         public Rune ifNullReplace(Rune rune) {
             if (rune == null) {
                 return Rune.BLANK;
