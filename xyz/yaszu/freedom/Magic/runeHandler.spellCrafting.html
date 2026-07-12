@@ -63,6 +63,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#openMenus" tabindex="0">openMenus</a></li>
 <li><a href="#inventory" tabindex="0">inventory</a></li>
 <li><a href="#allowedSlots" tabindex="0">allowedSlots</a></li>
+<li><a href="#booleanSlots" tabindex="0">booleanSlots</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
@@ -75,6 +76,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#set(org.bukkit.entity.Player)" tabindex="0">set(Player)</a></li>
 <li><a href="#getInventory()" tabindex="0">getInventory()</a></li>
 <li><a href="#onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent)" tabindex="0">onInventoryClick(InventoryClickEvent)</a></li>
+<li><a href="#isBooleanSlot(int)" tabindex="0">isBooleanSlot(int)</a></li>
 <li><a href="#isAllowedSlot(int)" tabindex="0">isAllowedSlot(int)</a></li>
 </ol>
 </li>
@@ -117,13 +119,20 @@ implements org.bukkit.inventory.InventoryHolder, org.bukkit.event.Listener</span
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a></code></div>
 <div class="col-second even-row-color"><code><a href="#allowedSlots" class="member-name-link">allowedSlots</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">SLOTS THAT ARE ABLE TO BE INTERACTED WITH WITHIN THE GUI</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#booleanSlots" class="member-name-link">booleanSlots</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">SLOTS THAT ARE BOOLEANS AND CANNOT BE INTERACTED WITH</div>
+</div>
+<div class="col-first even-row-color"><code>org.bukkit.inventory.Inventory</code></div>
+<div class="col-second even-row-color"><code><a href="#inventory" class="member-name-link">inventory</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>org.bukkit.inventory.Inventory</code></div>
-<div class="col-second odd-row-color"><code><a href="#inventory" class="member-name-link">inventory</a></code></div>
+<div class="col-first odd-row-color"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>, org.bukkit.inventory.Inventory&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#openMenus" class="member-name-link">openMenus</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html" title="class or interface in java.util" class="external-link">HashMap</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>, org.bukkit.inventory.Inventory&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#openMenus" class="member-name-link">openMenus</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -157,12 +166,15 @@ implements org.bukkit.inventory.InventoryHolder, org.bukkit.event.Listener</span
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isAllowedSlot(int)" class="member-name-link">isAllowedSlot</a><wbr>(int&nbsp;slot)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">onInventoryClick</a><wbr>(org.bukkit.event.inventory.InventoryClickEvent&nbsp;event)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBooleanSlot(int)" class="member-name-link">isBooleanSlot</a><wbr>(int&nbsp;slot)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(org.bukkit.entity.Player)" class="member-name-link">set</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent)" class="member-name-link">onInventoryClick</a><wbr>(org.bukkit.event.inventory.InventoryClickEvent&nbsp;event)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(org.bukkit.entity.Player)" class="member-name-link">set</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -201,6 +213,16 @@ implements org.bukkit.inventory.InventoryHolder, org.bukkit.event.Listener</span
 <h3>allowedSlots</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a></span>&nbsp;<span class="element-name">allowedSlots</span></div>
+<div class="block">SLOTS THAT ARE ABLE TO BE INTERACTED WITH WITHIN THE GUI</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="booleanSlots">
+<h3>booleanSlots</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a></span>&nbsp;<span class="element-name">booleanSlots</span></div>
+<div class="block">SLOTS THAT ARE BOOLEANS AND CANNOT BE INTERACTED WITH</div>
 </div>
 </section>
 </li>
@@ -254,6 +276,14 @@ implements org.bukkit.inventory.InventoryHolder, org.bukkit.event.Listener</span
 <h3>onInventoryClick</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onInventoryClick</span><wbr><span class="parameters">(org.bukkit.event.inventory.InventoryClickEvent&nbsp;event)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isBooleanSlot(int)">
+<h3>isBooleanSlot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBooleanSlot</span><wbr><span class="parameters">(int&nbsp;slot)</span></div>
 </div>
 </section>
 </li>
